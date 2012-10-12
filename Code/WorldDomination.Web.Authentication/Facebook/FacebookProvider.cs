@@ -62,7 +62,6 @@ namespace WorldDomination.Web.Authentication.Facebook
         {
             Condition.Requires(facebookClient).IsNotNull();
             Condition.Requires(facebookClient.Code).IsNotNullOrEmpty();
-            Condition.Requires(facebookClient.State).IsNotNullOrEmpty();
 
             var tokenUri = string.Format(TokenUri, ClientId, RedirectUri, ClientSecret, facebookClient.Code);
             var responseBody = WebClient.DownloadString(tokenUri);
@@ -89,19 +88,25 @@ namespace WorldDomination.Web.Authentication.Facebook
 
             var data = responseBody.Split(new[] {'&'}, StringSplitOptions.RemoveEmptyEntries);
             Condition.Requires(data).IsNotNull().HasLength(2);
+            int foundItems = 0;
             foreach (var content in data)
             {
                 // What do we have?
                 if (content.StartsWith(accessTokenKey))
                 {
                     facebookClient.AccessToken = ExtractContent(content, accessTokenKey);
+                    foundItems++;
                 }
                 else if (content.StartsWith(expiresKey))
                 {
                     facebookClient.ExpiresOn =
                         DateTime.UtcNow.AddSeconds(Convert.ToInt32(ExtractContent(content, expiresKey)));
+                    foundItems++;
                 }
             }
+
+            // Check to make sure we've correctly extracted all the required data.
+            Condition.Requires(foundItems).IsEqualTo(2);
         }
 
         private static string ExtractContent(string content, string tokenKey)
@@ -119,9 +124,10 @@ namespace WorldDomination.Web.Authentication.Facebook
                 throw new InvalidOperationException("No user information was received from Facebook.");
             }
 
-            var data = JsonConvert.DeserializeObject<MeResult>(responseBody);
-
-            return new UserInformation
+            try
+            {
+                var data = JsonConvert.DeserializeObject<MeResult>(responseBody);
+                return new UserInformation
                        {
                            Id = data.Id,
                            FirstName = data.FirstName,
@@ -129,6 +135,11 @@ namespace WorldDomination.Web.Authentication.Facebook
                            Locale = data.Locale,
                            Name = data.Username
                        };
+            }
+            catch(Exception exception)
+            {
+                throw new InvalidOperationException("Failed to deserialize the json user information result from Facebook.", exception);
+            }
         }
     }
 }

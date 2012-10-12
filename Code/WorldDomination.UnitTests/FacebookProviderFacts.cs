@@ -8,8 +8,6 @@ namespace WorldDomination.UnitTests
 
     public class FacebookProviderFacts
     {
-        #region Nested type: RetrieveAccessTokenFacts
-
         public class RetrieveAccessTokenFacts
         {
             [Fact]
@@ -20,10 +18,10 @@ namespace WorldDomination.UnitTests
                 var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"),
                                                             mockWebClientWrapper.Object);
                 var facebookClient = new FacebookClient
-                                         {
-                                             Code = "aa",
-                                             State = "bb"
-                                         };
+                                     {
+                                         Code = "aa",
+                                         State = "bb"
+                                     };
 
                 // Act.
                 facebookProvider.RetrieveAccessToken(facebookClient);
@@ -37,9 +35,70 @@ namespace WorldDomination.UnitTests
                 Assert.NotNull(facebookClient.UserInformation.FirstName);
                 Assert.NotNull(facebookClient.UserInformation.LastName);
             }
-        }
 
-        #endregion
+            [Fact]
+            public void GivenSomeInvalidResult_RetrieveAccessToken_ThrowsAnException()
+            {
+                // Arrange.
+                var mockWebClientWrapper = MoqUtilities.MockedIWebClientWrapper(new [] { "asds", null});
+                var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"),
+                                                            mockWebClientWrapper.Object);
+                var facebookClient = new FacebookClient
+                {
+                    Code = "aa",
+                    State = "bb"
+                };
+
+                // Act.
+                var result = Assert.Throws<ArgumentException>(() => facebookProvider.RetrieveAccessToken(facebookClient));
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal("value should contain 2 elements. value contains currently 1 element.\r\nParameter name: value", result.Message);
+            }
+
+            [Fact]
+            public void GivenAMissingExpiresParam_RetrieveAccessToken_ThrowsAnException()
+            {
+                // Arrange.
+                var mockWebClientWrapper = MoqUtilities.MockedIWebClientWrapper(new[] { "access_token=foo&hi=ohnoes", null });
+                var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"),
+                                                            mockWebClientWrapper.Object);
+                var facebookClient = new FacebookClient
+                {
+                    Code = "aa",
+                    State = "bb"
+                };
+
+                // Act.
+                var result = Assert.Throws<ArgumentException>(() => facebookProvider.RetrieveAccessToken(facebookClient));
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal("value should be equal to 2. The actual value is 1.\r\nParameter name: value", result.Message);
+            }
+
+            [Fact]
+            public void GivenSomethingWeirdHappenedWhileTryingToRetrieveMeData_RetrieveAccessToken_ThrowsAnException()
+            {
+                // Arrange.
+                var mockWebClientWrapper = MoqUtilities.MockedIWebClientWrapper(new[] { "access_token=foo&expires=1", "ohcrap" });
+                var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"),
+                                                            mockWebClientWrapper.Object);
+                var facebookClient = new FacebookClient
+                {
+                    Code = "aa",
+                    State = "bb"
+                };
+
+                // Act.
+                var result = Assert.Throws<InvalidOperationException>(() => facebookProvider.RetrieveAccessToken(facebookClient));
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal("Failed to deserialize the json user information result from Facebook.", result.Message);
+            }
+        }
     }
 
     // ReSharper restore InconsistentNaming
