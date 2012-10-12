@@ -14,7 +14,7 @@
 
 # A .NET package for using Facebook or Twitter to Authenticate your Users #
 
-I'm blond. I'm dum. But I program. 
+I'm blond. I'm dumb. But I program. 
 
 So I want a <insert deity of your choice> damn simple way to authenticate with Facebook, Twitter or wherever.
 
