@@ -2,6 +2,7 @@
 using System.Web.Mvc;
 using WorldDomination.Web.Authentication;
 using WorldDomination.Web.Authentication.Facebook;
+using WorldDomination.Web.Authentication.Twitter;
 using WorldDomination.Web.IntegrationTest.Models;
 
 namespace WorldDomination.Web.IntegrationTest.Controllers
@@ -10,18 +11,24 @@ namespace WorldDomination.Web.IntegrationTest.Controllers
     {
         private const string FacebookAppId = "113220502168922";
         private const string FacebookAppSecret = "b09592a5904746646f3d402178ce9c0f";
+        private const string TwitterConsumerKey = "Rb7qNNPUPsRSYkznFTbF6Q";
+        private const string TwitterConsumerSecret = "pP1jBdYOlmCzo08QFJjGIHY4YSyPdGLPO2m1q47hu9c";
 
-        private FacebookProvider FacebookProvider { get; set; }
-        private AuthenticationService AuthenticationService { get; set; }
         public HomeController()
         {
-            FacebookProvider = new FacebookProvider(FacebookAppId,
+            _facebookProvider = new FacebookProvider(FacebookAppId,
                                                     FacebookAppSecret,
                                                     new Uri("http://localhost:1337/home/authenticateCallback"),
                                                     new WebClientWrapper());
 
-            AuthenticationService = new AuthenticationService(FacebookProvider);
+            _twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret);
+
+            _authenticationService = new AuthenticationService(_facebookProvider, _twitterProvider);
         }
+
+        private readonly FacebookProvider _facebookProvider;
+        private readonly TwitterProvider _twitterProvider;
+        private readonly AuthenticationService _authenticationService;
 
         public ActionResult Index()
         {
@@ -31,25 +38,27 @@ namespace WorldDomination.Web.IntegrationTest.Controllers
         public RedirectResult FacebookAuthentication()
         {
             Session.Add("a", "a"); // Keep the SessionId constant.
-            return AuthenticationService.RedirectToFacebookAuthentication(Session.SessionID);
+            return _authenticationService.RedirectToFacebookAuthentication(Session.SessionID);
+        }
+
+        public RedirectResult TwitterAuthentication()
+        {
+            return _authenticationService.RedirectToTwitterAuthentication("http://localhost:1337/home/AuthenticateCallback");
+            
         }
 
         public ActionResult AuthenticateCallback()
         {
-            var client = AuthenticationService.CheckCallback(Request, Session.SessionID);
-
             var model = new AuthenticateCallbackViewModel();
-            
-            if (client is FacebookClient)
+            try
             {
-                var facebookClient = client as FacebookClient;
-                model.AccessToken = facebookClient.AccessToken;
-                model.Name =
-                    (facebookClient.UserInformation.FirstName + " " + facebookClient.UserInformation.LastName).Trim();
-                model.UserName = facebookClient.UserInformation.UserName;
-                model.Message = "Authenticated with Facebook successfully.";
+                model.AuthenticatedClient = _authenticationService.CheckCallback(Request, Session.SessionID);
             }
-
+            catch (Exception exception)
+            {
+                model.Exception = exception;
+            }
+            
             return View(model);
         }
     }

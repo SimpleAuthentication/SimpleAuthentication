@@ -35,6 +35,10 @@
     <Reference Include="Moq">
       <HintPath>..\..\packages\Moq.4.0.10827\lib\NET40\Moq.dll</HintPath>
     </Reference>
+    <Reference Include="RestSharp, Version=104.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\RestSharp.104.1\lib\net4\RestSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
@@ -49,6 +53,7 @@
     <Compile Include="MoqExtensions.cs" />
     <Compile Include="MoqUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TwitterProviderFacts.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

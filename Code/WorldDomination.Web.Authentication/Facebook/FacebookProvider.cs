@@ -19,41 +19,45 @@ namespace WorldDomination.Web.Authentication.Facebook
 
         private const string ScopeKey = "&scope={0}";
         private const string StateKey = "&state={0}";
+        private readonly string _clientId;
+        private readonly string _clientSecret;
+        private readonly Uri _redirectUri;
+        private readonly IList<string> _scope;
+        private readonly IWebClientWrapper _webClient;
 
-        public FacebookProvider(string clientId, string clientSecret, Uri redirectUri, IWebClientWrapper webClient)
+        public FacebookProvider(string clientId, string clientSecret, Uri redirectUri, IWebClientWrapper webClient) : this(clientId, clientSecret, redirectUri, null, webClient)
+        {
+        }
+
+        public FacebookProvider(string clientId, string clientSecret, Uri redirectUri, IList<string> scope, IWebClientWrapper webClient)
         {
             Condition.Requires(clientId).IsNotNullOrEmpty();
             Condition.Requires(clientSecret).IsNotNullOrEmpty();
             Condition.Requires(redirectUri).IsNotNull();
             Condition.Requires(webClient).IsNotNull();
 
-            ClientId = clientId;
-            ClientSecret = clientSecret;
-            RedirectUri = redirectUri;
-            WebClient = webClient;
-        }
+            _clientId = clientId;
+            _clientSecret = clientSecret;
+            _redirectUri = redirectUri;
+            _webClient = webClient;
 
-        public string ClientId { get; private set; }
-        public string ClientSecret { get; private set; }
-        public Uri RedirectUri { get; private set; }
-        public IList<string> Scope { get; set; }
-        public string State { get; private set; }
-        private IWebClientWrapper WebClient { get; set; }
+            // Optionals.
+            _scope = scope;
+        }
 
         public RedirectResult RedirectToAuthenticate(string state)
         {
             Condition.Requires(state).IsNotNullOrEmpty();
-            State = state;
 
-            var oauthDialogUri = string.Format(OauthDialogUri, ClientId, RedirectUri.AbsoluteUri);
+            var oauthDialogUri = string.Format(OauthDialogUri, _clientId, _redirectUri.AbsoluteUri);
 
             // Do we have any scope options?
-            if (Scope != null && Scope.Count > 0)
+            if (_scope != null && _scope.Count > 0)
             {
-                oauthDialogUri += string.Format(ScopeKey, string.Join(",", Scope));
+                oauthDialogUri += string.Format(ScopeKey, string.Join(",", _scope));
             }
 
-            oauthDialogUri += string.Format(StateKey, State);
+            oauthDialogUri += string.Format(StateKey, state);
 
             return new RedirectResult(oauthDialogUri);
         }
@@ -63,8 +67,8 @@ namespace WorldDomination.Web.Authentication.Facebook
             Condition.Requires(facebookClient).IsNotNull();
             Condition.Requires(facebookClient.Code).IsNotNullOrEmpty();
 
-            var tokenUri = string.Format(TokenUri, ClientId, RedirectUri, ClientSecret, facebookClient.Code);
-            var responseBody = WebClient.DownloadString(tokenUri);
+            var tokenUri = string.Format(TokenUri, _clientId, _redirectUri, _clientSecret, facebookClient.Code);
+            var responseBody = _webClient.DownloadString(tokenUri);
 
             if (string.IsNullOrEmpty(responseBody))
             {
@@ -118,7 +122,7 @@ namespace WorldDomination.Web.Authentication.Facebook
         {
             Condition.Requires(accessToken).IsNotNull();
 
-            var responseBody = WebClient.DownloadString(string.Format(MeUri, accessToken));
+            var responseBody = _webClient.DownloadString(string.Format(MeUri, accessToken));
             if (string.IsNullOrEmpty(responseBody))
             {
                 throw new InvalidOperationException("No user information was received from Facebook.");
@@ -130,15 +134,15 @@ namespace WorldDomination.Web.Authentication.Facebook
                 return new UserInformation
                        {
                            Id = data.Id,
-                           FirstName = data.FirstName,
-                           LastName = data.LastName,
+                           Name = (data.FirstName + " " + data.LastName).Trim(),
                            Locale = data.Locale,
-                           Name = data.Username
+                           UserName = data.Username
                        };
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
-                throw new InvalidOperationException("Failed to deserialize the json user information result from Facebook.", exception);
+                throw new InvalidOperationException(
+                    "Failed to deserialize the json user information result from Facebook.", exception);
             }
         }
     }

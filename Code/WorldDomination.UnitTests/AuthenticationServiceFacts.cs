@@ -24,7 +24,7 @@ namespace WorldDomination.UnitTests
                 var mockWebClientWrapper = MoqUtilities.MockedIWebClientWrapper();
                 var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"),
                                                             mockWebClientWrapper.Object);
-                var authenticationService = new AuthenticationService(facebookProvider);
+                var authenticationService = new AuthenticationService(facebookProvider, null);
                 var mockRequestBase = new Mock<HttpRequestBase>();
                 mockRequestBase.Setup(x => x.Params).Returns(new NameValueCollection
                                                                  {

@@ -5,24 +5,34 @@ using System.Web;
 using System.Web.Mvc;
 using CuttingEdge.Conditions;
 using WorldDomination.Web.Authentication.Facebook;
+using WorldDomination.Web.Authentication.Twitter;
 
 namespace WorldDomination.Web.Authentication
 {
     public class AuthenticationService
     {
-        private FacebookProvider FacebookProvider { get; set; }
-
-        public AuthenticationService(FacebookProvider facebookProvider)
+        private readonly FacebookProvider _facebookProvider;
+        private readonly TwitterProvider _twitterProvider;
+        public AuthenticationService(FacebookProvider facebookProvider,
+            TwitterProvider twitterProvider)
         {
             // Any one of these can be optional.
-            FacebookProvider = facebookProvider;
+            _facebookProvider = facebookProvider;
+            _twitterProvider = twitterProvider;
         }
 
         public RedirectResult RedirectToFacebookAuthentication(string state)
         {
             Condition.Requires(state).IsNotNullOrEmpty();
-            Condition.Requires(FacebookProvider).IsNotNull();
-            return FacebookProvider.RedirectToAuthenticate(state);
+            Condition.Requires(_facebookProvider).IsNotNull();
+            return _facebookProvider.RedirectToAuthenticate(state);
+        }
+
+        public RedirectResult RedirectToTwitterAuthentication(string callbackUrl)
+        {
+            Condition.Requires(callbackUrl).IsNotNullOrEmpty();
+
+            return _twitterProvider.RedirectToAuthenticate(callbackUrl);
         }
 
         public IAuthenticatedClient CheckCallback(HttpRequestBase httpRequestBase, string state)
@@ -38,9 +48,18 @@ namespace WorldDomination.Web.Authentication
             }
 
             // Tried to authenticate against Facebook?
-            if (FacebookProvider != null)
+            if (_facebookProvider != null)
             {
-                var client = TryGetFacebook(httpRequestBase.Params, state);
+                var client = TryGetFacebookClient(httpRequestBase.Params, state);
+                if (client != null)
+                {
+                    return client;
+                }
+            }
+
+            if (_twitterProvider != null)
+            {
+                var client = TryGetTwitterClient(httpRequestBase.Params);
                 if (client != null)
                 {
                     return client;
@@ -51,7 +70,7 @@ namespace WorldDomination.Web.Authentication
             return null;
         }
 
-        private FacebookClient TryGetFacebook(NameValueCollection parameters, string existingState)
+        private FacebookClient TryGetFacebookClient(NameValueCollection parameters, string existingState)
         {
             Condition.Requires(parameters).IsNotNull().IsLongerThan(0);
             Condition.Requires(existingState).IsNotNull();
@@ -76,7 +95,7 @@ namespace WorldDomination.Web.Authentication
                                State = state
                            };
 
-                FacebookProvider.RetrieveAccessToken(facebookClient);
+                _facebookProvider.RetrieveAccessToken(facebookClient);
                 return facebookClient;
             }
 
@@ -98,6 +117,24 @@ namespace WorldDomination.Web.Authentication
 
             // Nope. Didn't auth with Facebook.
             return null;
+        }
+
+        private TwitterClient TryGetTwitterClient(NameValueCollection parameters)
+        {
+            Condition.Requires(parameters).IsNotNull();
+
+            // Client didn't want to accept the Twitter app policy.
+            var denied = parameters["denied"];
+            if (!string.IsNullOrEmpty(denied))
+            {
+                return new TwitterClient {DeniedToken = denied};
+            }
+            
+            // Now ask Twitter for some user information.
+            var twitterClient = new TwitterClient();
+            _twitterProvider.RetrieveUserInformation(twitterClient, parameters);
+
+            return twitterClient;
         }
     }
 }

@@ -32,8 +32,8 @@ namespace WorldDomination.UnitTests
                 Assert.NotNull(facebookClient.Code);
                 Assert.NotNull(facebookClient.UserInformation);
                 Assert.True(facebookClient.UserInformation.Id > 0);
-                Assert.NotNull(facebookClient.UserInformation.FirstName);
-                Assert.NotNull(facebookClient.UserInformation.LastName);
+                Assert.NotNull(facebookClient.UserInformation.Name);
+                Assert.NotNull(facebookClient.UserInformation.UserName);
             }
 
             [Fact]

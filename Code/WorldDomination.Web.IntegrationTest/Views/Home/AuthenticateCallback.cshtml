@@ -3,6 +3,13 @@
 <h2>AuthenticateCallback</h2>
 
 
-@Html.DisplayForModel()
+@if (Model.AuthenticatedClient != null)
+{
+    Html.DisplayForModel(Model.AuthenticatedClient);
+}
+else if (Model.Exception != null)
+{
+    Html.DisplayForModel(Model.Exception);
+}
 
 @Html.ActionLink("Lets go back home.", "Index")
