@@ -46,42 +46,6 @@ namespace WorldDomination.Web.Authentication.Twitter
             return new RedirectResult(url);
         }
 
-        private TwitterClient RetrieveRequestToken(string callbackUrl)
-        {
-            Condition.Requires(callbackUrl).IsNotNullOrEmpty();
-
-            IRestResponse response;
-
-            try
-            {
-                _restClient.Authenticator = OAuth1Authenticator.ForRequestToken(_consumerKey, _consumerSecret, callbackUrl);
-                var request = new RestRequest("oauth/request_token", Method.POST);
-                response = _restClient.Execute(request);
-            }
-            catch (Exception exception)
-            {
-                throw new AuthenticationException("Failed to obtain a Request Token from Twitter.", exception);
-            }
-
-            if (response == null || 
-                response.StatusCode != HttpStatusCode.OK)
-            {
-                throw new AuthenticationException(
-                    string.Format(
-                        "Failed to obtain a Request Token from Twitter OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
-                        response == null ? "-- null response --" : response.StatusCode.ToString(),
-                        response == null ? string.Empty : response.StatusDescription));
-            }
-
-            // Grab the params which should have the request token info.
-            var querystringParameters = HttpUtility.ParseQueryString(response.Content);
-            return new TwitterClient
-                   {
-                       OAuthToken = querystringParameters["oauth_token"],
-                       OAuthTokenSecret = querystringParameters["oauth_token_secret"],
-                   };
-        }
-
         public void RetrieveUserInformation(TwitterClient twitterClient, NameValueCollection parameters)
         {
             // Retrieve the OAuth Verifier.
@@ -102,6 +66,42 @@ namespace WorldDomination.Web.Authentication.Twitter
                                             };
         }
 
+        private TwitterClient RetrieveRequestToken(string callbackUrl)
+        {
+            Condition.Requires(callbackUrl).IsNotNullOrEmpty();
+
+            IRestResponse response;
+
+            try
+            {
+                _restClient.Authenticator = OAuth1Authenticator.ForRequestToken(_consumerKey, _consumerSecret, callbackUrl);
+                var request = new RestRequest("oauth/request_token", Method.POST);
+                response = _restClient.Execute(request);
+            }
+            catch (Exception exception)
+            {
+                throw new AuthenticationException("Failed to obtain a Request Token from Twitter.", exception);
+            }
+
+            if (response == null ||
+                response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new AuthenticationException(
+                    string.Format(
+                        "Failed to obtain a Request Token from Twitter OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
+                        response == null ? "-- null response --" : response.StatusCode.ToString(),
+                        response == null ? string.Empty : response.StatusDescription));
+            }
+
+            // Grab the params which should have the request token info.
+            var querystringParameters = HttpUtility.ParseQueryString(response.Content);
+            return new TwitterClient
+            {
+                OAuthToken = querystringParameters["oauth_token"],
+                OAuthTokenSecret = querystringParameters["oauth_token_secret"],
+            };
+        }
+
         private static void RetrieveOAuthVerifier(TwitterClient twitterClient, NameValueCollection parameters)
         {
             twitterClient.OAuthToken = parameters["oauth_token"];
@@ -110,7 +110,7 @@ namespace WorldDomination.Web.Authentication.Twitter
             if (string.IsNullOrEmpty(twitterClient.OAuthToken) ||
                 string.IsNullOrEmpty(twitterClient.OAuthVerifier))
             {
-                throw new InvalidOperationException("Failed to retrieve an oauth_token and an oauth_token_secret after the client has signed and approved via Twitter.");
+                throw new AuthenticationException("Failed to retrieve an oauth_token and an oauth_token_secret after the client has signed and approved via Twitter.");
             }
         }
 
@@ -125,12 +125,12 @@ namespace WorldDomination.Web.Authentication.Twitter
             }
             catch (Exception exception)
             {
-                throw new InvalidOperationException("Failed to convert Request Token to an Access Token, from Twitter.", exception);
+                throw new AuthenticationException("Failed to convert Request Token to an Access Token, from Twitter.", exception);
             }
 
             if (response == null || response.StatusCode != HttpStatusCode.OK)
             {
-                throw new InvalidOperationException(
+                throw new AuthenticationException(
                     string.Format(
                         "Failed to obtain an Access Token from Twitter OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
                         response == null ? "-- null response --" : response.StatusCode.ToString(),

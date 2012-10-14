@@ -43,7 +43,7 @@ namespace WorldDomination.Web.Authentication
             if (httpRequestBase.Params == null ||
                 !httpRequestBase.Params.HasKeys())
             {
-                throw new InvalidOperationException(
+                throw new AuthenticationException(
                     "No request params found - unable to determine from where we authenticated with/against.");
             }
 
