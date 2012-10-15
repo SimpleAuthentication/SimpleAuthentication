@@ -3,6 +3,8 @@ using System.Collections.Specialized;
 using System.Net;
 using System.Web.Mvc;
 using CuttingEdge.Conditions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RestSharp;
 using RestSharp.Authenticators;
 using RestSharp.Contrib;
@@ -55,7 +57,7 @@ namespace WorldDomination.Web.Authentication.Twitter
             RetrieveAccessToken(twitterClient);
 
             // Grab the user information.
-            var verifyCredentialsResult = ApiVerifyCredentials(twitterClient);
+            var verifyCredentialsResult = VerifyCredentials(twitterClient);
 
             twitterClient.UserInformation = new UserInformation
                                             {
@@ -64,6 +66,18 @@ namespace WorldDomination.Web.Authentication.Twitter
                                                 Locale = verifyCredentialsResult.Lang,
                                                 UserName = verifyCredentialsResult.ScreenName
                                             };
+        }
+
+        private static void RetrieveOAuthVerifier(TwitterClient twitterClient, NameValueCollection parameters)
+        {
+            twitterClient.OAuthToken = parameters["oauth_token"];
+            twitterClient.OAuthVerifier = parameters["oauth_verifier"];
+
+            if (string.IsNullOrEmpty(twitterClient.OAuthToken) ||
+                string.IsNullOrEmpty(twitterClient.OAuthVerifier))
+            {
+                throw new AuthenticationException("Failed to retrieve an oauth_token and an oauth_token_secret after the client has signed and approved via Twitter.");
+            }
         }
 
         private TwitterClient RetrieveRequestToken(string callbackUrl)
@@ -95,23 +109,19 @@ namespace WorldDomination.Web.Authentication.Twitter
 
             // Grab the params which should have the request token info.
             var querystringParameters = HttpUtility.ParseQueryString(response.Content);
-            return new TwitterClient
+            var twitterClient = new TwitterClient
             {
                 OAuthToken = querystringParameters["oauth_token"],
                 OAuthTokenSecret = querystringParameters["oauth_token_secret"],
             };
-        }
-
-        private static void RetrieveOAuthVerifier(TwitterClient twitterClient, NameValueCollection parameters)
-        {
-            twitterClient.OAuthToken = parameters["oauth_token"];
-            twitterClient.OAuthVerifier = parameters["oauth_verifier"];
 
             if (string.IsNullOrEmpty(twitterClient.OAuthToken) ||
-                string.IsNullOrEmpty(twitterClient.OAuthVerifier))
+                string.IsNullOrEmpty(twitterClient.OAuthTokenSecret))
             {
-                throw new AuthenticationException("Failed to retrieve an oauth_token and an oauth_token_secret after the client has signed and approved via Twitter.");
+                throw new AuthenticationException("Retrieved a Twitter Request Token but it doesn't contain both the oauth_token and oauth_token_secret parameters.");
             }
+
+            return twitterClient;
         }
 
         private void RetrieveAccessToken(TwitterClient twitterClient)
@@ -142,7 +152,7 @@ namespace WorldDomination.Web.Authentication.Twitter
             twitterClient.OAuthTokenSecret = querystringParameters["oauth_token_secret"];
         }
 
-        public VerifyCredentialsResult ApiVerifyCredentials(TwitterClient twitterClient)
+        private VerifyCredentialsResult VerifyCredentials(TwitterClient twitterClient)
         {
             Condition.Requires(twitterClient).IsNotNull();
             Condition.Requires(twitterClient.OAuthToken).IsNotNullOrEmpty();

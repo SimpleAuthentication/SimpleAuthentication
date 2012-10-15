@@ -104,12 +104,12 @@ namespace WorldDomination.Web.Authentication.Twitter
         public int FavouritesCount { get; set; }
 
         [JsonProperty(PropertyName = "follow_request_sent")]
-        public bool FollowRequestSent { get; set; }
+        public bool? FollowRequestSent { get; set; }
 
         [JsonProperty(PropertyName = "followers_count")]
         public int FollowersCount { get; set; }
 
-        public bool Following { get; set; }
+        public bool? Following { get; set; }
 
         [JsonProperty(PropertyName = "friends_count")]
         public int FriendsCount { get; set; }
@@ -132,7 +132,7 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         public string Location { get; set; }
         public string Name { get; set; }
-        public bool Notifications { get; set; }
+        public bool? Notifications { get; set; }
 
         [JsonProperty(PropertyName = "profile_background_color")]
         public string ProfileBackgroundColor { get; set; }

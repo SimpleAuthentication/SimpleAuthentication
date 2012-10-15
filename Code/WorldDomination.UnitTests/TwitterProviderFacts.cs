@@ -1,6 +1,11 @@
-﻿using Moq;
+﻿using System;
+using System.Collections.Specialized;
+using System.Net;
+using Moq;
 using RestSharp;
+using WorldDomination.Web.Authentication;
 using WorldDomination.Web.Authentication.Twitter;
+using Xunit;
 
 namespace WorldDomination.UnitTests
 {
@@ -8,26 +13,311 @@ namespace WorldDomination.UnitTests
 
     public class TwitterProviderFacts
     {
-        public class ApiVerifyCredentialsFacts
+        public class RedirectToAuthenticateFacts
         {
-            //public void GivenValidAuthenticationData_ApiVerifyCredentials_ReturnsAVerifyCredentialsResult()
-            //{
-            //    // Arrange.
-            //    var mockRestClient = new Mock<IRestClient>();
-            //    mockRestClient.Setup(x => x.Execute<VerifyCredentialsResult>(It.IsAny<IRestRequest>()))
-            //        .Returns()
-            //    var json =
-            //        "{\"name\": \"Matt Harris\",\"profile_sidebar_border_color\": \"C0DEED\",\"profile_background_tile\": false,\"profile_sidebar_fill_color\": \"DDEEF6\",\"location\": \"San Francisco\",\"profile_image_url\": \"http://a1.twimg.com/profile_images/554181350/matt_normal.jpg\",\"created_at\": \"Sat Feb 17 20:49:54 +0000 2007\",\"profile_link_color\": \"0084B4\",\"favourites_count\": 95,\"url\": \"http://themattharris.com\",\"contributors_enabled\": false,\"utc_offset\": -28800,\"id\": 777925,\"profile_use_background_image\": true,\"profile_text_color\": \"333333\",\"protected\": false,\"followers_count\": 1025,\"lang\": \"en\",\"verified\": false,\"profile_background_color\": \"C0DEED\",\"geo_enabled\": true,\"notifications\": false,\"description\": \"Developer Advocate at Twitter. Also a hacker and British expat who is married to @cindyli and lives in San Francisco.\",\"time_zone\": \"Tijuana\",\"friends_count\": 294,\"statuses_count\": 2924,\"profile_background_image_url\": \"http://s.twimg.com/a/1276711174/images/themes/theme1/bg.png\",\"status\": {\"coordinates\": {\"coordinates\": [-122.40075845,37.78264991],\"type\": \"Point\"},\"favorited\": false,\"created_at\": \"Tue Jun 22 18:17:48 +0000 2010\",\"truncated\": false,\"text\": \"Going through and updating @twitterapi documentation\",\"contributors\": null,\"id\": 16789004997,\"geo\": {\"coordinates\": [37.78264991,-122.40075845],\"type\": \"Point\"},\"in_reply_to_user_id\": null,\"place\": null,\"source\": \"<a href=\\\"http://itunes.apple.com/app/twitter/id333903271?mt=8\\\" rel=\\\"nofollow\\\">Twitter for iPhone</a>\",\"in_reply_to_screen_name\": null,\"in_reply_to_status_id\": null},\"screen_name\": \"themattharris\",\"following\": false}";
-            //    var twitterProvider = new TwitterProvider("a", "b");
-            //    var twitterClient = new TwitterClient
-            //                        {
-            //                            OAuthToken = "c",
-            //                            OAuthVerifier = "d"
-            //                        };
+            [Fact]
+            public void GivenAValidRequestToken_RedirectToAuthenticate_ReturnsARedirectResult()
+            {
+                // Arrange.
+                var redirectUri =
+                    new Uri(
+                        "http://api.twitter.com/oauth/authorize?oauth_token=5rlgo7AwGJt67vSoHmF227QMSHXhvmOmhN5YJpRlEo");
+                var mockRestResponse = new Mock<IRestResponse>();
+                mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
+                mockRestResponse
+                    .Setup(x => x.Content)
+                    .Returns("oauth_token=aaaaaaa&oauth_token_secret=asdasd");
+                var mockRestClient = new Mock<IRestClient>();
+                mockRestClient
+                    .Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                    .Returns(redirectUri);
+                mockRestClient
+                    .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponse.Object);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                const string callbackUrl = "someCallBackUri";
 
-            //    // Arrange.
-            //    var result = twitterProvider.ApiVerifyCredentials(twitterClient);
-            //}
+                // Act.
+                var result = twitterProvider.RedirectToAuthenticate(callbackUrl);
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal(result.Url, redirectUri.AbsoluteUri);
+            }
+
+            [Fact]
+            public void GivenARequestTokenError_RedirectToAuthenticate_ThrowsAnAuthenticationException()
+            {
+                // Arrange.
+                var mockRestResponse = new Mock<IRestResponse>();
+                mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
+                mockRestResponse.Setup(x => x.StatusDescription).Returns("Unauthorized");
+                var mockRestClient = new Mock<IRestClient>();
+                mockRestClient
+                    .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponse.Object);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+
+                // Act.
+                var result = Assert.Throws<AuthenticationException>(() => twitterProvider.RedirectToAuthenticate("pewpew"));
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Null(result.InnerException);
+                Assert.Equal("Failed to obtain a Request Token from Twitter OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized", result.Message);
+            }
+
+            [Fact]
+            public void GivenAInvalidRequestToken_RedirectToAuthenticate_ThrowsAnAuthenticationException()
+            {
+                // Arrange.
+                var mockRestResponse = new Mock<IRestResponse>();
+                mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
+                mockRestResponse.Setup(x => x.Content)
+                    .Returns("oauth_token=aaaaaaa&missing_an_oauth_token_secret=asdasd");
+                var mockRestClient = new Mock<IRestClient>();
+                mockRestClient
+                    .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponse.Object);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+
+                // Act.
+                var result = Assert.Throws<AuthenticationException>(() => twitterProvider.RedirectToAuthenticate("pewpew"));
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Null(result.InnerException);
+                Assert.Equal("Retrieved a Twitter Request Token but it doesn't contain both the oauth_token and oauth_token_secret parameters.", result.Message);
+            }
+        }
+
+        public class RetrieveUserInformationFacts
+        {
+            [Fact]
+            public void GivenTheCallbackParamtersAreInvalid_RetrieveUserInformation_ThrowsAnAuthenticationException()
+            {
+                // Arrange.
+                var mockRestClient = new Mock<IRestClient>();
+                mockRestClient
+                    .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                    .Throws<Exception>();
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var nameValueCollection = new NameValueCollection(); // Missing 2x required params.
+                
+                // Act.
+                var result =
+                    Assert.Throws<AuthenticationException>(
+                        () => twitterProvider.RetrieveUserInformation(new TwitterClient(), nameValueCollection));
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal("Failed to retrieve an oauth_token and an oauth_token_secret after the client has signed and approved via Twitter.", result.Message);
+            }
+
+            [Fact]
+            public void GivenExecutingARequestToRetrieveARequestTokenThrowsAnException_RetrieveUserInformation_ThrowsAnAuthenticationException()
+            {
+                // Arrange.
+                var mockRestClient = new Mock<IRestClient>();
+                mockRestClient
+                    .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                    .Throws<Exception>();
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var nameValueCollection = new NameValueCollection
+                                          {
+                                              {"oauth_token", "aaa"},
+                                              {"oauth_verifier", "bbbb"}
+                                          };
+                // Act.
+                var result =
+                    Assert.Throws<AuthenticationException>(
+                        () => twitterProvider.RetrieveUserInformation(new TwitterClient(), nameValueCollection));
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal("Failed to convert Request Token to an Access Token, from Twitter.", result.Message);
+            }
+
+            [Fact]
+            public void GivenAnInvalidRequestToken_RetrieveUserInformation_ThrowsAnAuthenticationException()
+            {
+                // Arrange.
+                var mockRestClient = new Mock<IRestClient>();
+                var mockRestResponse = new Mock<IRestResponse>();
+                mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
+                mockRestResponse.Setup(x => x.StatusDescription).Returns("Unauthorized");
+                mockRestClient
+                    .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponse.Object);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var nameValueCollection = new NameValueCollection
+                                          {
+                                              {"oauth_token", "aaa"},
+                                              {"oauth_verifier", "bbbb"}
+                                          };
+                // Act.
+                var result =
+                    Assert.Throws<AuthenticationException>(
+                        () => twitterProvider.RetrieveUserInformation(new TwitterClient(), nameValueCollection));
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal("Failed to obtain an Access Token from Twitter OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized", result.Message);
+            }
+
+            [Fact]
+            public void GivenAnRequestTokenWithMissingParameters_RetrieveUserInformation_ThrowsAnAuthenticationException()
+            {
+                // Arrange.
+                var mockRestClient = new Mock<IRestClient>();
+                var mockRestResponse = new Mock<IRestResponse>();
+                mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
+                mockRestClient
+                    .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponse.Object);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var nameValueCollection = new NameValueCollection
+                                          {
+                                              {"oauth_token", "aaa"}
+                                          }; // Missing oauth_secret.
+                // Act.
+                var result =
+                    Assert.Throws<AuthenticationException>(
+                        () => twitterProvider.RetrieveUserInformation(new TwitterClient(), nameValueCollection));
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal("Failed to retrieve an oauth_token and an oauth_token_secret after the client has signed and approved via Twitter.", result.Message);
+            }
+
+            [Fact]
+            public void GivenExecutingVerifyCredentialsThrowsAnException_RetrieveUserInformation_ThrowsAnAuthenticationException()
+            {
+                // Arrange.
+                var mockRestClient = new Mock<IRestClient>();
+                
+                var mockRestResponseRetrieveRequestToken = new Mock<IRestResponse>();
+                mockRestResponseRetrieveRequestToken.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
+                mockRestResponseRetrieveRequestToken.Setup(x => x.Content).Returns("oauth_token=aaa&oauth_token_secret=ccc");
+
+                var verifyCredentialsResult = new VerifyCredentialsResult
+                                              {
+                                                  Name = "Some Name",
+                                                  Id = 1234,
+                                                  Lang = "en-au",
+                                                  ScreenName = "Some-Screen-Name"
+                                              };
+                var mockRestResponseVerifyCredentials = new Mock<IRestResponse<VerifyCredentialsResult>>();
+                mockRestResponseVerifyCredentials.Setup(x => x.Data).Returns(verifyCredentialsResult);
+
+                mockRestClient
+                    .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponseRetrieveRequestToken.Object);
+                mockRestClient
+                    .Setup(x => x.Execute<VerifyCredentialsResult>(It.IsAny<IRestRequest>()))
+                    .Throws(new Exception("Mock exception."));
+
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var nameValueCollection = new NameValueCollection
+                                          {
+                                              {"oauth_token", "aaa"},
+                                              {"oauth_verifier", "bbb"}
+                                          };
+                // Act.
+                var result =
+                    Assert.Throws<AuthenticationException>(
+                        () => twitterProvider.RetrieveUserInformation(new TwitterClient(), nameValueCollection));
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal("Failed to retrieve VerifyCredentials json data from the Twitter Api.", result.Message);
+                Assert.NotNull(result.InnerException);
+                Assert.Equal("Mock exception.", result.InnerException.Message);
+            }
+
+            [Fact]
+            public void GivenAnInvalidVerifyCredentials_RetrieveUserInformation_ThrowsAnAuthenticationException()
+            {
+                // Arrange.
+                var mockRestClient = new Mock<IRestClient>();
+
+                var mockRestResponseRetrieveRequestToken = new Mock<IRestResponse>();
+                mockRestResponseRetrieveRequestToken.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
+                mockRestResponseRetrieveRequestToken.Setup(x => x.Content).Returns("oauth_token=aaa&oauth_token_secret=ccc");
+                
+                var mockRestResponseVerifyCredentials = new Mock<IRestResponse<VerifyCredentialsResult>>();
+                mockRestResponseVerifyCredentials.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
+                mockRestResponseVerifyCredentials.Setup(x => x.StatusDescription).Returns("Unauthorized");
+
+                mockRestClient
+                    .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponseRetrieveRequestToken.Object);
+                mockRestClient
+                    .Setup(x => x.Execute<VerifyCredentialsResult>(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponseVerifyCredentials.Object);
+
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var nameValueCollection = new NameValueCollection
+                                          {
+                                              {"oauth_token", "aaa"},
+                                              {"oauth_verifier", "bbb"}
+                                          };
+                // Act.
+                var result =
+                    Assert.Throws<AuthenticationException>(
+                        () => twitterProvider.RetrieveUserInformation(new TwitterClient(), nameValueCollection));
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal("Failed to retrieve VerifyCredentials json data OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized", result.Message);
+            }
+
+            [Fact]
+            public void GivenSomeValidVerifyCredentials_RetrieveUserInformation_ReturnsATwitterClientWithUserInformation()
+            {
+                // Arrange.
+                var mockRestClient = new Mock<IRestClient>();
+
+                var mockRestResponseRetrieveRequestToken = new Mock<IRestResponse>();
+                mockRestResponseRetrieveRequestToken.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
+                mockRestResponseRetrieveRequestToken.Setup(x => x.Content).Returns("oauth_token=aaa&oauth_token_secret=ccc");
+
+                var verifyCredentialsResult = new VerifyCredentialsResult
+                {
+                    Name = "Some Name",
+                    Id = 1234,
+                    Lang = "en-au",
+                    ScreenName = "Some-Screen-Name"
+                };
+                var mockRestResponseVerifyCredentials = new Mock<IRestResponse<VerifyCredentialsResult>>();
+                mockRestResponseVerifyCredentials.Setup(x => x.Data).Returns(verifyCredentialsResult);
+                mockRestResponseVerifyCredentials.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
+
+                mockRestClient
+                    .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponseRetrieveRequestToken.Object);
+                mockRestClient
+                    .Setup(x => x.Execute<VerifyCredentialsResult>(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponseVerifyCredentials.Object);
+
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var nameValueCollection = new NameValueCollection
+                                          {
+                                              {"oauth_token", "aaa"},
+                                              {"oauth_verifier", "bbb"}
+                                          };
+                var twitterClient = new TwitterClient();
+
+                // Act.
+                twitterProvider.RetrieveUserInformation(twitterClient, nameValueCollection);
+
+                // Assert.
+                Assert.NotNull(twitterClient.UserInformation);
+                Assert.NotNull(twitterClient.UserInformation.Id);
+                Assert.NotNull(twitterClient.UserInformation.Locale);
+                Assert.NotNull(twitterClient.UserInformation.Name);
+                Assert.NotNull(twitterClient.UserInformation.UserName);
+            }
         }
     }
 
