@@ -95,7 +95,7 @@ namespace WorldDomination.Web.Authentication
                                State = state
                            };
 
-                _facebookProvider.RetrieveAccessToken(facebookClient);
+                _facebookProvider.RetrieveUserInformation(facebookClient);
                 return facebookClient;
             }
 

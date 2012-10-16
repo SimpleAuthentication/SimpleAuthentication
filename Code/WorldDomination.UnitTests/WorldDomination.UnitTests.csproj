@@ -52,7 +52,6 @@
     <Compile Include="AuthenticationServiceFacts.cs" />
     <Compile Include="FacebookProviderFacts.cs" />
     <Compile Include="MoqExtensions.cs" />
-    <Compile Include="MoqUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TwitterProviderFacts.cs" />
   </ItemGroup>

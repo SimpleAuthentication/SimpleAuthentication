@@ -54,14 +54,11 @@
     <Compile Include="IAuthenticatedClient.cs" />
     <Compile Include="AuthenticationService.cs" />
     <Compile Include="Facebook\FacebookProvider.cs" />
-    <Compile Include="IHttpWebRequestWrapper.cs" />
-    <Compile Include="IWebClientWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Twitter\TwitterClient.cs" />
     <Compile Include="Twitter\TwitterProvider.cs" />
     <Compile Include="Twitter\VerifyCredentialsResult.cs" />
     <Compile Include="UserInformation.cs" />
-    <Compile Include="WebClientWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

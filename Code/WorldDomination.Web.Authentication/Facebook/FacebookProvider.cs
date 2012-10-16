@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Web.Mvc;
 using CuttingEdge.Conditions;
-using Newtonsoft.Json;
+using RestSharp;
+using RestSharp.Contrib;
 
 namespace WorldDomination.Web.Authentication.Facebook
 {
@@ -10,46 +12,51 @@ namespace WorldDomination.Web.Authentication.Facebook
 
     public class FacebookProvider
     {
-        private const string OauthDialogUri = "https://www.facebook.com/dialog/oauth?client_id={0}&redirect_uri={1}";
-
-        private const string TokenUri =
-            "https://graph.facebook.com/oauth/access_token?client_id={0}&redirect_uri={1}&client_secret={2}&code={3}";
-
-        private const string MeUri = "https://graph.facebook.com/me?access_token={0}";
-
         private const string ScopeKey = "&scope={0}";
         private const string StateKey = "&state={0}";
         private readonly string _clientId;
         private readonly string _clientSecret;
         private readonly Uri _redirectUri;
+        private readonly IRestClient _restClient;
         private readonly IList<string> _scope;
-        private readonly IWebClientWrapper _webClient;
 
-        public FacebookProvider(string clientId, string clientSecret, Uri redirectUri, IWebClientWrapper webClient) : this(clientId, clientSecret, redirectUri, null, webClient)
+        public FacebookProvider(string clientId, string clientSecret, Uri redirectUri)
+            : this(clientId, clientSecret, redirectUri, null, null)
         {
         }
 
-        public FacebookProvider(string clientId, string clientSecret, Uri redirectUri, IList<string> scope, IWebClientWrapper webClient)
+        public FacebookProvider(string clientId, string clientSecret, Uri redirectUri, IRestClient restClient)
+            : this(clientId, clientSecret, redirectUri, null, restClient)
+        {
+        }
+
+        public FacebookProvider(string clientId, string clientSecret, Uri redirectUri, IList<string> scope)
+            : this(clientId, clientSecret, redirectUri, scope, null)
+        {
+        }
+
+        public FacebookProvider(string clientId, string clientSecret, Uri redirectUri, IList<string> scope,
+                                IRestClient restClient)
         {
             Condition.Requires(clientId).IsNotNullOrEmpty();
             Condition.Requires(clientSecret).IsNotNullOrEmpty();
             Condition.Requires(redirectUri).IsNotNull();
-            Condition.Requires(webClient).IsNotNull();
 
             _clientId = clientId;
             _clientSecret = clientSecret;
             _redirectUri = redirectUri;
-            _webClient = webClient;
 
             // Optionals.
             _scope = scope;
+            _restClient = restClient ?? new RestClient("http://graph.facebook.com");
         }
 
         public RedirectResult RedirectToAuthenticate(string state)
         {
             Condition.Requires(state).IsNotNullOrEmpty();
 
-            var oauthDialogUri = string.Format(OauthDialogUri, _clientId, _redirectUri.AbsoluteUri);
+            var oauthDialogUri = string.Format("https://www.facebook.com/dialog/oauth?client_id={0}&redirect_uri={1}",
+                                               _clientId, _redirectUri.AbsoluteUri);
 
             // Do we have any scope options?
             if (_scope != null && _scope.Count > 0)
@@ -62,88 +69,105 @@ namespace WorldDomination.Web.Authentication.Facebook
             return new RedirectResult(oauthDialogUri);
         }
 
-        public void RetrieveAccessToken(FacebookClient facebookClient)
+        public void RetrieveUserInformation(FacebookClient facebookClient)
         {
             Condition.Requires(facebookClient).IsNotNull();
             Condition.Requires(facebookClient.Code).IsNotNullOrEmpty();
 
-            var tokenUri = string.Format(TokenUri, _clientId, _redirectUri, _clientSecret, facebookClient.Code);
-            var responseBody = _webClient.DownloadString(tokenUri);
-
-            if (string.IsNullOrEmpty(responseBody))
+            IRestResponse response;
+            try
             {
-                throw new InvalidOperationException("No access token was received from Facebook.");
+                //    "/oauth/access_token?client_id={0}&redirect_uri={1}&client_secret={2}&code={3}";
+                var restRequest = new RestRequest("oauth/access_token");
+                restRequest.AddParameter("client_id", _clientId);
+                restRequest.AddParameter("redirect_uri", _redirectUri);
+                restRequest.AddParameter("client_secret", _clientSecret);
+                restRequest.AddParameter("code", facebookClient.Code);
+
+                response = _restClient.Execute(restRequest);
+            }
+            catch (Exception exception)
+            {
+                throw new AuthenticationException("Failed to retrieve an oauth access token from Facebook.", exception);
+            }
+
+            if (response == null ||
+                response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new AuthenticationException(
+                    string.Format(
+                        "Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
+                        response == null ? "-- null response --" : response.StatusCode.ToString(),
+                        response == null ? string.Empty : response.StatusDescription));
             }
 
             // Extract the relevant data.
-            ExtractContent(responseBody, facebookClient);
+            ExtractContent(response.Content, facebookClient);
 
             // Grab the user's information.
-            facebookClient.UserInformation = RetrieveUserInformation(facebookClient.AccessToken);
+            facebookClient.UserInformation = RetrieveMe(facebookClient.AccessToken);
         }
 
         private static void ExtractContent(string responseBody, FacebookClient facebookClient)
         {
-            const string accessTokenKey = "access_token=";
-            const string expiresKey = "expires=";
-
             Condition.Requires(responseBody).IsNotNullOrEmpty();
             Condition.Requires(facebookClient).IsNotNull();
 
-            var data = responseBody.Split(new[] {'&'}, StringSplitOptions.RemoveEmptyEntries);
-            Condition.Requires(data).IsNotNull().HasLength(2);
-            int foundItems = 0;
-            foreach (var content in data)
+            var querystringParameters = HttpUtility.ParseQueryString(responseBody);
+            facebookClient.AccessToken = querystringParameters["access_token"];
+            int expiresOn;
+            if (int.TryParse(querystringParameters["expires_on"], out expiresOn))
             {
-                // What do we have?
-                if (content.StartsWith(accessTokenKey))
-                {
-                    facebookClient.AccessToken = ExtractContent(content, accessTokenKey);
-                    foundItems++;
-                }
-                else if (content.StartsWith(expiresKey))
-                {
-                    facebookClient.ExpiresOn =
-                        DateTime.UtcNow.AddSeconds(Convert.ToInt32(ExtractContent(content, expiresKey)));
-                    foundItems++;
-                }
+                facebookClient.ExpiresOn = DateTime.UtcNow.AddSeconds(expiresOn);
+            }
+            else
+            {
+                facebookClient.ExpiresOn = DateTime.MinValue;
             }
 
-            // Check to make sure we've correctly extracted all the required data.
-            Condition.Requires(foundItems).IsEqualTo(2);
+            if (string.IsNullOrEmpty(facebookClient.AccessToken) ||
+                facebookClient.ExpiresOn <= DateTime.UtcNow)
+            {
+                throw new AuthenticationException(
+                    "Retrieved a Facebook Access Token but it doesn't contain both the access_token and expires_on parameters.");
+            }
         }
 
-        private static string ExtractContent(string content, string tokenKey)
-        {
-            return content.Substring(content.IndexOf(tokenKey, StringComparison.Ordinal) + tokenKey.Length);
-        }
-
-        private UserInformation RetrieveUserInformation(string accessToken)
+        private UserInformation RetrieveMe(string accessToken)
         {
             Condition.Requires(accessToken).IsNotNull();
 
-            var responseBody = _webClient.DownloadString(string.Format(MeUri, accessToken));
-            if (string.IsNullOrEmpty(responseBody))
-            {
-                throw new InvalidOperationException("No user information was received from Facebook.");
-            }
+            IRestResponse<MeResult> response;
 
             try
             {
-                var data = JsonConvert.DeserializeObject<MeResult>(responseBody);
-                return new UserInformation
-                       {
-                           Id = data.Id,
-                           Name = (data.FirstName + " " + data.LastName).Trim(),
-                           Locale = data.Locale,
-                           UserName = data.Username
-                       };
+                var restRequest = new RestRequest("me");
+                restRequest.AddParameter("access_token", accessToken);
+
+                response = _restClient.Execute<MeResult>(restRequest);
             }
             catch (Exception exception)
             {
-                throw new InvalidOperationException(
-                    "Failed to deserialize the json user information result from Facebook.", exception);
+                throw new AuthenticationException("Failed to retrieve any Me data from the Facebook Api.", exception);
             }
+
+            if (response == null ||
+                response.StatusCode != HttpStatusCode.OK)
+            {
+                throw new AuthenticationException(
+                    string.Format(
+                        "Failed to obtain some Me data from the Facebook api OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
+                        response == null ? "-- null response --" : response.StatusCode.ToString(),
+                        response == null ? string.Empty : response.StatusDescription));
+            }
+
+            return new UserInformation
+                   {
+                       Id = response.Data.Id,
+                       Name = (response.Data.FirstName + " " + response.Data.LastName).Trim(),
+                       Locale = response.Data.Locale,
+                       UserName = response.Data.Username
+                   };
         }
     }
 }

@@ -18,8 +18,7 @@ namespace WorldDomination.Web.IntegrationTest.Controllers
         {
             _facebookProvider = new FacebookProvider(FacebookAppId,
                                                     FacebookAppSecret,
-                                                    new Uri("http://localhost:1337/home/authenticateCallback"),
-                                                    new WebClientWrapper());
+                                                    new Uri("http://localhost:1337/home/authenticateCallback"));
 
             _twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret);
 
