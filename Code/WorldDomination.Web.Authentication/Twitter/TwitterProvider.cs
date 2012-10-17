@@ -11,7 +11,7 @@ using RestSharp.Contrib;
 
 namespace WorldDomination.Web.Authentication.Twitter
 {
-    public class TwitterProvider
+    public class TwitterProvider : IAuthenticationProvider
     {
         private readonly string _consumerKey;
         private readonly string _consumerSecret;

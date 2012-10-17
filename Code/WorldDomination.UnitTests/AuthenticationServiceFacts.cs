@@ -24,7 +24,7 @@ namespace WorldDomination.UnitTests
                 // Arrange.
                 var mockHttpRequestBase = new Mock<HttpRequestBase>();
 
-                var authenticationService = new AuthenticationService(null, null);
+                var authenticationService = new AuthenticationService();
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(() => authenticationService.CheckCallback(mockHttpRequestBase.Object, "meh"));
@@ -68,7 +68,8 @@ namespace WorldDomination.UnitTests
                 const string state = "someState";
                 var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"),
                                                             mockRestClient.Object);
-                var authenticationService = new AuthenticationService(facebookProvider, null);
+                var authenticationService = new AuthenticationService();
+                authenticationService.AddProvider(facebookProvider);
 
                 var mockHttpRequestBase = new Mock<HttpRequestBase>();
                 mockHttpRequestBase.Setup(x => x.Params)

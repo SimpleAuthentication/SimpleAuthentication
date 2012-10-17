@@ -10,7 +10,7 @@ namespace WorldDomination.Web.Authentication.Facebook
 {
     // REFERENCE: http://developers.facebook.com/docs/authentication/server-side/
 
-    public class FacebookProvider
+    public class FacebookProvider : IAuthenticationProvider
     {
         private const string ScopeKey = "&scope={0}";
         private const string StateKey = "&state={0}";

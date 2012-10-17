@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using System.Web;
@@ -11,28 +12,38 @@ namespace WorldDomination.Web.Authentication
 {
     public class AuthenticationService
     {
-        private readonly FacebookProvider _facebookProvider;
-        private readonly TwitterProvider _twitterProvider;
-        public AuthenticationService(FacebookProvider facebookProvider,
-            TwitterProvider twitterProvider)
+        private IDictionary<Type, IAuthenticationProvider> _authenticationProviders;
+        
+        public void AddProvider(IAuthenticationProvider authenticationProvider)
         {
-            // Any one of these can be optional.
-            _facebookProvider = facebookProvider;
-            _twitterProvider = twitterProvider;
+            if (_authenticationProviders == null)
+            {
+                _authenticationProviders = new Dictionary<Type, IAuthenticationProvider>();
+            }
+
+            // Does this provider already exist?
+            if (_authenticationProviders.ContainsKey(authenticationProvider.GetType()))
+            {
+                throw new InvalidOperationException("Trying to add a " + authenticationProvider.GetType() + " provider, but one already exists.");
+            }
+
+            _authenticationProviders.Add(authenticationProvider.GetType(), authenticationProvider);
         }
 
         public RedirectResult RedirectToFacebookAuthentication(string state)
         {
             Condition.Requires(state).IsNotNullOrEmpty();
-            Condition.Requires(_facebookProvider).IsNotNull();
-            return _facebookProvider.RedirectToAuthenticate(state);
+
+            var facebookProvider = GetAuthenticationProvider<FacebookProvider>();
+            return facebookProvider.RedirectToAuthenticate(state);
         }
 
         public RedirectResult RedirectToTwitterAuthentication(string callbackUrl)
         {
             Condition.Requires(callbackUrl).IsNotNullOrEmpty();
 
-            return _twitterProvider.RedirectToAuthenticate(callbackUrl);
+            var twitterProvider = GetAuthenticationProvider<TwitterProvider>();
+            return twitterProvider.RedirectToAuthenticate(callbackUrl);
         }
 
         public IAuthenticatedClient CheckCallback(HttpRequestBase httpRequestBase, string state)
@@ -48,7 +59,8 @@ namespace WorldDomination.Web.Authentication
             }
 
             // Tried to authenticate against Facebook?
-            if (_facebookProvider != null)
+            var facebookProvider = GetAuthenticationProvider<FacebookProvider>();
+            if (facebookProvider != null)
             {
                 var client = TryGetFacebookClient(httpRequestBase.Params, state);
                 if (client != null)
@@ -57,7 +69,8 @@ namespace WorldDomination.Web.Authentication
                 }
             }
 
-            if (_twitterProvider != null)
+            var twitterProvider = GetAuthenticationProvider<TwitterProvider>();
+            if (twitterProvider != null)
             {
                 var client = TryGetTwitterClient(httpRequestBase.Params);
                 if (client != null)
@@ -68,6 +81,22 @@ namespace WorldDomination.Web.Authentication
 
             // Nothing found :(
             return null;
+        }
+
+        private T GetAuthenticationProvider<T>() where T : class, IAuthenticationProvider
+        {
+            IAuthenticationProvider authenticationProvider = null;
+            if (_authenticationProviders != null)
+            {
+                _authenticationProviders.TryGetValue(typeof(T), out authenticationProvider);
+            }
+
+            if (authenticationProvider == null)
+            {
+                throw new InvalidOperationException("No " + typeof(T) + " providers have been added.");
+            }
+
+            return authenticationProvider as T;
         }
 
         private FacebookClient TryGetFacebookClient(NameValueCollection parameters, string existingState)
@@ -95,7 +124,8 @@ namespace WorldDomination.Web.Authentication
                                State = state
                            };
 
-                _facebookProvider.RetrieveUserInformation(facebookClient);
+                var facebookProvider = GetAuthenticationProvider<FacebookProvider>();
+                facebookProvider.RetrieveUserInformation(facebookClient);
                 return facebookClient;
             }
 
@@ -132,7 +162,8 @@ namespace WorldDomination.Web.Authentication
             
             // Now ask Twitter for some user information.
             var twitterClient = new TwitterClient();
-            _twitterProvider.RetrieveUserInformation(twitterClient, parameters);
+            var twitterProvider = GetAuthenticationProvider<TwitterProvider>();
+            twitterProvider.RetrieveUserInformation(twitterClient, parameters);
 
             return twitterClient;
         }

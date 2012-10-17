@@ -16,17 +16,17 @@ namespace WorldDomination.Web.IntegrationTest.Controllers
 
         public HomeController()
         {
-            _facebookProvider = new FacebookProvider(FacebookAppId,
+            var facebookProvider = new FacebookProvider(FacebookAppId,
                                                     FacebookAppSecret,
                                                     new Uri("http://localhost:1337/home/authenticateCallback"));
 
-            _twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret);
+            var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret);
 
-            _authenticationService = new AuthenticationService(_facebookProvider, _twitterProvider);
+            _authenticationService = new AuthenticationService();
+            _authenticationService.AddProvider(facebookProvider);
+            _authenticationService.AddProvider(twitterProvider);
         }
 
-        private readonly FacebookProvider _facebookProvider;
-        private readonly TwitterProvider _twitterProvider;
         private readonly AuthenticationService _authenticationService;
 
         public ActionResult Index()
