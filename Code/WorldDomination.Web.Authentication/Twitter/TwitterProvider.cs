@@ -3,8 +3,6 @@ using System.Collections.Specialized;
 using System.Net;
 using System.Web.Mvc;
 using CuttingEdge.Conditions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using RestSharp;
 using RestSharp.Authenticators;
 using RestSharp.Contrib;
