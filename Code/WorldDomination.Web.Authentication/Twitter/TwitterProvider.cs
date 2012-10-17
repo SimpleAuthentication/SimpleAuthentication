@@ -31,21 +31,6 @@ namespace WorldDomination.Web.Authentication.Twitter
             _restClient = restClient ?? new RestClient("http://api.twitter.com");
         }
 
-        public RedirectResult RedirectToAuthenticate(string callbackUrl)
-        {
-            Condition.Requires(callbackUrl).IsNotNullOrEmpty();
-
-            // First we need to grab a request token.
-            var twitterClient = RetrieveRequestToken(callbackUrl);
-
-            // Now we need the user to enter their name/password/accept this app @ Twitter.
-            // This means we need to redirect them to the Twitter website.
-            var request = new RestRequest("oauth/authorize");
-            request.AddParameter("oauth_token", twitterClient.OAuthToken);
-            var url = _restClient.BuildUri(request).ToString();
-            return new RedirectResult(url);
-        }
-
         public void RetrieveUserInformation(TwitterClient twitterClient, NameValueCollection parameters)
         {
             // Retrieve the OAuth Verifier.
@@ -181,5 +166,58 @@ namespace WorldDomination.Web.Authentication.Twitter
 
             return response.Data;
         }
+
+        #region Implementation of IAuthenticationProvider
+
+        public RedirectResult RedirectToAuthenticate(string callbackUrl)
+        {
+            Condition.Requires(callbackUrl).IsNotNullOrEmpty();
+
+            // First we need to grab a request token.
+            var twitterClient = RetrieveRequestToken(callbackUrl);
+
+            // Now we need the user to enter their name/password/accept this app @ Twitter.
+            // This means we need to redirect them to the Twitter website.
+            var request = new RestRequest("oauth/authorize");
+            request.AddParameter("oauth_token", twitterClient.OAuthToken);
+            var url = _restClient.BuildUri(request).ToString();
+            return new RedirectResult(url);
+        }
+
+        public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)
+        {
+            try
+            {
+                // Retrieve the OAuth Verifier.
+                RetrieveOAuthVerifier(twitterClient, parameters);
+
+                // Convert the Request Token to an Access Token, now that we have a verifier.
+                RetrieveAccessToken(twitterClient);
+
+                // Grab the user information.
+                var verifyCredentialsResult = VerifyCredentials(twitterClient);
+
+                twitterClient.UserInformation = new UserInformation
+                                                {
+                                                    Name = verifyCredentialsResult.Name,
+                                                    Id = verifyCredentialsResult.Id,
+                                                    Locale = verifyCredentialsResult.Lang,
+                                                    UserName = verifyCredentialsResult.ScreenName
+                                                };
+            }
+            catch(Exception exception)
+            {
+                return new AuthenticatedClient(ProviderType.Twitter)
+                       {
+                           ErrorInformation = new ErrorInformation
+                                              {
+                                                  Message = exception.Message,
+                                                  Exception = exception
+                                              }
+                       };
+            }
+        }
+
+        #endregion
     }
 }
