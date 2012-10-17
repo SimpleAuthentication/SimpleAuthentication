@@ -208,7 +208,7 @@ namespace WorldDomination.Web.Authentication.Facebook
                 return new AuthenticatedClient(ProviderType.Facebook)
                        {
                            ErrorInformation =
-                               new ErrorInformation(string.Format("Reason: {0}. Error: {1}. Description: {2}",
+                               new ErrorInformation(string.Format("Reason: {0}. Error: {1}. Description: {2}.",
                                                                   errorReason,
                                                                   error,
                                                                   errorDescription))
