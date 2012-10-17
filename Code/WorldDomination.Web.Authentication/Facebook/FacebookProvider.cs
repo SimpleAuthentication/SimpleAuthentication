@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Net;
 using System.Web.Mvc;
 using CuttingEdge.Conditions;
@@ -51,28 +52,9 @@ namespace WorldDomination.Web.Authentication.Facebook
             _restClient = restClient ?? new RestClient("http://graph.facebook.com");
         }
 
-        public RedirectResult RedirectToAuthenticate(string state)
+        private string RetrieveAccessToken(string code)
         {
-            Condition.Requires(state).IsNotNullOrEmpty();
-
-            var oauthDialogUri = string.Format("https://www.facebook.com/dialog/oauth?client_id={0}&redirect_uri={1}",
-                                               _clientId, _redirectUri.AbsoluteUri);
-
-            // Do we have any scope options?
-            if (_scope != null && _scope.Count > 0)
-            {
-                oauthDialogUri += string.Format(ScopeKey, string.Join(",", _scope));
-            }
-
-            oauthDialogUri += string.Format(StateKey, state);
-
-            return new RedirectResult(oauthDialogUri);
-        }
-
-        public void RetrieveUserInformation(FacebookClient facebookClient)
-        {
-            Condition.Requires(facebookClient).IsNotNull();
-            Condition.Requires(facebookClient.Code).IsNotNullOrEmpty();
+            Condition.Requires(code).IsNotNullOrEmpty();
 
             IRestResponse response;
             try
@@ -82,7 +64,7 @@ namespace WorldDomination.Web.Authentication.Facebook
                 restRequest.AddParameter("client_id", _clientId);
                 restRequest.AddParameter("redirect_uri", _redirectUri);
                 restRequest.AddParameter("client_secret", _clientSecret);
-                restRequest.AddParameter("code", facebookClient.Code);
+                restRequest.AddParameter("code", code);
 
                 response = _restClient.Execute(restRequest);
             }
@@ -101,36 +83,21 @@ namespace WorldDomination.Web.Authentication.Facebook
                         response == null ? string.Empty : response.StatusDescription));
             }
 
-            // Extract the relevant data.
-            ExtractContent(response.Content, facebookClient);
+            var querystringParameters = HttpUtility.ParseQueryString(response.Content);
+            var accessToken = querystringParameters["access_token"];
+            int expires;
+            var expiresOn = int.TryParse(querystringParameters["expires_on"], out expires)
+                                ? DateTime.UtcNow.AddSeconds(expires)
+                                : DateTime.MinValue;
 
-            // Grab the user's information.
-            facebookClient.UserInformation = RetrieveMe(facebookClient.AccessToken);
-        }
-
-        private static void ExtractContent(string responseBody, FacebookClient facebookClient)
-        {
-            Condition.Requires(responseBody).IsNotNullOrEmpty();
-            Condition.Requires(facebookClient).IsNotNull();
-
-            var querystringParameters = HttpUtility.ParseQueryString(responseBody);
-            facebookClient.AccessToken = querystringParameters["access_token"];
-            int expiresOn;
-            if (int.TryParse(querystringParameters["expires_on"], out expiresOn))
-            {
-                facebookClient.ExpiresOn = DateTime.UtcNow.AddSeconds(expiresOn);
-            }
-            else
-            {
-                facebookClient.ExpiresOn = DateTime.MinValue;
-            }
-
-            if (string.IsNullOrEmpty(facebookClient.AccessToken) ||
-                facebookClient.ExpiresOn <= DateTime.UtcNow)
+            if (string.IsNullOrEmpty(accessToken) ||
+                expiresOn <= DateTime.UtcNow)
             {
                 throw new AuthenticationException(
                     "Retrieved a Facebook Access Token but it doesn't contain both the access_token and expires_on parameters.");
             }
+
+            return accessToken;
         }
 
         private UserInformation RetrieveMe(string accessToken)
@@ -169,5 +136,89 @@ namespace WorldDomination.Web.Authentication.Facebook
                        UserName = response.Data.Username
                    };
         }
+
+        #region Implementation of IAuthenticationProvider
+
+        public RedirectResult RedirectToAuthenticate(string state)
+        {
+            Condition.Requires(state).IsNotNullOrEmpty();
+
+            var oauthDialogUri = string.Format("https://www.facebook.com/dialog/oauth?client_id={0}&redirect_uri={1}",
+                                               _clientId, _redirectUri.AbsoluteUri);
+
+            // Do we have any scope options?
+            if (_scope != null && _scope.Count > 0)
+            {
+                oauthDialogUri += string.Format(ScopeKey, string.Join(",", _scope));
+            }
+
+            oauthDialogUri += string.Format(StateKey, state);
+
+            return new RedirectResult(oauthDialogUri);
+        }
+
+        public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)
+        {
+            Condition.Requires(parameters).IsNotNull().IsLongerThan(0);
+            Condition.Requires(existingState).IsNotNull();
+
+            // Is this a facebook callback?
+            var code = parameters["code"];
+            var state = parameters["state"];
+
+            if (!string.IsNullOrEmpty(code) &&
+                !string.IsNullOrEmpty(state))
+            {
+                var authenticatedClient = new AuthenticatedClient(ProviderType.Facebook);
+
+                // CSRF (state) check.
+                if (state != existingState)
+                {
+                    authenticatedClient.ErrorInformation =
+                        new ErrorInformation(
+                            "The states do not match. It's possible that you may be a victim of a CSRF.");
+                    return authenticatedClient;
+                }
+
+                try
+                {
+                    authenticatedClient.AccessToken = RetrieveAccessToken(code);
+                    authenticatedClient.UserInformation = RetrieveMe(authenticatedClient.AccessToken);
+                }
+                catch (Exception exception)
+                {
+                    authenticatedClient.ErrorInformation = new ErrorInformation
+                                                           {
+                                                               Message = exception.Message,
+                                                               Exception = exception
+                                                           };
+                }
+
+                return authenticatedClient;
+            }
+
+            // Maybe we have an error?
+            var errorReason = parameters["error_reason"];
+            var error = parameters["error"];
+            var errorDescription = parameters["error_description"];
+            if (!string.IsNullOrEmpty(errorReason) &&
+                !string.IsNullOrEmpty(error) &&
+                !string.IsNullOrEmpty(errorDescription))
+            {
+                return new AuthenticatedClient(ProviderType.Facebook)
+                       {
+                           ErrorInformation =
+                               new ErrorInformation(string.Format("Reason: {0}. Error: {1}. Description: {2}",
+                                                                  errorReason,
+                                                                  error,
+                                                                  errorDescription))
+                       };
+            }
+
+            // Not any facebook params.
+            return null;
+        }
+
+        #endregion
     }
 }

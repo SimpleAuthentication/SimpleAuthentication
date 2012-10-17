@@ -1,6 +1,6 @@
 ﻿namespace WorldDomination.Web.Authentication.Twitter
 {
-    public class TwitterClient : IAuthenticatedClient
+    public class TwitterClient
     {
         public string DeniedToken { get; set; }
         public string OAuthToken { get; set; }

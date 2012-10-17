@@ -54,33 +54,48 @@ namespace WorldDomination.Web.Authentication
             if (httpRequestBase.Params == null ||
                 !httpRequestBase.Params.HasKeys())
             {
-                throw new AuthenticationException(
-                    "No request params found - unable to determine from where we authenticated with/against.");
+                return new AuthenticatedClient(ProviderType.Unknown)
+                       {
+                           ErrorInformation = new ErrorInformation("No request params found - unable to determine from where we authenticated with/against.")
+                       };
             }
 
-            // Tried to authenticate against Facebook?
-            var facebookProvider = GetAuthenticationProvider<FacebookProvider>();
-            if (facebookProvider != null)
+
+            IAuthenticatedClient authenticatedClient = null;
+            foreach(var provider in _authenticationProviders.Values)
             {
-                var client = TryGetFacebookClient(httpRequestBase.Params, state);
-                if (client != null)
+                authenticatedClient = provider.AuthenticateClient(httpRequestBase.Params, state);
+                if (authenticatedClient != null)
                 {
-                    return client;
+                    break;
                 }
             }
 
-            var twitterProvider = GetAuthenticationProvider<TwitterProvider>();
-            if (twitterProvider != null)
-            {
-                var client = TryGetTwitterClient(httpRequestBase.Params);
-                if (client != null)
-                {
-                    return client;
-                }
-            }
+            return authenticatedClient;
 
-            // Nothing found :(
-            return null;
+            //// Tried to authenticate against Facebook?
+            //var facebookProvider = GetAuthenticationProvider<FacebookProvider>();
+            //if (facebookProvider != null)
+            //{
+            //    var client = TryGetFacebookClient(httpRequestBase.Params, state);
+            //    if (client != null)
+            //    {
+            //        return client;
+            //    }
+            //}
+
+            //var twitterProvider = GetAuthenticationProvider<TwitterProvider>();
+            //if (twitterProvider != null)
+            //{
+            //    var client = TryGetTwitterClient(httpRequestBase.Params);
+            //    if (client != null)
+            //    {
+            //        return client;
+            //    }
+            //}
+
+            //// Nothing found :(
+            //return null;
         }
 
         private T GetAuthenticationProvider<T>() where T : class, IAuthenticationProvider

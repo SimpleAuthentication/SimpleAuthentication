@@ -2,7 +2,7 @@
 
 namespace WorldDomination.Web.Authentication.Facebook
 {
-    public class FacebookClient : IAuthenticatedClient
+    public class FacebookClient
     {
         private const string HashFragment = "#_=_";
         private string _state;
