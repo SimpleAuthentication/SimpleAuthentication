@@ -85,7 +85,7 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         private static IDictionary<string, string> RetrieveOAuthVerifier(NameValueCollection parameters)
         {
-            Condition.Requires(parameters).IsNotNull().IsNotEmpty();
+            Condition.Requires(parameters).IsNotNull();
 
             var oAuthToken = parameters[OAuthTokenKey];
             var oAuthVerifier = parameters[OAuthVerifierKey];
