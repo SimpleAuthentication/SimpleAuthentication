@@ -270,93 +270,97 @@ namespace WorldDomination.UnitTests
                 Assert.NotNull(result.ErrorInformation);
                 Assert.Equal("Failed to retrieve VerifyCredentials json data from the Twitter Api.", result.ErrorInformation.Message);
                 Assert.NotNull(result.ErrorInformation.Exception);
-                Assert.IsType<AuthenticationException>(result.ErrorInformation.Exception);
-                Assert.Equal(exceptionMessage, result.ErrorInformation.Exception.Message);
+                Assert.IsType<Exception>(result.ErrorInformation.Exception.InnerException);
+                Assert.Equal(exceptionMessage, result.ErrorInformation.Exception.InnerException.Message);
             }
 
-        //    [Fact]
-        //    public void GivenAnInvalidVerifyCredentials_RetrieveUserInformation_ThrowsAnAuthenticationException()
-        //    {
-        //        // Arrange.
-        //        var mockRestClient = new Mock<IRestClient>();
+            [Fact]
+            public void GivenAnInvalidVerifyCredentials_RetrieveUserInformation_ThrowsAnAuthenticationException()
+            {
+                // Arrange.
+                var mockRestClient = new Mock<IRestClient>();
 
-        //        var mockRestResponseRetrieveRequestToken = new Mock<IRestResponse>();
-        //        mockRestResponseRetrieveRequestToken.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-        //        mockRestResponseRetrieveRequestToken.Setup(x => x.Content).Returns("oauth_token=aaa&oauth_token_secret=ccc");
-                
-        //        var mockRestResponseVerifyCredentials = new Mock<IRestResponse<VerifyCredentialsResult>>();
-        //        mockRestResponseVerifyCredentials.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
-        //        mockRestResponseVerifyCredentials.Setup(x => x.StatusDescription).Returns("Unauthorized");
+                var mockRestResponseRetrieveRequestToken = new Mock<IRestResponse>();
+                mockRestResponseRetrieveRequestToken.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
+                mockRestResponseRetrieveRequestToken.Setup(x => x.Content).Returns("oauth_token=aaa&oauth_token_secret=ccc");
 
-        //        mockRestClient
-        //            .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
-        //            .Returns(mockRestResponseRetrieveRequestToken.Object);
-        //        mockRestClient
-        //            .Setup(x => x.Execute<VerifyCredentialsResult>(It.IsAny<IRestRequest>()))
-        //            .Returns(mockRestResponseVerifyCredentials.Object);
+                var mockRestResponseVerifyCredentials = new Mock<IRestResponse<VerifyCredentialsResult>>();
+                mockRestResponseVerifyCredentials.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
+                mockRestResponseVerifyCredentials.Setup(x => x.StatusDescription).Returns("Unauthorized");
 
-        //        var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
-        //        var nameValueCollection = new NameValueCollection
-        //                                  {
-        //                                      {"oauth_token", "aaa"},
-        //                                      {"oauth_verifier", "bbb"}
-        //                                  };
-        //        // Act.
-        //        var result =
-        //            Assert.Throws<AuthenticationException>(
-        //                () => twitterProvider.RetrieveUserInformation(new TwitterClient(), nameValueCollection));
+                mockRestClient
+                    .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponseRetrieveRequestToken.Object);
+                mockRestClient
+                    .Setup(x => x.Execute<VerifyCredentialsResult>(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponseVerifyCredentials.Object);
 
-        //        // Assert.
-        //        Assert.NotNull(result);
-        //        Assert.Equal("Failed to retrieve VerifyCredentials json data OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized", result.Message);
-        //    }
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var nameValueCollection = new NameValueCollection
+                                          {
+                                              {"oauth_token", "aaa"},
+                                              {"oauth_verifier", "bbb"}
+                                          };
+                // Act.
+                var result = twitterProvider.AuthenticateClient(nameValueCollection, "asd");
 
-        //    [Fact]
-        //    public void GivenSomeValidVerifyCredentials_RetrieveUserInformation_ReturnsATwitterClientWithUserInformation()
-        //    {
-        //        // Arrange.
-        //        var mockRestClient = new Mock<IRestClient>();
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal(ProviderType.Twitter, result.ProviderType);
+                Assert.NotNull(result.ErrorInformation);
+                Assert.Equal("Failed to retrieve VerifyCredentials json data OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized", result.ErrorInformation.Message);
+                Assert.NotNull(result.ErrorInformation.Exception);
+            }
 
-        //        var mockRestResponseRetrieveRequestToken = new Mock<IRestResponse>();
-        //        mockRestResponseRetrieveRequestToken.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-        //        mockRestResponseRetrieveRequestToken.Setup(x => x.Content).Returns("oauth_token=aaa&oauth_token_secret=ccc");
+            [Fact]
+            public void GivenSomeValidVerifyCredentials_RetrieveUserInformation_ReturnsAnAuthenticatedClient()
+            {
+                // Arrange.
+                var mockRestClient = new Mock<IRestClient>();
 
-        //        var verifyCredentialsResult = new VerifyCredentialsResult
-        //        {
-        //            Name = "Some Name",
-        //            Id = 1234,
-        //            Lang = "en-au",
-        //            ScreenName = "Some-Screen-Name"
-        //        };
-        //        var mockRestResponseVerifyCredentials = new Mock<IRestResponse<VerifyCredentialsResult>>();
-        //        mockRestResponseVerifyCredentials.Setup(x => x.Data).Returns(verifyCredentialsResult);
-        //        mockRestResponseVerifyCredentials.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
+                var mockRestResponseRetrieveRequestToken = new Mock<IRestResponse>();
+                mockRestResponseRetrieveRequestToken.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
+                mockRestResponseRetrieveRequestToken.Setup(x => x.Content).Returns("oauth_token=aaa&oauth_token_secret=ccc");
 
-        //        mockRestClient
-        //            .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
-        //            .Returns(mockRestResponseRetrieveRequestToken.Object);
-        //        mockRestClient
-        //            .Setup(x => x.Execute<VerifyCredentialsResult>(It.IsAny<IRestRequest>()))
-        //            .Returns(mockRestResponseVerifyCredentials.Object);
+                var verifyCredentialsResult = new VerifyCredentialsResult
+                {
+                    Name = "Some Name",
+                    Id = 1234,
+                    Lang = "en-au",
+                    ScreenName = "Some-Screen-Name"
+                };
+                var mockRestResponseVerifyCredentials = new Mock<IRestResponse<VerifyCredentialsResult>>();
+                mockRestResponseVerifyCredentials.Setup(x => x.Data).Returns(verifyCredentialsResult);
+                mockRestResponseVerifyCredentials.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
 
-        //        var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
-        //        var nameValueCollection = new NameValueCollection
-        //                                  {
-        //                                      {"oauth_token", "aaa"},
-        //                                      {"oauth_verifier", "bbb"}
-        //                                  };
-        //        var twitterClient = new TwitterClient();
+                mockRestClient
+                    .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponseRetrieveRequestToken.Object);
+                mockRestClient
+                    .Setup(x => x.Execute<VerifyCredentialsResult>(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponseVerifyCredentials.Object);
 
-        //        // Act.
-        //        twitterProvider.RetrieveUserInformation(twitterClient, nameValueCollection);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var nameValueCollection = new NameValueCollection
+                                          {
+                                              {"oauth_token", "aaa"},
+                                              {"oauth_verifier", "bbb"}
+                                          };
+                var twitterClient = new TwitterClient();
 
-        //        // Assert.
-        //        Assert.NotNull(twitterClient.UserInformation);
-        //        Assert.NotNull(twitterClient.UserInformation.Id);
-        //        Assert.NotNull(twitterClient.UserInformation.Locale);
-        //        Assert.NotNull(twitterClient.UserInformation.Name);
-        //        Assert.NotNull(twitterClient.UserInformation.UserName);
-        //    }
+                // Act.
+                var result = twitterProvider.AuthenticateClient(nameValueCollection, "asd");
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal(ProviderType.Twitter, result.ProviderType);
+                Assert.NotNull(result.UserInformation);
+                Assert.NotNull(result.UserInformation.Id);
+                Assert.NotNull(result.UserInformation.Locale);
+                Assert.NotNull(result.UserInformation.Name);
+                Assert.NotNull(result.UserInformation.UserName);
+                Assert.Null(result.ErrorInformation);
+            }
         }
     }
 

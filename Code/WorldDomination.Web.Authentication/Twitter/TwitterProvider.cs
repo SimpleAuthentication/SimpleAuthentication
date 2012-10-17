@@ -138,7 +138,7 @@ namespace WorldDomination.Web.Authentication.Twitter
             return new Dictionary<string, string>
                    {
                        {OAuthTokenKey, querystringParameters[OAuthTokenKey]},
-                       {oAuthTokenSecret, querystringParameters[OAuthTokenSecretKey]}
+                       {OAuthTokenSecretKey, querystringParameters[OAuthTokenSecretKey]}
                    };
         }
 
