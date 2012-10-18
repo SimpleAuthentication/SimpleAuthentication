@@ -346,7 +346,6 @@ namespace WorldDomination.UnitTests
                                               {"oauth_token", "aaa"},
                                               {"oauth_verifier", "bbb"}
                                           };
-                var twitterClient = new TwitterClient();
 
                 // Act.
                 var result = twitterProvider.AuthenticateClient(nameValueCollection, "asd");

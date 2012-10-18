@@ -1,0 +1,15 @@
+﻿@model WorldDomination.Web.Authentication.AuthenticatedClient
+
+<h1>Authenticated Client</h1>
+
+@if (Model.UserInformation != null)
+{
+    Html.DisplayFor(x => x.UserInformation);
+}
+
+@if (Model.ErrorInformation != null)
+{
+    Html.DisplayFor(x => x.ErrorInformation);
+}
+
+<hr/>

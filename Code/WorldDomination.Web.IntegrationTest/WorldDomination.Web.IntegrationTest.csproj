@@ -124,7 +124,16 @@
     <Content Include="Views\Home\AuthenticateCallback.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Home\DisplayTemplates\FacebookClient.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\AuthenticatedClient.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\DisplayTemplates\UserInformation.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\DisplayTemplates\ErrorInformation.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Views\Home\DisplayTemplates\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
