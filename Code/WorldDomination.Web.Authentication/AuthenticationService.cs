@@ -72,30 +72,6 @@ namespace WorldDomination.Web.Authentication
             }
 
             return authenticatedClient;
-
-            //// Tried to authenticate against Facebook?
-            //var facebookProvider = GetAuthenticationProvider<FacebookProvider>();
-            //if (facebookProvider != null)
-            //{
-            //    var client = TryGetFacebookClient(httpRequestBase.Params, state);
-            //    if (client != null)
-            //    {
-            //        return client;
-            //    }
-            //}
-
-            //var twitterProvider = GetAuthenticationProvider<TwitterProvider>();
-            //if (twitterProvider != null)
-            //{
-            //    var client = TryGetTwitterClient(httpRequestBase.Params);
-            //    if (client != null)
-            //    {
-            //        return client;
-            //    }
-            //}
-
-            //// Nothing found :(
-            //return null;
         }
 
         private T GetAuthenticationProvider<T>() where T : class, IAuthenticationProvider
