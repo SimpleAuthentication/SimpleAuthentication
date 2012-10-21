@@ -36,7 +36,7 @@ namespace WorldDomination.Web.Authentication.Twitter
             _redirectUri = redirectUri;
 
             // IRestClient can be optional.
-            _restClient = restClient ?? new RestClient("http://api.twitter.com");
+            _restClient = restClient ?? new RestClient("https://api.twitter.com");
         }
 
         private IDictionary<string, string> RetrieveRequestToken()
