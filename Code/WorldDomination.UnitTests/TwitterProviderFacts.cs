@@ -34,7 +34,7 @@ namespace WorldDomination.UnitTests
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
                 const string callbackUrl = "someCallBackUri";
 
                 // Act.
@@ -54,7 +54,7 @@ namespace WorldDomination.UnitTests
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Throws(new Exception("some mock exception"));
-                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
 
                 // Act.
                 var result =
@@ -78,7 +78,7 @@ namespace WorldDomination.UnitTests
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
 
                 // Act.
                 var result =
@@ -104,7 +104,7 @@ namespace WorldDomination.UnitTests
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
 
                 // Act.
                 var result =
@@ -130,7 +130,7 @@ namespace WorldDomination.UnitTests
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Throws<Exception>();
-                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
                 var nameValueCollection = new NameValueCollection(); // Missing 2x required params.
                 
                 // Act.
@@ -153,7 +153,7 @@ namespace WorldDomination.UnitTests
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Throws(new Exception("some mock exception."));
-                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
                 var nameValueCollection = new NameValueCollection
                                           {
                                               {"oauth_token", "aaa"},
@@ -182,7 +182,7 @@ namespace WorldDomination.UnitTests
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
                 var nameValueCollection = new NameValueCollection
                                           {
                                               {"oauth_token", "aaa"},
@@ -210,7 +210,7 @@ namespace WorldDomination.UnitTests
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
                 var nameValueCollection = new NameValueCollection
                                           {
                                               {"oauth_token", "aaa"}
@@ -255,7 +255,7 @@ namespace WorldDomination.UnitTests
                     .Setup(x => x.Execute<VerifyCredentialsResult>(It.IsAny<IRestRequest>()))
                     .Throws(new Exception(exceptionMessage));
 
-                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
                 var nameValueCollection = new NameValueCollection
                                           {
                                               {"oauth_token", "aaa"},
@@ -295,7 +295,7 @@ namespace WorldDomination.UnitTests
                     .Setup(x => x.Execute<VerifyCredentialsResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponseVerifyCredentials.Object);
 
-                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
                 var nameValueCollection = new NameValueCollection
                                           {
                                               {"oauth_token", "aaa"},
@@ -340,7 +340,7 @@ namespace WorldDomination.UnitTests
                     .Setup(x => x.Execute<VerifyCredentialsResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponseVerifyCredentials.Object);
 
-                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
                 var nameValueCollection = new NameValueCollection
                                           {
                                               {"oauth_token", "aaa"},

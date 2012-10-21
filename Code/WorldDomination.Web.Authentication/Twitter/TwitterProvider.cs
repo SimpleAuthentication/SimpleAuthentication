@@ -18,34 +18,35 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         private readonly string _consumerKey;
         private readonly string _consumerSecret;
+        private readonly Uri _redirectUri;
         private readonly IRestClient _restClient;
 
-        public TwitterProvider(string consumerKey, string consumerSecret) : this(consumerKey, consumerSecret, null)
+        public TwitterProvider(string consumerKey, string consumerSecret, Uri redirectUri) : this(consumerKey, consumerSecret, redirectUri, null)
         {
         }
 
-        public TwitterProvider(string consumerKey, string consumerSecret, IRestClient restClient)
+        public TwitterProvider(string consumerKey, string consumerSecret, Uri redirectUri, IRestClient restClient)
         {
             Condition.Requires(consumerKey).IsNotNullOrEmpty();
             Condition.Requires(consumerSecret).IsNotNullOrEmpty();
+            Condition.Requires(redirectUri).IsNotNull();
 
             _consumerKey = consumerKey;
             _consumerSecret = consumerSecret;
+            _redirectUri = redirectUri;
 
             // IRestClient can be optional.
             _restClient = restClient ?? new RestClient("http://api.twitter.com");
         }
 
-        private IDictionary<string, string> RetrieveRequestToken(string callbackUrl)
+        private IDictionary<string, string> RetrieveRequestToken()
         {
-            Condition.Requires(callbackUrl).IsNotNullOrEmpty();
-
             IRestResponse response;
 
             try
             {
                 _restClient.Authenticator = OAuth1Authenticator.ForRequestToken(_consumerKey, _consumerSecret,
-                                                                                callbackUrl);
+                                                                                _redirectUri.AbsoluteUri);
                 var request = new RestRequest("oauth/request_token", Method.POST);
                 response = _restClient.Execute(request);
             }
@@ -178,12 +179,12 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         #region Implementation of IAuthenticationProvider
 
-        public RedirectResult RedirectToAuthenticate(string callbackUrl)
+        public RedirectResult RedirectToAuthenticate(string state)
         {
-            Condition.Requires(callbackUrl).IsNotNullOrEmpty();
+            Condition.Requires(state).IsNotNullOrEmpty();
 
             // First we need to grab a request token.
-            var oAuthToken = RetrieveRequestToken(callbackUrl);
+            var oAuthToken = RetrieveRequestToken();
 
             // Now we need the user to enter their name/password/accept this app @ Twitter.
             // This means we need to redirect them to the Twitter website.
