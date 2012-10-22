@@ -2,6 +2,7 @@
 using System.Web.Mvc;
 using WorldDomination.Web.Authentication;
 using WorldDomination.Web.Authentication.Facebook;
+using WorldDomination.Web.Authentication.Google;
 using WorldDomination.Web.Authentication.Twitter;
 using WorldDomination.Web.IntegrationTest.Models;
 
@@ -13,6 +14,9 @@ namespace WorldDomination.Web.IntegrationTest.Controllers
         private const string FacebookAppSecret = "b09592a5904746646f3d402178ce9c0f";
         private const string TwitterConsumerKey = "Rb7qNNPUPsRSYkznFTbF6Q";
         private const string TwitterConsumerSecret = "pP1jBdYOlmCzo08QFJjGIHY4YSyPdGLPO2m1q47hu9c";
+        private const string GoogleConsumerKey = "587140099194.apps.googleusercontent.com";
+        private const string GoogleConsumerSecret = "npk1_gx-gqJmLiJRPFooxCEY";
+        
 
         public HomeController()
         {
@@ -23,9 +27,13 @@ namespace WorldDomination.Web.IntegrationTest.Controllers
             var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret,
                                                       new Uri("http://localhost:1337/home/AuthenticateCallback"));
 
+            var googleProvider = new GoogleProvider(GoogleConsumerKey, GoogleConsumerSecret,
+                                                      new Uri("http://localhost:1337/home/AuthenticateCallback"));
+
             _authenticationService = new AuthenticationService();
             _authenticationService.AddProvider(facebookProvider);
             _authenticationService.AddProvider(twitterProvider);
+            _authenticationService.AddProvider(googleProvider);
         }
 
         private readonly AuthenticationService _authenticationService;
@@ -47,6 +55,12 @@ namespace WorldDomination.Web.IntegrationTest.Controllers
         {
             // Note: Twitter doesn't use the state param. So it can be anything non-null.
             return _authenticationService.RedirectToTwitterAuthentication(Session.SessionID);
+        }
+
+        public RedirectResult GoogleAuthentication()
+        {
+            // Note: Twitter doesn't use the state param. So it can be anything non-null.
+            return _authenticationService.RedirectToGoogleAuthentication(Session.SessionID);
         }
 
         public ActionResult AuthenticateCallback()

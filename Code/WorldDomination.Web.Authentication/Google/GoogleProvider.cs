@@ -63,9 +63,9 @@ namespace WorldDomination.Web.Authentication.Google
                 _restClient.Authenticator = OAuth1Authenticator.ForRequestToken(_consumerKey, _consumerSecret,
                                                                                 _redirectUri.AbsoluteUri);
                 var request = new RestRequest("oauth/request_token", Method.POST);
-                request.AddParameter("response_type", "code");
-                request.AddParameter("state", state);
-                request.AddParameter("scope", string.Join(" ", _scope));
+                //request.AddParameter("response_type", "code");
+                //request.AddParameter("state", state);
+                //request.AddParameter("scope", string.Join(" ", _scope));
                 response = _restClient.Execute(request);
             }
             catch (Exception exception)

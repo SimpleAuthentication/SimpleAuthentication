@@ -6,6 +6,7 @@ using System.Web;
 using System.Web.Mvc;
 using CuttingEdge.Conditions;
 using WorldDomination.Web.Authentication.Facebook;
+using WorldDomination.Web.Authentication.Google;
 using WorldDomination.Web.Authentication.Twitter;
 
 namespace WorldDomination.Web.Authentication
@@ -38,12 +39,20 @@ namespace WorldDomination.Web.Authentication
             return facebookProvider.RedirectToAuthenticate(state);
         }
 
-        public RedirectResult RedirectToTwitterAuthentication(string callbackUrl)
+        public RedirectResult RedirectToTwitterAuthentication(string state)
         {
-            Condition.Requires(callbackUrl).IsNotNullOrEmpty();
+            Condition.Requires(state).IsNotNullOrEmpty();
 
             var twitterProvider = GetAuthenticationProvider<TwitterProvider>();
-            return twitterProvider.RedirectToAuthenticate(callbackUrl);
+            return twitterProvider.RedirectToAuthenticate(state);
+        }
+
+        public RedirectResult RedirectToGoogleAuthentication(string state)
+        {
+            Condition.Requires(state).IsNotNullOrEmpty();
+
+            var googleProvider = GetAuthenticationProvider<GoogleProvider>();
+            return googleProvider.RedirectToAuthenticate(state);
         }
 
         public IAuthenticatedClient CheckCallback(HttpRequestBase httpRequestBase, string state)
