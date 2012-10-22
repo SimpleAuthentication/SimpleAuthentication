@@ -20,8 +20,7 @@ namespace WorldDomination.Web.IntegrationTest.Controllers
 
         public HomeController()
         {
-            var facebookProvider = new FacebookProvider(FacebookAppId,
-                                                    FacebookAppSecret,
+            var facebookProvider = new FacebookProvider(FacebookAppId, FacebookAppSecret,
                                                     new Uri("http://localhost:1337/home/AuthenticateCallback"));
 
             var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret,
@@ -48,19 +47,22 @@ namespace WorldDomination.Web.IntegrationTest.Controllers
             // Keep the SessionId constant. 
             // Otherwise, you'll need to store some constant value in session .. and use that instead of the Session Id.
             Session.Add("SomeKey", "whatcha-talkin-bout-willis?"); 
-            return _authenticationService.RedirectToFacebookAuthentication(Session.SessionID);
+            var uri = _authenticationService.RedirectToAuthenticationProvider("Facebook", Session.SessionID);
+            return Redirect(uri.AbsoluteUri);
         }
 
         public RedirectResult TwitterAuthentication()
         {
             // Note: Twitter doesn't use the state param. So it can be anything non-null.
-            return _authenticationService.RedirectToTwitterAuthentication(Session.SessionID);
+            var uri = _authenticationService.RedirectToAuthenticationProvider("Twitter", Session.SessionID);
+            return Redirect(uri.AbsoluteUri);
         }
 
         public RedirectResult GoogleAuthentication()
         {
             // Note: Twitter doesn't use the state param. So it can be anything non-null.
-            return _authenticationService.RedirectToGoogleAuthentication(Session.SessionID);
+            var uri = _authenticationService.RedirectToAuthenticationProvider("Google", Session.SessionID);
+            return Redirect(uri.AbsoluteUri);
         }
 
         public ActionResult AuthenticateCallback()

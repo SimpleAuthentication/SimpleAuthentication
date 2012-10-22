@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
-using System.Web.Mvc;
 using CuttingEdge.Conditions;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -21,7 +20,8 @@ namespace WorldDomination.Web.Authentication.Twitter
         private readonly Uri _redirectUri;
         private readonly IRestClient _restClient;
 
-        public TwitterProvider(string consumerKey, string consumerSecret, Uri redirectUri) : this(consumerKey, consumerSecret, redirectUri, null)
+        public TwitterProvider(string consumerKey, string consumerSecret, Uri redirectUri)
+            : this(consumerKey, consumerSecret, redirectUri, null)
         {
         }
 
@@ -179,7 +179,12 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         #region Implementation of IAuthenticationProvider
 
-        public RedirectResult RedirectToAuthenticate(string state)
+        public string Name
+        {
+            get { return "Twitter"; }
+        }
+
+        public Uri RedirectToAuthenticate(string state)
         {
             Condition.Requires(state).IsNotNullOrEmpty();
 
@@ -190,8 +195,7 @@ namespace WorldDomination.Web.Authentication.Twitter
             // This means we need to redirect them to the Twitter website.
             var request = new RestRequest("oauth/authorize");
             request.AddParameter(OAuthTokenKey, oAuthToken[OAuthTokenKey]);
-            var url = _restClient.BuildUri(request).ToString();
-            return new RedirectResult(url);
+            return _restClient.BuildUri(request);
         }
 
         public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)

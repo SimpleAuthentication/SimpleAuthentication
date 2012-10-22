@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
-using System.Web.Mvc;
 using CuttingEdge.Conditions;
 using RestSharp;
 using RestSharp.Contrib;
@@ -139,7 +138,12 @@ namespace WorldDomination.Web.Authentication.Facebook
 
         #region Implementation of IAuthenticationProvider
 
-        public RedirectResult RedirectToAuthenticate(string state)
+        public string Name
+        {
+            get { return "Facebook"; }
+        }
+
+        public Uri RedirectToAuthenticate(string state)
         {
             Condition.Requires(state).IsNotNullOrEmpty();
 
@@ -154,7 +158,7 @@ namespace WorldDomination.Web.Authentication.Facebook
 
             oauthDialogUri += string.Format(StateKey, state);
 
-            return new RedirectResult(oauthDialogUri);
+            return new Uri(oauthDialogUri);
         }
 
         public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)

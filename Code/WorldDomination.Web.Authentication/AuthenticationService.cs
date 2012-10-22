@@ -1,58 +1,53 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Net;
 using System.Web;
-using System.Web.Mvc;
 using CuttingEdge.Conditions;
-using WorldDomination.Web.Authentication.Facebook;
-using WorldDomination.Web.Authentication.Google;
-using WorldDomination.Web.Authentication.Twitter;
 
 namespace WorldDomination.Web.Authentication
 {
     public class AuthenticationService
     {
-        private IDictionary<Type, IAuthenticationProvider> _authenticationProviders;
-        
+        private IDictionary<string, IAuthenticationProvider> _authenticationProviders;
+
+        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders
+        {
+            get { return _authenticationProviders; }
+        }
+
         public void AddProvider(IAuthenticationProvider authenticationProvider)
         {
             if (_authenticationProviders == null)
             {
-                _authenticationProviders = new Dictionary<Type, IAuthenticationProvider>();
+                _authenticationProviders = new Dictionary<string, IAuthenticationProvider>();
             }
 
             // Does this provider already exist?
-            if (_authenticationProviders.ContainsKey(authenticationProvider.GetType()))
+            if (_authenticationProviders.ContainsKey(authenticationProvider.Name))
             {
-                throw new InvalidOperationException("Trying to add a " + authenticationProvider.GetType() + " provider, but one already exists.");
+                throw new InvalidOperationException("Trying to add a " + authenticationProvider.GetType() +
+                                                    " provider, but one already exists.");
             }
 
-            _authenticationProviders.Add(authenticationProvider.GetType(), authenticationProvider);
+            _authenticationProviders.Add(authenticationProvider.Name, authenticationProvider);
         }
 
-        public RedirectResult RedirectToFacebookAuthentication(string state)
+        public Uri RedirectToAuthenticationProvider(string providerKey, string state)
         {
+            Condition.Requires(providerKey).IsNotNullOrEmpty();
             Condition.Requires(state).IsNotNullOrEmpty();
 
-            var facebookProvider = GetAuthenticationProvider<FacebookProvider>();
-            return facebookProvider.RedirectToAuthenticate(state);
-        }
+            IAuthenticationProvider authenticationProvider = null;
+            if (_authenticationProviders != null)
+            {
+                _authenticationProviders.TryGetValue(providerKey, out authenticationProvider);
+            }
 
-        public RedirectResult RedirectToTwitterAuthentication(string state)
-        {
-            Condition.Requires(state).IsNotNullOrEmpty();
+            if (authenticationProvider == null)
+            {
+                throw new InvalidOperationException("No '" + providerKey + "' provider has been added.");
+            }
 
-            var twitterProvider = GetAuthenticationProvider<TwitterProvider>();
-            return twitterProvider.RedirectToAuthenticate(state);
-        }
-
-        public RedirectResult RedirectToGoogleAuthentication(string state)
-        {
-            Condition.Requires(state).IsNotNullOrEmpty();
-
-            var googleProvider = GetAuthenticationProvider<GoogleProvider>();
-            return googleProvider.RedirectToAuthenticate(state);
+            return authenticationProvider.RedirectToAuthenticate(state);
         }
 
         public IAuthenticatedClient CheckCallback(HttpRequestBase httpRequestBase, string state)
@@ -65,13 +60,15 @@ namespace WorldDomination.Web.Authentication
             {
                 return new AuthenticatedClient(ProviderType.Unknown)
                        {
-                           ErrorInformation = new ErrorInformation("No request params found - unable to determine from where we authenticated with/against.")
+                           ErrorInformation =
+                               new ErrorInformation(
+                               "No request params found - unable to determine from where we authenticated with/against.")
                        };
             }
 
 
             IAuthenticatedClient authenticatedClient = null;
-            foreach(var provider in _authenticationProviders.Values)
+            foreach (var provider in _authenticationProviders.Values)
             {
                 authenticatedClient = provider.AuthenticateClient(httpRequestBase.Params, state);
                 if (authenticatedClient != null)
@@ -81,22 +78,6 @@ namespace WorldDomination.Web.Authentication
             }
 
             return authenticatedClient;
-        }
-
-        private T GetAuthenticationProvider<T>() where T : class, IAuthenticationProvider
-        {
-            IAuthenticationProvider authenticationProvider = null;
-            if (_authenticationProviders != null)
-            {
-                _authenticationProviders.TryGetValue(typeof(T), out authenticationProvider);
-            }
-
-            if (authenticationProvider == null)
-            {
-                throw new InvalidOperationException("No " + typeof(T) + " providers have been added.");
-            }
-
-            return authenticationProvider as T;
         }
     }
 }

@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Web.Mvc;
 using CuttingEdge.Conditions;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -16,21 +13,23 @@ namespace WorldDomination.Web.Authentication.Google
 
     public class GoogleProvider : IAuthenticationProvider
     {
-                private const string OAuthTokenKey = "oauth_token";
+        private const string OAuthTokenKey = "oauth_token";
         private const string OAuthTokenSecretKey = "oauth_token_secret";
         private const string OAuthVerifierKey = "oauth_verifier";
 
         private readonly string _consumerKey;
         private readonly string _consumerSecret;
         private readonly Uri _redirectUri;
-        private readonly IList<string> _scope;
         private readonly IRestClient _restClient;
+        private readonly IList<string> _scope;
 
-        public GoogleProvider(string consumerKey, string consumerSecret, Uri redirectUri) : this(consumerKey, consumerSecret, redirectUri, null, null)
+        public GoogleProvider(string consumerKey, string consumerSecret, Uri redirectUri)
+            : this(consumerKey, consumerSecret, redirectUri, null, null)
         {
         }
 
-        public GoogleProvider(string consumerKey, string consumerSecret, Uri redirectUri, IList<string> scope, IRestClient restClient)
+        public GoogleProvider(string consumerKey, string consumerSecret, Uri redirectUri, IList<string> scope,
+                              IRestClient restClient)
         {
             Condition.Requires(consumerKey).IsNotNullOrEmpty();
             Condition.Requires(consumerSecret).IsNotNullOrEmpty();
@@ -60,12 +59,15 @@ namespace WorldDomination.Web.Authentication.Google
 
             try
             {
-                _restClient.Authenticator = OAuth1Authenticator.ForRequestToken(_consumerKey, _consumerSecret,
-                                                                                _redirectUri.AbsoluteUri);
+                //_restClient.Authenticator = OAuth1Authenticator.ForRequestToken(_consumerKey, _consumerSecret,
+                //                                                                _redirectUri.AbsoluteUri);
                 var request = new RestRequest("oauth/request_token", Method.POST);
-                //request.AddParameter("response_type", "code");
-                //request.AddParameter("state", state);
-                //request.AddParameter("scope", string.Join(" ", _scope));
+                request.AddParameter("client_id", _consumerKey);
+                request.AddParameter("client_secret", _consumerSecret);
+                request.AddParameter("redirect_uri", _redirectUri);
+                request.AddParameter("response_type", "code");
+                request.AddParameter("state", state);
+                request.AddParameter("scope", string.Join(" ", _scope));
                 response = _restClient.Execute(request);
             }
             catch (Exception exception)
@@ -104,7 +106,12 @@ namespace WorldDomination.Web.Authentication.Google
 
         #region Implementation of IAuthenticationProvider
 
-        public RedirectResult RedirectToAuthenticate(string state)
+        public string Name
+        {
+            get { return "Google"; }
+        }
+
+        public Uri RedirectToAuthenticate(string state)
         {
             Condition.Requires(state).IsNotNullOrEmpty();
 

@@ -42,7 +42,7 @@ namespace WorldDomination.UnitTests
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal(result.Url, redirectUri.AbsoluteUri);
+                Assert.Equal(result.AbsoluteUri, redirectUri.AbsoluteUri);
             }
 
             [Fact]

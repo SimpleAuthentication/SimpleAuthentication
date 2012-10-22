@@ -1,11 +1,12 @@
-﻿using System.Collections.Specialized;
-using System.Web.Mvc;
+﻿using System;
+using System.Collections.Specialized;
 
 namespace WorldDomination.Web.Authentication
 {
     public interface IAuthenticationProvider
     {
-        RedirectResult RedirectToAuthenticate(string state);
+        string Name { get; }
+        Uri RedirectToAuthenticate(string state);
         IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState);
     }
 }
