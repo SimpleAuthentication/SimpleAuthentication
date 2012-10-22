@@ -21,13 +21,13 @@ namespace WorldDomination.Web.IntegrationTest.Controllers
         public HomeController()
         {
             var facebookProvider = new FacebookProvider(FacebookAppId, FacebookAppSecret,
-                                                    new Uri("http://localhost:1337/home/AuthenticateCallback"));
+                                                    new Uri("http://localhost:1337/home/AuthenticateCallback?providerKey=facebook"));
 
             var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret,
-                                                      new Uri("http://localhost:1337/home/AuthenticateCallback"));
+                                                      new Uri("http://localhost:1337/home/AuthenticateCallback?providerKey=twitter"));
 
             var googleProvider = new GoogleProvider(GoogleConsumerKey, GoogleConsumerSecret,
-                                                      new Uri("http://localhost:1337/home/AuthenticateCallback"));
+                                                      new Uri("http://localhost:1337/home/AuthenticateCallback?providerKey=google"));
 
             _authenticationService = new AuthenticationService();
             _authenticationService.AddProvider(facebookProvider);
@@ -42,35 +42,26 @@ namespace WorldDomination.Web.IntegrationTest.Controllers
             return View();
         }
 
-        public RedirectResult FacebookAuthentication()
+        public RedirectResult RedirectToAuthenticate(string providerKey)
         {
             // Keep the SessionId constant. 
             // Otherwise, you'll need to store some constant value in session .. and use that instead of the Session Id.
             Session.Add("SomeKey", "whatcha-talkin-bout-willis?"); 
-            var uri = _authenticationService.RedirectToAuthenticationProvider("Facebook", Session.SessionID);
+            var uri = _authenticationService.RedirectToAuthenticationProvider(providerKey, Session.SessionID);
             return Redirect(uri.AbsoluteUri);
         }
 
-        public RedirectResult TwitterAuthentication()
+        public ActionResult AuthenticateCallback(string providerKey)
         {
-            // Note: Twitter doesn't use the state param. So it can be anything non-null.
-            var uri = _authenticationService.RedirectToAuthenticationProvider("Twitter", Session.SessionID);
-            return Redirect(uri.AbsoluteUri);
-        }
+            if (string.IsNullOrEmpty(providerKey))
+            {
+                throw new ArgumentNullException("providerKey");
+            }
 
-        public RedirectResult GoogleAuthentication()
-        {
-            // Note: Twitter doesn't use the state param. So it can be anything non-null.
-            var uri = _authenticationService.RedirectToAuthenticationProvider("Google", Session.SessionID);
-            return Redirect(uri.AbsoluteUri);
-        }
-
-        public ActionResult AuthenticateCallback()
-        {
             var model = new AuthenticateCallbackViewModel();
             try
             {
-                model.AuthenticatedClient = _authenticationService.CheckCallback(Request, Session.SessionID);
+                model.AuthenticatedClient = _authenticationService.CheckCallback(providerKey, Request, Session.SessionID);
             }
             catch (Exception exception)
             {

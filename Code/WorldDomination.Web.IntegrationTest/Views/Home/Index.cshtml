@@ -7,9 +7,9 @@
     <body>
         <div>
             <ul>
-                <li>@Html.ActionLink("Facebook", "FacebookAuthentication")</li>
-                <li>@Html.ActionLink("Twitter", "TwitterAuthentication")</li>
-                <li>@Html.ActionLink("Google", "GoogleAuthentication")</li>
+                <li>@Html.ActionLink("Facebook", "RedirectToAuthenticate", new {providerKey="Facebook"}, null)</li>
+                <li>@Html.ActionLink("Twitter", "RedirectToAuthenticate", new {providerKey="Twitter"}, null)</li>
+                <li>@Html.ActionLink("Google", "RedirectToAuthenticate", new {providerKey="Google"}, null)</li>
             </ul>
         </div>
     </body>

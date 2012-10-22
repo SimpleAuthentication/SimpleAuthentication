@@ -13,7 +13,6 @@ namespace WorldDomination.Web.Authentication.Facebook
     public class FacebookProvider : IAuthenticationProvider
     {
         private const string ScopeKey = "&scope={0}";
-        private const string StateKey = "&state={0}";
         private readonly string _clientId;
         private readonly string _clientSecret;
         private readonly Uri _redirectUri;
@@ -48,7 +47,7 @@ namespace WorldDomination.Web.Authentication.Facebook
 
             // Optionals.
             _scope = scope;
-            _restClient = restClient ?? new RestClient("http://graph.facebook.com");
+            _restClient = restClient ?? new RestClient("https://graph.facebook.com");
         }
 
         private string RetrieveAccessToken(string code)
@@ -147,16 +146,14 @@ namespace WorldDomination.Web.Authentication.Facebook
         {
             Condition.Requires(state).IsNotNullOrEmpty();
 
-            var oauthDialogUri = string.Format("https://www.facebook.com/dialog/oauth?client_id={0}&redirect_uri={1}",
-                                               _clientId, _redirectUri.AbsoluteUri);
+            var oauthDialogUri = string.Format("https://www.facebook.com/dialog/oauth?client_id={0}&redirect_uri={1}&state={2}",
+                                               _clientId, _redirectUri.AbsoluteUri, state);
 
             // Do we have any scope options?
             if (_scope != null && _scope.Count > 0)
             {
                 oauthDialogUri += string.Format(ScopeKey, string.Join(",", _scope));
             }
-
-            oauthDialogUri += string.Format(StateKey, state);
 
             return new Uri(oauthDialogUri);
         }

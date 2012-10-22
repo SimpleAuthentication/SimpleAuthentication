@@ -50,11 +50,14 @@ namespace WorldDomination.Web.Authentication
             return authenticationProvider.RedirectToAuthenticate(state);
         }
 
-        public IAuthenticatedClient CheckCallback(HttpRequestBase httpRequestBase, string state)
+        public IAuthenticatedClient CheckCallback(string providerKey, HttpRequestBase httpRequestBase, string state)
         {
+            Condition.Requires(providerKey).IsNotNullOrEmpty();
             Condition.Requires(httpRequestBase).IsNotNull();
-            Condition.Requires(state).IsNotNull();
+            Condition.Requires(state).IsNotNullOrEmpty();
 
+            // TODO: Replace logic below with getting the provider via the providerKey.
+            //       I'll do this on the train, tomorrow :)
             if (httpRequestBase.Params == null ||
                 !httpRequestBase.Params.HasKeys())
             {
