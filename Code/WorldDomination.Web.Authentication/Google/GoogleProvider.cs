@@ -166,7 +166,7 @@ namespace WorldDomination.Web.Authentication.Google
                 string.IsNullOrEmpty(response.Data.Name) ||
                 string.IsNullOrEmpty(response.Data.Locale))
             {
-                throw new AuthenticationException("Retrieve some user info from the Google Api, but we're missing some required data - Id, Email, Name and Locale.");
+                throw new AuthenticationException("Retrieve some user info from the Google Api, but we're missing one or more of either: Id, Email, Name and Locale.");
             }
 
             return response.Data;

@@ -1,6 +1,6 @@
 ﻿namespace WorldDomination.Web.Authentication.Google
 {
-    internal class UserInfoResult
+    public class UserInfoResult
     {
         public string Id { get; set; }
         public string Email { get; set; }

@@ -28,14 +28,16 @@ namespace WorldDomination.Web.Authentication
                 AuthenticationProviders = new Dictionary<string, IAuthenticationProvider>();
             }
 
+            var providerName = authenticationProvider.Name.ToLowerInvariant();
+            
             // Does this provider already exist?
-            if (AuthenticationProviders.ContainsKey(authenticationProvider.Name))
+            if (AuthenticationProviders.ContainsKey(providerName))
             {
-                throw new AuthenticationException("Trying to add a " + authenticationProvider.Name +
+                throw new AuthenticationException("Trying to add a " + providerName +
                                                   " provider, but one already exists.");
             }
 
-            AuthenticationProviders.Add(authenticationProvider.Name.ToLowerInvariant(), authenticationProvider);
+            AuthenticationProviders.Add(providerName, authenticationProvider);
         }
 
         public Uri RedirectToAuthenticationProvider(string providerKey, string state)

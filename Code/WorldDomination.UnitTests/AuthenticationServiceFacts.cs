@@ -30,7 +30,7 @@ namespace WorldDomination.UnitTests
                 var providers = authenticationService.AuthenticationProviders;
                 Assert.NotNull(providers);
                 Assert.Equal(1, providers.Count);
-                Assert.NotNull(providers["Facebook"]);
+                Assert.NotNull(providers["facebook"]);
             }
 
             [Fact]
@@ -46,7 +46,7 @@ namespace WorldDomination.UnitTests
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Trying to add a Facebook provider, but one already exists.", result.Message);
+                Assert.Equal("Trying to add a facebook provider, but one already exists.", result.Message);
             }
         }
 

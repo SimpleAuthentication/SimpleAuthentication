@@ -105,7 +105,7 @@ namespace WorldDomination.UnitTests
                 var mockRestClient = new Mock<IRestClient>();
                 const string errorMessage =
                     "If God says he was not created by a creator, does that mean: god is an aetheist?";
-                mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Throws(new InvalidOperationException(errorMessage));
                 var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
@@ -132,11 +132,11 @@ namespace WorldDomination.UnitTests
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
-                var mockRestResponse = new Mock<IRestResponse>();
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
                 mockRestResponse.Setup(x => x.StatusDescription).Returns("Unauthorized");
                 mockRestClient
-                    .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
                 var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
@@ -161,12 +161,11 @@ namespace WorldDomination.UnitTests
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
-                var mockRestResponse = new Mock<IRestResponse>();
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                //mockRestResponse.Setup(x => x.Content).Returns("{\"access_token\":\"1/fFAGRNJru1FTz70BzhT3Zg\",\"expires_in\":3920,\"token_type\":\"Bearer\"}");
-                mockRestResponse.Setup(x => x.Content).Returns("{\"aaa\":\"bbb\",\"ccc\":ddd,\"eee\":\"ffff\"}");
+                mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult());
                 mockRestClient
-                    .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
                 var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
@@ -190,14 +189,76 @@ namespace WorldDomination.UnitTests
             public void GivenExecutingUserInfoThrowsAnException_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var mockRestClient = new Mock<IRestClient>();
-                var mockRestResponse = new Mock<IRestResponse>();
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponse.Setup(x => x.Content).Returns("\"access_token\":\"1/fFAGRNJru1FTz70BzhT3Zg\",\"expires_in\":3920,\"token_type\":\"Bearer\"");
+                mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
+                                                            {
+                                                                AccessToken = "aaa",
+                                                                ExpiresIn = 100,
+                                                                IdToken = "What if that sexy girl in that pop up chat really does want to meet people in my area?",
+                                                                TokenType = "overly attached girlfriend"
+                                                            });
+
+                var mockRestResponseUserInfo = new Mock<IRestResponse<UserInfoResult>>();
+                mockRestResponseUserInfo.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
+                mockRestResponseUserInfo.Setup(x => x.StatusDescription).Returns("Unauthorized");
+
+                var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
-                    .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
+
+                mockRestClient.
+                    Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponseUserInfo.Object);
+
                 var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null, mockRestClient.Object);
+                const string existingState = "http://2p1s.com";
+                var queryStringParameters = new NameValueCollection
+                                            {
+                                                {"code", "aaa"},
+                                                {"state", existingState}
+                                            };
+
+                // Act.
+                var result = Assert.Throws<AuthenticationException>(
+                    () => googleProvider.AuthenticateClient(queryStringParameters, existingState));
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal("Failed to obtain User Info from Google OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized", result.Message);
+            }
+
+            [Fact]
+            public void GivenExecutingUserInfoWorksButIsMissingSomeRequiredData_AuthenticateClient_ThrowsAnException()
+            {
+                // Arrange.
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
+                mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
+                mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
+                                                            {
+                                                                AccessToken = "aaa",
+                                                                ExpiresIn = 100,
+                                                                IdToken =
+                                                                    "What if that sexy girl in that pop up chat really does want to meet people in my area?",
+                                                                TokenType = "overly attached girlfriend"
+                                                            });
+
+                var mockRestResponseUserInfo = new Mock<IRestResponse<UserInfoResult>>();
+                mockRestResponseUserInfo.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
+                mockRestResponseUserInfo.Setup(x => x.Data).Returns(new UserInfoResult()); // Missing required info.
+
+                var mockRestClient = new Mock<IRestClient>();
+                mockRestClient
+                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponse.Object);
+
+                mockRestClient.
+                    Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponseUserInfo.Object);
+
+                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null,
+                                                        mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                                             {
@@ -212,7 +273,77 @@ namespace WorldDomination.UnitTests
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Retrieved a Google Access Token but it doesn't contain one or more of either: access_token, expires_in or token_type", result.Message);
+                Assert.Equal("Retrieve some user info from the Google Api, but we're missing one or more of either: Id, Email, Name and Locale.", result.Message);
+            }
+
+            [Fact]
+            public void GivenExecutingRetrieveSomeUserInfo_AuthenticateClient_ReturnsAnAuthenticatedClient()
+            {
+                // Arrange.
+                const string accessToken = "aaa";
+                const int expiresIn = 100;
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
+                mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
+                mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
+                {
+                    AccessToken = accessToken,
+                    ExpiresIn = expiresIn,
+                    IdToken = "What if that sexy girl in that pop up chat really does want to meet people in my area?",
+                    TokenType = "overly attached girlfriend"
+                });
+
+                var userInfoResult = new UserInfoResult
+                                     {
+                                         Email = "aaa",
+                                         FamilyName = "bbb",
+                                         Gender = "male",
+                                         GivenName = "ccc",
+                                         Id = "ddd",
+                                         Link = "http://2p1s.com",
+                                         Locale = "en-au",
+                                         Name = "eee",
+                                         Picture = "http://2p1s.com/zomg",
+                                         VerifiedEmail = true
+                                     };
+                var mockRestResponseUserInfo = new Mock<IRestResponse<UserInfoResult>>();
+                mockRestResponseUserInfo.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
+                mockRestResponseUserInfo.Setup(x => x.Data).Returns(userInfoResult);
+
+                var mockRestClient = new Mock<IRestClient>();
+                mockRestClient
+                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponse.Object);
+
+                mockRestClient.
+                    Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponseUserInfo.Object);
+
+                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null, mockRestClient.Object);
+                const string existingState = "http://2p1s.com";
+                
+                var queryStringParameters = new NameValueCollection
+                                            {
+                                                {"code", accessToken},
+                                                {"state", existingState}
+                                            };
+
+
+                // Act.
+                var result = googleProvider.AuthenticateClient(queryStringParameters, existingState);
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal(ProviderType.Google, result.ProviderType);
+                Assert.Equal(accessToken, result.AccessToken);
+                Assert.True(DateTime.UtcNow < result.AccessTokenExpiresOn);
+                Assert.NotNull(result.UserInformation);
+                Assert.Equal(GenderType.Male, result.UserInformation.Gender);
+                Assert.Equal(userInfoResult.Id, result.UserInformation.Id);
+                Assert.Equal(userInfoResult.Locale, result.UserInformation.Locale);
+                Assert.Equal(userInfoResult.Name, result.UserInformation.Name);
+                Assert.Equal(userInfoResult.Picture, result.UserInformation.Picture);
+                Assert.Equal(userInfoResult.GivenName, result.UserInformation.UserName);
+
             }
         }
     }
