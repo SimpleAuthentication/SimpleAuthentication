@@ -11,6 +11,16 @@ namespace WorldDomination.Web.Authentication
 
         public IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; private set; }
 
+        public IEnumerable<IAuthenticationProvider> Providers
+        {
+            get
+            {
+                return AuthenticationProviders != null && AuthenticationProviders.Count > 0
+                           ? AuthenticationProviders.Values
+                           : null;
+            }
+        }
+
         public void AddProvider(IAuthenticationProvider authenticationProvider)
         {
             if (AuthenticationProviders == null)
@@ -25,7 +35,7 @@ namespace WorldDomination.Web.Authentication
                                                   " provider, but one already exists.");
             }
 
-            AuthenticationProviders.Add(authenticationProvider.Name, authenticationProvider);
+            AuthenticationProviders.Add(authenticationProvider.Name.ToLowerInvariant(), authenticationProvider);
         }
 
         public Uri RedirectToAuthenticationProvider(string providerKey, string state)
@@ -56,7 +66,7 @@ namespace WorldDomination.Web.Authentication
             IAuthenticationProvider authenticationProvider = null;
             if (AuthenticationProviders != null)
             {
-                AuthenticationProviders.TryGetValue(providerKey, out authenticationProvider);
+                AuthenticationProviders.TryGetValue(providerKey.ToLowerInvariant(), out authenticationProvider);
             }
 
             if (authenticationProvider == null)

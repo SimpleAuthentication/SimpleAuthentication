@@ -218,7 +218,7 @@ namespace WorldDomination.Web.Authentication.Twitter
                            UserInformation = new UserInformation
                                              {
                                                  Name = verifyCredentialsResult.Name,
-                                                 Id = verifyCredentialsResult.Id,
+                                                 Id = verifyCredentialsResult.Id.ToString(),
                                                  Locale = verifyCredentialsResult.Lang,
                                                  UserName = verifyCredentialsResult.ScreenName
                                              },

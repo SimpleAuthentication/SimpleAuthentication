@@ -47,9 +47,11 @@
     <Compile Include="AuthenticatedClient.cs" />
     <Compile Include="AuthenticationException.cs" />
     <Compile Include="ErrorInformation.cs" />
-    <Compile Include="Facebook\FacebookClient.cs" />
     <Compile Include="Facebook\MeResult.cs" />
+    <Compile Include="GenderType.cs" />
+    <Compile Include="Google\AccessTokenResult.cs" />
     <Compile Include="Google\GoogleProvider.cs" />
+    <Compile Include="Google\UserInfoResult.cs" />
     <Compile Include="IAuthenticationService.cs" />
     <Compile Include="IAuthenticatedClient.cs" />
     <Compile Include="AuthenticationService.cs" />
@@ -58,7 +60,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProviderType.cs" />
     <Compile Include="Status.cs" />
-    <Compile Include="Twitter\TwitterClient.cs" />
     <Compile Include="Twitter\TwitterProvider.cs" />
     <Compile Include="Twitter\VerifyCredentialsResult.cs" />
     <Compile Include="UserInformation.cs" />

@@ -128,7 +128,7 @@ namespace WorldDomination.Web.Authentication.Facebook
 
             return new UserInformation
                    {
-                       Id = response.Data.Id,
+                       Id = response.Data.Id.ToString(),
                        Name = (response.Data.FirstName + " " + response.Data.LastName).Trim(),
                        Locale = response.Data.Locale,
                        UserName = response.Data.Username
@@ -167,19 +167,16 @@ namespace WorldDomination.Web.Authentication.Facebook
             var code = parameters["code"];
             var state = parameters["state"];
 
-            if (!string.IsNullOrEmpty(code) &&
-                !string.IsNullOrEmpty(state))
+            // CSRF (state) check.
+            if (string.IsNullOrEmpty(state) ||
+                state != existingState)
+            {
+                throw new AuthenticationException("The states do not match. It's possible that you may be a victim of a CSRF.");
+            }
+
+            if (!string.IsNullOrEmpty(code))
             {
                 var authenticatedClient = new AuthenticatedClient(ProviderType.Facebook);
-
-                // CSRF (state) check.
-                if (state != existingState)
-                {
-                    authenticatedClient.ErrorInformation =
-                        new ErrorInformation(
-                            "The states do not match. It's possible that you may be a victim of a CSRF.");
-                    return authenticatedClient;
-                }
 
                 try
                 {
