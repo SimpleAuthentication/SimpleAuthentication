@@ -179,7 +179,7 @@ namespace WorldDomination.UnitTests
                 const string exceptionMessage = "1st World Problems: The Pizza guy arrived. Before I finished downloading the movie.";
                 var mockRestResponse = new Mock<IRestResponse>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponse.Setup(x => x.Content).Returns("access_token=foo&expires_on=1000");
+                mockRestResponse.Setup(x => x.Content).Returns("access_token=foo&expires=1000");
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
@@ -205,13 +205,12 @@ namespace WorldDomination.UnitTests
             }
 
             [Fact]
-            public void
-                GivenAnInvalidMeResultThrowsAnException_AuthenticateClient_ThrowsAnAuthenticationException()
+            public void GivenAnInvalidMeResultThrowsAnException_AuthenticateClient_ThrowsAnAuthenticationException()
             {
                 // Arrange.
                 var mockRestResponse = new Mock<IRestResponse>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponse.Setup(x => x.Content).Returns("access_token=foo&expires_on=1000");
+                mockRestResponse.Setup(x => x.Content).Returns("access_token=foo&expires=1000");
 
                 var mockRestResponseApiMe = new Mock<IRestResponse<MeResult>>();
                 mockRestResponseApiMe.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
@@ -247,7 +246,7 @@ namespace WorldDomination.UnitTests
                 // Arrange.
                 var mockRestResponseAccessToken = new Mock<IRestResponse>();
                 mockRestResponseAccessToken.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponseAccessToken.Setup(x => x.Content).Returns("access_token=foo&expires_on=1000");
+                mockRestResponseAccessToken.Setup(x => x.Content).Returns("access_token=foo&expires=1000");
 
                 var meResult = new MeResult
                                {
