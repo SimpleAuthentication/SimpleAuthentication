@@ -13,16 +13,17 @@
     <div>
         <h1>Authenticated Client</h1>
 
-        @if (Model.AuthenticatedClient.UserInformation != null)
+        @if (Model.Exception != null)
+        {
+            <h1>Error Information</h1>
+            <p>>Message: @Model.Exception.Message<br/></p>
+            <p>StackTrace: @Model.Exception.StackTrace</p>
+
+        }
+        else
         {
             <h1>User Information</h1>
             <p>Name: @Model.AuthenticatedClient.UserInformation.Name</p>
-        }
-
-        @if (Model.AuthenticatedClient.ErrorInformation != null)
-        {
-            <h1>Error Information</h1>
-            <p>Message: @Model.AuthenticatedClient.ErrorInformation.Message</p>
         }
 
         <hr />
