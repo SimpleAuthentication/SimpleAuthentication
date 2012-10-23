@@ -72,10 +72,23 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\facebook_32.png" />
+    <Content Include="Content\facebook_active.png" />
+    <Content Include="Content\facebook_hover.png" />
+    <Content Include="Content\facebook_normal.png" />
+    <Content Include="Content\googleplus_active.png" />
+    <Content Include="Content\googleplus_hover.png" />
+    <Content Include="Content\googleplus_normal.png" />
+    <Content Include="Content\google_32.png" />
+    <Content Include="Content\main.css" />
+    <Content Include="Content\twitter_32.png" />
+    <Content Include="Content\twitter_active.png" />
+    <Content Include="Content\twitter_hover.png" />
+    <Content Include="Content\twitter_normal.png" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BootStrapper.cs" />
+    <Compile Include="Bootstrapper.cs" />
     <Compile Include="Model\AuthenticateCallbackViewModel.cs" />
     <Compile Include="Modules\HomeModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -97,6 +110,7 @@
       <Name>WorldDomination.Web.Authentication</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
