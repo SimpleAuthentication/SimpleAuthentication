@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using CuttingEdge.Conditions;
@@ -39,7 +38,7 @@ namespace WorldDomination.Web.Authentication.Twitter
             _restClient = restClient ?? new RestClient("https://api.twitter.com");
         }
 
-        private IDictionary<string, string> RetrieveRequestToken()
+        private RequestTokenResult RetrieveRequestToken()
         {
             IRestResponse response;
 
@@ -77,14 +76,14 @@ namespace WorldDomination.Web.Authentication.Twitter
                     "Retrieved a Twitter Request Token but it doesn't contain both the oauth_token and oauth_token_secret parameters.");
             }
 
-            return new Dictionary<string, string>
+            return new RequestTokenResult
                    {
-                       {OAuthTokenKey, oAuthToken},
-                       {OAuthTokenSecretKey, oAuthTokenSecret}
+                       OAuthToken = oAuthToken,
+                       OAuthTokenSecret = oAuthTokenSecret
                    };
         }
 
-        private static IDictionary<string, string> RetrieveOAuthVerifier(NameValueCollection parameters)
+        private static VerifierResult RetrieveOAuthVerifier(NameValueCollection parameters)
         {
             Condition.Requires(parameters).IsNotNull();
 
@@ -98,26 +97,26 @@ namespace WorldDomination.Web.Authentication.Twitter
                     "Failed to retrieve an oauth_token and an oauth_token_secret after the client has signed and approved via Twitter.");
             }
 
-            return new Dictionary<string, string>
+            return new VerifierResult
                    {
-                       {OAuthTokenKey, oAuthToken},
-                       {OAuthVerifierKey, oAuthVerifier}
+                       OAuthToken = oAuthToken,
+                       OAuthVerifier = oAuthVerifier
                    };
         }
 
-        private IDictionary<string, string> RetrieveAccessToken(string oAuthToken, string oAuthTokenSecret,
-                                                                string oAuthVerifier)
+        private AccessTokenResult RetrieveAccessToken(VerifierResult verifierResult)
         {
-            Condition.Requires(oAuthToken).IsNotNullOrEmpty();
-            //Condition.Requires(oAuthTokenSecret).IsNotNullOrEmpty();
-            Condition.Requires(oAuthVerifier).IsNotNullOrEmpty();
+            Condition.Requires(verifierResult).IsNotNull();
+            Condition.Requires(verifierResult.OAuthToken).IsNotNullOrEmpty();
+            Condition.Requires(verifierResult.OAuthVerifier).IsNotNullOrEmpty();
 
             IRestResponse response;
             try
             {
                 var request = new RestRequest("oauth/access_token", Method.POST);
-                _restClient.Authenticator = OAuth1Authenticator.ForAccessToken(_consumerKey, _consumerSecret, oAuthToken,
-                                                                               oAuthTokenSecret, oAuthVerifier);
+                _restClient.Authenticator = OAuth1Authenticator.ForAccessToken(_consumerKey, _consumerSecret,
+                                                                               verifierResult.OAuthToken,
+                                                                               null, verifierResult.OAuthVerifier);
                 response = _restClient.Execute(request);
             }
             catch (Exception exception)
@@ -136,24 +135,26 @@ namespace WorldDomination.Web.Authentication.Twitter
             }
 
             var querystringParameters = HttpUtility.ParseQueryString(response.Content);
-            return new Dictionary<string, string>
+            return new AccessTokenResult
                    {
-                       {OAuthTokenKey, querystringParameters[OAuthTokenKey]},
-                       {OAuthTokenSecretKey, querystringParameters[OAuthTokenSecretKey]}
+                       AccessToken = querystringParameters[OAuthTokenKey],
+                       AccessTokenSecret = querystringParameters[OAuthTokenSecretKey]
                    };
         }
 
 
-        private VerifyCredentialsResult VerifyCredentials(string oAuthToken, string oAuthTokenSecret)
+        private VerifyCredentialsResult VerifyCredentials(AccessTokenResult accessTokenResult)
         {
-            Condition.Requires(oAuthToken).IsNotNullOrEmpty();
-            Condition.Requires(oAuthTokenSecret).IsNotNullOrEmpty();
+            Condition.Requires(accessTokenResult).IsNotNull();
+            Condition.Requires(accessTokenResult.AccessToken).IsNotNullOrEmpty();
+            Condition.Requires(accessTokenResult.AccessTokenSecret).IsNotNullOrEmpty();
 
             IRestResponse<VerifyCredentialsResult> response;
             try
             {
                 _restClient.Authenticator = OAuth1Authenticator.ForProtectedResource(_consumerKey, _consumerSecret,
-                                                                                     oAuthToken, oAuthTokenSecret);
+                                                                                     accessTokenResult.AccessToken,
+                                                                                     accessTokenResult.AccessTokenSecret);
                 var request = new RestRequest("1.1/account/verify_credentials.json");
                 response = _restClient.Execute<VerifyCredentialsResult>(request);
             }
@@ -194,48 +195,32 @@ namespace WorldDomination.Web.Authentication.Twitter
             // Now we need the user to enter their name/password/accept this app @ Twitter.
             // This means we need to redirect them to the Twitter website.
             var request = new RestRequest("oauth/authorize");
-            request.AddParameter(OAuthTokenKey, oAuthToken[OAuthTokenKey]);
+            request.AddParameter(OAuthTokenKey, oAuthToken.OAuthToken);
             return _restClient.BuildUri(request);
         }
 
         public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)
         {
-            try
-            {
-                // Retrieve the OAuth Verifier.
-                var oAuthVerifier = RetrieveOAuthVerifier(parameters);
+            // Retrieve the OAuth Verifier.
+            var oAuthVerifier = RetrieveOAuthVerifier(parameters);
 
-                // Convert the Request Token to an Access Token, now that we have a verifier.
-                var oAuthAccessToken = RetrieveAccessToken(oAuthVerifier[OAuthTokenKey], null,
-                                                           oAuthVerifier[OAuthVerifierKey]);
+            // Convert the Request Token to an Access Token, now that we have a verifier.
+            var oAuthAccessToken = RetrieveAccessToken(oAuthVerifier);
 
-                // Grab the user information.
-                var verifyCredentialsResult = VerifyCredentials(oAuthAccessToken[OAuthTokenKey],
-                                                                oAuthAccessToken[OAuthTokenSecretKey]);
+            // Grab the user information.
+            var verifyCredentialsResult = VerifyCredentials(oAuthAccessToken);
 
-                return new AuthenticatedClient(ProviderType.Twitter)
-                       {
-                           UserInformation = new UserInformation
-                                             {
-                                                 Name = verifyCredentialsResult.Name,
-                                                 Id = verifyCredentialsResult.Id.ToString(),
-                                                 Locale = verifyCredentialsResult.Lang,
-                                                 UserName = verifyCredentialsResult.ScreenName
-                                             },
-                           AccessToken = oAuthAccessToken[OAuthTokenKey]
-                       };
-            }
-            catch (Exception exception)
-            {
-                return new AuthenticatedClient(ProviderType.Twitter)
-                       {
-                           ErrorInformation = new ErrorInformation
-                                              {
-                                                  Message = exception.Message,
-                                                  Exception = exception
-                                              }
-                       };
-            }
+            return new AuthenticatedClient(ProviderType.Twitter)
+                   {
+                       UserInformation = new UserInformation
+                                         {
+                                             Name = verifyCredentialsResult.Name,
+                                             Id = verifyCredentialsResult.Id.ToString(),
+                                             Locale = verifyCredentialsResult.Lang,
+                                             UserName = verifyCredentialsResult.ScreenName
+                                         },
+                       AccessToken = oAuthAccessToken.AccessToken
+                   };
         }
 
         #endregion

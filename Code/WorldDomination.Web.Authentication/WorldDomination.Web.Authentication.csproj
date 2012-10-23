@@ -60,7 +60,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProviderType.cs" />
     <Compile Include="Status.cs" />
+    <Compile Include="Twitter\AccessTokenResult.cs" />
+    <Compile Include="Twitter\RequestTokenResult.cs" />
     <Compile Include="Twitter\TwitterProvider.cs" />
+    <Compile Include="Twitter\VerifierResult.cs" />
     <Compile Include="Twitter\VerifyCredentialsResult.cs" />
     <Compile Include="UserInformation.cs" />
   </ItemGroup>

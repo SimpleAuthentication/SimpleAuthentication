@@ -50,6 +50,45 @@ namespace WorldDomination.Web.Authentication.Facebook
             _restClient = restClient ?? new RestClient("https://graph.facebook.com");
         }
 
+        private static string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState)
+        {
+            Condition.Requires(parameters).IsNotNull().IsLongerThan(0);
+            Condition.Requires(existingState).IsNotNull();
+
+            // Is this a facebook callback?
+            var code = parameters["code"];
+            var state = parameters["state"];
+
+            // CSRF (state) check.
+            if (string.IsNullOrEmpty(state) ||
+                state != existingState)
+            {
+                throw new AuthenticationException(
+                    "The states do not match. It's possible that you may be a victim of a CSRF.");
+            }
+
+            // Maybe we have an error?
+            var errorReason = parameters["error_reason"];
+            var error = parameters["error"];
+            var errorDescription = parameters["error_description"];
+            if (!string.IsNullOrEmpty(errorReason) &&
+                !string.IsNullOrEmpty(error) &&
+                !string.IsNullOrEmpty(errorDescription))
+            {
+                throw new AuthenticationException(string.Format("Reason: {0}. Error: {1}. Description: {2}.",
+                                                                errorReason,
+                                                                error,
+                                                                errorDescription));
+            }
+
+            if (string.IsNullOrEmpty(code))
+            {
+                throw new AuthenticationException("No code parameter provided in the response query string from Facebook.");
+            }
+
+            return code;
+        }
+
         private string RetrieveAccessToken(string code)
         {
             Condition.Requires(code).IsNotNullOrEmpty();
@@ -57,7 +96,6 @@ namespace WorldDomination.Web.Authentication.Facebook
             IRestResponse response;
             try
             {
-                //    "/oauth/access_token?client_id={0}&redirect_uri={1}&client_secret={2}&code={3}";
                 var restRequest = new RestRequest("oauth/access_token");
                 restRequest.AddParameter("client_id", _clientId);
                 restRequest.AddParameter("redirect_uri", _redirectUri);
@@ -160,61 +198,18 @@ namespace WorldDomination.Web.Authentication.Facebook
 
         public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)
         {
-            Condition.Requires(parameters).IsNotNull().IsLongerThan(0);
-            Condition.Requires(existingState).IsNotNull();
+            var authorizationCode = RetrieveAuthorizationCode(parameters, existingState);
 
-            // Is this a facebook callback?
-            var code = parameters["code"];
-            var state = parameters["state"];
+            var accessToken = RetrieveAccessToken(authorizationCode);
 
-            // CSRF (state) check.
-            if (string.IsNullOrEmpty(state) ||
-                state != existingState)
-            {
-                throw new AuthenticationException("The states do not match. It's possible that you may be a victim of a CSRF.");
-            }
+            var userInformation = RetrieveMe(accessToken);
 
-            if (!string.IsNullOrEmpty(code))
-            {
-                var authenticatedClient = new AuthenticatedClient(ProviderType.Facebook);
-
-                try
-                {
-                    authenticatedClient.AccessToken = RetrieveAccessToken(code);
-                    authenticatedClient.UserInformation = RetrieveMe(authenticatedClient.AccessToken);
-                }
-                catch (Exception exception)
-                {
-                    authenticatedClient.ErrorInformation = new ErrorInformation
-                                                           {
-                                                               Message = exception.Message,
-                                                               Exception = exception
-                                                           };
-                }
-
-                return authenticatedClient;
-            }
-
-            // Maybe we have an error?
-            var errorReason = parameters["error_reason"];
-            var error = parameters["error"];
-            var errorDescription = parameters["error_description"];
-            if (!string.IsNullOrEmpty(errorReason) &&
-                !string.IsNullOrEmpty(error) &&
-                !string.IsNullOrEmpty(errorDescription))
-            {
-                return new AuthenticatedClient(ProviderType.Facebook)
-                       {
-                           ErrorInformation =
-                               new ErrorInformation(string.Format("Reason: {0}. Error: {1}. Description: {2}.",
-                                                                  errorReason,
-                                                                  error,
-                                                                  errorDescription))
-                       };
-            }
-
-            // Not any facebook params.
-            return null;
+            return new AuthenticatedClient(ProviderType.Facebook)
+                   {
+                       AccessToken = accessToken,
+                       AccessTokenExpiresOn = DateTime.UtcNow,
+                       UserInformation = userInformation
+                   };
         }
 
         #endregion

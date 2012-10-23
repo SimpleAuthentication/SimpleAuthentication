@@ -114,7 +114,6 @@ namespace WorldDomination.UnitTests
                                                 {"code", "aaa"},
                                                 {"state", existingState}
                                             };
-                
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -146,7 +145,6 @@ namespace WorldDomination.UnitTests
                                                 {"state", existingState}
                                             };
 
-
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
                     () => googleProvider.AuthenticateClient(queryStringParameters, existingState));
@@ -174,7 +172,6 @@ namespace WorldDomination.UnitTests
                                                 {"code", "aaa"},
                                                 {"state", existingState}
                                             };
-
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -265,7 +262,6 @@ namespace WorldDomination.UnitTests
                                                 {"code", "aaa"},
                                                 {"state", existingState}
                                             };
-
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(

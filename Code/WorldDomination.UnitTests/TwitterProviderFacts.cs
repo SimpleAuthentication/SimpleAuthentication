@@ -123,7 +123,7 @@ namespace WorldDomination.UnitTests
         public class AuthenticateClientFacts
         {
             [Fact]
-            public void GivenTheCallbackParamtersAreInvalid_AuthenticateClient_ReturnsAnAuthenticatedClientWithErrorInformation()
+            public void GivenTheCallbackParamtersAreInvalid_AuthenticateClient_ThrowsAnAuthenticationException()
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
@@ -134,25 +134,21 @@ namespace WorldDomination.UnitTests
                 var nameValueCollection = new NameValueCollection(); // Missing 2x required params.
                 
                 // Act.
-                var result = twitterProvider.AuthenticateClient(nameValueCollection, "aa");
+                var result = Assert.Throws<AuthenticationException>(() => twitterProvider.AuthenticateClient(nameValueCollection, "aa"));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal(ProviderType.Twitter, result.ProviderType);
-                Assert.NotNull(result.ErrorInformation);
-                Assert.Equal("Failed to retrieve an oauth_token and an oauth_token_secret after the client has signed and approved via Twitter.", result.ErrorInformation.Message);
-                Assert.NotNull(result.ErrorInformation.Exception);
-                Assert.IsType<AuthenticationException>(result.ErrorInformation.Exception);
+                Assert.Equal("Failed to retrieve an oauth_token and an oauth_token_secret after the client has signed and approved via Twitter.", result.Message);
             }
 
             [Fact]
-            public void GivenExecutingARequestToRetrieveARequestTokenThrowsAnException_AuthenticateClient_ReturnsAnAuthenticatedClientWithErrorInformation()
+            public void GivenExecutingARequestToRetrieveARequestTokenThrowsAnException_AuthenticateClient_ThrowsAnAuthenticationException()
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
-                    .Throws(new Exception("some mock exception."));
+                    .Throws(new Exception("one does not simply 'get a job'."));
                 var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
                 var nameValueCollection = new NameValueCollection
                                           {
@@ -160,19 +156,17 @@ namespace WorldDomination.UnitTests
                                               {"oauth_verifier", "bbbb"}
                                           };
                 // Act.
-                var result = twitterProvider.AuthenticateClient(nameValueCollection, "aa");
+                var result = Assert.Throws<AuthenticationException>(() => twitterProvider.AuthenticateClient(nameValueCollection, "aa"));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal(ProviderType.Twitter, result.ProviderType);
-                Assert.NotNull(result.ErrorInformation);
-                Assert.Equal("Failed to convert Request Token to an Access Token, from Twitter.", result.ErrorInformation.Message);
-                Assert.NotNull(result.ErrorInformation.Exception);
-                Assert.IsType<AuthenticationException>(result.ErrorInformation.Exception);
+                Assert.Equal("Failed to convert Request Token to an Access Token, from Twitter.", result.Message);
+                Assert.NotNull(result.InnerException);
+                Assert.Equal("one does not simply 'get a job'.", result.InnerException.Message);
             }
 
             [Fact]
-            public void GivenAnInvalidRequestToken_AuthenticateClient_ReturnsAnAuthenticatedClientWithErrorInformation()
+            public void GivenAnInvalidRequestToken_AuthenticateClient_ThrowsAnAuthenticationException()
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
@@ -189,19 +183,15 @@ namespace WorldDomination.UnitTests
                                               {"oauth_verifier", "bbbb"}
                                           };
                 // Act.
-                var result = twitterProvider.AuthenticateClient(nameValueCollection, "asas");
+                var result = Assert.Throws<AuthenticationException>(() => twitterProvider.AuthenticateClient(nameValueCollection, "asas"));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal(ProviderType.Twitter, result.ProviderType);
-                Assert.NotNull(result.ErrorInformation);
-                Assert.Equal("Failed to obtain an Access Token from Twitter OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized", result.ErrorInformation.Message);
-                Assert.NotNull(result.ErrorInformation.Exception);
-                Assert.IsType<AuthenticationException>(result.ErrorInformation.Exception);
+                Assert.Equal("Failed to obtain an Access Token from Twitter OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized", result.Message);
             }
 
             [Fact]
-            public void GivenAnRequestTokenWithMissingParameters_AuthenticateClient_ReturnsAnAuthenticatedClientWithErrorInformation()
+            public void GivenAnRequestTokenWithMissingParameters_AuthenticateClient_ThrowsAnAuthenticationException()
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
@@ -216,19 +206,15 @@ namespace WorldDomination.UnitTests
                                               {"oauth_token", "aaa"}
                                           }; // Missing oauth_secret.
                 // Act.
-                var result = twitterProvider.AuthenticateClient(nameValueCollection, "asd");
+                var result = Assert.Throws<AuthenticationException>(() => twitterProvider.AuthenticateClient(nameValueCollection, "asd"));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal(ProviderType.Twitter, result.ProviderType);
-                Assert.NotNull(result.ErrorInformation);
-                Assert.Equal("Failed to retrieve an oauth_token and an oauth_token_secret after the client has signed and approved via Twitter.", result.ErrorInformation.Message);
-                Assert.NotNull(result.ErrorInformation.Exception);
-                Assert.IsType<AuthenticationException>(result.ErrorInformation.Exception);
+                Assert.Equal("Failed to retrieve an oauth_token and an oauth_token_secret after the client has signed and approved via Twitter.", result.Message);
             }
 
             [Fact]
-            public void GivenExecutingVerifyCredentialsThrowsAnException_AuthenticateClient_ReturnsAnAuthenticatedClientWithErrorInformation()
+            public void GivenExecutingVerifyCredentialsThrowsAnException_AuthenticateClient_ThrowsAnAuthenticationException()
             {
                 // Arrange.
                 const string exceptionMessage = "some mock exception.";
@@ -262,16 +248,11 @@ namespace WorldDomination.UnitTests
                                               {"oauth_verifier", "bbb"}
                                           };
                 // Act.
-                var result = twitterProvider.AuthenticateClient(nameValueCollection, "asd");
+                var result = Assert.Throws<AuthenticationException>(() => twitterProvider.AuthenticateClient(nameValueCollection, "asd"));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal(ProviderType.Twitter, result.ProviderType);
-                Assert.NotNull(result.ErrorInformation);
-                Assert.Equal("Failed to retrieve VerifyCredentials json data from the Twitter Api.", result.ErrorInformation.Message);
-                Assert.NotNull(result.ErrorInformation.Exception);
-                Assert.IsType<Exception>(result.ErrorInformation.Exception.InnerException);
-                Assert.Equal(exceptionMessage, result.ErrorInformation.Exception.InnerException.Message);
+                Assert.Equal("Failed to retrieve VerifyCredentials json data from the Twitter Api.", result.Message);
             }
 
             [Fact]
@@ -302,14 +283,11 @@ namespace WorldDomination.UnitTests
                                               {"oauth_verifier", "bbb"}
                                           };
                 // Act.
-                var result = twitterProvider.AuthenticateClient(nameValueCollection, "asd");
+                var result = Assert.Throws<AuthenticationException>(() => twitterProvider.AuthenticateClient(nameValueCollection, "asd"));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal(ProviderType.Twitter, result.ProviderType);
-                Assert.NotNull(result.ErrorInformation);
-                Assert.Equal("Failed to retrieve VerifyCredentials json data OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized", result.ErrorInformation.Message);
-                Assert.NotNull(result.ErrorInformation.Exception);
+                Assert.Equal("Failed to retrieve VerifyCredentials json data OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized", result.Message);
             }
 
             [Fact]
