@@ -1,0 +1,31 @@
+﻿﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<WorldDomination.Web.IntegrationTest.NancyFX.Model.AuthenticateCallbackViewModel>
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>title</title>
+</head>
+<body>
+    <div>
+        <h1>Authenticated Client</h1>
+
+        @if (Model.AuthenticatedClient.UserInformation != null)
+        {
+            <h1>User Information</h1>
+            <p>Name: @Model.AuthenticatedClient.UserInformation.Name</p>
+        }
+
+        @if (Model.AuthenticatedClient.ErrorInformation != null)
+        {
+            <h1>Error Information</h1>
+            <p>Message: @Model.AuthenticatedClient.ErrorInformation.Message</p>
+        }
+
+        <hr />
+    </div>
+</body>
+</html>
