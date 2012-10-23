@@ -23,16 +23,12 @@ namespace WorldDomination.Web.IntegrationTest.NancyFX.Modules
             authenticationService = new AuthenticationService();
             authenticationService.AddProvider(twitterProvider);
 
-
-
             Get["/"] = parameters => "Hi";
 
             Get["/login"] = parameters => View["login"];
 
-            Get["/RedirectToAuthenticate/{providerKey}"] =
-                parameters =>
+            Get["/RedirectToAuthenticate/{providerKey}"] = parameters =>
                 {
-
                     Session["GUID"] = Guid.NewGuid();
                     Uri uri = authenticationService.RedirectToAuthenticationProvider(parameters.providerKey, Session["GUID"].ToString());
 
@@ -40,37 +36,35 @@ namespace WorldDomination.Web.IntegrationTest.NancyFX.Modules
                 };
 
             Get["/AuthenticateCallback"] = parameters =>
-                                           {
-                                               if (string.IsNullOrEmpty(this.Request.Query.providerKey))
-                                               {
-                                                   throw new ArgumentNullException("providerKey");
-                                               }
+                {
+                    if (string.IsNullOrEmpty(this.Request.Query.providerKey))
+                    {
+                        throw new ArgumentNullException("providerKey");
+                    }
 
-                                               var model = new AuthenticateCallbackViewModel();
+                    var model = new AuthenticateCallbackViewModel();
 
-                                               //var nameValueCollection = this.Request.Query.Cast<string>()
-                                               //    .Select(s => new {Key = s, Value = this.Request.Query[s]})
-                                               //    .ToDictionary(p => p.Key, p => p.Value);
+                    //var nameValueCollection = this.Request.Query.Cast<string>()
+                    //    .Select(s => new {Key = s, Value = this.Request.Query[s]})
+                    //    .ToDictionary(p => p.Key, p => p.Value);
 
-                                               NameValueCollection coll = new NameValueCollection();
-                                               foreach (var item in this.Request.Query)
-                                               {
-                                                   coll.Add(item, this.Request.Query[item]);
-                                               }
+                    NameValueCollection coll = new NameValueCollection();
+                    foreach (var item in this.Request.Query)
+                    {
+                        coll.Add(item, this.Request.Query[item]);
+                    }
 
-                                               try
-                                               {
-                                                   model.AuthenticatedClient = authenticationService.CheckCallback(this.Request.Query.providerKey, coll, Session["GUID"].ToString());
-                                               }
-                                               catch (Exception exception)
-                                               {
-                                                   model.Exception = exception;
-                                               }
+                    try
+                    {
+                        model.AuthenticatedClient = authenticationService.CheckCallback(this.Request.Query.providerKey, coll, Session["GUID"].ToString());
+                    }
+                    catch (Exception exception)
+                    {
+                        model.Exception = exception;
+                    }
 
-                                               return View["AuthenticateCallback",model];
-                                           };
+                    return View["AuthenticateCallback", model];
+                };
         }
-
-
     }
 }
