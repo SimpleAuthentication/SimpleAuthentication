@@ -42,7 +42,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthenticatedClient.cs" />
@@ -51,6 +50,7 @@
     <Compile Include="Facebook\FacebookClient.cs" />
     <Compile Include="Facebook\MeResult.cs" />
     <Compile Include="Google\GoogleProvider.cs" />
+    <Compile Include="IAuthenticationService.cs" />
     <Compile Include="IAuthenticatedClient.cs" />
     <Compile Include="AuthenticationService.cs" />
     <Compile Include="Facebook\FacebookProvider.cs" />

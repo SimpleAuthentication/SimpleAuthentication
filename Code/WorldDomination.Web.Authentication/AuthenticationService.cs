@@ -1,34 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Web;
+using System.Collections.Specialized;
 using CuttingEdge.Conditions;
 
 namespace WorldDomination.Web.Authentication
 {
-    public class AuthenticationService
+    public class AuthenticationService : IAuthenticationService
     {
-        private IDictionary<string, IAuthenticationProvider> _authenticationProviders;
+        #region Implementation of IAuthenticationService
 
-        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders
-        {
-            get { return _authenticationProviders; }
-        }
+        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; private set; }
 
         public void AddProvider(IAuthenticationProvider authenticationProvider)
         {
-            if (_authenticationProviders == null)
+            if (AuthenticationProviders == null)
             {
-                _authenticationProviders = new Dictionary<string, IAuthenticationProvider>();
+                AuthenticationProviders = new Dictionary<string, IAuthenticationProvider>();
             }
 
             // Does this provider already exist?
-            if (_authenticationProviders.ContainsKey(authenticationProvider.Name))
+            if (AuthenticationProviders.ContainsKey(authenticationProvider.Name))
             {
-                throw new InvalidOperationException("Trying to add a " + authenticationProvider.GetType() +
-                                                    " provider, but one already exists.");
+                throw new AuthenticationException("Trying to add a " + authenticationProvider.Name +
+                                                  " provider, but one already exists.");
             }
 
-            _authenticationProviders.Add(authenticationProvider.Name, authenticationProvider);
+            AuthenticationProviders.Add(authenticationProvider.Name, authenticationProvider);
         }
 
         public Uri RedirectToAuthenticationProvider(string providerKey, string state)
@@ -36,51 +33,37 @@ namespace WorldDomination.Web.Authentication
             Condition.Requires(providerKey).IsNotNullOrEmpty();
             Condition.Requires(state).IsNotNullOrEmpty();
 
-            IAuthenticationProvider authenticationProvider = null;
-            if (_authenticationProviders != null)
-            {
-                _authenticationProviders.TryGetValue(providerKey, out authenticationProvider);
-            }
-
-            if (authenticationProvider == null)
-            {
-                throw new InvalidOperationException("No '" + providerKey + "' provider has been added.");
-            }
+            var authenticationProvider = GetAuthenticationProvider(providerKey);
 
             return authenticationProvider.RedirectToAuthenticate(state);
         }
 
-        public IAuthenticatedClient CheckCallback(string providerKey, HttpRequestBase httpRequestBase, string state)
+        public IAuthenticatedClient CheckCallback(string providerKey, NameValueCollection requestParameters,
+                                                  string state)
         {
             Condition.Requires(providerKey).IsNotNullOrEmpty();
-            Condition.Requires(httpRequestBase).IsNotNull();
+            Condition.Requires(requestParameters).IsNotNull();
             Condition.Requires(state).IsNotNullOrEmpty();
 
-            // TODO: Replace logic below with getting the provider via the providerKey.
-            //       I'll do this on the train, tomorrow :)
-            if (httpRequestBase.Params == null ||
-                !httpRequestBase.Params.HasKeys())
+            var authenticationProvider = GetAuthenticationProvider(providerKey);
+            return authenticationProvider.AuthenticateClient(requestParameters, state);
+        }
+
+        #endregion
+
+        private IAuthenticationProvider GetAuthenticationProvider(string providerKey)
+        {
+            IAuthenticationProvider authenticationProvider = null;
+            if (AuthenticationProviders != null)
             {
-                return new AuthenticatedClient(ProviderType.Unknown)
-                       {
-                           ErrorInformation =
-                               new ErrorInformation(
-                               "No request params found - unable to determine from where we authenticated with/against.")
-                       };
+                AuthenticationProviders.TryGetValue(providerKey, out authenticationProvider);
             }
 
-
-            IAuthenticatedClient authenticatedClient = null;
-            foreach (var provider in _authenticationProviders.Values)
+            if (authenticationProvider == null)
             {
-                authenticatedClient = provider.AuthenticateClient(httpRequestBase.Params, state);
-                if (authenticatedClient != null)
-                {
-                    break;
-                }
+                throw new AuthenticationException("No '" + providerKey + "' provider has been added.");
             }
-
-            return authenticatedClient;
+            return authenticationProvider;
         }
     }
 }

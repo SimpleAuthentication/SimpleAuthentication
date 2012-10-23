@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Net;
 using System.Web;
 using Moq;
@@ -14,6 +15,57 @@ namespace WorldDomination.UnitTests
 
     public class AuthenticationServiceFacts
     {
+        public class AddProviderFacts
+        {
+            [Fact]
+            public void GivenANewProvider_AddProvider_AddsTheProviderToTheProviderCollection()
+            {
+                // Arrange.
+                var authenticationService = new AuthenticationService();
+
+                // Act.
+                authenticationService.AddProvider(new FacebookProvider("a", "b", new Uri("http://www.google.com")));
+
+                // Assert.
+                var providers = authenticationService.AuthenticationProviders;
+                Assert.NotNull(providers);
+                Assert.Equal(1, providers.Count);
+                Assert.NotNull(providers["Facebook"]);
+            }
+
+            [Fact]
+            public void GivenAnExistingProvider_AddProvider_ThrowsAnException()
+            {
+                // Arrange.
+                var authenticationService = new AuthenticationService();
+                var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"));
+                // Act.
+                authenticationService.AddProvider(facebookProvider);
+                var result = Assert.Throws<AuthenticationException>( 
+                    () => authenticationService.AddProvider(facebookProvider));
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal("Trying to add a Facebook provider, but one already exists.", result.Message);
+            }
+        }
+
+        public class RedirectToAuthenticationProviderFacts
+        {
+            [Fact]
+            public void GivenAnInvalidProviderKey_RedirectToAuthenticationProvider_ThrowsAnException()
+            {
+                // Arrange.
+                const string providerKey = "aaa";
+                const string state = "asd";
+                var authenticationService = new AuthenticationService();
+
+                // Act and Assert
+                var result = authenticationService.RedirectToAuthenticationProvider(providerKey, state);
+
+            }
+        }
+
         //public class CheckCallbackFacts
         //{
         //    [Fact]
