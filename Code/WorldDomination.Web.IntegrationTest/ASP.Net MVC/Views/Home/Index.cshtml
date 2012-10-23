@@ -1,16 +1,17 @@
 ﻿<!DOCTYPE html>
-
 <html>
     <head>
-        <title>Authentication Integration Tests.</title>
+        <title>Login Page</title>
+        <link rel="stylesheet" type="text/css" href="/Content/main.css"/>
     </head>
     <body>
-        <div>
-            <ul>
-                <li>@Html.ActionLink("Facebook", "RedirectToAuthenticate", new {providerKey="Facebook"}, null)</li>
-                <li>@Html.ActionLink("Twitter", "RedirectToAuthenticate", new {providerKey="Twitter"}, null)</li>
-                <li>@Html.ActionLink("Google", "RedirectToAuthenticate", new {providerKey="Google"}, null)</li>
-            </ul>
+        <div id="container">
+            <fieldset title="Login">
+                <legend>Login:</legend>
+                <a href="/Home/RedirectToAuthenticate?providerKey=Twitter"><img src="/Content/twitter_32.png"></img></a>
+                <a href="/Home/RedirectToAuthenticate?providerKey=Facebook"><img src="/Content/facebook_32.png"></img></a>
+                <a href="/Home/RedirectToAuthenticate?providerKey=Google"><img src="/Content/google_32.png"></img></a>
+            </fieldset>
         </div>
     </body>
 </html>
