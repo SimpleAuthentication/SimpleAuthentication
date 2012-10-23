@@ -336,7 +336,6 @@ namespace WorldDomination.UnitTests
                 Assert.NotNull(result.UserInformation.Locale);
                 Assert.NotNull(result.UserInformation.Name);
                 Assert.NotNull(result.UserInformation.UserName);
-                Assert.Null(result.ErrorInformation);
             }
         }
     }

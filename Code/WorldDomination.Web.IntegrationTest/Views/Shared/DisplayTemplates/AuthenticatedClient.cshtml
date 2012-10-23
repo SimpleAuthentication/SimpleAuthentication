@@ -2,14 +2,19 @@
 
 <h1>Authenticated Client</h1>
 
+@Html.LabelFor(x => x.ProviderType)<br/>
+@Html.DisplayFor(x => x.ProviderType)
+
+@Html.LabelFor(x => x.AccessToken)<br/>
+@Html.DisplayFor(x => x.AccessToken)
+
+@Html.LabelFor(x => x.AccessTokenExpiresOn)<br/>
+@Html.DisplayFor(x => x.AccessTokenExpiresOn)
+
 @if (Model.UserInformation != null)
 {
     Html.DisplayFor(x => x.UserInformation);
 }
 
-@if (Model.ErrorInformation != null)
-{
-    Html.DisplayFor(x => x.ErrorInformation);
-}
 
 <hr/>

@@ -3,7 +3,14 @@
 <h2>AuthenticateCallback</h2>
 
 
-@Html.DisplayFor(x => x.AuthenticatedClient)
+@if (Model.Exception != null)
+{
+    Html.DisplayFor(x => x.Exception);
+}
+else
+{
+    Html.DisplayFor(x => x.AuthenticatedClient);
+}
 
 <hr/>
 

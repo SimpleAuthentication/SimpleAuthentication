@@ -292,7 +292,6 @@ namespace WorldDomination.UnitTests
                 Assert.False(string.IsNullOrEmpty(result.UserInformation.Id));
                 Assert.NotNull(result.UserInformation.Name);
                 Assert.NotNull(result.UserInformation.UserName);
-                Assert.Null(result.ErrorInformation);
             }
         }
     }

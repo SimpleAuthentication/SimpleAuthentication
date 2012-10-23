@@ -122,7 +122,7 @@ namespace WorldDomination.Web.Authentication.Facebook
             var querystringParameters = HttpUtility.ParseQueryString(response.Content);
             var accessToken = querystringParameters["access_token"];
             int expires;
-            var expiresOn = int.TryParse(querystringParameters["expires_on"], out expires)
+            var expiresOn = int.TryParse(querystringParameters["expires"], out expires)
                                 ? DateTime.UtcNow.AddSeconds(expires)
                                 : DateTime.MinValue;
 
