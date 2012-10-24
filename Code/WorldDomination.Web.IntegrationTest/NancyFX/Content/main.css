@@ -53,6 +53,7 @@ table {
 
 body {
     background-color: #353535;
+     color: #f8f8f8;
 }
 
 
@@ -60,6 +61,7 @@ body {
     width: 300px;
     margin: 100px auto 0 auto;
 }
+
 
 fieldset {
     border-radius: 5px;
@@ -82,3 +84,15 @@ legend {
     padding: 6px;
     color: #f8f8f8;
 }
+
+#usercontainer {
+    width: 800px;
+     margin: 100px auto 0 auto;
+     background-color: #8C8C8C;
+     border-radius: 5px;
+     -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+}
+
+h1 { font-size: 1.3em;padding-bottom: 8px;}
+h2 { font-size: 1.1em;padding-bottom: 8px;}

@@ -7,26 +7,27 @@
 
 <html>
 <head>
-    <title>title</title>
+    <title>Client Details</title>
+     <link rel="stylesheet" type="text/css" href="/Content/main.css"/>
 </head>
 <body>
-    <div>
+      <div id="usercontainer">
         <h1>Authenticated Client</h1>
 
         @if (Model.Exception != null)
         {
-            <h1>Error Information</h1>
+            <h2>Error Information</h2>
             <p>>Message: @Model.Exception.Message<br/></p>
             <p>StackTrace: @Model.Exception.StackTrace</p>
 
         }
         else
         {
-            <h1>User Information</h1>
+            <h2>User Information</h2>
             <p>Name: @Model.AuthenticatedClient.UserInformation.Name</p>
         }
 
-        <hr />
+     
     </div>
 </body>
 </html>
