@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Nancy;
+﻿using Nancy;
 using Nancy.Bootstrapper;
 using Nancy.Session;
 using TinyIoC;

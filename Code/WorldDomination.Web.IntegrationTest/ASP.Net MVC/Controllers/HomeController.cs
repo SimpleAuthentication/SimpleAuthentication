@@ -16,8 +16,6 @@ namespace WorldDomination.Web.IntegrationTest.Controllers
         private const string TwitterConsumerSecret = "pP1jBdYOlmCzo08QFJjGIHY4YSyPdGLPO2m1q47hu9c";
         private const string GoogleConsumerKey = "587140099194.apps.googleusercontent.com";
         private const string GoogleConsumerSecret = "npk1_gx-gqJmLiJRPFooxCEY";
-
-
         private readonly AuthenticationService _authenticationService;
 
         public HomeController()
