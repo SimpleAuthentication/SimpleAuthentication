@@ -1,15 +1,31 @@
-﻿@model WorldDomination.Web.IntegrationTest.Models.AuthenticateCallbackViewModel
+﻿@model WorldDomination.Web.IntegrationTest.Mvc.Models.AuthenticateCallbackViewModel
+
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
 
 <h2>AuthenticateCallback</h2>
 
-
 @if (Model.Exception != null)
 {
-    Html.DisplayFor(x => x.Exception);
+    //Html.DisplayFor(x => x.Exception);
+     <h2>Error Information</h2>
+    <p>>Message: @Model.Exception.Message<br/></p>
+    <p>StackTrace: @Model.Exception.StackTrace</p>
 }
 else
 {
-    Html.DisplayFor(x => x.AuthenticatedClient);
+    //Html.DisplayFor(x => x.AuthenticatedClient);
+    <h2>User Information</h2>
+    <p>Provider Type: @Model.AuthenticatedClient.ProviderType</p>
+    <p>Access Token: @Model.AuthenticatedClient.AccessToken</p>
+    <p>Access Token Expires On: @Model.AuthenticatedClient.AccessTokenExpiresOn</p>
+    <p>ID: @Model.AuthenticatedClient.UserInformation.Id</p>
+    <p>Name: @Model.AuthenticatedClient.UserInformation.Name</p>
+    <p>UserName: @Model.AuthenticatedClient.UserInformation.UserName</p>
+    <p>Locale: @Model.AuthenticatedClient.UserInformation.Locale</p>
+    <p>Picture: @Model.AuthenticatedClient.UserInformation.Picture</p>
+    <p>Gender: @Model.AuthenticatedClient.UserInformation.Gender.ToString()</p>
 }
 
 <hr/>

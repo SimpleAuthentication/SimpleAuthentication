@@ -1,7 +1,7 @@
 ﻿using System;
 using WorldDomination.Web.Authentication;
 
-namespace WorldDomination.Web.IntegrationTest.Models
+namespace WorldDomination.Web.IntegrationTest.Mvc.Models
 {
     public class AuthenticateCallbackViewModel
     {
