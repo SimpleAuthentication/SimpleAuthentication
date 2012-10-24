@@ -12,25 +12,23 @@ namespace WorldDomination.Web.IntegrationTest.NancyFX.Modules
     {
         private const string TwitterConsumerKey = "Rb7qNNPUPsRSYkznFTbF6Q";
         private const string TwitterConsumerSecret = "pP1jBdYOlmCzo08QFJjGIHY4YSyPdGLPO2m1q47hu9c";
+        private const string SessionGuidKey = "GUIDKey";
         private readonly AuthenticationService authenticationService;
 
         public HomeModule()
         {
-
             var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret,
                                                       new Uri("http://localhost:49409/AuthenticateCallback?providerKey=Twitter"));
 
             authenticationService = new AuthenticationService();
             authenticationService.AddProvider(twitterProvider);
 
-            Get["/"] = parameters => "Hi";
-
-            Get["/login"] = parameters => View["login"];
+            Get["/"] = parameters => View["login"];
 
             Get["/RedirectToAuthenticate/{providerKey}"] = parameters =>
                 {
-                    Session["GUID"] = Guid.NewGuid();
-                    Uri uri = authenticationService.RedirectToAuthenticationProvider(parameters.providerKey, Session["GUID"].ToString());
+                    Session[SessionGuidKey] = Guid.NewGuid();
+                    Uri uri = authenticationService.RedirectToAuthenticationProvider(parameters.providerKey, Session[SessionGuidKey].ToString());
 
                     return Response.AsRedirect(uri.AbsoluteUri);
                 };
@@ -44,10 +42,6 @@ namespace WorldDomination.Web.IntegrationTest.NancyFX.Modules
 
                     var model = new AuthenticateCallbackViewModel();
 
-                    //var nameValueCollection = this.Request.Query.Cast<string>()
-                    //    .Select(s => new {Key = s, Value = this.Request.Query[s]})
-                    //    .ToDictionary(p => p.Key, p => p.Value);
-
                     NameValueCollection coll = new NameValueCollection();
                     foreach (var item in this.Request.Query)
                     {
@@ -56,7 +50,7 @@ namespace WorldDomination.Web.IntegrationTest.NancyFX.Modules
 
                     try
                     {
-                        model.AuthenticatedClient = authenticationService.CheckCallback(this.Request.Query.providerKey, coll, Session["GUID"].ToString());
+                        model.AuthenticatedClient = authenticationService.CheckCallback(this.Request.Query.providerKey, coll, Session[SessionGuidKey].ToString());
                     }
                     catch (Exception exception)
                     {

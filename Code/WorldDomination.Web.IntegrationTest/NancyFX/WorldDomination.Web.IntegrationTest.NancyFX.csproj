@@ -85,7 +85,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\login.cshtml" />
+    <Content Include="Views\Login.cshtml" />
     <Content Include="Views\AuthenticateCallback.cshtml" />
     <Content Include="packages.config" />
     <None Include="Web.Debug.config">
