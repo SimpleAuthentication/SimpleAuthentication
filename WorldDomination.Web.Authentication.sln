@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{6D4F06
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.UnitTests", "Code\WorldDomination.UnitTests\WorldDomination.UnitTests.csproj", "{14AC417B-A1F8-4DEC-8FF0-EB6788C1C1AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.IntegrationTest.MVC", "Code\WorldDomination.Web.IntegrationTest\ASP.Net MVC\WorldDomination.Web.IntegrationTest.MVC.csproj", "{EFF9B222-5F74-422C-8587-B9EF2FD6B794}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.IntegrationTest.Mvc", "Code\WorldDomination.Web.IntegrationTest\ASP.Net MVC\WorldDomination.Web.IntegrationTest.Mvc.csproj", "{EFF9B222-5F74-422C-8587-B9EF2FD6B794}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.IntegrationTest.NancyFX", "Code\WorldDomination.Web.IntegrationTest\NancyFX\WorldDomination.Web.IntegrationTest.NancyFX.csproj", "{667E9BD9-61C1-4B7F-BBD0-2522C6AE9F28}"
 EndProject
