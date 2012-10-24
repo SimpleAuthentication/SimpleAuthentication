@@ -10,19 +10,10 @@ namespace WorldDomination.Web.IntegrationTest.NancyFX.Modules
 {
     public class HomeModule : NancyModule
     {
-        private const string TwitterConsumerKey = "Rb7qNNPUPsRSYkznFTbF6Q";
-        private const string TwitterConsumerSecret = "pP1jBdYOlmCzo08QFJjGIHY4YSyPdGLPO2m1q47hu9c";
         private const string SessionGuidKey = "GUIDKey";
-        private readonly AuthenticationService authenticationService;
 
-        public HomeModule()
+        public HomeModule(IAuthenticationService authenticationService)
         {
-            var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret,
-                                                      new Uri("http://localhost:49409/AuthenticateCallback?providerKey=Twitter"));
-
-            authenticationService = new AuthenticationService();
-            authenticationService.AddProvider(twitterProvider);
-
             Get["/"] = parameters => View["login"];
 
             Get["/RedirectToAuthenticate/{providerKey}"] = parameters =>
