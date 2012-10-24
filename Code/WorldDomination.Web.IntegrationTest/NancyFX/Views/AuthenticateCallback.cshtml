@@ -31,7 +31,7 @@
             <p>Name: @Model.AuthenticatedClient.UserInformation.Name</p>
             <p>UserName: @Model.AuthenticatedClient.UserInformation.UserName</p>
             <p>Locale: @Model.AuthenticatedClient.UserInformation.Locale</p>
-            <p>Picture: @Model.AuthenticatedClient.UserInformation.Picture</p>
+            <p>Picture:<br/> <img alt="Provider Image" src="@Model.AuthenticatedClient.UserInformation.Picture" /></p>
             <p>Gender: @Model.AuthenticatedClient.UserInformation.Gender.ToString()</p>
         }
 
