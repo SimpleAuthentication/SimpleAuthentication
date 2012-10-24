@@ -1,0 +1,23 @@
+﻿﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<System.Collections.Generic.IEnumerable<dynamic>>
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login Page</title>
+        <link rel="stylesheet" type="text/css" href="/Content/main.css"/>
+    </head>
+    <body>
+        <div id="container">
+            <fieldset title="Login">
+                <legend>Login:</legend>
+                <a href="/RedirectToAuthenticate/Twitter"><img src="/Content/twitter_32.png"></img></a>
+                <a href="/RedirectToAuthenticate/Facebook"><img src="/Content/facebook_32.png"></img></a>
+                <a href="/RedirectToAuthenticate/Google"><img src="/Content/google_32.png"></img></a>
+            </fieldset>
+        </div>
+    </body>
+</html>
