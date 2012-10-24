@@ -4,9 +4,9 @@ using WorldDomination.Web.Authentication;
 using WorldDomination.Web.Authentication.Facebook;
 using WorldDomination.Web.Authentication.Google;
 using WorldDomination.Web.Authentication.Twitter;
-using WorldDomination.Web.IntegrationTest.Models;
+using WorldDomination.Web.IntegrationTest.Mvc.Models;
 
-namespace WorldDomination.Web.IntegrationTest.Controllers
+namespace WorldDomination.Web.IntegrationTest.Mvc.Controllers
 {
     public class HomeController : Controller
     {

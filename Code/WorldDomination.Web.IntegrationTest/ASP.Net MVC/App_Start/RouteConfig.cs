@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace WorldDomination.Web.IntegrationTest
+namespace WorldDomination.Web.IntegrationTest.Mvc.App_Start
 {
     public class RouteConfig
     {

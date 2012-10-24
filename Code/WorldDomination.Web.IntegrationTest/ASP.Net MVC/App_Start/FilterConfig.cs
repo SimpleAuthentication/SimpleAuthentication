@@ -1,7 +1,6 @@
-﻿using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 
-namespace WorldDomination.Web.IntegrationTest
+namespace WorldDomination.Web.IntegrationTest.Mvc.App_Start
 {
     public class FilterConfig
     {
