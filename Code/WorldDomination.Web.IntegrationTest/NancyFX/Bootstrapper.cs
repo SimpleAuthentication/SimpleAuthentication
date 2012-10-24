@@ -1,4 +1,5 @@
 ﻿using System;
+using CuttingEdge.Conditions;
 using Nancy;
 using Nancy.Bootstrapper;
 using Nancy.Session;
@@ -21,12 +22,24 @@ namespace WorldDomination.Web.IntegrationTest.NancyFX
 
         protected override void ApplicationStartup(TinyIoCContainer container, IPipelines pipelines)
         {
+            RegisterAuthenticationProviders(container);
+
+            base.ApplicationStartup(container, pipelines);
+
+            CookieBasedSessions.Enable(pipelines);
+        }
+
+        private static void RegisterAuthenticationProviders(TinyIoCContainer container)
+        {
+            Condition.Requires(container).IsNotNull();
+
             var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret,
-                                                    new Uri("http://localhost:6969/AuthenticateCallback?providerKey=Twitter"));
+                                                      new Uri(
+                                                          "http://localhost:6969/AuthenticateCallback?providerKey=Twitter"));
 
             var facebookProvider = new FacebookProvider(FacebookAppId, FacebookAppSecret,
-                                                       new Uri(
-                                                           "http://localhost:6969/AuthenticateCallback?providerKey=facebook"));
+                                                        new Uri(
+                                                            "http://localhost:6969/AuthenticateCallback?providerKey=facebook"));
 
             var googleProvider = new GoogleProvider(GoogleConsumerKey, GoogleConsumerSecret,
                                                     new Uri(
@@ -38,10 +51,6 @@ namespace WorldDomination.Web.IntegrationTest.NancyFX
             authenticationService.AddProvider(googleProvider);
 
             container.Register<IAuthenticationService>(authenticationService);
-
-            base.ApplicationStartup(container, pipelines);
-
-            CookieBasedSessions.Enable(pipelines);
         }
     }
 }
