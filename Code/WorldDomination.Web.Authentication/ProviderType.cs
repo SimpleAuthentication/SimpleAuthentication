@@ -5,7 +5,7 @@
         Facebook,
         Twitter,
         Google,
-        GitHub,
+        Other,
         Unknown
     }
 }
