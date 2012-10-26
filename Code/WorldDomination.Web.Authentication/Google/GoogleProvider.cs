@@ -179,7 +179,7 @@ namespace WorldDomination.Web.Authentication.Google
             get { return "Google"; }
         }
 
-        public Uri RedirectToAuthenticate(string state)
+        public Uri RedirectToAuthenticate(string state, params string[] optionalParameters)
         {
             Condition.Requires(state).IsNotNullOrEmpty();
 

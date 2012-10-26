@@ -40,14 +40,14 @@ namespace WorldDomination.Web.Authentication
             AuthenticationProviders.Add(providerName, authenticationProvider);
         }
 
-        public Uri RedirectToAuthenticationProvider(string providerKey, string state)
+        public Uri RedirectToAuthenticationProvider(string providerKey, string state, params string[] optionalParameters)
         {
             Condition.Requires(providerKey).IsNotNullOrEmpty();
             Condition.Requires(state).IsNotNullOrEmpty();
 
             var authenticationProvider = GetAuthenticationProvider(providerKey);
 
-            return authenticationProvider.RedirectToAuthenticate(state);
+            return authenticationProvider.RedirectToAuthenticate(state, optionalParameters);
         }
 
         public IAuthenticatedClient CheckCallback(string providerKey, NameValueCollection requestParameters,

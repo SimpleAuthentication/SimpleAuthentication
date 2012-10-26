@@ -180,12 +180,15 @@ namespace WorldDomination.Web.Authentication.Facebook
             get { return "Facebook"; }
         }
 
-        public Uri RedirectToAuthenticate(string state)
+        public Uri RedirectToAuthenticate(string state, params string[] optionalParameters)
         {
             Condition.Requires(state).IsNotNullOrEmpty();
 
-            var oauthDialogUri = string.Format("https://www.facebook.com/dialog/oauth?client_id={0}&redirect_uri={1}&state={2}",
-                                               _clientId, _redirectUri.AbsoluteUri, state);
+            int index = optionalParameters == null ? -1 : Array.IndexOf(optionalParameters, "isMobile");
+            var baseUri = index < 0 ? "https://www.facebook.com" : "https://m.facebook.com";
+
+            var oauthDialogUri = string.Format("{0}/dialog/oauth?client_id={1}&redirect_uri={2}&state={3}",
+                                               baseUri, _clientId, _redirectUri.AbsoluteUri, state);
 
             // Do we have any scope options?
             if (_scope != null && _scope.Count > 0)

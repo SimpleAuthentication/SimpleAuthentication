@@ -185,7 +185,7 @@ namespace WorldDomination.Web.Authentication.Twitter
             get { return "Twitter"; }
         }
 
-        public Uri RedirectToAuthenticate(string state)
+        public Uri RedirectToAuthenticate(string state, params string[] optionalParameters)
         {
             Condition.Requires(state).IsNotNullOrEmpty();
 
