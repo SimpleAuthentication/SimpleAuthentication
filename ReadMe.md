@@ -34,28 +34,50 @@ That's It.
 ## Code or GTFO ##
 
 ```
-public RedirectResult FacebookAuthentication()
+public RedirectResult FacebookAuthentication(string providerKey)
 {
+	// NOTE: ProviderKey? WTF is that? well .. where do you want to go? Facebook? Twitter? Google? that's this value.
+	//       This is what button you usually press, on your web page UI.
+	//       A 'Provider' is the fancy word for the website we goto to login, at. Eg. FB/T/Goog, etc..
+
+    // Create some session, so the 'state' is remembered on the callback 
+	// (when we return from the authentication website).
     Session.Add("a", "a"); // Keep the SessionId constant.
-    return AuthenticationService.RedirectToFacebookAuthentication(Session.SessionID);
+
+	// Grab the uri which we need to redirect to, based on which provider we want to authenticate against.
+    var uri = _authenticationService.RedirectToAuthenticationProvider(providerKey, Session.SessionID);
+
+	// GO! GO! GO!
+    return Redirect(uri.AbsoluteUri);
 }
 
-public ActionResult AuthenticateCallback()
+public ActionResult AuthenticateCallback(string providerKey)
 {
-    var client = AuthenticationService.CheckCallback(Request, Session.SessionID);
-
-    var model = new AuthenticateCallbackViewModel();
-            
-    if (client is FacebookClient)
+    // NOTE: we need to know where we *were* ... so the provider includes this piece of info 
+    //       when they *callback* to us.        
+    if (string.IsNullOrEmpty(providerKey))
     {
-        var facebookClient = client as FacebookClient;
-        model.AccessToken = facebookClient.AccessToken;
-        model.Name =
-            (facebookClient.UserInformation.FirstName + " " + facebookClient.UserInformation.LastName).Trim();
-        model.UserName = facebookClient.UserInformation.UserName;
-        model.Message = "Authenticated with Facebook successfully.";
+        throw new ArgumentNullException("providerKey");
     }
 
+    // Ye standard Ole View model. 
+    // PROTIP: You do use view models, right? (There is only one correct answer, here)
+    var model = new AuthenticateCallbackViewModel();
+    try
+    {
+        // Get the user details. If this works, we've authenticated AND have *some* user details.
+        // Depending on who you authenticated against, some data is not provided.
+        model.AuthenticatedClient = _authenticationService.CheckCallback(providerKey, Request.Params,
+                                                                         Session.SessionID);
+    }
+    catch (Exception exception)
+    {
+        // Shit happened .. or the user manually said 'No - do not give permissions' when asked if they 
+        // can hand over some of their personal info after they've entered their username/password.
+        model.Exception = exception;
+    }
+
+    // $5 if you can guess what this does.
     return View(model);
 }
 ```
