@@ -86,7 +86,7 @@ public ActionResult AuthenticateCallback(string providerKey)
 
 Don't be scared to fork and then make some pull requests. I :heart: pull requests!
 
-Then this simple library can actually be really helpful to more than 1 person (le moi) on rock called Earth.
+Then this simple library can actually be really helpful to more than 1 person (le moi) on this rock called Earth.
 
 #### Disclaimer ####
 *No blonds or Unicorns were harmed in the coding of this library.*
