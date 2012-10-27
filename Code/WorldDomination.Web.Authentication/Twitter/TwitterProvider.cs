@@ -185,9 +185,9 @@ namespace WorldDomination.Web.Authentication.Twitter
             get { return "Twitter"; }
         }
 
-        public Uri RedirectToAuthenticate(string state, params string[] optionalParameters)
+        public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            Condition.Requires(state).IsNotNullOrEmpty();
+            Condition.Requires(authenticationServiceSettings).IsNotNull();
 
             // First we need to grab a request token.
             var oAuthToken = RetrieveRequestToken();
@@ -221,6 +221,11 @@ namespace WorldDomination.Web.Authentication.Twitter
                                          },
                        AccessToken = oAuthAccessToken.AccessToken
                    };
+        }
+
+        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
+        {
+            get { return new TwitterAuthenticationServiceSettings(); }
         }
 
         #endregion

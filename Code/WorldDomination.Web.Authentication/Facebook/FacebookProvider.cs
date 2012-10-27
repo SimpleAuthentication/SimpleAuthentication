@@ -180,15 +180,20 @@ namespace WorldDomination.Web.Authentication.Facebook
             get { return "Facebook"; }
         }
 
-        public Uri RedirectToAuthenticate(string state, params string[] optionalParameters)
+        public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            Condition.Requires(state).IsNotNullOrEmpty();
+            Condition.Requires(authenticationServiceSettings).IsNotNull();
+            
+            var facebookAuthenticationSettings = authenticationServiceSettings as FacebookAuthenticationSettings;
+            Condition.Requires(facebookAuthenticationSettings).IsNotNull();
+            Condition.Requires(facebookAuthenticationSettings.ProviderKey).IsNotNullOrEmpty();
+            Condition.Requires(facebookAuthenticationSettings.ProviderType).IsNotEqualTo(ProviderType.Unknown);
+            Condition.Requires(facebookAuthenticationSettings.State).IsNotNullOrEmpty();
 
-            int index = optionalParameters == null ? -1 : Array.IndexOf(optionalParameters, "isMobile");
-            var baseUri = index < 0 ? "https://www.facebook.com" : "https://m.facebook.com";
+            var baseUri = facebookAuthenticationSettings.IsMobile ? "https://m.facebook.com" : "https://www.facebook.com";
 
             var oauthDialogUri = string.Format("{0}/dialog/oauth?client_id={1}&redirect_uri={2}&state={3}",
-                                               baseUri, _clientId, _redirectUri.AbsoluteUri, state);
+                                               baseUri, _clientId, _redirectUri.AbsoluteUri, facebookAuthenticationSettings.State);
 
             // Do we have any scope options?
             if (_scope != null && _scope.Count > 0)
@@ -213,6 +218,17 @@ namespace WorldDomination.Web.Authentication.Facebook
                        AccessTokenExpiresOn = DateTime.UtcNow,
                        UserInformation = userInformation
                    };
+        }
+
+        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
+        {
+            get
+            {
+                return new FacebookAuthenticationSettings
+                       {
+                           IsMobile = false
+                       };
+            }
         }
 
         #endregion

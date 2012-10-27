@@ -179,12 +179,13 @@ namespace WorldDomination.Web.Authentication.Google
             get { return "Google"; }
         }
 
-        public Uri RedirectToAuthenticate(string state, params string[] optionalParameters)
+        public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            Condition.Requires(state).IsNotNullOrEmpty();
+            Condition.Requires(authenticationServiceSettings).IsNotNull();
+            Condition.Requires(authenticationServiceSettings.State).IsNotNullOrEmpty();
 
             var oauthDialogUri = string.Format("https://accounts.google.com/o/oauth2/auth?client_id={0}&redirect_uri={1}&response_type=code&state={2}",
-                                               _clientId, _redirectUri.AbsoluteUri, state);
+                                               _clientId, _redirectUri.AbsoluteUri, authenticationServiceSettings.State);
 
             // Do we have any scope options?
             if (_scope != null && _scope.Count > 0)
@@ -222,6 +223,11 @@ namespace WorldDomination.Web.Authentication.Google
                                          }
                    };
 
+        }
+
+        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
+        {
+            get { return new GoogleAuthenticationServiceSettings(); }
         }
 
         #endregion

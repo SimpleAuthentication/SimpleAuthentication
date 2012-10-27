@@ -8,7 +8,8 @@ namespace WorldDomination.Web.Authentication
     {
         IEnumerable<IAuthenticationProvider> Providers { get; }
         void AddProvider(IAuthenticationProvider authenticationProvider);
-        Uri RedirectToAuthenticationProvider(string providerKey, string state, params string[] optionalParameters);
+        Uri RedirectToAuthenticationProvider(string providerKey, string state);
+        Uri RedirectToAuthenticationProvider(IAuthenticationServiceSettings authenticationServiceSettings);
         IAuthenticatedClient CheckCallback(string providerKey, NameValueCollection requestParameters, string state);
     }
 }

@@ -30,6 +30,8 @@ namespace WorldDomination.Web.Authentication
             }
         }
 
+        public string State { get; set; }
+
         #endregion
     }
 }

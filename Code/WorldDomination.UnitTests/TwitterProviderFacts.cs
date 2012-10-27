@@ -35,10 +35,9 @@ namespace WorldDomination.UnitTests
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
                 var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
-                const string callbackUrl = "someCallBackUri";
 
                 // Act.
-                var result = twitterProvider.RedirectToAuthenticate(callbackUrl);
+                var result = twitterProvider.RedirectToAuthenticate(new TwitterAuthenticationServiceSettings());
 
                 // Assert.
                 Assert.NotNull(result);
@@ -58,7 +57,7 @@ namespace WorldDomination.UnitTests
 
                 // Act.
                 var result =
-                    Assert.Throws<AuthenticationException>(() => twitterProvider.RedirectToAuthenticate("pewpew"));
+                    Assert.Throws<AuthenticationException>(() => twitterProvider.RedirectToAuthenticate(new TwitterAuthenticationServiceSettings()));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -82,7 +81,7 @@ namespace WorldDomination.UnitTests
 
                 // Act.
                 var result =
-                    Assert.Throws<AuthenticationException>(() => twitterProvider.RedirectToAuthenticate("pewpew"));
+                    Assert.Throws<AuthenticationException>(() => twitterProvider.RedirectToAuthenticate(new TwitterAuthenticationServiceSettings()));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -108,7 +107,7 @@ namespace WorldDomination.UnitTests
 
                 // Act.
                 var result =
-                    Assert.Throws<AuthenticationException>(() => twitterProvider.RedirectToAuthenticate("pewpew"));
+                    Assert.Throws<AuthenticationException>(() => twitterProvider.RedirectToAuthenticate(new TwitterAuthenticationServiceSettings()));
 
                 // Assert.
                 Assert.NotNull(result);

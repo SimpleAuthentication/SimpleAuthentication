@@ -23,7 +23,7 @@ namespace WorldDomination.Web.IntegrationTest.Mvc.Controllers
             var facebookProvider = new FacebookProvider(FacebookAppId, FacebookAppSecret,
                                                         new Uri(
                                                             "http://localhost:1337/home/AuthenticateCallback?providerKey=facebook"));
-
+            
             var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret,
                                                       new Uri(
                                                           "http://localhost:1337/home/AuthenticateCallback?providerKey=twitter"));
@@ -49,6 +49,19 @@ namespace WorldDomination.Web.IntegrationTest.Mvc.Controllers
             // Otherwise, you'll need to store some constant value in session .. and use that instead of the Session Id.
             Session.Add("SomeKey", "whatcha-talkin-bout-willis?");
             var uri = _authenticationService.RedirectToAuthenticationProvider(providerKey, Session.SessionID);
+            return Redirect(uri.AbsoluteUri);
+        }
+
+        public RedirectResult RedirectToFacebookMobile()
+        {
+            // Keep the SessionId constant. 
+            // Otherwise, you'll need to store some constant value in session .. and use that instead of the Session Id.
+            Session.Add("SomeKey", "whatcha-talkin-bout-willis?");
+            var uri = _authenticationService.RedirectToAuthenticationProvider(new FacebookAuthenticationSettings
+                                                                              {
+                                                                                  State = Session.SessionID,
+                                                                                  IsMobile = true
+                                                                              });
             return Redirect(uri.AbsoluteUri);
         }
 

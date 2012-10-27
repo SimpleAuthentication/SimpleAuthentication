@@ -99,6 +99,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Content Include="Content\facebook_32.png" />
+    <Content Include="Content\facebook_mobile_32.png" />
     <Content Include="Content\google_32.png" />
     <Content Include="Content\main.css" />
     <Content Include="Content\twitter_32.png" />

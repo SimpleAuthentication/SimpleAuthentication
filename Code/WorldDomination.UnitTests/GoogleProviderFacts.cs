@@ -26,7 +26,7 @@ namespace WorldDomination.UnitTests
                 var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"));
 
                 // Act.
-                var result = googleProvider.RedirectToAuthenticate("bleh");
+                var result = googleProvider.RedirectToAuthenticate(new GoogleAuthenticationServiceSettings{State = "bleh"});
 
                 // Assert.
                 Assert.NotNull(result);

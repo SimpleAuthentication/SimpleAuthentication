@@ -51,6 +51,7 @@
     <Compile Include="Facebook\MeResult.cs" />
     <Compile Include="GenderType.cs" />
     <Compile Include="Google\AccessTokenResult.cs" />
+    <Compile Include="Google\GoogleAuthenticationServiceSettings.cs" />
     <Compile Include="Google\GoogleProvider.cs" />
     <Compile Include="Google\UserInfoResult.cs" />
     <Compile Include="IAuthenticationService.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="Status.cs" />
     <Compile Include="Twitter\AccessTokenResult.cs" />
     <Compile Include="Twitter\RequestTokenResult.cs" />
+    <Compile Include="Twitter\TwitterAuthenticationServiceSettings.cs" />
     <Compile Include="Twitter\TwitterProvider.cs" />
     <Compile Include="Twitter\VerifierResult.cs" />
     <Compile Include="Twitter\VerifyCredentialsResult.cs" />

@@ -4,5 +4,6 @@
     {
         string ProviderKey { get; }
         ProviderType ProviderType { get; }
+        string State { get; set; }
     }
 }

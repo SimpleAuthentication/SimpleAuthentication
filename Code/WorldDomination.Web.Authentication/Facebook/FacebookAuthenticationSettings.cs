@@ -2,7 +2,7 @@
 {
     public class FacebookAuthenticationSettings : BaseAuthenticationServiceSettings
     {
-        public FacebookAuthenticationSettings(string providerKey) : base(providerKey)
+        public FacebookAuthenticationSettings() : base("Facebook")
         {
         }
 

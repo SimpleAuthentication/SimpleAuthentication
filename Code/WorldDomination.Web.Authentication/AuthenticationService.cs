@@ -40,14 +40,27 @@ namespace WorldDomination.Web.Authentication
             AuthenticationProviders.Add(providerName, authenticationProvider);
         }
 
-        public Uri RedirectToAuthenticationProvider(string providerKey, string state, params string[] optionalParameters)
+        public Uri RedirectToAuthenticationProvider(string providerKey, string state)
         {
             Condition.Requires(providerKey).IsNotNullOrEmpty();
             Condition.Requires(state).IsNotNullOrEmpty();
 
             var authenticationProvider = GetAuthenticationProvider(providerKey);
+            var authenticationServiceSettings = authenticationProvider.DefaultAuthenticationServiceSettings;
+            authenticationServiceSettings.State = state;
+            
+            return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
+        }
 
-            return authenticationProvider.RedirectToAuthenticate(state, optionalParameters);
+        public Uri RedirectToAuthenticationProvider(IAuthenticationServiceSettings authenticationServiceSettings)
+        {
+            Condition.Requires(authenticationServiceSettings).IsNotNull();
+            Condition.Requires(authenticationServiceSettings.ProviderKey).IsNotNullOrEmpty();
+            Condition.Requires(authenticationServiceSettings.ProviderType).IsNotEqualTo(ProviderType.Unknown);
+
+            var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderKey);
+
+            return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
         }
 
         public IAuthenticatedClient CheckCallback(string providerKey, NameValueCollection requestParameters,
@@ -77,5 +90,7 @@ namespace WorldDomination.Web.Authentication
             }
             return authenticationProvider;
         }
+
+        
     }
 }
