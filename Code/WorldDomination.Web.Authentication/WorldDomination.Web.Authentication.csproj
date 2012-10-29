@@ -46,8 +46,9 @@
   <ItemGroup>
     <Compile Include="AuthenticatedClient.cs" />
     <Compile Include="AuthenticationException.cs" />
+    <Compile Include="AuthenticationServiceSettingsFactory.cs" />
     <Compile Include="BaseAuthenticationServiceSettings.cs" />
-    <Compile Include="Facebook\FacebookAuthenticationSettings.cs" />
+    <Compile Include="Facebook\FacebookAuthenticationServiceSettings.cs" />
     <Compile Include="Facebook\MeResult.cs" />
     <Compile Include="GenderType.cs" />
     <Compile Include="Google\AccessTokenResult.cs" />

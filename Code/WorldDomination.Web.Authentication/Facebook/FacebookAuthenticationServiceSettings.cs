@@ -1,8 +1,8 @@
 ﻿namespace WorldDomination.Web.Authentication.Facebook
 {
-    public class FacebookAuthenticationSettings : BaseAuthenticationServiceSettings
+    public class FacebookAuthenticationServiceSettings : BaseAuthenticationServiceSettings
     {
-        public FacebookAuthenticationSettings() : base("Facebook")
+        public FacebookAuthenticationServiceSettings() : base("Facebook")
         {
         }
 

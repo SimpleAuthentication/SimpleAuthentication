@@ -57,30 +57,46 @@ namespace WorldDomination.UnitTests
             {
                 // Arrange.
                 const string providerKey = "aaa";
-                const string state = "asd";
                 var authenticationService = new AuthenticationService();
 
                 // Act and Assert.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => authenticationService.RedirectToAuthenticationProvider(providerKey, state));
+                    () => authenticationService.RedirectToAuthenticationProvider(providerKey));
 
                 Assert.NotNull(result);
                 Assert.Equal("No 'aaa' provider has been added.", result.Message);
             }
 
             [Fact]
-            public void GivenAValidProviderKey_RedirectToAuthenticate_ReturnsAUri()
+            public void GivenAValidProviderKeyWithNoState_RedirectToAuthenticate_ReturnsAUri()
             {
                 // Arrange.
                 var authenticationService = new AuthenticationService();
-                authenticationService.AddProvider(new FacebookProvider("aa", "bb", new Uri("http://www.google.com")));
+                authenticationService.AddProvider(new FacebookProvider("aa", "bb", new Uri("http://www.whatever.com")));
 
                 // Act.
-                var result = authenticationService.RedirectToAuthenticationProvider("Facebook", "abc");
+                var result = authenticationService.RedirectToAuthenticationProvider("Facebook");
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal(result.AbsoluteUri, "https://www.facebook.com/dialog/oauth?client_id=aa&redirect_uri=http://www.google.com/&state=abc");
+                Assert.Equal("https://www.facebook.com/dialog/oauth?client_id=aa&redirect_uri=http://www.whatever.com/", result.AbsoluteUri);
+            }
+
+            [Fact]
+            public void GivenAValidProviderKeyWithState_RedirectToAuthenticate_ReturnsAUriWithState()
+            {
+                // Arrange.
+                var authenticationService = new AuthenticationService();
+                authenticationService.AddProvider(new FacebookProvider("aa", "bb", new Uri("http://www.whatever.com")));
+
+                // Act.
+                var authenticationServiceSettings = AuthenticationServiceSettingsFactory.GetAuthenticateServiceSettings("facebook");
+                authenticationServiceSettings.State = "pewpew";
+                var result = authenticationService.RedirectToAuthenticationProvider(authenticationServiceSettings);
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal("https://www.facebook.com/dialog/oauth?client_id=aa&redirect_uri=http://www.whatever.com/&state=pewpew", result.AbsoluteUri);
             }
         }
 

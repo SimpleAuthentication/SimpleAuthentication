@@ -22,12 +22,18 @@ namespace WorldDomination.Web.IntegrationTest.NancyFX.Modules
 
             Get["/RedirectToAuthenticate/{providerKey}"] = parameters =>
                                                            {
+                                                               // State key.
                                                                Session[SessionGuidKey] = Guid.NewGuid();
+
+                                                               // TODO: What happens if an invalid providerKey is provided?
+                                                               var authenticationServiceSettings = AuthenticationServiceSettingsFactory.
+                                                                   GetAuthenticateServiceSettings(parameters.providerKey);
+                                                               authenticationServiceSettings.State =
+                                                                   Session[SessionGuidKey].ToString();
+                                                               
                                                                Uri uri =
                                                                    authenticationService.
-                                                                       RedirectToAuthenticationProvider(
-                                                                           parameters.providerKey,
-                                                                           Session[SessionGuidKey].ToString());
+                                                                       RedirectToAuthenticationProvider(authenticationServiceSettings);
                                                                
                                                                return Response.AsRedirect(uri.AbsoluteUri);
                                                            };
@@ -43,7 +49,7 @@ namespace WorldDomination.Web.IntegrationTest.NancyFX.Modules
                                                // It's possible that a person might hit this resource directly, before any session value
                                                // has been set. As such, we should just fake some state up, which will not match the
                                                // CSRF check.
-                                               var existingState = (string)(Session[SessionGuidKey] ?? Guid.NewGuid().ToString());
+                                               var existingState = (Guid)(Session[SessionGuidKey] ?? Guid.NewGuid());
 
                                                var model = new AuthenticateCallbackViewModel();
 
@@ -58,7 +64,7 @@ namespace WorldDomination.Web.IntegrationTest.NancyFX.Modules
                                                    model.AuthenticatedClient =
                                                        authenticationService.CheckCallback(Request.Query.providerKey,
                                                                                            querystringParameters,
-                                                                                           existingState);
+                                                                                           existingState.ToString());
                                                }
                                                catch (Exception exception)
                                                {

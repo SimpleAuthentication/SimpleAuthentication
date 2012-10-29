@@ -184,22 +184,19 @@ namespace WorldDomination.Web.Authentication.Facebook
         {
             Condition.Requires(authenticationServiceSettings).IsNotNull();
             
-            var facebookAuthenticationSettings = authenticationServiceSettings as FacebookAuthenticationSettings;
+            var facebookAuthenticationSettings = authenticationServiceSettings as FacebookAuthenticationServiceSettings;
             Condition.Requires(facebookAuthenticationSettings).IsNotNull();
-            Condition.Requires(facebookAuthenticationSettings.ProviderKey).IsNotNullOrEmpty();
-            Condition.Requires(facebookAuthenticationSettings.ProviderType).IsNotEqualTo(ProviderType.Unknown);
-            Condition.Requires(facebookAuthenticationSettings.State).IsNotNullOrEmpty();
 
             var baseUri = facebookAuthenticationSettings.IsMobile ? "https://m.facebook.com" : "https://www.facebook.com";
+            var scope = (_scope != null && _scope.Count > 0)
+                            ? "&scope=" + string.Join(",", _scope)
+                            : string.Empty;
+            var state = !string.IsNullOrEmpty(facebookAuthenticationSettings.State)
+                            ? "&state=" + facebookAuthenticationSettings.State
+                            : string.Empty;
 
-            var oauthDialogUri = string.Format("{0}/dialog/oauth?client_id={1}&redirect_uri={2}&state={3}",
-                                               baseUri, _clientId, _redirectUri.AbsoluteUri, facebookAuthenticationSettings.State);
-
-            // Do we have any scope options?
-            if (_scope != null && _scope.Count > 0)
-            {
-                oauthDialogUri += string.Format(ScopeKey, string.Join(",", _scope));
-            }
+            var oauthDialogUri = string.Format("{0}/dialog/oauth?client_id={1}&redirect_uri={2}{3}{4}",
+                                               baseUri, _clientId, _redirectUri.AbsoluteUri, state, scope);
 
             return new Uri(oauthDialogUri);
         }
@@ -224,7 +221,7 @@ namespace WorldDomination.Web.Authentication.Facebook
         {
             get
             {
-                return new FacebookAuthenticationSettings
+                return new FacebookAuthenticationServiceSettings
                        {
                            IsMobile = false
                        };

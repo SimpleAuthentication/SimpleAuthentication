@@ -48,7 +48,7 @@ namespace WorldDomination.Web.IntegrationTest.Mvc.Controllers
             // Keep the SessionId constant. 
             // Otherwise, you'll need to store some constant value in session .. and use that instead of the Session Id.
             Session.Add("SomeKey", "whatcha-talkin-bout-willis?");
-            var uri = _authenticationService.RedirectToAuthenticationProvider(providerKey, Session.SessionID);
+            var uri = _authenticationService.RedirectToAuthenticationProvider(providerKey);
             return Redirect(uri.AbsoluteUri);
         }
 
@@ -57,7 +57,7 @@ namespace WorldDomination.Web.IntegrationTest.Mvc.Controllers
             // Keep the SessionId constant. 
             // Otherwise, you'll need to store some constant value in session .. and use that instead of the Session Id.
             Session.Add("SomeKey", "whatcha-talkin-bout-willis?");
-            var uri = _authenticationService.RedirectToAuthenticationProvider(new FacebookAuthenticationSettings
+            var uri = _authenticationService.RedirectToAuthenticationProvider(new FacebookAuthenticationServiceSettings
                                                                               {
                                                                                   State = Session.SessionID,
                                                                                   IsMobile = true
