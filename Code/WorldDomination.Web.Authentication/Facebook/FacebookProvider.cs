@@ -12,7 +12,6 @@ namespace WorldDomination.Web.Authentication.Facebook
 
     public class FacebookProvider : IAuthenticationProvider
     {
-        private const string ScopeKey = "&scope={0}";
         private readonly string _clientId;
         private readonly string _clientSecret;
         private readonly Uri _redirectUri;
@@ -50,17 +49,16 @@ namespace WorldDomination.Web.Authentication.Facebook
             _restClient = restClient ?? new RestClient("https://graph.facebook.com");
         }
 
-        private static string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState)
+        private static string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState = null)
         {
             Condition.Requires(parameters).IsNotNull().IsLongerThan(0);
-            Condition.Requires(existingState).IsNotNull();
 
             // Is this a facebook callback?
             var code = parameters["code"];
             var state = parameters["state"];
 
             // CSRF (state) check.
-            if (string.IsNullOrEmpty(state) ||
+            if (!string.IsNullOrEmpty(state) &&
                 state != existingState)
             {
                 throw new AuthenticationException(

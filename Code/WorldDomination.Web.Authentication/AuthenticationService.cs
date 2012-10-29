@@ -65,11 +65,10 @@ namespace WorldDomination.Web.Authentication
         }
 
         public IAuthenticatedClient CheckCallback(string providerKey, NameValueCollection requestParameters,
-                                                  string state)
+                                                  string state = null)
         {
             Condition.Requires(providerKey).IsNotNullOrEmpty();
             Condition.Requires(requestParameters).IsNotNull();
-            Condition.Requires(state).IsNotNullOrEmpty();
 
             var authenticationProvider = GetAuthenticationProvider(providerKey);
             return authenticationProvider.AuthenticateClient(requestParameters, state);

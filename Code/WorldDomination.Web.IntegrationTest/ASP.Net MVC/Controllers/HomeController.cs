@@ -16,6 +16,8 @@ namespace WorldDomination.Web.IntegrationTest.Mvc.Controllers
         private const string TwitterConsumerSecret = "pP1jBdYOlmCzo08QFJjGIHY4YSyPdGLPO2m1q47hu9c";
         private const string GoogleConsumerKey = "587140099194.apps.googleusercontent.com";
         private const string GoogleConsumerSecret = "npk1_gx-gqJmLiJRPFooxCEY";
+        private const string SessionStateKey = "SomeKey";
+
         private readonly AuthenticationService _authenticationService;
 
         public HomeController()
@@ -47,7 +49,6 @@ namespace WorldDomination.Web.IntegrationTest.Mvc.Controllers
         {
             // Keep the SessionId constant. 
             // Otherwise, you'll need to store some constant value in session .. and use that instead of the Session Id.
-            Session.Add("SomeKey", "whatcha-talkin-bout-willis?");
             var uri = _authenticationService.RedirectToAuthenticationProvider(providerKey);
             return Redirect(uri.AbsoluteUri);
         }
@@ -56,10 +57,10 @@ namespace WorldDomination.Web.IntegrationTest.Mvc.Controllers
         {
             // Keep the SessionId constant. 
             // Otherwise, you'll need to store some constant value in session .. and use that instead of the Session Id.
-            Session.Add("SomeKey", "whatcha-talkin-bout-willis?");
+            Session.Add(SessionStateKey, "whatcha-talkin-bout-willis?");
             var uri = _authenticationService.RedirectToAuthenticationProvider(new FacebookAuthenticationServiceSettings
                                                                               {
-                                                                                  State = Session.SessionID,
+                                                                                  State = Session[SessionStateKey] as string,
                                                                                   IsMobile = true
                                                                               });
             return Redirect(uri.AbsoluteUri);
@@ -75,8 +76,13 @@ namespace WorldDomination.Web.IntegrationTest.Mvc.Controllers
             var model = new AuthenticateCallbackViewModel();
             try
             {
+                // ProTip: It's possible that the session value could be null, here. Which is fine.
+                //         I would be null if it wasn't created, such as with the 'simple' RedirectToAuthenticate method (above).
                 model.AuthenticatedClient = _authenticationService.CheckCallback(providerKey, Request.Params,
-                                                                                 Session.SessionID);
+                                                                                 Session[SessionStateKey] as string);
+
+                // Clean up after ourselves like a nice little boy/girl/monster we are.
+                Session.Remove(SessionStateKey);
             }
             catch (Exception exception)
             {
