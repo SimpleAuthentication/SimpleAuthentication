@@ -23,14 +23,14 @@ namespace WorldDomination.UnitTests
             public void GivenSomeState_RedirectToAuthenticate_ReturnsAUri()
             {
                 // Arrange.
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"));
+                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.pewpew.com"));
 
                 // Act.
                 var result = googleProvider.RedirectToAuthenticate(new GoogleAuthenticationServiceSettings{State = "bleh"});
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("https://accounts.google.com/o/oauth2/auth?client_id=aa&redirect_uri=http://wwww.google.com/&response_type=code&state=bleh&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email", result.AbsoluteUri);
+                Assert.Equal("https://accounts.google.com/o/oauth2/auth?client_id=aa&redirect_uri=http://wwww.pewpew.com/&response_type=code&state=bleh&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email", result.AbsoluteUri);
             }
         }
 

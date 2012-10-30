@@ -52,11 +52,10 @@ namespace WorldDomination.Web.Authentication.Google
             _restClient = restClient ?? new RestClient("https://accounts.google.com");
         }
 
-        private static string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState)
+        private static string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState = null)
         {
             Condition.Requires(parameters).IsNotNull().IsLongerThan(0);
-            Condition.Requires(existingState).IsNotNullOrEmpty();
-
+            
             /* Documentation:
                Google returns an authorization code to your application if the user grants your application the permissions it requested. 
                The authorization code is returned to your application in the query string parameter code. If the state parameter was included in the request,
@@ -67,7 +66,8 @@ namespace WorldDomination.Web.Authentication.Google
             
             // CSRF (state) check.
             // NOTE: There is always a state provided. Even if an error is returned.
-            if (state != existingState)
+            if (!string.IsNullOrEmpty(existingState) && 
+                state != existingState)
             {
                 throw new AuthenticationException("The states do not match. It's possible that you may be a victim of a CSRF.");
             }
@@ -182,17 +182,19 @@ namespace WorldDomination.Web.Authentication.Google
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
             Condition.Requires(authenticationServiceSettings).IsNotNull();
-            Condition.Requires(authenticationServiceSettings.State).IsNotNullOrEmpty();
-
-            var oauthDialogUri = string.Format("https://accounts.google.com/o/oauth2/auth?client_id={0}&redirect_uri={1}&response_type=code&state={2}",
-                                               _clientId, _redirectUri.AbsoluteUri, authenticationServiceSettings.State);
 
             // Do we have any scope options?
-            if (_scope != null && _scope.Count > 0)
-            {
-                // Google uses a space-delimeted string for their scope key.
-                oauthDialogUri += string.Format(ScopeKey, string.Join(" ", _scope));
-            }
+            // NOTE: Google uses a space-delimeted string for their scope key.
+            var scope = (_scope != null && _scope.Count > 0)
+                            ? string.Format(ScopeKey, string.Join(" ", _scope))
+                            : string.Empty;
+        
+            var state = string.IsNullOrEmpty(authenticationServiceSettings.State)
+                            ? string.Empty
+                            : "&state=" + authenticationServiceSettings.State;
+
+            var oauthDialogUri = string.Format("https://accounts.google.com/o/oauth2/auth?client_id={0}&redirect_uri={1}&response_type=code{2}{3}",
+                                               _clientId, _redirectUri.AbsoluteUri, state, scope);
 
             return new Uri(oauthDialogUri);
         }
