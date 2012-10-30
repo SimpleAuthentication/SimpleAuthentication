@@ -192,9 +192,13 @@ namespace WorldDomination.Web.Authentication.Facebook
             var state = !string.IsNullOrEmpty(facebookAuthenticationSettings.State)
                             ? "&state=" + facebookAuthenticationSettings.State
                             : string.Empty;
+            var display = facebookAuthenticationSettings.Display == DisplayType.Unknown
+                              ? string.Empty
+                              : "&display=" + facebookAuthenticationSettings.Display;
 
-            var oauthDialogUri = string.Format("{0}/dialog/oauth?client_id={1}&redirect_uri={2}{3}{4}",
-                                               baseUri, _clientId, _redirectUri.AbsoluteUri, state, scope);
+            // REFERENCE: https://developers.facebook.com/docs/reference/dialogs/oauth/
+            var oauthDialogUri = string.Format("{0}/dialog/oauth?client_id={1}&redirect_uri={2}{3}{4}{5}",
+                                               baseUri, _clientId, _redirectUri.AbsoluteUri, state, scope, display);
 
             return new Uri(oauthDialogUri);
         }
@@ -221,6 +225,7 @@ namespace WorldDomination.Web.Authentication.Facebook
             {
                 return new FacebookAuthenticationServiceSettings
                        {
+                           Display = DisplayType.Unknown,
                            IsMobile = false
                        };
             }

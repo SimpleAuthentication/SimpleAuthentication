@@ -48,6 +48,7 @@
     <Compile Include="AuthenticationException.cs" />
     <Compile Include="AuthenticationServiceSettingsFactory.cs" />
     <Compile Include="BaseAuthenticationServiceSettings.cs" />
+    <Compile Include="Facebook\DisplayType.cs" />
     <Compile Include="Facebook\FacebookAuthenticationServiceSettings.cs" />
     <Compile Include="Facebook\MeResult.cs" />
     <Compile Include="GenderType.cs" />

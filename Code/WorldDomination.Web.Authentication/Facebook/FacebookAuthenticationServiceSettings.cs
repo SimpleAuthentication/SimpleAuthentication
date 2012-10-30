@@ -7,6 +7,6 @@
         }
 
         public bool IsMobile { get; set; }
-        public string Display { get; set; }
+        public DisplayType Display { get; set; }
     }
 }

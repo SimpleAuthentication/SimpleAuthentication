@@ -14,6 +14,42 @@ namespace WorldDomination.UnitTests
 
     public class FacebookProviderFacts
     {
+        public class RedirectToAuthenticateFacts
+        {
+            [Fact]
+            public void GivenDefaultSettingsRequested_RedirectToAuthenticate_ReturnsAUri()
+            {
+                // Arrange.
+                var facebookProvider = new FacebookProvider("aa", "bb", new Uri("http://www.2p1s.com"));
+                var facebookAuthenticationServiceSettings = new FacebookAuthenticationServiceSettings();
+
+                // Act.
+                var result = facebookProvider.RedirectToAuthenticate(facebookAuthenticationServiceSettings);
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal("https://www.facebook.com/dialog/oauth?client_id=aa&redirect_uri=http://www.2p1s.com/", result.AbsoluteUri);
+            }
+
+            [Fact]
+            public void GivenMobileAndDisplayAreRequested_RedirectToAuthenticate_ReturnsAUri()
+            {
+                // Arrange.
+                var facebookProvider = new FacebookProvider("aa", "bb", new Uri("http://www.2p1s.com"));
+                var facebookAuthenticationServiceSettings = new FacebookAuthenticationServiceSettings
+                                                            {
+                                                                IsMobile = true,
+                                                                Display = DisplayType.Touch
+                                                            };
+                // Act.
+                var result = facebookProvider.RedirectToAuthenticate(facebookAuthenticationServiceSettings);
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal("https://m.facebook.com/dialog/oauth?client_id=aa&redirect_uri=http://www.2p1s.com/&display=Touch", result.AbsoluteUri);
+            }
+        }
+
         public class AuthenticateClientFacts
         {
             [Fact]
