@@ -10,6 +10,7 @@ namespace WorldDomination.Web.Authentication.Twitter
 {
     public class TwitterProvider : IAuthenticationProvider
     {
+        private const string DeniedKey = "denied";
         private const string OAuthTokenKey = "oauth_token";
         private const string OAuthTokenSecretKey = "oauth_token_secret";
         private const string OAuthVerifierKey = "oauth_verifier";
@@ -87,9 +88,15 @@ namespace WorldDomination.Web.Authentication.Twitter
         {
             Condition.Requires(parameters).IsNotNull();
 
+            var denied = parameters[DeniedKey];
+            if (!string.IsNullOrEmpty(denied))
+            {
+                throw new AuthenticationException("Failed to accept the Twitter App Authorization. Therefore, authentication didn't proceed.");
+            }
+
             var oAuthToken = parameters[OAuthTokenKey];
             var oAuthVerifier = parameters[OAuthVerifierKey];
-
+            
             if (string.IsNullOrEmpty(oAuthToken) ||
                 string.IsNullOrEmpty(oAuthVerifier))
             {
@@ -141,7 +148,6 @@ namespace WorldDomination.Web.Authentication.Twitter
                        AccessTokenSecret = querystringParameters[OAuthTokenSecretKey]
                    };
         }
-
 
         private VerifyCredentialsResult VerifyCredentials(AccessTokenResult accessTokenResult)
         {

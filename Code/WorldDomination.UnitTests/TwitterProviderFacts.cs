@@ -122,6 +122,24 @@ namespace WorldDomination.UnitTests
         public class AuthenticateClientFacts
         {
             [Fact]
+            public void GivenAUserDeniesAcceptingTheAppAuthorization_AuthenticateClient_ThrowsAnAuthenticationException()
+            {
+                // Arrange.
+                var mockRestClient = new Mock<IRestClient>();
+                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
+                var nameValueCollection = new NameValueCollection
+                                          {
+                                              {"denied", "JpQ7ZTt1nMeAhIypiOxLrkS3LreHwihKjsJcIJDf4To"}
+                                          };
+                // Act.
+                var result = Assert.Throws<AuthenticationException>(() => twitterProvider.AuthenticateClient(nameValueCollection, null));
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal("Failed to accept the Twitter App Authorization. Therefore, authentication didn't proceed.", result.Message);
+            }
+
+            [Fact]
             public void GivenTheCallbackParamtersAreInvalid_AuthenticateClient_ThrowsAnAuthenticationException()
             {
                 // Arrange.
