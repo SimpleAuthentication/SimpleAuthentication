@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using Moq;
 using RestSharp;
 using WorldDomination.Web.Authentication;
@@ -17,23 +13,6 @@ namespace WorldDomination.UnitTests
 
     public class GoogleProviderFacts
     {
-        public class RedirectToAuthenticateFacts
-        {
-            [Fact]
-            public void GivenSomeState_RedirectToAuthenticate_ReturnsAUri()
-            {
-                // Arrange.
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.pewpew.com"));
-
-                // Act.
-                var result = googleProvider.RedirectToAuthenticate(new GoogleAuthenticationServiceSettings{State = "bleh"});
-
-                // Assert.
-                Assert.NotNull(result);
-                Assert.Equal("https://accounts.google.com/o/oauth2/auth?client_id=aa&redirect_uri=http://wwww.pewpew.com/&response_type=code&state=bleh&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email", result.AbsoluteUri);
-            }
-        }
-
         public class AuthenticateClientFacts
         {
             [Fact]
@@ -53,7 +32,8 @@ namespace WorldDomination.UnitTests
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("The states do not match. It's possible that you may be a victim of a CSRF.", result.Message);
+                Assert.Equal("The states do not match. It's possible that you may be a victim of a CSRF.",
+                             result.Message);
             }
 
             [Fact]
@@ -64,7 +44,10 @@ namespace WorldDomination.UnitTests
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                                             {
-                                                {"error", "I dont' always use bayonets. But when I do, I transport them on Aircraft Carriers."},
+                                                {
+                                                    "error",
+                                                    "I dont' always use bayonets. But when I do, I transport them on Aircraft Carriers."
+                                                },
                                                 {"state", existingState}
                                             };
 
@@ -74,7 +57,9 @@ namespace WorldDomination.UnitTests
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Failed to retrieve an authorization code from Google. The error provided is: I dont' always use bayonets. But when I do, I transport them on Aircraft Carriers.", result.Message);
+                Assert.Equal(
+                    "Failed to retrieve an authorization code from Google. The error provided is: I dont' always use bayonets. But when I do, I transport them on Aircraft Carriers.",
+                    result.Message);
             }
 
             [Fact]
@@ -107,7 +92,8 @@ namespace WorldDomination.UnitTests
                     "If God says he was not created by a creator, does that mean: god is an aetheist?";
                 mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Throws(new InvalidOperationException(errorMessage));
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null, mockRestClient.Object);
+                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null,
+                                                        mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                                             {
@@ -137,7 +123,8 @@ namespace WorldDomination.UnitTests
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null, mockRestClient.Object);
+                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null,
+                                                        mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                                             {
@@ -151,7 +138,9 @@ namespace WorldDomination.UnitTests
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Failed to obtain an Access Token from Google OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized", result.Message);
+                Assert.Equal(
+                    "Failed to obtain an Access Token from Google OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
+                    result.Message);
             }
 
             [Fact]
@@ -165,7 +154,8 @@ namespace WorldDomination.UnitTests
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null, mockRestClient.Object);
+                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null,
+                                                        mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                                             {
@@ -179,7 +169,9 @@ namespace WorldDomination.UnitTests
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Retrieved a Google Access Token but it doesn't contain one or more of either: access_token, expires_in or token_type", result.Message);
+                Assert.Equal(
+                    "Retrieved a Google Access Token but it doesn't contain one or more of either: access_token, expires_in or token_type",
+                    result.Message);
             }
 
             [Fact]
@@ -192,7 +184,8 @@ namespace WorldDomination.UnitTests
                                                             {
                                                                 AccessToken = "aaa",
                                                                 ExpiresIn = 100,
-                                                                IdToken = "What if that sexy girl in that pop up chat really does want to meet people in my area?",
+                                                                IdToken =
+                                                                    "What if that sexy girl in that pop up chat really does want to meet people in my area?",
                                                                 TokenType = "overly attached girlfriend"
                                                             });
 
@@ -209,7 +202,8 @@ namespace WorldDomination.UnitTests
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponseUserInfo.Object);
 
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null, mockRestClient.Object);
+                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null,
+                                                        mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                                             {
@@ -223,7 +217,9 @@ namespace WorldDomination.UnitTests
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Failed to obtain User Info from Google OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized", result.Message);
+                Assert.Equal(
+                    "Failed to obtain User Info from Google OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
+                    result.Message);
             }
 
             [Fact]
@@ -269,7 +265,9 @@ namespace WorldDomination.UnitTests
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Retrieve some user info from the Google Api, but we're missing one or more of either: Id, Email, Name and Locale.", result.Message);
+                Assert.Equal(
+                    "Retrieve some user info from the Google Api, but we're missing one or more of either: Id, Email, Name and Locale.",
+                    result.Message);
             }
 
             [Fact]
@@ -281,12 +279,13 @@ namespace WorldDomination.UnitTests
                 var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
-                {
-                    AccessToken = accessToken,
-                    ExpiresIn = expiresIn,
-                    IdToken = "What if that sexy girl in that pop up chat really does want to meet people in my area?",
-                    TokenType = "overly attached girlfriend"
-                });
+                                                            {
+                                                                AccessToken = accessToken,
+                                                                ExpiresIn = expiresIn,
+                                                                IdToken =
+                                                                    "What if that sexy girl in that pop up chat really does want to meet people in my area?",
+                                                                TokenType = "overly attached girlfriend"
+                                                            });
 
                 var userInfoResult = new UserInfoResult
                                      {
@@ -314,9 +313,10 @@ namespace WorldDomination.UnitTests
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponseUserInfo.Object);
 
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null, mockRestClient.Object);
+                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null,
+                                                        mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
-                
+
                 var queryStringParameters = new NameValueCollection
                                             {
                                                 {"code", accessToken},
@@ -339,7 +339,26 @@ namespace WorldDomination.UnitTests
                 Assert.Equal(userInfoResult.Name, result.UserInformation.Name);
                 Assert.Equal(userInfoResult.Picture, result.UserInformation.Picture);
                 Assert.Equal(userInfoResult.GivenName, result.UserInformation.UserName);
+            }
+        }
 
+        public class RedirectToAuthenticateFacts
+        {
+            [Fact]
+            public void GivenSomeState_RedirectToAuthenticate_ReturnsAUri()
+            {
+                // Arrange.
+                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.pewpew.com"));
+
+                // Act.
+                var result =
+                    googleProvider.RedirectToAuthenticate(new GoogleAuthenticationServiceSettings {State = "bleh"});
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal(
+                    "https://accounts.google.com/o/oauth2/auth?client_id=aa&redirect_uri=http://wwww.pewpew.com/&response_type=code&state=bleh&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email",
+                    result.AbsoluteUri);
             }
         }
     }
