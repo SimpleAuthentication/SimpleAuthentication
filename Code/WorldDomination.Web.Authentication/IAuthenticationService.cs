@@ -10,6 +10,6 @@ namespace WorldDomination.Web.Authentication
         void AddProvider(IAuthenticationProvider authenticationProvider);
         Uri RedirectToAuthenticationProvider(string providerKey);
         Uri RedirectToAuthenticationProvider(IAuthenticationServiceSettings authenticationServiceSettings);
-        IAuthenticatedClient CheckCallback(string providerKey, NameValueCollection requestParameters, string state);
+        IAuthenticatedClient CheckCallback(string providerKey, NameValueCollection requestParameters, string state = null);
     }
 }

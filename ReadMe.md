@@ -61,7 +61,7 @@ public ActionResult AuthenticateCallback(string providerKey)
     }
 
     // Ye standard Ole View model. 
-    // PROTIP: You do use view models, right? (There is only one correct answer, here)
+    // PRO-TIP: You do use view models, right? (There is only one correct answer, here)
     var model = new AuthenticateCallbackViewModel();
     try
     {
