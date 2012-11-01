@@ -33,8 +33,8 @@ Pro Tips
                   you might fancy.
 3. Coding Choons: You can't get away without some pro coding choons. Here's 2
                   which will make your nipples hard :
-                  a) 
-                  b)                
+                  a) http://soundcloud.com/phazing-004/dirty-south-phazing-radio-004
+                  b) http://www.youtube.com/watch?v=cla38u6MrEI             
 
 ----------------------------------------------------------------------------------------
 
