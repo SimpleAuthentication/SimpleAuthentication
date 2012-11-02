@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Web.Mvc;
+using CuttingEdge.Conditions;
 using WorldDomination.Web.Authentication.Facebook;
 using WorldDomination.Web.Authentication.Google;
 using WorldDomination.Web.Authentication.Test.Mvc.Advanced.Models;
@@ -9,34 +10,16 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.Controllers
 {
     public class HomeController : Controller
     {
-        private const string FacebookAppId = "113220502168922";
-        private const string FacebookAppSecret = "b09592a5904746646f3d402178ce9c0f";
-        private const string TwitterConsumerKey = "Rb7qNNPUPsRSYkznFTbF6Q";
-        private const string TwitterConsumerSecret = "pP1jBdYOlmCzo08QFJjGIHY4YSyPdGLPO2m1q47hu9c";
-        private const string GoogleConsumerKey = "587140099194.apps.googleusercontent.com";
-        private const string GoogleConsumerSecret = "npk1_gx-gqJmLiJRPFooxCEY";
+
         private const string SessionStateKey = "SomeKey";
 
-        private readonly AuthenticationService _authenticationService;
+        private readonly IAuthenticationService _authenticationService;
 
-        public HomeController()
+        public HomeController(IAuthenticationService authenticationService)
         {
-            var facebookProvider = new FacebookProvider(FacebookAppId, FacebookAppSecret,
-                                                        new Uri(
-                                                            "http://localhost:1337/home/AuthenticateCallback?providerKey=facebook"));
-            
-            var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret,
-                                                      new Uri(
-                                                          "http://localhost:1337/home/AuthenticateCallback?providerKey=twitter"));
+            Condition.Requires(authenticationService).IsNotNull();
 
-            var googleProvider = new GoogleProvider(GoogleConsumerKey, GoogleConsumerSecret,
-                                                    new Uri(
-                                                        "http://localhost:1337/home/AuthenticateCallback?providerKey=google"));
-
-            _authenticationService = new AuthenticationService();
-            _authenticationService.AddProvider(facebookProvider);
-            _authenticationService.AddProvider(twitterProvider);
-            _authenticationService.AddProvider(googleProvider);
+            _authenticationService = authenticationService;
         }
 
         public ActionResult Index()

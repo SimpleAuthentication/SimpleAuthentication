@@ -90,7 +90,5 @@ namespace WorldDomination.Web.Authentication
             }
             return authenticationProvider;
         }
-
-        
     }
 }
