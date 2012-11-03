@@ -66,9 +66,11 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.Controllers
             var model = new AuthenticateCallbackViewModel();
             try
             {
+                // Retrieve the state for the XSS check.
+                var state = Session[SessionStateKey] == null ? null : Session[SessionStateKey].ToString();
+                
                 // Complete the authentication process by retrieving the UserInformation from the provider.
-                model.AuthenticatedClient = _authenticationService.CheckCallback(providerKey, Request.Params,
-                                                                                 Session[SessionStateKey].ToString());
+                model.AuthenticatedClient = _authenticationService.CheckCallback(providerKey, Request.Params, state);
 
                 // Clean up after ourselves like a nice little boy/girl/monster we are.
                 Session.Remove(SessionStateKey);
