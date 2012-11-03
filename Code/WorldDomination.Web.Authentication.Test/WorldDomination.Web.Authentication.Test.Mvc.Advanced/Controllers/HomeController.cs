@@ -2,15 +2,12 @@
 using System.Web.Mvc;
 using CuttingEdge.Conditions;
 using WorldDomination.Web.Authentication.Facebook;
-using WorldDomination.Web.Authentication.Google;
 using WorldDomination.Web.Authentication.Test.Mvc.Advanced.Models;
-using WorldDomination.Web.Authentication.Twitter;
 
 namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.Controllers
 {
     public class HomeController : Controller
     {
-
         private const string SessionStateKey = "SomeKey";
 
         private readonly IAuthenticationService _authenticationService;
@@ -29,22 +26,33 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.Controllers
 
         public RedirectResult RedirectToAuthenticate(string providerKey)
         {
-            // Keep the SessionId constant. 
-            // Otherwise, you'll need to store some constant value in session .. and use that instead of the Session Id.
-            var uri = _authenticationService.RedirectToAuthenticationProvider(providerKey);
+            // Which provider are we after?
+            var settings = AuthenticationServiceSettingsFactory.GetAuthenticateServiceSettings(providerKey);
+
+            // We need to remember the state for some XSS protection.
+            Session[SessionStateKey] = Guid.NewGuid();
+            settings.State = Session[SessionStateKey].ToString();
+
+            // Grab the Uri we need redirect to.
+            var uri = _authenticationService.RedirectToAuthenticationProvider(settings);
+
+            // Redirect!
             return Redirect(uri.AbsoluteUri);
         }
 
         public RedirectResult RedirectToFacebookMobile()
         {
-            // Keep the SessionId constant. 
-            // Otherwise, you'll need to store some constant value in session .. and use that instead of the Session Id.
-            Session.Add(SessionStateKey, "whatcha-talkin-bout-willis?");
+            // We need to remember the state for some XSS protection.
+            Session[SessionStateKey] = Guid.NewGuid();
+
+            // Grab the Uri we need redirect to.
             var uri = _authenticationService.RedirectToAuthenticationProvider(new FacebookAuthenticationServiceSettings
                                                                               {
-                                                                                  State = Session[SessionStateKey] as string,
+                                                                                  State = Session[SessionStateKey].ToString(),
                                                                                   IsMobile = true
                                                                               });
+
+            // Redirect!
             return Redirect(uri.AbsoluteUri);
         }
 
@@ -58,10 +66,9 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.Controllers
             var model = new AuthenticateCallbackViewModel();
             try
             {
-                // ProTip: It's possible that the session value could be null, here. Which is fine.
-                //         I would be null if it wasn't created, such as with the 'simple' RedirectToAuthenticate method (above).
+                // Complete the authentication process by retrieving the UserInformation from the provider.
                 model.AuthenticatedClient = _authenticationService.CheckCallback(providerKey, Request.Params,
-                                                                                 Session[SessionStateKey] as string);
+                                                                                 Session[SessionStateKey].ToString());
 
                 // Clean up after ourselves like a nice little boy/girl/monster we are.
                 Session.Remove(SessionStateKey);

@@ -16,27 +16,33 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 
+using System;
+using System.Configuration;
 using StructureMap;
 using WorldDomination.Web.Authentication.Facebook;
+using WorldDomination.Web.Authentication.Google;
+using WorldDomination.Web.Authentication.Twitter;
 
 namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.DependencyResolution
 {
     public static class IoC
     {
-        private const string FacebookAppId = "113220502168922";
-        private const string FacebookAppSecret = "b09592a5904746646f3d402178ce9c0f";
-        private const string TwitterConsumerKey = "Rb7qNNPUPsRSYkznFTbF6Q";
-        private const string TwitterConsumerSecret = "pP1jBdYOlmCzo08QFJjGIHY4YSyPdGLPO2m1q47hu9c";
-        private const string GoogleConsumerKey = "587140099194.apps.googleusercontent.com";
-        private const string GoogleConsumerSecret = "npk1_gx-gqJmLiJRPFooxCEY";
-
         public static IContainer Initialize()
         {
             ObjectFactory.Initialize(x =>
                                      {
                                          var authenticationRegistry = new AuthenticationRegistry(
-                                             new FacebookProvider(FacebookAppId, FacebookAppSecret,), )
-                                         x.AddRegistry()
+                                             new FacebookProvider(ConfigurationManager.AppSettings["FacebookAppId"],
+                                                                  ConfigurationManager.AppSettings["FacebookAppSecret"],
+                                                                  new Uri(ConfigurationManager.AppSettings["FacebookRedirectUri"])),
+                                             new GoogleProvider(ConfigurationManager.AppSettings["GoogleConsumerKey"],
+                                                                ConfigurationManager.AppSettings["GoogleConsumerSecret"],
+                                                                new Uri(ConfigurationManager.AppSettings["GoogleConsumerRedirectUri"])),
+                                             new TwitterProvider(ConfigurationManager.AppSettings["TwitterConsumerKey"],
+                                                                 ConfigurationManager.AppSettings["TwitterConsumerSecret"],
+                                                                 new Uri(ConfigurationManager.AppSettings["TwitterConsumerRedirectUri"]))
+                                             );
+                                         x.AddRegistry(authenticationRegistry);
                                      });
             return ObjectFactory.Container;
         }
