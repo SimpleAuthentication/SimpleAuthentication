@@ -1,7 +1,8 @@
 
-#############################################
-##  Web Authentication - made damn simple. ##
-#############################################
+             #################################################
+             ##    Web Authentication - made damn simple.   ##
+             #################################################
+
 
    You've nuget installed this package so I don't to explain what this shiz does ;)
 
@@ -9,6 +10,8 @@
    1. Simple Mvc example: : http://bitly.com/YjDXDD
    2. Advanced Mvc example : http://bitly.com/U9AkR7
    3. NancyFx example: http://bitly.com/Tsmcff
+   4. Fake (In Memory) Mvc example: 
+
 
    PRO TIP: It's -strongly- recommended that you provide some 'state' value when
             authenticating against a 3rd party (like Facebook, etc).

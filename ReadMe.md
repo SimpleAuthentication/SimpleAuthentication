@@ -1,6 +1,6 @@
 ![WTF](http://i.imgur.com/Jx9vL.jpg)
 
-![Not impressed](http://i.imgur.com/Uq4Wm.jpg)
+![Not impressed](http://i.imgur.com/K2b91.jpg)
 
 ![I just don't get it](http://i.imgur.com/AUEc3.jpg)
 
@@ -12,17 +12,17 @@
 
 ![Success Programmer](http://i.imgur.com/yQVJU.jpg)
 
-# A .NET package for using Facebook or Twitter to Authenticate your Users #
+# A .NET package for using Facebook, Google or Twitter to Authenticate your Users #
 
 I'm blond. I'm dumb. But I program. 
 
 So I want a <insert deity of your choice> damn simple way to authenticate with Facebook, Twitter or wherever.
 
-**I DON'T CARE IF IT'S OAUTH OR OPENID OR OH-GO-SCREW-YOURSELF.**
+**I DON'T CARE IF IT'S OAUTH OR OPENID OR O-GO-SCREW-YOURSELF.**
 
 I just want to do
 
-1. Send me off to Facebook, Twitter, wherever.
+1. Send me off to Facebook, Google or Twitter.
 2. Come back to my site and the site now has whatever user data they handed over.
 
 That's It.
@@ -31,56 +31,34 @@ That's It.
 - No Session stuff.
 - No over-generic-crazy one-solution-fits-every-provider-on-the-interwebs.
 
+So install this bad boy :
+
+[![Yes! Install this package!!](http://i.imgur.com/FM21h.png)](http://nuget.org/packages/World-Domination.Web.Authentication)
+
 ## Code or GTFO ##
 
-```
-public RedirectResult FacebookAuthentication(string providerKey)
+Here's the main code that does what we want (excluding error checking, etc, for brevity).
+
+```c#
+public RedirectResult RedirectToAuthenticate(string providerKey)
 {
-	// NOTE: ProviderKey? WTF is that? well .. where do you want to go? Facebook? Twitter? Google? that's this value.
-	//       This is what button you usually press, on your web page UI.
-	//       A 'Provider' is the fancy word for the website we goto to login, at. Eg. FB/T/Goog, etc..
-
-    // Create some session, so the 'state' is remembered on the callback 
-	// (when we return from the authentication website).
-    Session.Add("a", "a"); // Keep the SessionId constant.
-
-	// Grab the uri which we need to redirect to, based on which provider we want to authenticate against.
-    var uri = _authenticationService.RedirectToAuthenticationProvider(providerKey, Session.SessionID);
-
-	// GO! GO! GO!
+    var uri = _authenticationService.RedirectToAuthenticationProvider(providerKey);
     return Redirect(uri.AbsoluteUri);
 }
 
 public ActionResult AuthenticateCallback(string providerKey)
 {
-    // NOTE: we need to know where we *were* ... so the provider includes this piece of info 
-    //       when they *callback* to us.        
-    if (string.IsNullOrEmpty(providerKey))
-    {
-        throw new ArgumentNullException("providerKey");
-    }
-
-    // Ye standard Ole View model. 
-    // PRO-TIP: You do use view models, right? (There is only one correct answer, here)
     var model = new AuthenticateCallbackViewModel();
-    try
-    {
-        // Get the user details. If this works, we've authenticated AND have *some* user details.
-        // Depending on who you authenticated against, some data is not provided.
-        model.AuthenticatedClient = _authenticationService.CheckCallback(providerKey, Request.Params,
-                                                                         Session.SessionID);
-    }
-    catch (Exception exception)
-    {
-        // Shit happened .. or the user manually said 'No - do not give permissions' when asked if they 
-        // can hand over some of their personal info after they've entered their username/password.
-        model.Exception = exception;
-    }
-
-    // $5 if you can guess what this does.
+    model.AuthenticatedClient = _authenticationService.CheckCallback(providerKey, Request.Params);
     return View(model);
 }
 ```
+
+## Ok. You had me at Bad Luck Brian. Now what?
+
+1. Read the [sample code pages in the project's Wiki](https://github.com/PureKrome/World-Domination.Web.Authentication/wiki) - take 1 minute to grok.
+2. Install nuget pacakge.
+3. Win.
 
 ## Play it forward ##
 
