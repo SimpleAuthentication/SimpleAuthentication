@@ -73,7 +73,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("https://www.facebook.com/dialog/oauth?client_id=aa&redirect_uri=http://www.whatever.com/", result.AbsoluteUri);
+                Assert.Equal("https://www.facebook.com/dialog/oauth?client_id=aa&redirect_uri=http://www.whatever.com/&scope=email", result.AbsoluteUri);
             }
 
             [Fact]
@@ -90,7 +90,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("https://www.facebook.com/dialog/oauth?client_id=aa&redirect_uri=http://www.whatever.com/&state=pewpew", result.AbsoluteUri);
+                Assert.Equal("https://www.facebook.com/dialog/oauth?client_id=aa&redirect_uri=http://www.whatever.com/&state=pewpew&scope=email", result.AbsoluteUri);
             }
         }
 

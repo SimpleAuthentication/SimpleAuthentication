@@ -168,7 +168,8 @@ namespace WorldDomination.Web.Authentication.Facebook
                        Name = (response.Data.FirstName + " " + response.Data.LastName).Trim(),
                        Email = response.Data.Email,
                        Locale = response.Data.Locale,
-                       UserName = response.Data.Username
+                       UserName = response.Data.Username,
+                       Picture = string.Format("https://graph.facebook.com/{0}/picture", response.Data.Username)
                    };
         }
 
