@@ -30,6 +30,7 @@
             <p>ID: @Model.AuthenticatedClient.UserInformation.Id</p>
             <p>Name: @Model.AuthenticatedClient.UserInformation.Name</p>
             <p>UserName: @Model.AuthenticatedClient.UserInformation.UserName</p>
+            <p>Email: @(string.IsNullOrEmpty(Model.AuthenticatedClient.UserInformation.Email) ? "- none provided -" : Model.AuthenticatedClient.UserInformation.Email)</p>
             <p>Locale: @Model.AuthenticatedClient.UserInformation.Locale</p>
             @if (!string.IsNullOrEmpty(Model.AuthenticatedClient.UserInformation.Picture))
              {

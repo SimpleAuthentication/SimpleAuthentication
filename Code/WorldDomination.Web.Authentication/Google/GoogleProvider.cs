@@ -219,6 +219,7 @@ namespace WorldDomination.Web.Authentication.Google
                                              Id = userInfo.Id,
                                              Gender = (GenderType)Enum.Parse(typeof(GenderType), userInfo.Gender, true),
                                              Name = userInfo.Name,
+                                             Email = userInfo.Email,
                                              Locale = userInfo.Locale,
                                              Picture = userInfo.Picture,
                                              UserName = userInfo.GivenName

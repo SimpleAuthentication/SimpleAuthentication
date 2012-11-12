@@ -45,7 +45,7 @@ namespace WorldDomination.Web.Authentication.Facebook
             _redirectUri = redirectUri;
 
             // Optionals.
-            _scope = scope;
+            _scope = scope ?? new List<string> {"email"};
             _restClient = restClient ?? new RestClient("https://graph.facebook.com");
         }
 
@@ -166,6 +166,7 @@ namespace WorldDomination.Web.Authentication.Facebook
                    {
                        Id = response.Data.Id.ToString(),
                        Name = (response.Data.FirstName + " " + response.Data.LastName).Trim(),
+                       Email = response.Data.Email,
                        Locale = response.Data.Locale,
                        UserName = response.Data.Username
                    };

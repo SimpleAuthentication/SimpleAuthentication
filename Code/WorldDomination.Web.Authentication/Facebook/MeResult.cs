@@ -8,6 +8,7 @@
         public string LastName { get; set; }
         public string Link { get; set; }
         public string Username { get; set; }
+        public string Email { get; set; }
         public int Timezone { get; set; }
         public string Locale { get; set; }
         public bool Verified { get; set; }
