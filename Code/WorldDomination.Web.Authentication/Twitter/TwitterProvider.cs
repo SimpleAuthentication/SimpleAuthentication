@@ -223,7 +223,8 @@ namespace WorldDomination.Web.Authentication.Twitter
                                              Name = verifyCredentialsResult.Name,
                                              Id = verifyCredentialsResult.Id.ToString(),
                                              Locale = verifyCredentialsResult.Lang,
-                                             UserName = verifyCredentialsResult.ScreenName
+                                             UserName = verifyCredentialsResult.ScreenName,
+                                             Picture = verifyCredentialsResult.ProfileImageUrl
                                          },
                        AccessToken = oAuthAccessToken.AccessToken
                    };
