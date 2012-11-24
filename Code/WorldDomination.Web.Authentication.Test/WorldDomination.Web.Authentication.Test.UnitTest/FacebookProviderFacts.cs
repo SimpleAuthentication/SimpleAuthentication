@@ -26,7 +26,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("https://www.facebook.com/dialog/oauth?client_id=aa&redirect_uri=http://www.2p1s.com/&scope=email", result.AbsoluteUri);
+                Assert.Equal("https://www.facebook.com/dialog/oauth?client_id=aa&scope=email&redirect_uri=http://www.2p1s.com/", result.AbsoluteUri);
             }
 
             [Fact]
@@ -44,7 +44,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("https://m.facebook.com/dialog/oauth?client_id=aa&redirect_uri=http://www.2p1s.com/&scope=email&display=touch", result.AbsoluteUri);
+                Assert.Equal("https://m.facebook.com/dialog/oauth?client_id=aa&scope=email&display=touch&redirect_uri=http://www.2p1s.com/", result.AbsoluteUri);
             }
         }
 
@@ -153,6 +153,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 var mockRestResponse = new Mock<IRestResponse>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
                 mockRestResponse.Setup(x => x.StatusDescription).Returns("Unauthorised");
+                mockRestResponse.Setup(x => x.Content).Returns("{error:hi there asshat}");
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
@@ -172,7 +173,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorised",
+                Assert.Equal("Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorised. Error Content: {error:hi there asshat}",
                     result.Message);
             }
 

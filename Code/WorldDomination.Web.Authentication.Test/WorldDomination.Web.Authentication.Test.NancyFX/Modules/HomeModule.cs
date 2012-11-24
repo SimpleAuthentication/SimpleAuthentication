@@ -40,6 +40,7 @@ namespace WorldDomination.Web.Authentication.Test.NancyFX.Modules
                                                    throw new ArgumentNullException("providerKey");
                                                }
 
+                                               // Retrieve the state for the XSS check.
                                                // It's possible that a person might hit this resource directly, before any session value
                                                // has been set. As such, we should just fake some state up, which will not match the
                                                // CSRF check.

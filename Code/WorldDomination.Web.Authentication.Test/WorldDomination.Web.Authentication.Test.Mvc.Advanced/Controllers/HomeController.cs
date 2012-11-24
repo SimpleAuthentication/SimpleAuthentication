@@ -67,10 +67,13 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.Controllers
             try
             {
                 // Retrieve the state for the XSS check.
-                var state = Session[SessionStateKey] == null ? null : Session[SessionStateKey].ToString();
+                // It's possible that a person might hit this resource directly, before any session value
+                // has been set. As such, we should just fake some state up, which will not match the
+                // CSRF check.
+                var state = (Guid)(Session[SessionStateKey] ?? Guid.NewGuid());
                 
                 // Complete the authentication process by retrieving the UserInformation from the provider.
-                model.AuthenticatedClient = _authenticationService.CheckCallback(providerKey, Request.Params, state);
+                model.AuthenticatedClient = _authenticationService.CheckCallback(providerKey, Request.Params, state.ToString());
 
                 // Clean up after ourselves like a nice little boy/girl/monster we are.
                 Session.Remove(SessionStateKey);
