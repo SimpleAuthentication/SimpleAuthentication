@@ -96,9 +96,9 @@ namespace WorldDomination.Web.Authentication.Facebook
             {
                 var restRequest = new RestRequest("oauth/access_token");
                 restRequest.AddParameter("client_id", _clientId);
-                restRequest.AddParameter("redirect_uri", _redirectUri);
                 restRequest.AddParameter("client_secret", _clientSecret);
                 restRequest.AddParameter("code", code);
+                restRequest.AddParameter("redirect_uri", _redirectUri.AbsoluteUri);
 
                 response = _restClient.Execute(restRequest);
             }
@@ -110,11 +110,14 @@ namespace WorldDomination.Web.Authentication.Facebook
             if (response == null ||
                 response.StatusCode != HttpStatusCode.OK)
             {
+                // {"error":{"message":"Error validating verification code. Please make sure your redirect_uri is identical to the one you used in the OAuth dialog request","type":"OAuthException","code":100}}
+
                 throw new AuthenticationException(
                     string.Format(
-                        "Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
+                        "Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Content: {2}",
                         response == null ? "-- null response --" : response.StatusCode.ToString(),
-                        response == null ? string.Empty : response.StatusDescription));
+                        response == null ? string.Empty : response.StatusDescription,
+                        response == null ? string.Empty : response.Content));
             }
 
             var querystringParameters = HttpUtility.ParseQueryString(response.Content);
@@ -196,13 +199,13 @@ namespace WorldDomination.Web.Authentication.Facebook
                             : string.Empty;
             var display = facebookAuthenticationSettings.Display == DisplayType.Unknown
                               ? string.Empty
-                              : "&display=" + facebookAuthenticationSettings.Display;
+                              : "&display=" + facebookAuthenticationSettings.Display.ToString().ToLowerInvariant();
 
             // REFERENCE: https://developers.facebook.com/docs/reference/dialogs/oauth/
             // NOTE: Facebook is case-sensitive anal retentive with regards to their uri + querystring params.
             //       So ... we'll lowercase the entire biatch. Thanks, Facebook :(
-            var oauthDialogUri = string.Format("{0}/dialog/oauth?client_id={1}&redirect_uri={2}{3}{4}{5}",
-                                               baseUri, _clientId, _redirectUri.AbsoluteUri, state, scope, display).ToLowerInvariant();
+            var oauthDialogUri = string.Format("{0}/dialog/oauth?client_id={1}{2}{3}{4}&redirect_uri={5}",
+                                               baseUri, _clientId, state, scope, display, _redirectUri.AbsoluteUri);
 
             return new Uri(oauthDialogUri);
         }
