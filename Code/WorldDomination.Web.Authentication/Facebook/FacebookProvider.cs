@@ -199,8 +199,10 @@ namespace WorldDomination.Web.Authentication.Facebook
                               : "&display=" + facebookAuthenticationSettings.Display;
 
             // REFERENCE: https://developers.facebook.com/docs/reference/dialogs/oauth/
+            // NOTE: Facebook is case-sensitive anal retentive with regards to their uri + querystring params.
+            //       So ... we'll lowercase the entire biatch. Thanks, Facebook :(
             var oauthDialogUri = string.Format("{0}/dialog/oauth?client_id={1}&redirect_uri={2}{3}{4}{5}",
-                                               baseUri, _clientId, _redirectUri.AbsoluteUri, state, scope, display);
+                                               baseUri, _clientId, _redirectUri.AbsoluteUri, state, scope, display).ToLowerInvariant();
 
             return new Uri(oauthDialogUri);
         }

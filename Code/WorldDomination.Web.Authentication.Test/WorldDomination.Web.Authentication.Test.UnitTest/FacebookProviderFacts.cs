@@ -44,7 +44,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("https://m.facebook.com/dialog/oauth?client_id=aa&redirect_uri=http://www.2p1s.com/&scope=email&display=Touch", result.AbsoluteUri);
+                Assert.Equal("https://m.facebook.com/dialog/oauth?client_id=aa&redirect_uri=http://www.2p1s.com/&scope=email&display=touch", result.AbsoluteUri);
             }
         }
 
