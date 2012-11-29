@@ -5,6 +5,7 @@ using System.Net;
 using CuttingEdge.Conditions;
 using RestSharp;
 using RestSharp.Contrib;
+using WorldDomination.Web.Authentication.Config;
 
 namespace WorldDomination.Web.Authentication.Facebook
 {
@@ -17,6 +18,13 @@ namespace WorldDomination.Web.Authentication.Facebook
         private readonly Uri _redirectUri;
         private readonly IRestClient _restClient;
         private readonly IList<string> _scope;
+
+        public FacebookProvider(ProviderKey providerKey, Uri redirectUri)
+        {
+            _clientId = providerKey.Key;
+            _clientSecret = providerKey.Secret;
+            _redirectUri = redirectUri;
+        }
 
         public FacebookProvider(string clientId, string clientSecret, Uri redirectUri)
             : this(clientId, clientSecret, redirectUri, null, null)
