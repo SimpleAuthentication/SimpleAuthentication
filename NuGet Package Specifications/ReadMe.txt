@@ -7,9 +7,9 @@
    You've nuget installed this package so I don't to explain what this shiz does ;)
 
 
-   1. Simple Mvc example: : http://bitly.com/YjDXDD
-   2. Advanced Mvc example : http://bitly.com/U9AkR7
-   3. NancyFx example: http://bitly.com/Tsmcff
+   1. Simple Mvc example: : http://bit.ly/V1RJYD
+   2. Advanced Mvc example : http://bit.ly/V1RRHy
+   3. NancyFx example: http://bit.ly/V43viS
    4. Fake (In Memory) Mvc example: http://bit.ly/Tm1YYo
 
 
@@ -22,7 +22,7 @@
 
 More Pro Tips
 ^^^^^^^^^^^^^
-1. Free Login Images: Need some login buttons? Thought so: http://bitly.com/YphHYZ
+1. Free Login Images: Need some login buttons? Thought so: http://bit.ly/U3qSIL
 3. Coding Choons: You can't get away without some pro coding choons. Here's 2
                   which will make your nipples hard :
                   a) http://soundcloud.com/phazing-004/dirty-south-phazing-radio-004
