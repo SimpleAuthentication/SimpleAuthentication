@@ -40,6 +40,7 @@
       <HintPath>..\..\packages\RestSharp.104.1\lib\net4\RestSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
@@ -48,6 +49,10 @@
     <Compile Include="AuthenticationException.cs" />
     <Compile Include="AuthenticationServiceSettingsFactory.cs" />
     <Compile Include="BaseAuthenticationServiceSettings.cs" />
+    <Compile Include="Config\ProviderConfiguration.cs" />
+    <Compile Include="Config\ProviderConfigurationHelper.cs" />
+    <Compile Include="Config\ProviderKey.cs" />
+    <Compile Include="Config\ProviderKeyCollection.cs" />
     <Compile Include="Facebook\DisplayType.cs" />
     <Compile Include="Facebook\FacebookAuthenticationServiceSettings.cs" />
     <Compile Include="Facebook\FakeFacebookProvider.cs" />
