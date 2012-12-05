@@ -5,9 +5,9 @@ namespace WorldDomination.Web.Authentication.Config
     public class ProviderKey : ConfigurationElement
     {
         [ConfigurationProperty("name", IsRequired = true, IsKey = true)]
-        public ProviderEnum Name
+        public ProviderType Name
         {
-            get { return (ProviderEnum)this["name"]; }
+            get { return (ProviderType)this["name"]; }
         }
 
         [ConfigurationProperty("key", IsRequired = true)]

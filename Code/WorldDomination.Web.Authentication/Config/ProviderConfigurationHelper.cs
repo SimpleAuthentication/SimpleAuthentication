@@ -51,7 +51,7 @@ namespace WorldDomination.Web.Authentication.Config
             return providerConfig;
         }
 
-        public static ProviderKey For(this ProviderConfiguration section, ProviderEnum providerEnumKey)
+        public static ProviderKey For(this ProviderConfiguration section, ProviderType providerEnumKey)
         {
 
             var provider = section.Providers[providerEnumKey];

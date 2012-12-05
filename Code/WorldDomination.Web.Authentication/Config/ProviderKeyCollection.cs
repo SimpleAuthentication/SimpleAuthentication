@@ -4,7 +4,7 @@ namespace WorldDomination.Web.Authentication.Config
 {
     public class ProviderKeyCollection : KeyValueConfigurationCollection
     {
-        public ProviderKey this[ProviderEnum provider]
+        public ProviderKey this[ProviderType provider]
         {
             get
             {
