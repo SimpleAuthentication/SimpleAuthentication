@@ -13,7 +13,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
         {
             var providers = (ProviderConfiguration) ConfigurationManager.GetSection("authProviders");
 
-            var facebookProvider = providers.Providers[ProviderEnum.Facebook];
+            var facebookProvider = providers.Providers[ProviderType.Facebook];
 
             Assert.Equal("testKey", facebookProvider.Key);
         }
@@ -23,7 +23,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
         {
             var providers = (ProviderConfiguration)ConfigurationManager.GetSection("authProviders");
 
-            var facebookProvider = providers.Providers[ProviderEnum.Twitter];
+            var facebookProvider = providers.Providers[ProviderType.Twitter];
 
             Assert.Null(facebookProvider);
         }
@@ -33,7 +33,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
         {
             Assert.Throws<KeyNotFoundException>(() =>
             {
-                ProviderConfigHelper.UseConfig().For(ProviderEnum.Twitter);
+                ProviderConfigHelper.UseConfig().For(ProviderType.Twitter);
             });
         }
 
@@ -42,7 +42,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
         {
             Assert.Throws<ApplicationException>(() =>
             {
-                ProviderConfigHelper.UseConfig("TestFile.config").For(ProviderEnum.Twitter);
+                ProviderConfigHelper.UseConfig("TestFile.config").For(ProviderType.Twitter);
             });
         }
     }

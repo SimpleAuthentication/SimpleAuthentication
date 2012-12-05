@@ -53,7 +53,6 @@
     <Compile Include="Config\ProviderConfigurationHelper.cs" />
     <Compile Include="Config\ProviderKey.cs" />
     <Compile Include="Config\ProviderKeyCollection.cs" />
-    <Compile Include="Config\ProviderEnum.cs" />
     <Compile Include="Facebook\DisplayType.cs" />
     <Compile Include="Facebook\FacebookAuthenticationServiceSettings.cs" />
     <Compile Include="Facebook\FakeFacebookProvider.cs" />
