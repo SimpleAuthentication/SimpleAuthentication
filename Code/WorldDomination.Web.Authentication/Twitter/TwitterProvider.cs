@@ -5,6 +5,7 @@ using CuttingEdge.Conditions;
 using RestSharp;
 using RestSharp.Authenticators;
 using RestSharp.Contrib;
+using WorldDomination.Web.Authentication.Config;
 
 namespace WorldDomination.Web.Authentication.Twitter
 {
@@ -19,6 +20,13 @@ namespace WorldDomination.Web.Authentication.Twitter
         private readonly string _consumerSecret;
         private readonly Uri _redirectUri;
         private readonly IRestClient _restClient;
+
+        public TwitterProvider(ProviderKey providerKey, Uri redirectUri)
+        {
+            _consumerKey = providerKey.Key;
+            _consumerSecret = providerKey.Secret;
+            _redirectUri = redirectUri;
+        }
 
         public TwitterProvider(string consumerKey, string consumerSecret, Uri redirectUri)
             : this(consumerKey, consumerSecret, redirectUri, null)
