@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
+using System.Linq;
 using WorldDomination.Web.Authentication.Config;
 using Xunit;
 
@@ -11,41 +11,49 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
     public class ConfigurationFacts
     {
         [Fact]
-        public void GivenTheKeyFacebook_ShouldFindConfigurationSection_AndReturnCorrectKeyAndSecret()
+        public void GivenAValidConfigSectionWithAFacebookKey_UseConfig_ReturnsAFacebookProviderWithACorrectKeyAndSecret()
         {
-            var providers = (ProviderConfiguration) ConfigurationManager.GetSection("authProviders");
+            // Arrange.
 
-            var facebookProvider = providers.Providers[ProviderType.Facebook];
+            // Act.
+            var authenticationProviders = ProviderConfigHelper.UseConfig();
+            var facebookProvider = authenticationProviders.Providers[ProviderType.Facebook];
 
+            // Assert.
             Assert.Equal("testKey", facebookProvider.Key);
+            Assert.Equal("testSecret", facebookProvider.Secret);
         }
 
         [Fact]
-        public void GivenTheKeyTwitter_ShouldNotFindConfigSection_ShouldBeNull()
+        public void GivenAValidConfigSectionWithAMisingProvider_ProvidersIndexer_ReturnsNull()
         {
-            var providers = (ProviderConfiguration)ConfigurationManager.GetSection("authProviders");
+            // Arrange.
+            var authenticationProviders = ProviderConfigHelper.UseConfig();
 
-            var facebookProvider = providers.Providers[ProviderType.Twitter];
+            // Act.
+            var facebookProvider = authenticationProviders.Providers[ProviderType.Twitter];
 
+            // Assert.
             Assert.Null(facebookProvider);
         }
 
         [Fact]
-        public void GivenTheKeyTwitter_UsingTheConfigHelper_ShouldThrow()
+        public void GivenAValidConfigSectionWithAMisingProvider_UsingConfigFor_ThrowsAKeyNotFoundException()
         {
-            Assert.Throws<KeyNotFoundException>(() =>
-            {
-                ProviderConfigHelper.UseConfig().For(ProviderType.Twitter);
-            });
+            // Arrange.
+
+            // Act & Assert.
+            Assert.Throws<KeyNotFoundException>(() => { ProviderConfigHelper.UseConfig().For(ProviderType.Twitter); });
         }
 
         [Fact]
-        public void GivenAnyKey_WhenFileDoesntExist_ShouldThrow()
+        public void GivenAMissingConfigFile_UseConfig_ThrowsAnApplicationException()
         {
-            Assert.Throws<ApplicationException>(() =>
-            {
-                ProviderConfigHelper.UseConfig("TestFile.config").For(ProviderType.Twitter);
-            });
+            // Arrange.
+            const string fileName = "TestFile.config";
+
+            // Act & Assert.
+            Assert.Throws<ApplicationException>(() => { ProviderConfigHelper.UseConfig(fileName).For(ProviderType.Twitter); });
         }
 
         [Fact]
@@ -54,15 +62,16 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             // Arrange.
             var providerConfiguration = ProviderConfigHelper.UseConfig();
             var providerCount = providerConfiguration.Providers.Count;
+            var redirectUri = new Uri("http://www.whatever.com/callback");
 
             // Act.
-            var authenticationService = new AuthenticationService(providerConfiguration);
+            var authenticationService = new AuthenticationService(providerConfiguration, redirectUri);
 
             // Assert.
             Assert.NotNull(authenticationService);
-            Assert.Equal(providerCount, ((IList<IAuthenticationProvider>)authenticationService.Providers).Count);
+            Assert.Equal(providerCount, authenticationService.Providers.Count());
         }
-    } 
+    }
 
     // ReSharper restore InconsistentNaming
 }

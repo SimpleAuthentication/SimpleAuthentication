@@ -21,19 +21,12 @@ namespace WorldDomination.Web.Authentication.Twitter
         private readonly Uri _redirectUri;
         private readonly IRestClient _restClient;
 
-        public TwitterProvider(ProviderKey providerKey, Uri redirectUri)
-        {
-            _consumerKey = providerKey.Key;
-            _consumerSecret = providerKey.Secret;
-            _redirectUri = redirectUri;
-        }
-
-        public TwitterProvider(string consumerKey, string consumerSecret, Uri redirectUri)
-            : this(consumerKey, consumerSecret, redirectUri, null)
+        public TwitterProvider(ProviderKey providerKey, Uri redirectUri, IRestClient restClient = null)
+            : this(providerKey.Key, providerKey.Secret, redirectUri, restClient)
         {
         }
 
-        public TwitterProvider(string consumerKey, string consumerSecret, Uri redirectUri, IRestClient restClient)
+        public TwitterProvider(string consumerKey, string consumerSecret, Uri redirectUri, IRestClient restClient = null)
         {
             Condition.Requires(consumerKey).IsNotNullOrEmpty();
             Condition.Requires(consumerSecret).IsNotNullOrEmpty();
@@ -99,12 +92,13 @@ namespace WorldDomination.Web.Authentication.Twitter
             var denied = parameters[DeniedKey];
             if (!string.IsNullOrEmpty(denied))
             {
-                throw new AuthenticationException("Failed to accept the Twitter App Authorization. Therefore, authentication didn't proceed.");
+                throw new AuthenticationException(
+                    "Failed to accept the Twitter App Authorization. Therefore, authentication didn't proceed.");
             }
 
             var oAuthToken = parameters[OAuthTokenKey];
             var oAuthVerifier = parameters[OAuthVerifierKey];
-            
+
             if (string.IsNullOrEmpty(oAuthToken) ||
                 string.IsNullOrEmpty(oAuthVerifier))
             {

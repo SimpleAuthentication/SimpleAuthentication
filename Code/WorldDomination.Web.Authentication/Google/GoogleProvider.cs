@@ -4,8 +4,6 @@ using System.Collections.Specialized;
 using System.Net;
 using CuttingEdge.Conditions;
 using RestSharp;
-using RestSharp.Authenticators;
-using RestSharp.Contrib;
 using WorldDomination.Web.Authentication.Config;
 
 namespace WorldDomination.Web.Authentication.Google
@@ -25,20 +23,14 @@ namespace WorldDomination.Web.Authentication.Google
         private readonly IRestClient _restClient;
         private readonly IList<string> _scope;
 
-        public GoogleProvider(ProviderKey providerKey, Uri redirectUri)
-        {
-            _clientId = providerKey.Key;
-            _clientSecret = providerKey.Secret;
-            _redirectUri = redirectUri;
-        }
-
-        public GoogleProvider(string clientId, string clientSecret, Uri redirectUri)
-            : this(clientId, clientSecret, redirectUri, null, null)
+        public GoogleProvider(ProviderKey providerKey, Uri redirectUri,
+                              IList<string> scope = null, IRestClient restClient = null)
+            : this(providerKey.Key, providerKey.Secret, redirectUri, scope, restClient)
         {
         }
 
-        public GoogleProvider(string clientId, string clientSecret, Uri redirectUri, IList<string> scope,
-                              IRestClient restClient)
+        public GoogleProvider(string clientId, string clientSecret, Uri redirectUri,
+                              IList<string> scope = null, IRestClient restClient = null)
         {
             Condition.Requires(clientId).IsNotNullOrEmpty();
             Condition.Requires(clientSecret).IsNotNullOrEmpty();
@@ -63,7 +55,7 @@ namespace WorldDomination.Web.Authentication.Google
         private static string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState = null)
         {
             Condition.Requires(parameters).IsNotNull().IsLongerThan(0);
-            
+
             /* Documentation:
                Google returns an authorization code to your application if the user grants your application the permissions it requested. 
                The authorization code is returned to your application in the query string parameter code. If the state parameter was included in the request,
@@ -71,13 +63,14 @@ namespace WorldDomination.Web.Authentication.Google
             var code = parameters["code"];
             var state = parameters["state"];
             var error = parameters["error"];
-            
+
             // CSRF (state) check.
             // NOTE: There is always a state provided. Even if an error is returned.
-            if (!string.IsNullOrEmpty(existingState) && 
+            if (!string.IsNullOrEmpty(existingState) &&
                 state != existingState)
             {
-                throw new AuthenticationException("The states do not match. It's possible that you may be a victim of a CSRF.");
+                throw new AuthenticationException(
+                    "The states do not match. It's possible that you may be a victim of a CSRF.");
             }
 
             // First check for any errors.
@@ -133,7 +126,8 @@ namespace WorldDomination.Web.Authentication.Google
                 string.IsNullOrEmpty(response.Data.TokenType))
             {
                 throw new AuthenticationException(
-                    "Retrieved a Google Access Token but it doesn't contain one or more of either: " + AccessTokenKey + ", " + ExpiresInKey +" or " + TokenTypeKey);
+                    "Retrieved a Google Access Token but it doesn't contain one or more of either: " + AccessTokenKey +
+                    ", " + ExpiresInKey + " or " + TokenTypeKey);
             }
 
             return response.Data;
@@ -149,7 +143,7 @@ namespace WorldDomination.Web.Authentication.Google
             {
                 var request = new RestRequest("/oauth2/v2/userinfo", Method.GET);
                 request.AddParameter(AccessTokenKey, accessToken);
-                
+
                 _restClient.BaseUrl = "https://www.googleapis.com";
                 response = _restClient.Execute<UserInfoResult>(request);
             }
@@ -174,7 +168,8 @@ namespace WorldDomination.Web.Authentication.Google
                 string.IsNullOrEmpty(response.Data.Name) ||
                 string.IsNullOrEmpty(response.Data.Locale))
             {
-                throw new AuthenticationException("Retrieve some user info from the Google Api, but we're missing one or more of either: Id, Email, Name and Locale.");
+                throw new AuthenticationException(
+                    "Retrieve some user info from the Google Api, but we're missing one or more of either: Id, Email, Name and Locale.");
             }
 
             return response.Data;
@@ -196,13 +191,15 @@ namespace WorldDomination.Web.Authentication.Google
             var scope = (_scope != null && _scope.Count > 0)
                             ? string.Format(ScopeKey, string.Join(" ", _scope))
                             : string.Empty;
-        
+
             var state = string.IsNullOrEmpty(authenticationServiceSettings.State)
                             ? string.Empty
                             : "&state=" + authenticationServiceSettings.State;
 
-            var oauthDialogUri = string.Format("https://accounts.google.com/o/oauth2/auth?client_id={0}&redirect_uri={1}&response_type=code{2}{3}",
-                                               _clientId, _redirectUri.AbsoluteUri, state, scope);
+            var oauthDialogUri =
+                string.Format(
+                    "https://accounts.google.com/o/oauth2/auth?client_id={0}&redirect_uri={1}&response_type=code{2}{3}",
+                    _clientId, _redirectUri.AbsoluteUri, state, scope);
 
             return new Uri(oauthDialogUri);
         }
@@ -225,7 +222,8 @@ namespace WorldDomination.Web.Authentication.Google
                        UserInformation = new UserInformation
                                          {
                                              Id = userInfo.Id,
-                                             Gender = (GenderType)Enum.Parse(typeof(GenderType), userInfo.Gender, true),
+                                             Gender =
+                                                 (GenderType) Enum.Parse(typeof (GenderType), userInfo.Gender, true),
                                              Name = userInfo.Name,
                                              Email = userInfo.Email,
                                              Locale = userInfo.Locale,
@@ -233,7 +231,6 @@ namespace WorldDomination.Web.Authentication.Google
                                              UserName = userInfo.GivenName
                                          }
                    };
-
         }
 
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
