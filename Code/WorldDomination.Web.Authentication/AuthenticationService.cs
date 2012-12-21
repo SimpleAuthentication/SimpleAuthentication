@@ -2,11 +2,28 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using CuttingEdge.Conditions;
+using WorldDomination.Web.Authentication.Config;
 
 namespace WorldDomination.Web.Authentication
 {
     public class AuthenticationService : IAuthenticationService
     {
+        public AuthenticationService()
+        {
+        }
+
+        public AuthenticationService(ProviderConfiguration providerConfiguration)
+        {
+            Condition.Requires(providerConfiguration).IsNotNull();
+            Condition.Requires(providerConfiguration.Providers).IsNotNull();
+
+            foreach (var provider in providerConfiguration.Providers)
+            {
+                // Grab the name.
+                int i = 0;
+                // Check to see we 
+            }
+        }
         #region Implementation of IAuthenticationService
 
         public IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; private set; }

@@ -6,6 +6,8 @@ using Xunit;
 
 namespace WorldDomination.Web.Authentication.Test.UnitTest
 {
+    // ReSharper disable InconsistentNaming
+
     public class ConfigurationFacts
     {
         [Fact]
@@ -45,5 +47,22 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 ProviderConfigHelper.UseConfig("TestFile.config").For(ProviderType.Twitter);
             });
         }
-    }
+
+        [Fact]
+        public void GivenAValidProviderConfigurationWithSomeKeys_NewAuthenticationService_HasSomeProvidersAdded()
+        {
+            // Arrange.
+            var providerConfiguration = ProviderConfigHelper.UseConfig();
+            var providerCount = providerConfiguration.Providers.Count;
+
+            // Act.
+            var authenticationService = new AuthenticationService(providerConfiguration);
+
+            // Assert.
+            Assert.NotNull(authenticationService);
+            Assert.Equal(providerCount, ((IList<IAuthenticationProvider>)authenticationService.Providers).Count);
+        }
+    } 
+
+    // ReSharper restore InconsistentNaming
 }
