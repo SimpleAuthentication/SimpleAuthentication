@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using WorldDomination.Web.Authentication.Config;
 using Xunit;
@@ -20,8 +21,20 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             var facebookProvider = authenticationProviders.Providers[ProviderType.Facebook];
 
             // Assert.
+            Assert.Equal(new Uri("http://www.mywebsite.com/authenticationCallback").AbsoluteUri, authenticationProviders.CallbackUri);
+            Assert.Equal("providerKey", authenticationProviders.CallbackQuerystringKey);
             Assert.Equal("testKey", facebookProvider.Key);
             Assert.Equal("testSecret", facebookProvider.Secret);
+        }
+
+        [Fact]
+        public void GivenAInvalidConfigurationSection_UseConfig_ThrowsAConfigurationErrorsException()
+        {
+            // Arrange.
+            const string fileName = "InvalidApp.config";
+
+            // Act & Assert.
+            Assert.Throws<ConfigurationErrorsException>(() => { ProviderConfigHelper.UseConfig(fileName,  "authenticationProviders"); });
         }
 
         [Fact]
@@ -62,14 +75,16 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             // Arrange.
             var providerConfiguration = ProviderConfigHelper.UseConfig();
             var providerCount = providerConfiguration.Providers.Count;
-            var redirectUri = new Uri("http://www.whatever.com/callback");
 
             // Act.
-            var authenticationService = new AuthenticationService(providerConfiguration, redirectUri);
+            var authenticationService = new AuthenticationService(providerConfiguration);
 
             // Assert.
             Assert.NotNull(authenticationService);
             Assert.Equal(providerCount, authenticationService.Providers.Count());
+            var firstProvider = authenticationService.Providers.First();
+            Assert.NotNull(firstProvider);
+            Assert.Equal("Facebook", firstProvider.Name);
         }
     }
 

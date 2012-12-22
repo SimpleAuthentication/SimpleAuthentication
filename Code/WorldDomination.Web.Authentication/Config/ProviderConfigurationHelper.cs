@@ -14,7 +14,7 @@ namespace WorldDomination.Web.Authentication.Config
         /// <param name="file">string: the name of a config file to load and check.</param>
         /// <param name="sectionName">Optional; string: name of the config file section. Defaults to 'authenticationProviders'</param>
         /// <returns>ProviderConfiguration: some configuration data.</returns>
-        public static ProviderConfiguration UseConfig(string file, string sectionName = "authenticationProviders")
+        public static ProviderConfiguration UseConfig(string file, string sectionName)
         {
             Condition.Requires(file).IsNotNullOrEmpty();
             Condition.Requires(sectionName).IsNotNullOrEmpty();

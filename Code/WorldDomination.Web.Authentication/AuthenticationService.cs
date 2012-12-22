@@ -16,25 +16,28 @@ namespace WorldDomination.Web.Authentication
         {
         }
 
-        public AuthenticationService(ProviderConfiguration providerConfiguration, Uri redirectUri,
+        public AuthenticationService(ProviderConfiguration providerConfiguration,
                                      IList<string> scope = null, IRestClient restClient = null)
         {
             Condition.Requires(providerConfiguration).IsNotNull();
             Condition.Requires(providerConfiguration.Providers).IsNotNull();
 
+            var redirectUri = string.Format("{0}?{1}=", providerConfiguration.CallbackUri, providerConfiguration.CallbackQuerystringKey);
             foreach (ProviderKey provider in providerConfiguration.Providers)
             {
-                IAuthenticationProvider authenticationProvider = null;
+                var providerSpecificRedirectUri = new Uri((redirectUri + provider.Name).ToLower());
+
+                IAuthenticationProvider authenticationProvider;
                 switch (provider.Name)
                 {
                     case ProviderType.Facebook:
-                        authenticationProvider = new FacebookProvider(provider, redirectUri, scope, restClient);
+                        authenticationProvider = new FacebookProvider(provider, providerSpecificRedirectUri, scope, restClient);
                         break;
                     case ProviderType.Google:
-                        authenticationProvider = new GoogleProvider(provider, redirectUri, scope, restClient);
+                        authenticationProvider = new GoogleProvider(provider, providerSpecificRedirectUri, scope, restClient);
                         break;
                     case ProviderType.Twitter:
-                        authenticationProvider = new TwitterProvider(provider, redirectUri, restClient);
+                        authenticationProvider = new TwitterProvider(provider, providerSpecificRedirectUri, restClient);
                         break;
                     default:
                         throw new ApplicationException(

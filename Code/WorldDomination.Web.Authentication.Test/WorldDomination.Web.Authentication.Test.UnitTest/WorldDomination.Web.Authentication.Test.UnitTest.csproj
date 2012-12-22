@@ -66,6 +66,10 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <Content Include="InvalidApp.config">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="EmptySection.config">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
