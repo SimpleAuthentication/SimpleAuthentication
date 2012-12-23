@@ -19,30 +19,14 @@ namespace WorldDomination.Web.Authentication.Facebook
         private readonly IRestClient _restClient;
         private readonly IList<string> _scope;
 
-        public FacebookProvider(ProviderKey providerKey, Uri redirectUri)
-        {
-            _clientId = providerKey.Key;
-            _clientSecret = providerKey.Secret;
-            _redirectUri = redirectUri;
-        }
-
-        public FacebookProvider(string clientId, string clientSecret, Uri redirectUri)
-            : this(clientId, clientSecret, redirectUri, null, null)
+        public FacebookProvider(ProviderKey providerKey, Uri redirectUri,
+                                IList<string> scope = null, IRestClient restClient = null) :
+                                    this(providerKey.Key, providerKey.Secret, redirectUri, scope, restClient)
         {
         }
 
-        public FacebookProvider(string clientId, string clientSecret, Uri redirectUri, IRestClient restClient)
-            : this(clientId, clientSecret, redirectUri, null, restClient)
-        {
-        }
-
-        public FacebookProvider(string clientId, string clientSecret, Uri redirectUri, IList<string> scope)
-            : this(clientId, clientSecret, redirectUri, scope, null)
-        {
-        }
-
-        public FacebookProvider(string clientId, string clientSecret, Uri redirectUri, IList<string> scope,
-                                IRestClient restClient)
+        public FacebookProvider(string clientId, string clientSecret, Uri redirectUri,
+                                IList<string> scope = null, IRestClient restClient = null)
         {
             Condition.Requires(clientId).IsNotNullOrEmpty();
             Condition.Requires(clientSecret).IsNotNullOrEmpty();
@@ -89,7 +73,8 @@ namespace WorldDomination.Web.Authentication.Facebook
 
             if (string.IsNullOrEmpty(code))
             {
-                throw new AuthenticationException("No code parameter provided in the response query string from Facebook.");
+                throw new AuthenticationException(
+                    "No code parameter provided in the response query string from Facebook.");
             }
 
             return code;
@@ -194,11 +179,13 @@ namespace WorldDomination.Web.Authentication.Facebook
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
             Condition.Requires(authenticationServiceSettings).IsNotNull();
-            
+
             var facebookAuthenticationSettings = authenticationServiceSettings as FacebookAuthenticationServiceSettings;
             Condition.Requires(facebookAuthenticationSettings).IsNotNull();
 
-            var baseUri = facebookAuthenticationSettings.IsMobile ? "https://m.facebook.com" : "https://www.facebook.com";
+            var baseUri = facebookAuthenticationSettings.IsMobile
+                              ? "https://m.facebook.com"
+                              : "https://www.facebook.com";
             var scope = (_scope != null && _scope.Count > 0)
                             ? "&scope=" + string.Join(",", _scope)
                             : string.Empty;

@@ -57,7 +57,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>())).Returns(It.IsAny<IRestResponse>);
                 var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"),
-                                                            mockRestClient.Object);
+                                                            null, mockRestClient.Object);
                 var queryStringParameters = new NameValueCollection
                                             {
                                                 {"code", "aaa"},
@@ -79,7 +79,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>())).Returns(It.IsAny<IRestResponse>);
                 var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"),
-                                                            mockRestClient.Object);
+                                                            null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                                             {
@@ -104,7 +104,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>())).Returns(It.IsAny<IRestResponse>);
                 var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"),
-                                                            mockRestClient.Object);
+                                                            null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                                             {
@@ -128,7 +128,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Throws(new Exception(exceptionMessage));
                 var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"),
-                                                            mockRestClient.Object);
+                                                            null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                                             {
@@ -160,7 +160,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                     .Returns(mockRestResponse.Object);
 
                 var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"),
-                                                            mockRestClient.Object);
+                                                            null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                                             {
@@ -190,7 +190,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                     .Returns(mockRestResponse.Object);
 
                 var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"),
-                                                            mockRestClient.Object);
+                                                            null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                                             {
@@ -223,7 +223,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                     .Throws(new Exception(exceptionMessage));
 
                 var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"),
-                                                            mockRestClient.Object);
+                                                            null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                                             {
@@ -258,7 +258,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                     .Returns(mockRestResponseApiMe.Object);
 
                 var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"),
-                                                            mockRestClient.Object);
+                                                            null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                                             {
@@ -307,7 +307,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                     .Returns(mockRestResponseApiMe.Object);
 
                 var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"),
-                                                            mockRestClient.Object);
+                                                            null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                                             {

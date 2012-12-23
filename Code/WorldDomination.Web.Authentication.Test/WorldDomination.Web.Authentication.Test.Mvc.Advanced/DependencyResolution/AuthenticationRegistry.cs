@@ -25,6 +25,8 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.DependencyResolut
                 authenticationService.AddProvider(twitterProvider);
             }
 
+
+
             For<IAuthenticationService>()
                 .Use(authenticationService)
                 .Named("Authentication Service.");

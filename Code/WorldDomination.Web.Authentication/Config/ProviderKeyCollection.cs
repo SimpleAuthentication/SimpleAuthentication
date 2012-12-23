@@ -6,18 +6,15 @@ namespace WorldDomination.Web.Authentication.Config
     {
         public ProviderKey this[ProviderType provider]
         {
-            get
-            {
-                return base.BaseGet(provider) as ProviderKey;
-            }
+            get { return BaseGet(provider) as ProviderKey; }
             set
             {
-                if (base.BaseGet(provider) != null)
+                if (BaseGet(provider) != null)
                 {
-                    var index = base.BaseIndexOf(base.BaseGet(provider));
-                    base.BaseRemoveAt(index);
+                    int index = BaseIndexOf(BaseGet(provider));
+                    BaseRemoveAt(index);
                 }
-                this.BaseAdd(0, value);
+                BaseAdd(0, value);
             }
         }
 
@@ -28,7 +25,7 @@ namespace WorldDomination.Web.Authentication.Config
 
         protected override object GetElementKey(ConfigurationElement element)
         {
-            return ((ProviderKey)element).Name;
-        } 
+            return ((ProviderKey) element).Name;
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using CuttingEdge.Conditions;
 
 namespace WorldDomination.Web.Authentication.Config
 {
@@ -10,10 +11,14 @@ namespace WorldDomination.Web.Authentication.Config
         /// Used for testing, gives you the ability to specify a different config file
         /// custom config file needs to be set to copy
         /// </summary>
-        /// <param name="file"></param>
-        /// <returns></returns>
-        public static ProviderConfiguration UseConfig(string file)
+        /// <param name="file">string: the name of a config file to load and check.</param>
+        /// <param name="sectionName">Optional; string: name of the config file section. Defaults to 'authenticationProviders'</param>
+        /// <returns>ProviderConfiguration: some configuration data.</returns>
+        public static ProviderConfiguration UseConfig(string file, string sectionName)
         {
+            Condition.Requires(file).IsNotNullOrEmpty();
+            Condition.Requires(sectionName).IsNotNullOrEmpty();
+
             var currentConfig = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
             var path = currentConfig.Substring(0, currentConfig.LastIndexOf(@"\", StringComparison.Ordinal));
 
@@ -29,23 +34,30 @@ namespace WorldDomination.Web.Authentication.Config
                 throw new ApplicationException(string.Format("the config file {0} does not exist or isn't set to 'copy' on build", file));
             }
 
-            var providerConfig = config.GetSection("authProviders") as ProviderConfiguration;
+            var providerConfig = config.GetSection(sectionName) as ProviderConfiguration;
 
             if (providerConfig == null)
             {
-                throw new ApplicationException("authProviders config section is missing from your .config file");
+                throw new ApplicationException("Missing the config section [" + sectionName + "] from your .config file");
             }
 
             return providerConfig;
         }
 
-        public static ProviderConfiguration UseConfig()
+        /// <summary>
+        /// Retrieves the authentication settings from the applications .config file.
+        /// </summary>
+        /// <param name="sectionName">Optional; string: name of the config file section. Defaults to 'authenticationProviders'</param>
+        /// <returns>ProviderConfiguration: some configuration data.</returns>
+        public static ProviderConfiguration UseConfig(string sectionName = "authenticationProviders")
         {
-            var providerConfig = ConfigurationManager.GetSection("authProviders") as ProviderConfiguration;
+            Condition.Requires(sectionName).IsNotNullOrEmpty();
+
+            var providerConfig = ConfigurationManager.GetSection(sectionName) as ProviderConfiguration;
 
             if (providerConfig == null)
             {
-                throw new ApplicationException("authProviders config section is missing from your .config file");
+                throw new ApplicationException("Missing the config section [" + sectionName + "] from your .config file");
             }
 
             return providerConfig;
@@ -53,7 +65,6 @@ namespace WorldDomination.Web.Authentication.Config
 
         public static ProviderKey For(this ProviderConfiguration section, ProviderType providerEnumKey)
         {
-
             var provider = section.Providers[providerEnumKey];
 
             if (provider == null)
@@ -63,5 +74,7 @@ namespace WorldDomination.Web.Authentication.Config
 
             return provider;
         }
+
+        //public static 
     }
 }

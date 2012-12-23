@@ -2,11 +2,52 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using CuttingEdge.Conditions;
+using RestSharp;
+using WorldDomination.Web.Authentication.Config;
+using WorldDomination.Web.Authentication.Facebook;
+using WorldDomination.Web.Authentication.Google;
+using WorldDomination.Web.Authentication.Twitter;
 
 namespace WorldDomination.Web.Authentication
 {
     public class AuthenticationService : IAuthenticationService
     {
+        public AuthenticationService()
+        {
+        }
+
+        public AuthenticationService(ProviderConfiguration providerConfiguration,
+                                     IList<string> scope = null, IRestClient restClient = null)
+        {
+            Condition.Requires(providerConfiguration).IsNotNull();
+            Condition.Requires(providerConfiguration.Providers).IsNotNull();
+
+            var redirectUri = string.Format("{0}?{1}=", providerConfiguration.CallbackUri, providerConfiguration.CallbackQuerystringKey);
+            foreach (ProviderKey provider in providerConfiguration.Providers)
+            {
+                var providerSpecificRedirectUri = new Uri((redirectUri + provider.Name).ToLower());
+
+                IAuthenticationProvider authenticationProvider;
+                switch (provider.Name)
+                {
+                    case ProviderType.Facebook:
+                        authenticationProvider = new FacebookProvider(provider, providerSpecificRedirectUri, scope, restClient);
+                        break;
+                    case ProviderType.Google:
+                        authenticationProvider = new GoogleProvider(provider, providerSpecificRedirectUri, scope, restClient);
+                        break;
+                    case ProviderType.Twitter:
+                        authenticationProvider = new TwitterProvider(provider, providerSpecificRedirectUri, restClient);
+                        break;
+                    default:
+                        throw new ApplicationException(
+                            "Unhandled ProviderType found - unable to know which Provider Type to create.");
+                }
+
+                AddProvider(authenticationProvider);
+            }
+        }
+
         #region Implementation of IAuthenticationService
 
         public IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; private set; }
@@ -29,7 +70,7 @@ namespace WorldDomination.Web.Authentication
             }
 
             var providerName = authenticationProvider.Name.ToLowerInvariant();
-            
+
             // Does this provider already exist?
             if (AuthenticationProviders.ContainsKey(providerName))
             {
@@ -49,7 +90,7 @@ namespace WorldDomination.Web.Authentication
 
             // Retrieve the default settings for this provider.
             var authenticationServiceSettings = authenticationProvider.DefaultAuthenticationServiceSettings;
-            
+
             return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
         }
 
