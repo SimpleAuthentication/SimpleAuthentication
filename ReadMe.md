@@ -33,7 +33,7 @@ That's It.
 
 So install this bad boy :
 
-[![Yes! Install this package!!](http://i.imgur.com/FM21h.png)](http://nuget.org/packages/World-Domination.Web.Authentication)
+[![Yes! Install this package!!](http://i.imgur.com/FM21h.png)](http://nuget.org/packages/WorldDomination.Web.Authentication)
 
 ## Code or GTFO ##
 
@@ -56,7 +56,7 @@ public ActionResult AuthenticateCallback(string providerKey)
 
 ## Ok. You had me at Bad Luck Brian. Now what?
 
-1. Read the [sample code pages in the project's Wiki](https://github.com/PureKrome/World-Domination.Web.Authentication/wiki) - take 1 minute to grok.
+1. Read the [sample code pages in the project's Wiki](https://github.com/PureKrome/WorldDomination.Web.Authentication/wiki) - take 1 minute to grok.
 2. Install nuget pacakge.
 3. Win.
 
