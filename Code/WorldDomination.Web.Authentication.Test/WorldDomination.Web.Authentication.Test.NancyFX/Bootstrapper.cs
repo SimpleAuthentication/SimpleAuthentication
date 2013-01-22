@@ -36,6 +36,7 @@ namespace WorldDomination.Web.Authentication.Test.NancyFX
             var googleProvider = new GoogleProvider(GoogleConsumerKey, GoogleConsumerSecret);
 
             var authenticationService = new AuthenticationService();
+
             authenticationService.AddProvider(twitterProvider);
             authenticationService.AddProvider(facebookProvider);
             authenticationService.AddProvider(googleProvider);
