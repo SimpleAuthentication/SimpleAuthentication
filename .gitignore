@@ -35,3 +35,5 @@ App_Data/
 [Tt]est[Rr]esult*
 [Bb]uild[Ll]og.*
 *.sln.DotSettings.*
+*.ncrunchproject
+*.ncrunchsolution

@@ -47,7 +47,6 @@
   <ItemGroup>
     <Compile Include="AuthenticatedClient.cs" />
     <Compile Include="AuthenticationException.cs" />
-    <Compile Include="AuthenticationServiceSettingsFactory.cs" />
     <Compile Include="BaseAuthenticationServiceSettings.cs" />
     <Compile Include="Config\ProviderConfiguration.cs" />
     <Compile Include="Config\ProviderConfigurationHelper.cs" />

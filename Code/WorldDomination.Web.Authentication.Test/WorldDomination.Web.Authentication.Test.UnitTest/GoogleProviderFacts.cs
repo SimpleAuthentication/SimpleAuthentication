@@ -18,7 +18,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             public void GivenADifferentStateValue_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"));
+                var googleProvider = new GoogleProvider("aa", "bb");
                 var queryStringParameters = new NameValueCollection
                                             {
                                                 {"code", "a"},
@@ -39,7 +39,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             public void GivenGoogleReturnedAnError_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"));
+                var googleProvider = new GoogleProvider("aa", "bb");
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                                             {
@@ -65,7 +65,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             public void GivenNoCodeAndNoErrorWasReturned_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"));
+                var googleProvider = new GoogleProvider("aa", "bb");
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                                             {
@@ -83,6 +83,38 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             }
 
             [Fact]
+            public void GivenANullCallbackUriWhileTryingToRetrieveAnAccessToken_AuthenticateClient_ThrowsAnException()
+            {
+                // Arrange.
+                var mockRestClient = new Mock<IRestClient>();
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
+                mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.BadRequest);
+                mockRestResponse.Setup(x => x.StatusDescription).Returns("Bad Request");
+                mockRestResponse.Setup(x => x.Content).Returns("{\n  \"error\" : \"invalid_request\"\n}");
+                mockRestClient
+                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
+                    .Returns(mockRestResponse.Object);
+                var googleProvider = new GoogleProvider("aa", "bb", null,
+                                                        mockRestClient.Object);
+                const string existingState = "http://2p1s.com";
+                var queryStringParameters = new NameValueCollection
+                                            {
+                                                {"code", "aaa"},
+                                                {"state", existingState}
+                                            };
+
+                // Act.
+                var result = Assert.Throws<AuthenticationException>(
+                    () => googleProvider.AuthenticateClient(queryStringParameters, existingState));
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal(
+                    "Failed to obtain an Access Token from Google OR the the response was not an HTTP Status 200 OK. Response Status: BadRequest. Response Description: Bad Request",
+                    result.Message);
+            }
+
+            [Fact]
             public void GivenAnErrorOccuredWhileTryingToRetrieveAnAccessToken_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
@@ -91,7 +123,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                     "If God says he was not created by a creator, does that mean: god is an aetheist?";
                 mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Throws(new InvalidOperationException(errorMessage));
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null,
+                var googleProvider = new GoogleProvider("aa", "bb", null,
                                                         mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
@@ -122,7 +154,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null,
+                var googleProvider = new GoogleProvider("aa", "bb", null,
                                                         mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
@@ -153,7 +185,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null,
+                var googleProvider = new GoogleProvider("aa", "bb", null,
                                                         mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
@@ -201,7 +233,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponseUserInfo.Object);
 
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null,
+                var googleProvider = new GoogleProvider("aa", "bb", null,
                                                         mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
@@ -249,7 +281,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponseUserInfo.Object);
 
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null,
+                var googleProvider = new GoogleProvider("aa", "bb", null,
                                                         mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
@@ -312,7 +344,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponseUserInfo.Object);
 
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.google.com"), null,
+                var googleProvider = new GoogleProvider("aa", "bb", null,
                                                         mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
 
@@ -347,11 +379,16 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             public void GivenSomeState_RedirectToAuthenticate_ReturnsAUri()
             {
                 // Arrange.
-                var googleProvider = new GoogleProvider("aa", "bb", new Uri("http://wwww.pewpew.com"));
+                var googleProvider = new GoogleProvider("aa", "bb");
 
                 // Act.
                 var result =
-                    googleProvider.RedirectToAuthenticate(new GoogleAuthenticationServiceSettings {State = "bleh"});
+                    googleProvider.RedirectToAuthenticate(new GoogleAuthenticationServiceSettings
+                                                          {
+                                                              CallBackUri =
+                                                                  new Uri("http://wwww.pewpew.com/"),
+                                                              State = "bleh"
+                                                          });
 
                 // Assert.
                 Assert.NotNull(result);

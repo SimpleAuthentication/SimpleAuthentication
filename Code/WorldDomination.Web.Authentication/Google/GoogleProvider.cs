@@ -19,26 +19,23 @@ namespace WorldDomination.Web.Authentication.Google
 
         private readonly string _clientId;
         private readonly string _clientSecret;
-        private readonly Uri _redirectUri;
         private readonly IRestClient _restClient;
         private readonly IList<string> _scope;
 
-        public GoogleProvider(ProviderKey providerKey, Uri redirectUri,
+        public GoogleProvider(ProviderKey providerKey,
                               IList<string> scope = null, IRestClient restClient = null)
-            : this(providerKey.Key, providerKey.Secret, redirectUri, scope, restClient)
+            : this(providerKey.Key, providerKey.Secret, scope, restClient)
         {
         }
 
-        public GoogleProvider(string clientId, string clientSecret, Uri redirectUri,
+        public GoogleProvider(string clientId, string clientSecret,
                               IList<string> scope = null, IRestClient restClient = null)
         {
             Condition.Requires(clientId).IsNotNullOrEmpty();
             Condition.Requires(clientSecret).IsNotNullOrEmpty();
-            Condition.Requires(redirectUri).IsNotNull();
 
             _clientId = clientId;
             _clientSecret = clientSecret;
-            _redirectUri = redirectUri;
 
             // Optionals.
             _scope = scope == null ||
@@ -100,7 +97,10 @@ namespace WorldDomination.Web.Authentication.Google
                 var request = new RestRequest("/o/oauth2/token", Method.POST);
                 request.AddParameter("client_id", _clientId);
                 request.AddParameter("client_secret", _clientSecret);
-                request.AddParameter("redirect_uri", _redirectUri.AbsoluteUri);
+                if (CallBackUri != null)
+                {
+                    request.AddParameter("redirect_uri", CallBackUri.AbsoluteUri);
+                }
                 request.AddParameter("code", authorizationCode);
                 request.AddParameter("grant_type", "authorization_code");
                 response = _restClient.Execute<AccessTokenResult>(request);
@@ -182,9 +182,16 @@ namespace WorldDomination.Web.Authentication.Google
             get { return "Google"; }
         }
 
+        public Uri CallBackUri { get; private set; }
+
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            Condition.Requires(authenticationServiceSettings).IsNotNull();
+            Condition.WithExceptionOnFailure<ArgumentNullException>()
+                .Requires(authenticationServiceSettings).IsNotNull();
+            Condition.Requires(authenticationServiceSettings.CallBackUri).IsNotNull();
+
+            // Remember the callback uri.
+            CallBackUri = authenticationServiceSettings.CallBackUri;
 
             // Do we have any scope options?
             // NOTE: Google uses a space-delimeted string for their scope key.
@@ -199,7 +206,7 @@ namespace WorldDomination.Web.Authentication.Google
             var oauthDialogUri =
                 string.Format(
                     "https://accounts.google.com/o/oauth2/auth?client_id={0}&redirect_uri={1}&response_type=code{2}{3}",
-                    _clientId, _redirectUri.AbsoluteUri, state, scope);
+                    _clientId, CallBackUri.AbsoluteUri, state, scope);
 
             return new Uri(oauthDialogUri);
         }

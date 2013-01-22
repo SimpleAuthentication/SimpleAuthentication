@@ -30,6 +30,8 @@ namespace WorldDomination.Web.Authentication
             }
         }
 
+        public Uri CallBackUri { get; set; }
+
         public string State { get; set; }
 
         #endregion

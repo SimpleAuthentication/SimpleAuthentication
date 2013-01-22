@@ -23,12 +23,14 @@ namespace WorldDomination.Web.Authentication.Google
             get { return "Google"; }
         }
 
+        public Uri CallBackUri { get; private set; }
+
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            if (!string.IsNullOrEmpty(RedirectToAuthenticateExceptionMessage))
-            {
-                throw new AuthenticationException(RedirectToAuthenticateExceptionMessage);
-            }
+            Condition.WithExceptionOnFailure<AuthenticationException>()
+                     .Requires(RedirectToAuthenticateExceptionMessage).IsNotNullOrEmpty();
+
+            CallBackUri = authenticationServiceSettings.CallBackUri;
 
             return _redirectToAuthenticateUri ?? new Uri("http://bit.ly/RD3lQT");
         }

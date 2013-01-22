@@ -15,14 +15,11 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.DependencyResolut
                                      {
                                          var authenticationRegistry = new AuthenticationRegistry(
                                              new FacebookProvider(ConfigurationManager.AppSettings["FacebookAppId"],
-                                                                  ConfigurationManager.AppSettings["FacebookAppSecret"],
-                                                                  new Uri(ConfigurationManager.AppSettings["FacebookRedirectUri"])),
+                                                                  ConfigurationManager.AppSettings["FacebookAppSecret"]),
                                              new GoogleProvider(ConfigurationManager.AppSettings["GoogleConsumerKey"],
-                                                                ConfigurationManager.AppSettings["GoogleConsumerSecret"],
-                                                                new Uri(ConfigurationManager.AppSettings["GoogleConsumerRedirectUri"])),
+                                                                ConfigurationManager.AppSettings["GoogleConsumerSecret"]),
                                              new TwitterProvider(ConfigurationManager.AppSettings["TwitterConsumerKey"],
-                                                                 ConfigurationManager.AppSettings["TwitterConsumerSecret"],
-                                                                 new Uri(ConfigurationManager.AppSettings["TwitterConsumerRedirectUri"]))
+                                                                 ConfigurationManager.AppSettings["TwitterConsumerSecret"])
                                              );
                                          x.AddRegistry(authenticationRegistry);
                                      });

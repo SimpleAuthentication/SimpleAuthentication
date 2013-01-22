@@ -15,26 +15,23 @@ namespace WorldDomination.Web.Authentication.Facebook
     {
         private readonly string _clientId;
         private readonly string _clientSecret;
-        private readonly Uri _redirectUri;
         private readonly IRestClient _restClient;
         private readonly IList<string> _scope;
 
-        public FacebookProvider(ProviderKey providerKey, Uri redirectUri,
+        public FacebookProvider(ProviderKey providerKey, 
                                 IList<string> scope = null, IRestClient restClient = null) :
-                                    this(providerKey.Key, providerKey.Secret, redirectUri, scope, restClient)
+                                    this(providerKey.Key, providerKey.Secret, scope, restClient)
         {
         }
 
-        public FacebookProvider(string clientId, string clientSecret, Uri redirectUri,
+        public FacebookProvider(string clientId, string clientSecret, 
                                 IList<string> scope = null, IRestClient restClient = null)
         {
             Condition.Requires(clientId).IsNotNullOrEmpty();
             Condition.Requires(clientSecret).IsNotNullOrEmpty();
-            Condition.Requires(redirectUri).IsNotNull();
 
             _clientId = clientId;
             _clientSecret = clientSecret;
-            _redirectUri = redirectUri;
 
             // Optionals.
             _scope = scope ?? new List<string> {"email"};
@@ -91,8 +88,10 @@ namespace WorldDomination.Web.Authentication.Facebook
                 restRequest.AddParameter("client_id", _clientId);
                 restRequest.AddParameter("client_secret", _clientSecret);
                 restRequest.AddParameter("code", code);
-                restRequest.AddParameter("redirect_uri", _redirectUri.AbsoluteUri);
-
+                if (CallBackUri != null)
+                {
+                    restRequest.AddParameter("redirect_uri", CallBackUri.AbsoluteUri);
+                }
                 response = _restClient.Execute(restRequest);
             }
             catch (Exception exception)
@@ -176,12 +175,18 @@ namespace WorldDomination.Web.Authentication.Facebook
             get { return "Facebook"; }
         }
 
+        public Uri CallBackUri { get; private set; }
+
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            Condition.Requires(authenticationServiceSettings).IsNotNull();
+            Condition.WithExceptionOnFailure<ArgumentNullException>()
+                .Requires(authenticationServiceSettings).IsNotNull();
 
             var facebookAuthenticationSettings = authenticationServiceSettings as FacebookAuthenticationServiceSettings;
             Condition.Requires(facebookAuthenticationSettings).IsNotNull();
+
+            // Remember the callback uri.
+            CallBackUri = authenticationServiceSettings.CallBackUri;
 
             var baseUri = facebookAuthenticationSettings.IsMobile
                               ? "https://m.facebook.com"
@@ -200,7 +205,7 @@ namespace WorldDomination.Web.Authentication.Facebook
             // NOTE: Facebook is case-sensitive anal retentive with regards to their uri + querystring params.
             //       So ... we'll lowercase the entire biatch. Thanks, Facebook :(
             var oauthDialogUri = string.Format("{0}/dialog/oauth?client_id={1}{2}{3}{4}&redirect_uri={5}",
-                                               baseUri, _clientId, state, scope, display, _redirectUri.AbsoluteUri);
+                                               baseUri, _clientId, state, scope, display, CallBackUri.AbsoluteUri);
 
             return new Uri(oauthDialogUri);
         }
