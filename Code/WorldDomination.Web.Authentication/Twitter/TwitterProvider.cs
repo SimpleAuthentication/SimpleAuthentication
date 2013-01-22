@@ -18,23 +18,20 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         private readonly string _consumerKey;
         private readonly string _consumerSecret;
-        private readonly Uri _redirectUri;
         private readonly IRestClient _restClient;
 
-        public TwitterProvider(ProviderKey providerKey, Uri redirectUri, IRestClient restClient = null)
-            : this(providerKey.Key, providerKey.Secret, redirectUri, restClient)
+        public TwitterProvider(ProviderKey providerKey, IRestClient restClient = null)
+            : this(providerKey.Key, providerKey.Secret, restClient)
         {
         }
 
-        public TwitterProvider(string consumerKey, string consumerSecret, Uri redirectUri, IRestClient restClient = null)
+        public TwitterProvider(string consumerKey, string consumerSecret, IRestClient restClient = null)
         {
             Condition.Requires(consumerKey).IsNotNullOrEmpty();
             Condition.Requires(consumerSecret).IsNotNullOrEmpty();
-            Condition.Requires(redirectUri).IsNotNull();
 
             _consumerKey = consumerKey;
             _consumerSecret = consumerSecret;
-            _redirectUri = redirectUri;
 
             // IRestClient can be optional.
             _restClient = restClient ?? new RestClient("https://api.twitter.com");
@@ -47,7 +44,7 @@ namespace WorldDomination.Web.Authentication.Twitter
             try
             {
                 _restClient.Authenticator = OAuth1Authenticator.ForRequestToken(_consumerKey, _consumerSecret,
-                                                                                _redirectUri.AbsoluteUri);
+                                                                                CallBackUri.AbsoluteUri);
                 var request = new RestRequest("oauth/request_token", Method.POST);
                 response = _restClient.Execute(request);
             }
@@ -115,9 +112,12 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         private AccessTokenResult RetrieveAccessToken(VerifierResult verifierResult)
         {
-            Condition.Requires(verifierResult).IsNotNull();
-            Condition.Requires(verifierResult.OAuthToken).IsNotNullOrEmpty();
-            Condition.Requires(verifierResult.OAuthVerifier).IsNotNullOrEmpty();
+            Condition.WithExceptionOnFailure<ArgumentNullException>()
+                .Requires(verifierResult).IsNotNull();
+            Condition.WithExceptionOnFailure<ArgumentNullException>()
+                .Requires(verifierResult.OAuthToken).IsNotNullOrEmpty();
+            Condition.WithExceptionOnFailure<ArgumentNullException>()
+                .Requires(verifierResult.OAuthVerifier).IsNotNullOrEmpty();
 
             IRestResponse response;
             try
@@ -153,9 +153,12 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         private VerifyCredentialsResult VerifyCredentials(AccessTokenResult accessTokenResult)
         {
-            Condition.Requires(accessTokenResult).IsNotNull();
-            Condition.Requires(accessTokenResult.AccessToken).IsNotNullOrEmpty();
-            Condition.Requires(accessTokenResult.AccessTokenSecret).IsNotNullOrEmpty();
+            Condition.WithExceptionOnFailure<ArgumentNullException>()
+                .Requires(accessTokenResult).IsNotNull();
+            Condition.WithExceptionOnFailure<ArgumentNullException>()
+                .Requires(accessTokenResult.AccessToken).IsNotNullOrEmpty();
+            Condition.WithExceptionOnFailure<ArgumentNullException>()
+                .Requires(accessTokenResult.AccessTokenSecret).IsNotNullOrEmpty();
 
             IRestResponse<VerifyCredentialsResult> response;
             try
@@ -193,9 +196,14 @@ namespace WorldDomination.Web.Authentication.Twitter
             get { return "Twitter"; }
         }
 
+        public Uri CallBackUri { get; private set; }
+
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            Condition.Requires(authenticationServiceSettings).IsNotNull();
+            Condition.WithExceptionOnFailure<ArgumentNullException>()
+                .Requires(authenticationServiceSettings).IsNotNull();
+
+            CallBackUri = authenticationServiceSettings.CallBackUri;
 
             // First we need to grab a request token.
             var oAuthToken = RetrieveRequestToken();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Web;
 using System.Web.Mvc;
 using CuttingEdge.Conditions;
 using WorldDomination.Web.Authentication.Facebook;
@@ -29,6 +30,9 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.Controllers
             // Which provider are we after?
             var settings = AuthenticationServiceSettingsFactory.GetAuthenticateServiceSettings(providerKey);
 
+            // Provide the callBack instead of using the config file entry (for the use of this demo).
+            settings.CallBackUri = new Uri(ToAbsoluteUrl(Url.Action("AuthenticateCallback", new {providerKey})));
+
             // We need to remember the state for some XSS protection.
             Session[SessionStateKey] = Guid.NewGuid();
             settings.State = Session[SessionStateKey].ToString();
@@ -48,7 +52,14 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.Controllers
             // Grab the Uri we need redirect to.
             var uri = _authenticationService.RedirectToAuthenticationProvider(new FacebookAuthenticationServiceSettings
                                                                               {
-                                                                                  State = Session[SessionStateKey].ToString(),
+                                                                                  CallBackUri =
+                                                                                      new Uri(
+                                                                                      ToAbsoluteUrl(
+                                                                                          Url.Action(
+                                                                                              "AuthenticateCallback",
+                                                                                              new {providerKey = "facebook"}))),
+                                                                                  State =
+                                                                                      Session[SessionStateKey].ToString(),
                                                                                   IsMobile = true
                                                                               });
 
@@ -70,10 +81,11 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.Controllers
                 // It's possible that a person might hit this resource directly, before any session value
                 // has been set. As such, we should just fake some state up, which will not match the
                 // CSRF check.
-                var state = (Guid)(Session[SessionStateKey] ?? Guid.NewGuid());
-                
+                var state = (Guid) (Session[SessionStateKey] ?? Guid.NewGuid());
+
                 // Complete the authentication process by retrieving the UserInformation from the provider.
-                model.AuthenticatedClient = _authenticationService.CheckCallback(providerKey, Request.Params, state.ToString());
+                model.AuthenticatedClient = _authenticationService.CheckCallback(providerKey, Request.Params,
+                                                                                 state.ToString());
 
                 // Clean up after ourselves like a nice little boy/girl/monster we are.
                 Session.Remove(SessionStateKey);
@@ -84,6 +96,35 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.Controllers
             }
 
             return View(model);
+        }
+
+        // Based upon StackOverflow Q: http://stackoverflow.com/questions/3681052/get-absolute-url-from-relative-path-refactored-method
+        private string ToAbsoluteUrl(string relativeUrl)
+        {
+            if (string.IsNullOrEmpty(relativeUrl))
+            {
+                return relativeUrl;
+            }
+
+            if (HttpContext == null)
+            {
+                return relativeUrl;
+            }
+
+            if (relativeUrl.StartsWith("/"))
+            {
+                relativeUrl = relativeUrl.Insert(0, "~");
+            }
+            if (!relativeUrl.StartsWith("~/"))
+            {
+                relativeUrl = relativeUrl.Insert(0, "~/");
+            }
+
+            var url = HttpContext.Request.Url;
+            var port = url.Port != 80 ? (":" + url.Port) : string.Empty;
+
+            return string.Format("{0}://{1}{2}{3}",
+                                 url.Scheme, url.Host, port, VirtualPathUtility.ToAbsolute(relativeUrl));
         }
     }
 }

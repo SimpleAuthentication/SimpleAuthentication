@@ -23,12 +23,14 @@ namespace WorldDomination.Web.Authentication.Twitter
             get { return "Twitter"; }
         }
 
+        public Uri CallBackUri { get; private set; }
+
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            if (!string.IsNullOrEmpty(RedirectToAuthenticateExceptionMessage))
-            {
-                throw new AuthenticationException(RedirectToAuthenticateExceptionMessage);
-            }
+            Condition.WithExceptionOnFailure<AuthenticationException>()
+                     .Requires(RedirectToAuthenticateExceptionMessage).IsNotNullOrEmpty();
+            
+            CallBackUri = authenticationServiceSettings.CallBackUri;
 
             return _redirectToAuthenticateUri ?? new Uri("bitly.com/Ttw62r");
         }

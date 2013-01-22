@@ -23,12 +23,14 @@ namespace WorldDomination.Web.Authentication.Facebook
             get { return "Facebook"; }
         }
 
+        public Uri CallBackUri { get; private set; }
+
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            if (!string.IsNullOrEmpty(RedirectToAuthenticateExceptionMessage))
-            {
-                throw new AuthenticationException(RedirectToAuthenticateExceptionMessage);
-            }
+            Condition.WithExceptionOnFailure<AuthenticationException>()
+                     .Requires(RedirectToAuthenticateExceptionMessage).IsNotNullOrEmpty();
+
+            CallBackUri = authenticationServiceSettings.CallBackUri;
 
             return _redirectToAuthenticateUri ?? new Uri("http://some.fake.uri/with/lots/of/pewpew");
         }

@@ -18,7 +18,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 var authenticationService = new AuthenticationService();
 
                 // Act.
-                authenticationService.AddProvider(new FacebookProvider("a", "b", new Uri("http://www.google.com")));
+                authenticationService.AddProvider(new FacebookProvider("a", "b"));
 
                 // Assert.
                 var providers = authenticationService.AuthenticationProviders;
@@ -32,10 +32,10 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             {
                 // Arrange.
                 var authenticationService = new AuthenticationService();
-                var facebookProvider = new FacebookProvider("a", "b", new Uri("http://www.google.com"));
+                var facebookProvider = new FacebookProvider("a", "b");
                 // Act.
                 authenticationService.AddProvider(facebookProvider);
-                var result = Assert.Throws<AuthenticationException>( 
+                var result = Assert.Throws<AuthenticationException>(
                     () => authenticationService.AddProvider(facebookProvider));
 
                 // Assert.
@@ -66,10 +66,10 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             {
                 // Arrange.
                 var authenticationService = new AuthenticationService();
-                authenticationService.AddProvider(new FacebookProvider("aa", "bb", new Uri("http://www.whatever.com")));
+                authenticationService.AddProvider(new FacebookProvider("aa", "bb"));
 
                 // Act.
-                var result = authenticationService.RedirectToAuthenticationProvider("Facebook");
+                var result = authenticationService.RedirectToAuthenticationProvider("Facebook", new Uri("http://www.whatever.com"));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -81,11 +81,12 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             {
                 // Arrange.
                 var authenticationService = new AuthenticationService();
-                authenticationService.AddProvider(new FacebookProvider("aa", "bb", new Uri("http://www.whatever.com")));
+                authenticationService.AddProvider(new FacebookProvider("aa", "bb"));
 
                 // Act.
                 var authenticationServiceSettings = AuthenticationServiceSettingsFactory.GetAuthenticateServiceSettings("facebook");
                 authenticationServiceSettings.State = "pewpew";
+                authenticationServiceSettings.CallBackUri = new Uri("http://www.whatever.com");
                 var result = authenticationService.RedirectToAuthenticationProvider(authenticationServiceSettings);
 
                 // Assert.

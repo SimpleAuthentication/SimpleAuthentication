@@ -13,7 +13,7 @@ namespace WorldDomination.Web.Authentication
             Condition.Requires(providerKey).IsNotNullOrEmpty();
 
             // Convert the string to an enumeration.
-            var providerType = ProviderType.Unknown;
+            ProviderType providerType;
             if (!Enum.TryParse(providerKey, true, out providerType))
             {
                 return null;

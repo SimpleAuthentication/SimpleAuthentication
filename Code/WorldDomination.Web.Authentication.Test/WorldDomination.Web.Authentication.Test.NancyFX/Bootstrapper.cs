@@ -1,5 +1,4 @@
-﻿using System;
-using CuttingEdge.Conditions;
+﻿using CuttingEdge.Conditions;
 using Nancy;
 using Nancy.Bootstrapper;
 using Nancy.Session;
@@ -32,17 +31,9 @@ namespace WorldDomination.Web.Authentication.Test.NancyFX
         {
             Condition.Requires(container).IsNotNull();
 
-            var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret,
-                                                      new Uri(
-                                                          "http://localhost:6969/AuthenticateCallback?providerKey=Twitter"));
-
-            var facebookProvider = new FacebookProvider(FacebookAppId, FacebookAppSecret,
-                                                        new Uri(
-                                                            "http://localhost:6969/AuthenticateCallback?providerKey=facebook"));
-
-            var googleProvider = new GoogleProvider(GoogleConsumerKey, GoogleConsumerSecret,
-                                                    new Uri(
-                                                        "http://localhost:6969/AuthenticateCallback?providerKey=google"));
+            var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret);
+            var facebookProvider = new FacebookProvider(FacebookAppId, FacebookAppSecret);
+            var googleProvider = new GoogleProvider(GoogleConsumerKey, GoogleConsumerSecret);
 
             var authenticationService = new AuthenticationService();
             authenticationService.AddProvider(twitterProvider);

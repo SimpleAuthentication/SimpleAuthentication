@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Web;
 using System.Web.Mvc;
 using WorldDomination.Web.Authentication.Facebook;
 using WorldDomination.Web.Authentication.Google;
@@ -20,17 +21,11 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Simple.Controllers
 
         public HomeController()
         {
-            var facebookProvider = new FacebookProvider(FacebookAppId, FacebookAppSecret,
-                                                        new Uri(
-                                                            "http://localhost:1337/home/AuthenticateCallback?providerKey=facebook"));
+            var facebookProvider = new FacebookProvider(FacebookAppId, FacebookAppSecret);
 
-            var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret,
-                                                      new Uri(
-                                                          "http://localhost:1337/home/AuthenticateCallback?providerKey=twitter"));
+            var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret);
 
-            var googleProvider = new GoogleProvider(GoogleConsumerKey, GoogleConsumerSecret,
-                                                    new Uri(
-                                                        "http://localhost:1337/home/AuthenticateCallback?providerKey=google"));
+            var googleProvider = new GoogleProvider(GoogleConsumerKey, GoogleConsumerSecret);
 
             _authenticationService = new AuthenticationService();
             _authenticationService.AddProvider(facebookProvider);
@@ -45,7 +40,8 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Simple.Controllers
 
         public RedirectResult RedirectToAuthenticate(string providerKey)
         {
-            var uri = _authenticationService.RedirectToAuthenticationProvider(providerKey);
+            var uri = _authenticationService.RedirectToAuthenticationProvider(providerKey, 
+                new Uri(ToAbsoluteUrl(Url.Action("AuthenticateCallback", new {providerKey}))));
             return Redirect(uri.AbsoluteUri);
         }
 
@@ -67,6 +63,35 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Simple.Controllers
             }
 
             return View(model);
+        }
+
+        // Based upon StackOverflow Q: http://stackoverflow.com/questions/3681052/get-absolute-url-from-relative-path-refactored-method
+        private string ToAbsoluteUrl(string relativeUrl)
+        {
+            if (string.IsNullOrEmpty(relativeUrl))
+            {
+                return relativeUrl;
+            }
+
+            if (HttpContext == null)
+            {
+                return relativeUrl;
+            }
+
+            if (relativeUrl.StartsWith("/"))
+            {
+                relativeUrl = relativeUrl.Insert(0, "~");
+            }
+            if (!relativeUrl.StartsWith("~/"))
+            {
+                relativeUrl = relativeUrl.Insert(0, "~/");
+            }
+
+            var url = HttpContext.Request.Url;
+            var port = url.Port != 80 ? (":" + url.Port) : string.Empty;
+
+            return string.Format("{0}://{1}{2}{3}",
+                                 url.Scheme, url.Host, port, VirtualPathUtility.ToAbsolute(relativeUrl));
         }
     }
 }

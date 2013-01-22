@@ -25,19 +25,17 @@ namespace WorldDomination.Web.Authentication
             var redirectUri = string.Format("{0}?{1}=", providerConfiguration.CallbackUri, providerConfiguration.CallbackQuerystringKey);
             foreach (ProviderKey provider in providerConfiguration.Providers)
             {
-                var providerSpecificRedirectUri = new Uri((redirectUri + provider.Name).ToLower());
-
                 IAuthenticationProvider authenticationProvider;
                 switch (provider.Name)
                 {
                     case ProviderType.Facebook:
-                        authenticationProvider = new FacebookProvider(provider, providerSpecificRedirectUri, scope, restClient);
+                        authenticationProvider = new FacebookProvider(provider, scope, restClient);
                         break;
                     case ProviderType.Google:
-                        authenticationProvider = new GoogleProvider(provider, providerSpecificRedirectUri, scope, restClient);
+                        authenticationProvider = new GoogleProvider(provider, scope, restClient);
                         break;
                     case ProviderType.Twitter:
-                        authenticationProvider = new TwitterProvider(provider, providerSpecificRedirectUri, restClient);
+                        authenticationProvider = new TwitterProvider(provider, restClient);
                         break;
                     default:
                         throw new ApplicationException(
@@ -81,7 +79,7 @@ namespace WorldDomination.Web.Authentication
             AuthenticationProviders.Add(providerName, authenticationProvider);
         }
 
-        public Uri RedirectToAuthenticationProvider(string providerKey)
+        public Uri RedirectToAuthenticationProvider(string providerKey, Uri callBackUri = null)
         {
             Condition.Requires(providerKey).IsNotNullOrEmpty();
 
@@ -91,6 +89,12 @@ namespace WorldDomination.Web.Authentication
             // Retrieve the default settings for this provider.
             var authenticationServiceSettings = authenticationProvider.DefaultAuthenticationServiceSettings;
 
+            // Have we provided an specific callBack uri?
+            if (callBackUri != null)
+            {
+                authenticationServiceSettings.CallBackUri = callBackUri;
+            }
+
             return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
         }
 
@@ -99,6 +103,8 @@ namespace WorldDomination.Web.Authentication
             Condition.Requires(authenticationServiceSettings).IsNotNull();
             Condition.Requires(authenticationServiceSettings.ProviderKey).IsNotNullOrEmpty();
             Condition.Requires(authenticationServiceSettings.ProviderType).IsNotEqualTo(ProviderType.Unknown);
+            Condition.Requires(authenticationServiceSettings.CallBackUri).IsNotNull();
+            Condition.Requires(authenticationServiceSettings.CallBackUri.AbsoluteUri).IsNotNullOrEmpty();
 
             var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderKey);
 

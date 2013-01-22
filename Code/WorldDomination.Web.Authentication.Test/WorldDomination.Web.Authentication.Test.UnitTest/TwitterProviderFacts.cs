@@ -33,10 +33,14 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var twitterAuthenticationServiceSettings = new TwitterAuthenticationServiceSettings()
+                                                           {
+                                                               CallBackUri = new Uri("http://www.pewpew.com")
+                                                           };
 
                 // Act.
-                var result = twitterProvider.RedirectToAuthenticate(new TwitterAuthenticationServiceSettings());
+                var result = twitterProvider.RedirectToAuthenticate(twitterAuthenticationServiceSettings);
 
                 // Assert.
                 Assert.NotNull(result);
@@ -52,11 +56,14 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Throws(new Exception("some mock exception"));
-                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
-
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var twitterAuthenticationServiceSettings = new TwitterAuthenticationServiceSettings()
+                                                           {
+                                                               CallBackUri = new Uri("http://www.pewpew.com")
+                                                           };
                 // Act.
                 var result =
-                    Assert.Throws<AuthenticationException>(() => twitterProvider.RedirectToAuthenticate(new TwitterAuthenticationServiceSettings()));
+                    Assert.Throws<AuthenticationException>(() => twitterProvider.RedirectToAuthenticate(twitterAuthenticationServiceSettings));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -76,11 +83,15 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var twitterAuthenticationServiceSettings = new TwitterAuthenticationServiceSettings()
+                                                           {
+                                                               CallBackUri = new Uri("http://www.pewpew.com")
+                                                           };
 
                 // Act.
                 var result =
-                    Assert.Throws<AuthenticationException>(() => twitterProvider.RedirectToAuthenticate(new TwitterAuthenticationServiceSettings()));
+                    Assert.Throws<AuthenticationException>(() => twitterProvider.RedirectToAuthenticate(twitterAuthenticationServiceSettings));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -102,11 +113,15 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
+                var twitterAuthenticationServiceSettings = new TwitterAuthenticationServiceSettings()
+                                                           {
+                                                               CallBackUri = new Uri("http://www.pewpew.com")
+                                                           };
 
                 // Act.
                 var result =
-                    Assert.Throws<AuthenticationException>(() => twitterProvider.RedirectToAuthenticate(new TwitterAuthenticationServiceSettings()));
+                    Assert.Throws<AuthenticationException>(() => twitterProvider.RedirectToAuthenticate(twitterAuthenticationServiceSettings));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -125,7 +140,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
-                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
                 var nameValueCollection = new NameValueCollection
                                           {
                                               {"denied", "JpQ7ZTt1nMeAhIypiOxLrkS3LreHwihKjsJcIJDf4To"}
@@ -146,9 +161,9 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Throws<Exception>();
-                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
                 var nameValueCollection = new NameValueCollection(); // Missing 2x required params.
-                
+
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(() => twitterProvider.AuthenticateClient(nameValueCollection, "aa"));
 
@@ -165,7 +180,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Throws(new Exception("one does not simply 'get a job'."));
-                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
                 var nameValueCollection = new NameValueCollection
                                           {
                                               {"oauth_token", "aaa"},
@@ -192,7 +207,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
                 var nameValueCollection = new NameValueCollection
                                           {
                                               {"oauth_token", "aaa"},
@@ -216,7 +231,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
                 var nameValueCollection = new NameValueCollection
                                           {
                                               {"oauth_token", "aaa"}
@@ -257,7 +272,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                     .Setup(x => x.Execute<VerifyCredentialsResult>(It.IsAny<IRestRequest>()))
                     .Throws(new Exception(exceptionMessage));
 
-                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
                 var nameValueCollection = new NameValueCollection
                                           {
                                               {"oauth_token", "aaa"},
@@ -292,7 +307,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                     .Setup(x => x.Execute<VerifyCredentialsResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponseVerifyCredentials.Object);
 
-                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
                 var nameValueCollection = new NameValueCollection
                                           {
                                               {"oauth_token", "aaa"},
@@ -334,7 +349,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                     .Setup(x => x.Execute<VerifyCredentialsResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponseVerifyCredentials.Object);
 
-                var twitterProvider = new TwitterProvider("a", "b", new Uri("http://www.google.com.au"), mockRestClient.Object);
+                var twitterProvider = new TwitterProvider("a", "b", mockRestClient.Object);
                 var nameValueCollection = new NameValueCollection
                                           {
                                               {"oauth_token", "aaa"},

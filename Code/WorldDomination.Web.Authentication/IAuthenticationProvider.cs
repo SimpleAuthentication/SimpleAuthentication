@@ -6,6 +6,7 @@ namespace WorldDomination.Web.Authentication
     public interface IAuthenticationProvider
     {
         string Name { get; }
+        Uri CallBackUri { get; }
         Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings);
         IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState);
         IAuthenticationServiceSettings DefaultAuthenticationServiceSettings { get; }
