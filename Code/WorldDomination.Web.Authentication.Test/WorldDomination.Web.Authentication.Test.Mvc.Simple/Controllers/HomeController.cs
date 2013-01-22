@@ -17,14 +17,17 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Simple.Controllers
         private const string GoogleConsumerKey = "587140099194.apps.googleusercontent.com";
         private const string GoogleConsumerSecret = "npk1_gx-gqJmLiJRPFooxCEY";
 
-        private readonly AuthenticationService _authenticationService;
+        private static readonly AuthenticationService _authenticationService;
 
-        public HomeController()
+        static HomeController()
         {
+            // For the purpose of this example we just made the service static in 
+            // a static constructor, normally you would do this using dependency injection
+            // but for the take of simplicity we added it it here. Please refer
+            // to the Advanced sample for the DI version. Don't use a static constructor
+            // like this in your project, please. :)
             var facebookProvider = new FacebookProvider(FacebookAppId, FacebookAppSecret);
-
             var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret);
-
             var googleProvider = new GoogleProvider(GoogleConsumerKey, GoogleConsumerSecret);
 
             _authenticationService = new AuthenticationService();
@@ -42,6 +45,7 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Simple.Controllers
         {
             var uri = _authenticationService.RedirectToAuthenticationProvider(providerKey, 
                 new Uri(ToAbsoluteUrl(Url.Action("AuthenticateCallback", new {providerKey}))));
+
             return Redirect(uri.AbsoluteUri);
         }
 

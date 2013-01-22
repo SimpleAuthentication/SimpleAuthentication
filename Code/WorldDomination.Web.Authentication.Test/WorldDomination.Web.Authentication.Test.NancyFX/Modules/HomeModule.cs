@@ -18,10 +18,10 @@ namespace WorldDomination.Web.Authentication.Test.NancyFX.Modules
                 // State key.
                 Session[SessionGuidKey] = Guid.NewGuid();
 
-                var settings = authenticationService.GetAuthenticateServiceSettings(parameters.providerKey);
+                var settings = authenticationService.GetAuthenticateServiceSettings(parameters.providerKey.Default<string>());
 
                 settings.State = Session[SessionGuidKey].ToString();
-                settings.CallBackUri(GetReturnUrl(Context, "/AuthenticateCallback", parameters.providerKey));
+                settings.CallBackUri = GetReturnUrl(Context, "/AuthenticateCallback", parameters.providerKey);
 
                 Uri uri = authenticationService.RedirectToAuthenticationProvider(settings);
 
