@@ -71,7 +71,6 @@
     <Compile Include="IFakeAuthenticationProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProviderType.cs" />
-    <Compile Include="Status.cs" />
     <Compile Include="Twitter\AccessTokenResult.cs" />
     <Compile Include="Twitter\FakeTwitterProvider.cs" />
     <Compile Include="Twitter\RequestTokenResult.cs" />
