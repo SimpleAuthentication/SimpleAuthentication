@@ -84,7 +84,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 authenticationService.AddProvider(new FacebookProvider("aa", "bb"));
 
                 // Act.
-                var authenticationServiceSettings = AuthenticationServiceSettingsFactory.GetAuthenticateServiceSettings("facebook");
+                var authenticationServiceSettings = authenticationService.GetAuthenticateServiceSettings("facebook");
                 authenticationServiceSettings.State = "pewpew";
                 authenticationServiceSettings.CallBackUri = new Uri("http://www.whatever.com");
                 var result = authenticationService.RedirectToAuthenticationProvider(authenticationServiceSettings);

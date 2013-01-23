@@ -11,5 +11,6 @@ namespace WorldDomination.Web.Authentication
         Uri RedirectToAuthenticationProvider(string providerKey, Uri callBackUri = null);
         Uri RedirectToAuthenticationProvider(IAuthenticationServiceSettings authenticationServiceSettings);
         IAuthenticatedClient CheckCallback(string providerKey, NameValueCollection requestParameters, string state = null);
+        IAuthenticationServiceSettings GetAuthenticateServiceSettings(string providerKey);
     }
 }

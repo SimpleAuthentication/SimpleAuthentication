@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("WorldDomination.Web.IntegrationTest.NancyFX")]
+[assembly: AssemblyTitle("WorldDomination.Web.Authentication.Test.NancyFX")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("WorldDomination.Web.IntegrationTest.NancyFX")]
-[assembly: AssemblyCopyright("Copyright ©  2012")]
+[assembly: AssemblyProduct("WorldDomination.Web.Authentication.Test.NancyFX")]
+[assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("50611daa-2f7a-438f-9eac-b2f0b2358216")]
+[assembly: Guid("350a9220-8de6-4a5d-9536-694f52f80a63")]
 
 // Version information for an assembly consists of the following four values:
 //
