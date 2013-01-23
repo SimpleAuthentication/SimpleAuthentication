@@ -28,7 +28,7 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.Controllers
         public RedirectResult RedirectToAuthenticate(string providerKey)
         {
             // Which provider are we after?
-            var settings = AuthenticationServiceSettingsFactory.GetAuthenticateServiceSettings(providerKey);
+            var settings = _authenticationService.GetAuthenticateServiceSettings(providerKey);
 
             // Provide the callBack instead of using the config file entry (for the use of this demo).
             settings.CallBackUri = new Uri(ToAbsoluteUrl(Url.Action("AuthenticateCallback", new {providerKey})));

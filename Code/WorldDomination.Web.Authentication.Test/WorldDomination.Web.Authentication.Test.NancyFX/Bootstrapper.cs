@@ -2,14 +2,14 @@
 using Nancy;
 using Nancy.Bootstrapper;
 using Nancy.Session;
-using TinyIoC;
+using Nancy.TinyIoc;
 using WorldDomination.Web.Authentication.Facebook;
 using WorldDomination.Web.Authentication.Google;
 using WorldDomination.Web.Authentication.Twitter;
 
 namespace WorldDomination.Web.Authentication.Test.NancyFX
 {
-    public class Bootstrapper : DefaultNancyBootstrapper
+    public class CustomBootstrapper : DefaultNancyBootstrapper
     {
         private const string TwitterConsumerKey = "Rb7qNNPUPsRSYkznFTbF6Q";
         private const string TwitterConsumerSecret = "pP1jBdYOlmCzo08QFJjGIHY4YSyPdGLPO2m1q47hu9c";
@@ -36,6 +36,7 @@ namespace WorldDomination.Web.Authentication.Test.NancyFX
             var googleProvider = new GoogleProvider(GoogleConsumerKey, GoogleConsumerSecret);
 
             var authenticationService = new AuthenticationService();
+
             authenticationService.AddProvider(twitterProvider);
             authenticationService.AddProvider(facebookProvider);
             authenticationService.AddProvider(googleProvider);
