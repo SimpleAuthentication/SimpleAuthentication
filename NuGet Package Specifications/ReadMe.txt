@@ -32,4 +32,4 @@ More Pro Tips
 
 Now go forth and execute World Domination! Seriously. Go. Dominate. Even a wee bit. Go.
 
--Pure Krome [just some asshat from Melbourne, Australia ... mate :) ]-
+-Pure Krome [from Melbourne, Australia ... mate :) ]-
