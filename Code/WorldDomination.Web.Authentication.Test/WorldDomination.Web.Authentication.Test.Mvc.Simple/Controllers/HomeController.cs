@@ -17,7 +17,7 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Simple.Controllers
         private const string GoogleConsumerKey = "587140099194.apps.googleusercontent.com";
         private const string GoogleConsumerSecret = "npk1_gx-gqJmLiJRPFooxCEY";
 
-        private static readonly AuthenticationService _authenticationService;
+        private static readonly AuthenticationService AuthenticationService;
 
         static HomeController()
         {
@@ -30,10 +30,10 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Simple.Controllers
             var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret);
             var googleProvider = new GoogleProvider(GoogleConsumerKey, GoogleConsumerSecret);
 
-            _authenticationService = new AuthenticationService();
-            _authenticationService.AddProvider(facebookProvider);
-            _authenticationService.AddProvider(twitterProvider);
-            _authenticationService.AddProvider(googleProvider);
+            AuthenticationService = new AuthenticationService();
+            AuthenticationService.AddProvider(facebookProvider);
+            AuthenticationService.AddProvider(twitterProvider);
+            AuthenticationService.AddProvider(googleProvider);
         }
 
         public ActionResult Index()
@@ -43,8 +43,11 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Simple.Controllers
 
         public RedirectResult RedirectToAuthenticate(string providerKey)
         {
-            var uri = _authenticationService.RedirectToAuthenticationProvider(providerKey, 
-                new Uri(ToAbsoluteUrl(Url.Action("AuthenticateCallback", new {providerKey}))));
+            // Determine the callback Uri based on the server details.
+            var callBackUri = new Uri(ToAbsoluteUrl(Url.Action("AuthenticateCallback", new {providerKey})));
+
+            // Determine the full redirect uri.
+            var uri = AuthenticationService.RedirectToAuthenticationProvider(providerKey, callBackUri);
 
             return Redirect(uri.AbsoluteUri);
         }
@@ -59,7 +62,7 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Simple.Controllers
             var model = new AuthenticateCallbackViewModel();
             try
             {
-                model.AuthenticatedClient = _authenticationService.CheckCallback(providerKey, Request.Params);
+                model.AuthenticatedClient = AuthenticationService.CheckCallback(providerKey, Request.Params);
             }
             catch (Exception exception)
             {
