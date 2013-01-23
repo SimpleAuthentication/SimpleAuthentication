@@ -78,7 +78,7 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Fakes.Controllers
             var model = new AuthenticateCallbackViewModel();
             try
             {
-                model.AuthenticatedClient = _authenticationService.CheckCallback(providerKey, Request.Params);
+                model.AuthenticatedClient = _authenticationService.GetAuthenticatedClient(providerKey, Request.Params);
             }
             catch (Exception exception)
             {
@@ -98,7 +98,7 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Fakes.Controllers
             var model = new AuthenticateCallbackViewModel();
             try
             {
-                model.AuthenticatedClient = _authenticationServiceThatErrors.CheckCallback(providerKey, Request.Params);
+                model.AuthenticatedClient = _authenticationServiceThatErrors.GetAuthenticatedClient(providerKey, Request.Params);
             }
             catch (Exception exception)
             {

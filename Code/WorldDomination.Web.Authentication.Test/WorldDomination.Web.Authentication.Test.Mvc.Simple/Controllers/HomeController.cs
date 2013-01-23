@@ -62,7 +62,7 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Simple.Controllers
             var model = new AuthenticateCallbackViewModel();
             try
             {
-                model.AuthenticatedClient = AuthenticationService.CheckCallback(providerKey, Request.Params);
+                model.AuthenticatedClient = AuthenticationService.GetAuthenticatedClient(providerKey, Request.Params);
             }
             catch (Exception exception)
             {

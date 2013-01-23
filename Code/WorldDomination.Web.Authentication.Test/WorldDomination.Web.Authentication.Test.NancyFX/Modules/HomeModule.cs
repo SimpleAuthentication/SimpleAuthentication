@@ -39,7 +39,7 @@ namespace WorldDomination.Web.Authentication.Test.NancyFX.Modules
                 // It's possible that a person might hit this resource directly, before any session value
                 // has been set. As such, we should just fake some state up, which will not match the
                 // CSRF check.
-                var existingState = (Guid) (Session[SessionGuidKey] ?? Guid.NewGuid());
+                var existingState = (Guid)(Session[SessionGuidKey] ?? Guid.NewGuid());
                 var model = new AuthenticateCallbackViewModel();
                 var querystringParameters = new NameValueCollection();
 
@@ -51,9 +51,9 @@ namespace WorldDomination.Web.Authentication.Test.NancyFX.Modules
                 try
                 {
                     model.AuthenticatedClient =
-                        authenticationService.CheckCallback(Request.Query.providerKey,
-                                                            querystringParameters,
-                                                            existingState.ToString());
+                        authenticationService.GetAuthenticatedClient(Request.Query.providerKey,
+                                                                     querystringParameters,
+                                                                     existingState.ToString());
                 }
                 catch (Exception exception)
                 {

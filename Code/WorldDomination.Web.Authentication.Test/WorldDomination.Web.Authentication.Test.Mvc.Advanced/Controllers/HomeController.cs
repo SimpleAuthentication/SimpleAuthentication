@@ -84,7 +84,7 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.Controllers
                 var state = (Guid) (Session[SessionStateKey] ?? Guid.NewGuid());
 
                 // Complete the authentication process by retrieving the UserInformation from the provider.
-                model.AuthenticatedClient = _authenticationService.CheckCallback(providerKey, Request.Params,
+                model.AuthenticatedClient = _authenticationService.GetAuthenticatedClient(providerKey, Request.Params,
                                                                                  state.ToString());
 
                 // Clean up after ourselves like a nice little boy/girl/monster we are.
