@@ -22,7 +22,6 @@ namespace WorldDomination.Web.Authentication
             Condition.Requires(providerConfiguration).IsNotNull();
             Condition.Requires(providerConfiguration.Providers).IsNotNull();
 
-            var redirectUri = string.Format("{0}?{1}=", providerConfiguration.CallbackUri, providerConfiguration.CallbackQuerystringKey);
             foreach (ProviderKey provider in providerConfiguration.Providers)
             {
                 IAuthenticationProvider authenticationProvider;
@@ -111,7 +110,7 @@ namespace WorldDomination.Web.Authentication
             return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
         }
 
-        public IAuthenticatedClient CheckCallback(string providerKey, NameValueCollection requestParameters,
+        public IAuthenticatedClient GetAuthenticatedClient(string providerKey, NameValueCollection requestParameters,
                                                   string state = null)
         {
             Condition.Requires(providerKey).IsNotNullOrEmpty();

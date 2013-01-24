@@ -186,8 +186,7 @@ namespace WorldDomination.Web.Authentication.Google
 
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            Condition.WithExceptionOnFailure<ArgumentNullException>()
-                .Requires(authenticationServiceSettings).IsNotNull();
+            Condition.Requires(authenticationServiceSettings).IsNotNull();
             Condition.Requires(authenticationServiceSettings.CallBackUri).IsNotNull();
 
             // Remember the callback uri.

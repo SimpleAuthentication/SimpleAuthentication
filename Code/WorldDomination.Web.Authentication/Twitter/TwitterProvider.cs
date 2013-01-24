@@ -112,12 +112,9 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         private AccessTokenResult RetrieveAccessToken(VerifierResult verifierResult)
         {
-            Condition.WithExceptionOnFailure<ArgumentNullException>()
-                .Requires(verifierResult).IsNotNull();
-            Condition.WithExceptionOnFailure<ArgumentNullException>()
-                .Requires(verifierResult.OAuthToken).IsNotNullOrEmpty();
-            Condition.WithExceptionOnFailure<ArgumentNullException>()
-                .Requires(verifierResult.OAuthVerifier).IsNotNullOrEmpty();
+            Condition.Requires(verifierResult).IsNotNull();
+            Condition.Requires(verifierResult.OAuthToken).IsNotNullOrEmpty();
+            Condition.Requires(verifierResult.OAuthVerifier).IsNotNullOrEmpty();
 
             IRestResponse response;
             try
@@ -153,12 +150,9 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         private VerifyCredentialsResult VerifyCredentials(AccessTokenResult accessTokenResult)
         {
-            Condition.WithExceptionOnFailure<ArgumentNullException>()
-                .Requires(accessTokenResult).IsNotNull();
-            Condition.WithExceptionOnFailure<ArgumentNullException>()
-                .Requires(accessTokenResult.AccessToken).IsNotNullOrEmpty();
-            Condition.WithExceptionOnFailure<ArgumentNullException>()
-                .Requires(accessTokenResult.AccessTokenSecret).IsNotNullOrEmpty();
+            Condition.Requires(accessTokenResult).IsNotNull();
+            Condition.Requires(accessTokenResult.AccessToken).IsNotNullOrEmpty();
+            Condition.Requires(accessTokenResult.AccessTokenSecret).IsNotNullOrEmpty();
 
             IRestResponse<VerifyCredentialsResult> response;
             try
@@ -200,8 +194,7 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            Condition.WithExceptionOnFailure<ArgumentNullException>()
-                .Requires(authenticationServiceSettings).IsNotNull();
+            Condition.Requires(authenticationServiceSettings).IsNotNull();
 
             CallBackUri = authenticationServiceSettings.CallBackUri;
 

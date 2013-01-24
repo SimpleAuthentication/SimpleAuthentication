@@ -104,7 +104,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 var authenticationService = new AuthenticationService();
 
                 // Act.
-                var result = Assert.Throws<ArgumentNullException>(() => authenticationService.CheckCallback(null, null, null));
+                var result = Assert.Throws<ArgumentNullException>(() => authenticationService.GetAuthenticatedClient(null, null, null));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -122,7 +122,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 // Act and Assert.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => authenticationService.CheckCallback(providerKey, querystringParams, state));
+                    () => authenticationService.GetAuthenticatedClient(providerKey, querystringParams, state));
 
                 Assert.NotNull(result);
                 Assert.Equal("No 'aaa' provider has been added.", result.Message);

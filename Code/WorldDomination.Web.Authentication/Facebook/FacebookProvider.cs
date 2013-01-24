@@ -179,8 +179,7 @@ namespace WorldDomination.Web.Authentication.Facebook
 
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            Condition.WithExceptionOnFailure<ArgumentNullException>()
-                .Requires(authenticationServiceSettings).IsNotNull();
+            Condition.Requires(authenticationServiceSettings).IsNotNull();
 
             var facebookAuthenticationSettings = authenticationServiceSettings as FacebookAuthenticationServiceSettings;
             Condition.Requires(facebookAuthenticationSettings).IsNotNull();

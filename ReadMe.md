@@ -33,7 +33,7 @@ That's It.
 
 So install this bad boy :
 
-[![Yes! Install this package!!](http://i.imgur.com/FM21h.png)](http://nuget.org/packages/WorldDomination.Web.Authentication)
+[![Yes! Install this package!!](http://i.imgur.com/xevxLCl.png)](http://nuget.org/packages/WorldDomination.Web.Authentication)
 
 ## Code or GTFO ##
 
