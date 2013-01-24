@@ -12,36 +12,29 @@ article, aside, canvas, details, embed,
 figure, figcaption, footer, header, hgroup,
 menu, nav, output, ruby, section, summary,
 time, mark, audio, video {
+    border: 0;
+    font: inherit;
+    font-size: 100%;
     margin: 0;
     padding: 0;
-    border: 0;
-    font-size: 100%;
-    font: inherit;
     vertical-align: baseline;
 }
 /* HTML5 display-role reset for older browsers */
+
 article, aside, details, figcaption, figure,
-footer, header, hgroup, menu, nav, section {
-    display: block;
-}
+footer, header, hgroup, menu, nav, section { display: block; }
 
-body {
-    line-height: 1;
-}
+body { line-height: 1; }
 
-ol, ul {
-    list-style: none;
-}
+ol, ul { list-style: none; }
 
-blockquote, q {
-    quotes: none;
-}
+blockquote, q { quotes: none; }
 
-    blockquote:before, blockquote:after,
-    q:before, q:after {
-        content: '';
-        content: none;
-    }
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content: '';
+    content: none;
+}
 
 table {
     border-collapse: collapse;
@@ -53,47 +46,55 @@ table {
 
 body {
     background-color: #353535;
-     color: #f8f8f8;
+    color: #f8f8f8;
 }
 
 
 #container {
-    width: 300px;
     margin: 100px auto 0 auto;
+    width: 300px;
 }
 
 
 fieldset {
-    border-radius: 5px;
-     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
     background-color: #8C8C8C;
+    border-radius: 5px;
     color: #f8f8f8;
     font-size: 90%;
-    width: 150px;
     margin: 0 auto;
     text-align: center;
+    width: 150px;
 }
 
 legend {
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
     background: #8C8C8C;
     border: solid 1px black;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
     border-radius: 5px;
-    padding: 6px;
     color: #f8f8f8;
+    padding: 6px;
 }
 
 #usercontainer {
-    width: 800px;
-     margin: 100px auto 0 auto;
-     background-color: #8C8C8C;
-     border-radius: 5px;
-     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    background-color: #8C8C8C;
+    border-radius: 5px;
+    margin: 100px auto 0 auto;
+    width: 800px;
 }
 
-h1 { font-size: 1.3em;padding-bottom: 8px;}
-h2 { font-size: 1.1em;padding-bottom: 8px;}
-a { color: #B04089;}
+h1 {
+    font-size: 1.3em;
+    padding-bottom: 8px;
+}
+
+h2 {
+    font-size: 1.1em;
+    padding-bottom: 8px;
+}
+
+a { color: #B04089; }

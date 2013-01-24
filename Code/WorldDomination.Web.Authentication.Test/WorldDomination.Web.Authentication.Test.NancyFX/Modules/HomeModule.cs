@@ -18,7 +18,8 @@ namespace WorldDomination.Web.Authentication.Test.NancyFX.Modules
                 // State key.
                 Session[SessionGuidKey] = Guid.NewGuid();
 
-                var settings = authenticationService.GetAuthenticateServiceSettings(parameters.providerKey.Default<string>());
+                var settings =
+                    authenticationService.GetAuthenticateServiceSettings(parameters.providerKey.Default<string>());
 
                 settings.State = Session[SessionGuidKey].ToString();
                 settings.CallBackUri = GetReturnUrl(Context, "/AuthenticateCallback", parameters.providerKey);
@@ -39,7 +40,7 @@ namespace WorldDomination.Web.Authentication.Test.NancyFX.Modules
                 // It's possible that a person might hit this resource directly, before any session value
                 // has been set. As such, we should just fake some state up, which will not match the
                 // CSRF check.
-                var existingState = (Guid)(Session[SessionGuidKey] ?? Guid.NewGuid());
+                var existingState = (Guid) (Session[SessionGuidKey] ?? Guid.NewGuid());
                 var model = new AuthenticateCallbackViewModel();
                 var querystringParameters = new NameValueCollection();
 
@@ -63,7 +64,7 @@ namespace WorldDomination.Web.Authentication.Test.NancyFX.Modules
                 return View["AuthenticateCallback", model];
             };
         }
-        
+
         private Uri GetReturnUrl(NancyContext context, string relativeUrl, string provider)
         {
             if (!relativeUrl.StartsWith("/"))

@@ -27,7 +27,7 @@ namespace WorldDomination.Web.Authentication
         /// <param name="callBackUri">The uri to call back to, after the Authentication Provider has completed it's authentication process.</param>
         /// <returns>The uri to redirect to.</returns>
         Uri RedirectToAuthenticationProvider(string providerKey, Uri callBackUri = null);
-        
+
         /// <summary>
         /// Determine the uri which is used to redirect to a given Provider.
         /// </summary>
@@ -42,7 +42,8 @@ namespace WorldDomination.Web.Authentication
         /// <param name="requestParameters">QueryString parameters from the callback uri.</param>
         /// <param name="state">Any optional state value. (Can be null for no state checks)</param>
         /// <returns>An authenticatedClient with either user information or some error message(s).</returns>
-        IAuthenticatedClient GetAuthenticatedClient(string providerKey, NameValueCollection requestParameters, string state = null);
+        IAuthenticatedClient GetAuthenticatedClient(string providerKey, NameValueCollection requestParameters,
+                                                    string state = null);
 
         /// <summary>
         /// Retrieves the settings for an authentication service.

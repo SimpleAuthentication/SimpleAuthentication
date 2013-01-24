@@ -41,10 +41,10 @@ namespace WorldDomination.Web.Authentication.Google
             _scope = scope == null ||
                      scope.Count <= 0
                          ? new List<string>
-                           {
-                               "https://www.googleapis.com/auth/userinfo.profile",
-                               "https://www.googleapis.com/auth/userinfo.email"
-                           }
+                         {
+                             "https://www.googleapis.com/auth/userinfo.profile",
+                             "https://www.googleapis.com/auth/userinfo.email"
+                         }
                          : scope;
             _restClient = restClient ?? new RestClient("https://accounts.google.com");
         }
@@ -222,21 +222,21 @@ namespace WorldDomination.Web.Authentication.Google
             var userInfo = RetrieveUserInfo(oAuthAccessToken.AccessToken);
 
             return new AuthenticatedClient(ProviderType.Google)
-                   {
-                       AccessToken = oAuthAccessToken.AccessToken,
-                       AccessTokenExpiresOn = DateTime.UtcNow.AddSeconds(oAuthAccessToken.ExpiresIn),
-                       UserInformation = new UserInformation
-                                         {
-                                             Id = userInfo.Id,
-                                             Gender =
-                                                 (GenderType) Enum.Parse(typeof (GenderType), userInfo.Gender, true),
-                                             Name = userInfo.Name,
-                                             Email = userInfo.Email,
-                                             Locale = userInfo.Locale,
-                                             Picture = userInfo.Picture,
-                                             UserName = userInfo.GivenName
-                                         }
-                   };
+            {
+                AccessToken = oAuthAccessToken.AccessToken,
+                AccessTokenExpiresOn = DateTime.UtcNow.AddSeconds(oAuthAccessToken.ExpiresIn),
+                UserInformation = new UserInformation
+                {
+                    Id = userInfo.Id,
+                    Gender =
+                        (GenderType) Enum.Parse(typeof (GenderType), userInfo.Gender, true),
+                    Name = userInfo.Name,
+                    Email = userInfo.Email,
+                    Locale = userInfo.Locale,
+                    Picture = userInfo.Picture,
+                    UserName = userInfo.GivenName
+                }
+            };
         }
 
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings

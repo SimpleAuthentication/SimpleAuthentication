@@ -21,7 +21,8 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             var facebookProvider = authenticationProviders.Providers[ProviderType.Facebook];
 
             // Assert.
-            Assert.Equal(new Uri("http://www.mywebsite.com/authenticationCallback").AbsoluteUri, authenticationProviders.CallbackUri);
+            Assert.Equal(new Uri("http://www.mywebsite.com/authenticationCallback").AbsoluteUri,
+                         authenticationProviders.CallbackUri);
             Assert.Equal("providerKey", authenticationProviders.CallbackQuerystringKey);
             Assert.Equal("testKey", facebookProvider.Key);
             Assert.Equal("testSecret", facebookProvider.Secret);
@@ -34,7 +35,8 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             const string fileName = "InvalidApp.config";
 
             // Act & Assert.
-            Assert.Throws<ConfigurationErrorsException>(() => { ProviderConfigHelper.UseConfig(fileName,  "authenticationProviders"); });
+            Assert.Throws<ConfigurationErrorsException>(
+                () => { ProviderConfigHelper.UseConfig(fileName, "authenticationProviders"); });
         }
 
         [Fact]
@@ -66,7 +68,8 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             const string fileName = "TestFile.config";
 
             // Act & Assert.
-            Assert.Throws<ApplicationException>(() => { ProviderConfigHelper.UseConfig(fileName).For(ProviderType.Twitter); });
+            Assert.Throws<ApplicationException>(
+                () => { ProviderConfigHelper.UseConfig(fileName).For(ProviderType.Twitter); });
         }
 
         [Fact]

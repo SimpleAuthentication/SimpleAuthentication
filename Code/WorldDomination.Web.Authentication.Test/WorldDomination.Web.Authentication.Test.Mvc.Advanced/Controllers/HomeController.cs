@@ -51,17 +51,17 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.Controllers
 
             // Grab the Uri we need redirect to.
             var uri = _authenticationService.RedirectToAuthenticationProvider(new FacebookAuthenticationServiceSettings
-                                                                              {
-                                                                                  CallBackUri =
-                                                                                      new Uri(
-                                                                                      ToAbsoluteUrl(
-                                                                                          Url.Action(
-                                                                                              "AuthenticateCallback",
-                                                                                              new {providerKey = "facebook"}))),
-                                                                                  State =
-                                                                                      Session[SessionStateKey].ToString(),
-                                                                                  IsMobile = true
-                                                                              });
+            {
+                CallBackUri =
+                    new Uri(
+                                                                                  ToAbsoluteUrl(
+                                                                                      Url.Action(
+                                                                                          "AuthenticateCallback",
+                                                                                          new {providerKey = "facebook"}))),
+                State =
+                    Session[SessionStateKey].ToString(),
+                IsMobile = true
+            });
 
             // Redirect!
             return Redirect(uri.AbsoluteUri);
@@ -85,7 +85,7 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.Controllers
 
                 // Complete the authentication process by retrieving the UserInformation from the provider.
                 model.AuthenticatedClient = _authenticationService.GetAuthenticatedClient(providerKey, Request.Params,
-                                                                                 state.ToString());
+                                                                                          state.ToString());
 
                 // Clean up after ourselves like a nice little boy/girl/monster we are.
                 Session.Remove(SessionStateKey);

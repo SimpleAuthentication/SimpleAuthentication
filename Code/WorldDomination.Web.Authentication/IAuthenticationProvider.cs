@@ -19,6 +19,11 @@ namespace WorldDomination.Web.Authentication
         Uri CallBackUri { get; }
 
         /// <summary>
+        /// The default authentication service settings for a Provider.
+        /// </summary>
+        IAuthenticationServiceSettings DefaultAuthenticationServiceSettings { get; }
+
+        /// <summary>
         /// Uri to redirect to the Authentication Provider with all querystring parameters defined.
         /// </summary>
         /// <param name="authenticationServiceSettings">Specific authentication service settings to be passed along to the Authentication Provider.</param>
@@ -32,10 +37,5 @@ namespace WorldDomination.Web.Authentication
         /// <param name="existingState">Any optional state value. (Can be null for no state checks)</param>
         /// <returns>An authenticatedClient with either user information or some error message(s).</returns>
         IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState);
-
-        /// <summary>
-        /// The default authentication service settings for a Provider.
-        /// </summary>
-        IAuthenticationServiceSettings DefaultAuthenticationServiceSettings { get; }
     }
 }
