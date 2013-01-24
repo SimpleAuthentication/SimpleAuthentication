@@ -95,6 +95,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Nancy.Authentication.WorldDomination\Nancy.Authentication.WorldDomination.csproj">
+      <Project>{94b8d947-6cad-42c3-b328-f369ce7bc6c0}</Project>
+      <Name>Nancy.Authentication.WorldDomination</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\WorldDomination.Web.Authentication\WorldDomination.Web.Authentication.csproj">
       <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
       <Name>WorldDomination.Web.Authentication</Name>

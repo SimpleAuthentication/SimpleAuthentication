@@ -22,7 +22,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authent
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.Test.NancyFX2", "Code\WorldDomination.Web.Authentication.Test\WorldDomination.Web.Authentication.Test.NancyFX2\WorldDomination.Web.Authentication.Test.NancyFX2.csproj", "{837B5D35-57D3-402F-BA87-23E6B8E18433}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nancy.Authentication.WorldDomination", "Nancy.Authentication.WorldDomination\Nancy.Authentication.WorldDomination.csproj", "{94B8D947-6CAD-42C3-B328-F369CE7BC6C0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nancy.Authentication.WorldDomination", "Code\Nancy.Authentication.WorldDomination\Nancy.Authentication.WorldDomination.csproj", "{94B8D947-6CAD-42C3-B328-F369CE7BC6C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

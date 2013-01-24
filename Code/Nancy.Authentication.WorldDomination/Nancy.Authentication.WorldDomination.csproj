@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IAuthenticationCallbackProvider.cs" />
+    <Compile Include="ProcessResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WorldDominationAuthenticationModule.cs" />
   </ItemGroup>
@@ -48,7 +49,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Code\WorldDomination.Web.Authentication\WorldDomination.Web.Authentication.csproj">
+    <ProjectReference Include="..\WorldDomination.Web.Authentication\WorldDomination.Web.Authentication.csproj">
       <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
       <Name>WorldDomination.Web.Authentication</Name>
     </ProjectReference>

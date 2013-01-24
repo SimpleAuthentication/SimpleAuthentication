@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using Nancy;
+using Nancy.Authentication.WorldDomination;
 using WorldDomination.Web.Authentication.Test.NancyFX2.Model;
 
 namespace WorldDomination.Web.Authentication.Test.NancyFX2.Modules
@@ -14,6 +15,14 @@ namespace WorldDomination.Web.Authentication.Test.NancyFX2.Modules
             {
                 return "Logged in!!!";
             };
+        }
+    }
+
+    public class Test : IAuthenticationCallbackProvider
+    {
+        public ProcessResult Process(AuthenticateCallbackData model)
+        {
+            throw new NotImplementedException();
         }
     }
 }
