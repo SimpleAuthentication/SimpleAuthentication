@@ -2,6 +2,24 @@
 {
     public class ProcessResult
     {
+        #region ActionEnum enum
+
+        public enum ActionEnum
+        {
+            /// <summary>
+            /// To redirect, assign the RedirectTo property on the ProcessResult
+            /// </summary>
+            Redirect,
+
+            /// <summary>
+            /// To Render a view, please supply the View (Name or Path+Name) 
+            /// and a ViewModel
+            /// </summary>
+            RenderView
+        }
+
+        #endregion
+
         public ProcessResult(ActionEnum action)
         {
             Action = action;
@@ -23,18 +41,5 @@
         /// The ViewModel to be rendered with the View (use with RenderView Action)
         /// </summary>
         public dynamic ViewModel { get; set; }
-
-        public enum ActionEnum
-        {
-            /// <summary>
-            /// To redirect, assign the RedirectTo property on the ProcessResult
-            /// </summary>
-            Redirect,
-            /// <summary>
-            /// To Render a view, please supply the View (Name or Path+Name) 
-            /// and a ViewModel
-            /// </summary>
-            RenderView
-        }
     }
 }

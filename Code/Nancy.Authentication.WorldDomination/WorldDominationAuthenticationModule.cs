@@ -11,25 +11,28 @@ namespace Nancy.Authentication.WorldDomination
         public WorldDominationAuthenticationModule(IAuthenticationService authenticationService)
             : this(authenticationService, null)
         {
-            throw new ApplicationException("World Domination requires you implement your own IAuthenticationCallbackProvider");
+            throw new ApplicationException(
+                "World Domination requires you implement your own IAuthenticationCallbackProvider");
         }
 
         public WorldDominationAuthenticationModule(IAuthenticationService authenticationService,
-                                                    IAuthenticationCallbackProvider authenticationCallbackProvider)
+                                                   IAuthenticationCallbackProvider authenticationCallbackProvider)
         {
             Get["/authentication/redirect/{providerkey}"] = _ =>
             {
                 if (string.IsNullOrEmpty(Request.Query.providerkey))
                 {
-                    throw new ArgumentException("You need to supply a valid provider key so we know where to redirect the user.");
+                    throw new ArgumentException(
+                        "You need to supply a valid provider key so we know where to redirect the user.");
                 }
 
-                var settings = authenticationService.GetAuthenticateServiceSettings((string)_.providerkey);
+                var settings = authenticationService.GetAuthenticateServiceSettings((string) _.providerkey);
                 var guidString = Guid.NewGuid().ToString();
 
                 Session[StateKey] = guidString;
                 settings.State = guidString;
-                settings.CallBackUri = GetReturnUrl(Context, "/authentication/authenticatecallback", (string)_.providerkey);
+                settings.CallBackUri = GetReturnUrl(Context, "/authentication/authenticatecallback",
+                                                    (string) _.providerkey);
 
                 Uri uri = authenticationService.RedirectToAuthenticationProvider(settings);
 
@@ -55,7 +58,8 @@ namespace Nancy.Authentication.WorldDomination
                 try
                 {
                     model.AuthenticatedClient =
-                        authenticationService.GetAuthenticatedClient((string)Request.Query.providerKey, querystringParameters, existingState);
+                        authenticationService.GetAuthenticatedClient((string) Request.Query.providerKey,
+                                                                     querystringParameters, existingState);
                 }
                 catch (Exception exception)
                 {
@@ -86,11 +90,5 @@ namespace Nancy.Authentication.WorldDomination
             return new Uri(string.Format("{0}://{1}{2}{3}?providerkey={4}",
                                          url.Scheme, url.HostName, port, relativeUrl, provider));
         }
-    }
-
-    public class AuthenticateCallbackData
-    {
-        public IAuthenticatedClient AuthenticatedClient { get; set; }
-        public Exception Exception { get; set; }
     }
 }
