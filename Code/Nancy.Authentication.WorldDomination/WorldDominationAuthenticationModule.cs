@@ -20,19 +20,19 @@ namespace Nancy.Authentication.WorldDomination
         {
             Get["/authentication/redirect/{providerkey}"] = _ =>
             {
-                if (string.IsNullOrEmpty(Request.Query.providerkey))
+                if (string.IsNullOrEmpty((string)_.providerkey))
                 {
                     throw new ArgumentException(
                         "You need to supply a valid provider key so we know where to redirect the user.");
                 }
 
-                var settings = authenticationService.GetAuthenticateServiceSettings((string) _.providerkey);
+                var settings = authenticationService.GetAuthenticateServiceSettings((string)_.providerkey);
                 var guidString = Guid.NewGuid().ToString();
 
                 Session[StateKey] = guidString;
                 settings.State = guidString;
                 settings.CallBackUri = GetReturnUrl(Context, "/authentication/authenticatecallback",
-                                                    (string) _.providerkey);
+                                                    (string)_.providerkey);
 
                 Uri uri = authenticationService.RedirectToAuthenticationProvider(settings);
 
@@ -88,7 +88,7 @@ namespace Nancy.Authentication.WorldDomination
             var port = url.Port != 80 ? (":" + url.Port) : string.Empty;
 
             return new Uri(string.Format("{0}://{1}{2}{3}?providerkey={4}",
-                                         url.Scheme, url.HostName, port, relativeUrl, provider));
+                                         url.Scheme, url.HostName, port, relativeUrl, provider.ToLower()));
         }
     }
 }

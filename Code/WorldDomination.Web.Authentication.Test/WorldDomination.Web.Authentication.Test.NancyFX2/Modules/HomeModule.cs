@@ -9,7 +9,6 @@ namespace WorldDomination.Web.Authentication.Test.NancyFX2.Modules
         public HomeModule()
         {
             Get["/"] = parameters => View["login"];
-            Get["/logged-in"] = parameters => { return "Logged in!!!"; };
         }
     }
 
@@ -17,7 +16,11 @@ namespace WorldDomination.Web.Authentication.Test.NancyFX2.Modules
     {
         public ProcessResult Process(AuthenticateCallbackData model)
         {
-            throw new NotImplementedException();
+            return new ProcessResult(ProcessResult.ActionEnum.RenderView)
+            {
+                View = "AuthenticateCallback.cshtml",
+                ViewModel = model
+            };
         }
     }
 }

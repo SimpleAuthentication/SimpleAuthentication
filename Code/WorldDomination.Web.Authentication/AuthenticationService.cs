@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Configuration;
 using CuttingEdge.Conditions;
 using RestSharp;
 using WorldDomination.Web.Authentication.Config;
@@ -14,10 +15,23 @@ namespace WorldDomination.Web.Authentication
     {
         public AuthenticationService()
         {
+            var providerConfig = ConfigurationManager.GetSection("authenticationProviders") as ProviderConfiguration;
+
+            if (providerConfig == null)
+            {
+                throw new ApplicationException("Missing the config section [authenticationProviders] from your .config file");
+            }
+
+            Initialize(providerConfig);
         }
 
         public AuthenticationService(ProviderConfiguration providerConfiguration,
                                      IList<string> scope = null, IRestClient restClient = null)
+        {
+            Initialize(providerConfiguration, scope, restClient);
+        }
+
+        public void Initialize(ProviderConfiguration providerConfiguration, IList<string> scope = null, IRestClient restClient = null)
         {
             Condition.Requires(providerConfiguration).IsNotNull();
             Condition.Requires(providerConfiguration.Providers).IsNotNull();

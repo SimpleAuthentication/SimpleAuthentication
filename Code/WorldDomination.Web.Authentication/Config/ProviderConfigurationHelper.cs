@@ -53,7 +53,7 @@ namespace WorldDomination.Web.Authentication.Config
         public static ProviderConfiguration UseConfig(string sectionName = "authenticationProviders")
         {
             Condition.Requires(sectionName).IsNotNullOrEmpty();
-
+            
             var providerConfig = ConfigurationManager.GetSection(sectionName) as ProviderConfiguration;
 
             if (providerConfig == null)

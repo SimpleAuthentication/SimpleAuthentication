@@ -4,7 +4,7 @@ namespace WorldDomination.Web.Authentication.Config
 {
     public class ProviderConfiguration : ConfigurationSection
     {
-        [ConfigurationProperty("callbackUri", IsRequired = true)]
+        [ConfigurationProperty("callbackUri")]
         public string CallbackUri
         {
             get { return this["callbackUri"] as string; }
