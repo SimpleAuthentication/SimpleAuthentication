@@ -111,7 +111,7 @@ namespace WorldDomination.Web.Authentication
         }
 
         public IAuthenticatedClient GetAuthenticatedClient(string providerKey, NameValueCollection requestParameters,
-                                                  string state = null)
+                                                           string state = null)
         {
             Condition.Requires(providerKey).IsNotNullOrEmpty();
             Condition.Requires(requestParameters).IsNotNull();

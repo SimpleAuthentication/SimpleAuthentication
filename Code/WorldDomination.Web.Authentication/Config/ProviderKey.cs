@@ -7,7 +7,7 @@ namespace WorldDomination.Web.Authentication.Config
         [ConfigurationProperty("name", IsRequired = true, IsKey = true)]
         public ProviderType Name
         {
-            get { return (ProviderType)this["name"]; }
+            get { return (ProviderType) this["name"]; }
         }
 
         [ConfigurationProperty("key", IsRequired = true)]

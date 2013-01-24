@@ -43,19 +43,19 @@ namespace WorldDomination.Web.Authentication.Google
             }
 
             return new AuthenticatedClient(ProviderType.Facebook)
-                   {
-                       AccessToken = "SomethingWonderfulHasHappened.AniImPregnant",
-                       AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),
-                       UserInformation = UserInformation ?? new UserInformation
-                                                            {
-                                                                Gender = GenderType.Female,
-                                                                Id = "FakeId-" + Guid.NewGuid().ToString(),
-                                                                Locale = "en-au",
-                                                                Name = "Natalie Portman",
-                                                                Picture = "http://i.imgur.com/B9es0.jpg",
-                                                                UserName = "Natalie.Portman"
-                                                            }
-                   };
+            {
+                AccessToken = "SomethingWonderfulHasHappened.AniImPregnant",
+                AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),
+                UserInformation = UserInformation ?? new UserInformation
+                {
+                    Gender = GenderType.Female,
+                    Id = "FakeId-" + Guid.NewGuid().ToString(),
+                    Locale = "en-au",
+                    Name = "Natalie Portman",
+                    Picture = "http://i.imgur.com/B9es0.jpg",
+                    UserName = "Natalie.Portman"
+                }
+            };
         }
 
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
