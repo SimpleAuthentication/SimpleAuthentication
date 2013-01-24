@@ -18,13 +18,13 @@ namespace WorldDomination.Web.Authentication.Facebook
         private readonly IRestClient _restClient;
         private readonly IList<string> _scope;
 
-        public FacebookProvider(ProviderKey providerKey, 
+        public FacebookProvider(ProviderKey providerKey,
                                 IList<string> scope = null, IRestClient restClient = null) :
                                     this(providerKey.Key, providerKey.Secret, scope, restClient)
         {
         }
 
-        public FacebookProvider(string clientId, string clientSecret, 
+        public FacebookProvider(string clientId, string clientSecret,
                                 IList<string> scope = null, IRestClient restClient = null)
         {
             Condition.Requires(clientId).IsNotNullOrEmpty();
@@ -158,14 +158,14 @@ namespace WorldDomination.Web.Authentication.Facebook
             }
 
             return new UserInformation
-                   {
-                       Id = response.Data.Id.ToString(),
-                       Name = (response.Data.FirstName + " " + response.Data.LastName).Trim(),
-                       Email = response.Data.Email,
-                       Locale = response.Data.Locale,
-                       UserName = response.Data.Username,
-                       Picture = string.Format("https://graph.facebook.com/{0}/picture", response.Data.Username)
-                   };
+            {
+                Id = response.Data.Id.ToString(),
+                Name = (response.Data.FirstName + " " + response.Data.LastName).Trim(),
+                Email = response.Data.Email,
+                Locale = response.Data.Locale,
+                UserName = response.Data.Username,
+                Picture = string.Format("https://graph.facebook.com/{0}/picture", response.Data.Username)
+            };
         }
 
         #region Implementation of IAuthenticationProvider
@@ -218,11 +218,11 @@ namespace WorldDomination.Web.Authentication.Facebook
             var userInformation = RetrieveMe(accessToken);
 
             return new AuthenticatedClient(ProviderType.Facebook)
-                   {
-                       AccessToken = accessToken,
-                       AccessTokenExpiresOn = DateTime.UtcNow,
-                       UserInformation = userInformation
-                   };
+            {
+                AccessToken = accessToken,
+                AccessTokenExpiresOn = DateTime.UtcNow,
+                UserInformation = userInformation
+            };
         }
 
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
@@ -230,10 +230,10 @@ namespace WorldDomination.Web.Authentication.Facebook
             get
             {
                 return new FacebookAuthenticationServiceSettings
-                       {
-                           Display = DisplayType.Unknown,
-                           IsMobile = false
-                       };
+                {
+                    Display = DisplayType.Unknown,
+                    IsMobile = false
+                };
             }
         }
 

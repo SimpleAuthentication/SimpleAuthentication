@@ -76,10 +76,10 @@ namespace WorldDomination.Web.Authentication.Twitter
             }
 
             return new RequestTokenResult
-                   {
-                       OAuthToken = oAuthToken,
-                       OAuthTokenSecret = oAuthTokenSecret
-                   };
+            {
+                OAuthToken = oAuthToken,
+                OAuthTokenSecret = oAuthTokenSecret
+            };
         }
 
         private static VerifierResult RetrieveOAuthVerifier(NameValueCollection parameters)
@@ -104,10 +104,10 @@ namespace WorldDomination.Web.Authentication.Twitter
             }
 
             return new VerifierResult
-                   {
-                       OAuthToken = oAuthToken,
-                       OAuthVerifier = oAuthVerifier
-                   };
+            {
+                OAuthToken = oAuthToken,
+                OAuthVerifier = oAuthVerifier
+            };
         }
 
         private AccessTokenResult RetrieveAccessToken(VerifierResult verifierResult)
@@ -142,10 +142,10 @@ namespace WorldDomination.Web.Authentication.Twitter
 
             var querystringParameters = HttpUtility.ParseQueryString(response.Content);
             return new AccessTokenResult
-                   {
-                       AccessToken = querystringParameters[OAuthTokenKey],
-                       AccessTokenSecret = querystringParameters[OAuthTokenSecretKey]
-                   };
+            {
+                AccessToken = querystringParameters[OAuthTokenKey],
+                AccessTokenSecret = querystringParameters[OAuthTokenSecretKey]
+            };
         }
 
         private VerifyCredentialsResult VerifyCredentials(AccessTokenResult accessTokenResult)
@@ -220,17 +220,17 @@ namespace WorldDomination.Web.Authentication.Twitter
             var verifyCredentialsResult = VerifyCredentials(oAuthAccessToken);
 
             return new AuthenticatedClient(ProviderType.Twitter)
-                   {
-                       UserInformation = new UserInformation
-                                         {
-                                             Name = verifyCredentialsResult.Name,
-                                             Id = verifyCredentialsResult.Id.ToString(),
-                                             Locale = verifyCredentialsResult.Lang,
-                                             UserName = verifyCredentialsResult.ScreenName,
-                                             Picture = verifyCredentialsResult.ProfileImageUrl
-                                         },
-                       AccessToken = oAuthAccessToken.AccessToken
-                   };
+            {
+                UserInformation = new UserInformation
+                {
+                    Name = verifyCredentialsResult.Name,
+                    Id = verifyCredentialsResult.Id.ToString(),
+                    Locale = verifyCredentialsResult.Lang,
+                    UserName = verifyCredentialsResult.ScreenName,
+                    Picture = verifyCredentialsResult.ProfileImageUrl
+                },
+                AccessToken = oAuthAccessToken.AccessToken
+            };
         }
 
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings

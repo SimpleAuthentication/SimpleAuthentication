@@ -31,7 +31,8 @@ namespace WorldDomination.Web.Authentication.Config
 
             if (config == null)
             {
-                throw new ApplicationException(string.Format("the config file {0} does not exist or isn't set to 'copy' on build", file));
+                throw new ApplicationException(
+                    string.Format("the config file {0} does not exist or isn't set to 'copy' on build", file));
             }
 
             var providerConfig = config.GetSection(sectionName) as ProviderConfiguration;
@@ -52,7 +53,7 @@ namespace WorldDomination.Web.Authentication.Config
         public static ProviderConfiguration UseConfig(string sectionName = "authenticationProviders")
         {
             Condition.Requires(sectionName).IsNotNullOrEmpty();
-
+            
             var providerConfig = ConfigurationManager.GetSection(sectionName) as ProviderConfiguration;
 
             if (providerConfig == null)

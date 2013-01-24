@@ -43,19 +43,19 @@ namespace WorldDomination.Web.Authentication.Facebook
             }
 
             return new AuthenticatedClient(ProviderType.Facebook)
-                   {
-                       AccessToken = "IAmALittleTeaPotShortAndStout",
-                       AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),
-                       UserInformation = UserInformation ?? new UserInformation
-                                                            {
-                                                                Gender = GenderType.Female,
-                                                                Id = "FakeId-" + Guid.NewGuid().ToString(),
-                                                                Locale = "en-au",
-                                                                Name = "Leah Culver",
-                                                                Picture = "http://i.imgur.com/f4mIx.png",
-                                                                UserName = "Leah.Culver"
-                                                            }
-                   };
+            {
+                AccessToken = "IAmALittleTeaPotShortAndStout",
+                AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),
+                UserInformation = UserInformation ?? new UserInformation
+                {
+                    Gender = GenderType.Female,
+                    Id = "FakeId-" + Guid.NewGuid().ToString(),
+                    Locale = "en-au",
+                    Name = "Leah Culver",
+                    Picture = "http://i.imgur.com/f4mIx.png",
+                    UserName = "Leah.Culver"
+                }
+            };
         }
 
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
@@ -63,10 +63,10 @@ namespace WorldDomination.Web.Authentication.Facebook
             get
             {
                 return new FacebookAuthenticationServiceSettings
-                       {
-                           Display = DisplayType.Unknown,
-                           IsMobile = false
-                       };
+                {
+                    Display = DisplayType.Unknown,
+                    IsMobile = false
+                };
             }
         }
 

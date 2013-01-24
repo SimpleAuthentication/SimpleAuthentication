@@ -20,10 +20,10 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 // Arrange.
                 var googleProvider = new GoogleProvider("aa", "bb");
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"code", "a"},
-                                                {"state", "b"}
-                                            };
+                {
+                    {"code", "a"},
+                    {"state", "b"}
+                };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -42,13 +42,13 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 var googleProvider = new GoogleProvider("aa", "bb");
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {
-                                                    "error",
-                                                    "I dont' always use bayonets. But when I do, I transport them on Aircraft Carriers."
-                                                },
-                                                {"state", existingState}
-                                            };
+                {
+                    {
+                        "error",
+                        "I dont' always use bayonets. But when I do, I transport them on Aircraft Carriers."
+                    },
+                    {"state", existingState}
+                };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -68,10 +68,10 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 var googleProvider = new GoogleProvider("aa", "bb");
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"aaa", "bbb"},
-                                                {"state", existingState}
-                                            };
+                {
+                    {"aaa", "bbb"},
+                    {"state", existingState}
+                };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -98,10 +98,10 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                                                         mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"code", "aaa"},
-                                                {"state", existingState}
-                                            };
+                {
+                    {"code", "aaa"},
+                    {"state", existingState}
+                };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -122,15 +122,15 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 const string errorMessage =
                     "If God says he was not created by a creator, does that mean: god is an aetheist?";
                 mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
-                    .Throws(new InvalidOperationException(errorMessage));
+                              .Throws(new InvalidOperationException(errorMessage));
                 var googleProvider = new GoogleProvider("aa", "bb", null,
                                                         mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"code", "aaa"},
-                                                {"state", existingState}
-                                            };
+                {
+                    {"code", "aaa"},
+                    {"state", existingState}
+                };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -158,10 +158,10 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                                                         mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"code", "aaa"},
-                                                {"state", existingState}
-                                            };
+                {
+                    {"code", "aaa"},
+                    {"state", existingState}
+                };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -189,10 +189,10 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                                                         mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"code", "aaa"},
-                                                {"state", existingState}
-                                            };
+                {
+                    {"code", "aaa"},
+                    {"state", existingState}
+                };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -212,13 +212,13 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
-                                                            {
-                                                                AccessToken = "aaa",
-                                                                ExpiresIn = 100,
-                                                                IdToken =
-                                                                    "What if that sexy girl in that pop up chat really does want to meet people in my area?",
-                                                                TokenType = "overly attached girlfriend"
-                                                            });
+                {
+                    AccessToken = "aaa",
+                    ExpiresIn = 100,
+                    IdToken =
+                        "What if that sexy girl in that pop up chat really does want to meet people in my area?",
+                    TokenType = "overly attached girlfriend"
+                });
 
                 var mockRestResponseUserInfo = new Mock<IRestResponse<UserInfoResult>>();
                 mockRestResponseUserInfo.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
@@ -231,16 +231,16 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 mockRestClient.
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
-                    .Returns(mockRestResponseUserInfo.Object);
+                              .Returns(mockRestResponseUserInfo.Object);
 
                 var googleProvider = new GoogleProvider("aa", "bb", null,
                                                         mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"code", "aaa"},
-                                                {"state", existingState}
-                                            };
+                {
+                    {"code", "aaa"},
+                    {"state", existingState}
+                };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -260,13 +260,13 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
-                                                            {
-                                                                AccessToken = "aaa",
-                                                                ExpiresIn = 100,
-                                                                IdToken =
-                                                                    "What if that sexy girl in that pop up chat really does want to meet people in my area?",
-                                                                TokenType = "overly attached girlfriend"
-                                                            });
+                {
+                    AccessToken = "aaa",
+                    ExpiresIn = 100,
+                    IdToken =
+                        "What if that sexy girl in that pop up chat really does want to meet people in my area?",
+                    TokenType = "overly attached girlfriend"
+                });
 
                 var mockRestResponseUserInfo = new Mock<IRestResponse<UserInfoResult>>();
                 mockRestResponseUserInfo.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
@@ -279,16 +279,16 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 mockRestClient.
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
-                    .Returns(mockRestResponseUserInfo.Object);
+                              .Returns(mockRestResponseUserInfo.Object);
 
                 var googleProvider = new GoogleProvider("aa", "bb", null,
                                                         mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"code", "aaa"},
-                                                {"state", existingState}
-                                            };
+                {
+                    {"code", "aaa"},
+                    {"state", existingState}
+                };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -310,27 +310,27 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
-                                                            {
-                                                                AccessToken = accessToken,
-                                                                ExpiresIn = expiresIn,
-                                                                IdToken =
-                                                                    "What if that sexy girl in that pop up chat really does want to meet people in my area?",
-                                                                TokenType = "overly attached girlfriend"
-                                                            });
+                {
+                    AccessToken = accessToken,
+                    ExpiresIn = expiresIn,
+                    IdToken =
+                        "What if that sexy girl in that pop up chat really does want to meet people in my area?",
+                    TokenType = "overly attached girlfriend"
+                });
 
                 var userInfoResult = new UserInfoResult
-                                     {
-                                         Email = "aaa",
-                                         FamilyName = "bbb",
-                                         Gender = "male",
-                                         GivenName = "ccc",
-                                         Id = "ddd",
-                                         Link = "http://2p1s.com",
-                                         Locale = "en-au",
-                                         Name = "eee",
-                                         Picture = "http://2p1s.com/zomg",
-                                         VerifiedEmail = true
-                                     };
+                {
+                    Email = "aaa",
+                    FamilyName = "bbb",
+                    Gender = "male",
+                    GivenName = "ccc",
+                    Id = "ddd",
+                    Link = "http://2p1s.com",
+                    Locale = "en-au",
+                    Name = "eee",
+                    Picture = "http://2p1s.com/zomg",
+                    VerifiedEmail = true
+                };
                 var mockRestResponseUserInfo = new Mock<IRestResponse<UserInfoResult>>();
                 mockRestResponseUserInfo.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponseUserInfo.Setup(x => x.Data).Returns(userInfoResult);
@@ -342,18 +342,17 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 mockRestClient.
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
-                    .Returns(mockRestResponseUserInfo.Object);
+                              .Returns(mockRestResponseUserInfo.Object);
 
                 var googleProvider = new GoogleProvider("aa", "bb", null,
                                                         mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
 
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"code", accessToken},
-                                                {"state", existingState}
-                                            };
-
+                {
+                    {"code", accessToken},
+                    {"state", existingState}
+                };
 
                 // Act.
                 var result = googleProvider.AuthenticateClient(queryStringParameters, existingState);
@@ -384,11 +383,11 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 // Act.
                 var result =
                     googleProvider.RedirectToAuthenticate(new GoogleAuthenticationServiceSettings
-                                                          {
-                                                              CallBackUri =
-                                                                  new Uri("http://wwww.pewpew.com/"),
-                                                              State = "bleh"
-                                                          });
+                    {
+                        CallBackUri =
+                            new Uri("http://wwww.pewpew.com/"),
+                        State = "bleh"
+                    });
 
                 // Assert.
                 Assert.NotNull(result);

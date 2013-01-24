@@ -29,7 +29,7 @@ namespace WorldDomination.Web.Authentication.Twitter
         {
             Condition.WithExceptionOnFailure<AuthenticationException>()
                      .Requires(RedirectToAuthenticateExceptionMessage).IsNotNullOrEmpty();
-            
+
             CallBackUri = authenticationServiceSettings.CallBackUri;
 
             return _redirectToAuthenticateUri ?? new Uri("bitly.com/Ttw62r");
@@ -43,19 +43,19 @@ namespace WorldDomination.Web.Authentication.Twitter
             }
 
             return new AuthenticatedClient(ProviderType.Facebook)
-                   {
-                       AccessToken = "EstSularusOthMithas-MyHonorIsMyLife",
-                       AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),
-                       UserInformation = UserInformation ?? new UserInformation
-                                                            {
-                                                                Gender = GenderType.Male,
-                                                                Id = "FakeId-" + Guid.NewGuid().ToString(),
-                                                                Locale = "en-au",
-                                                                Name = "Sturm Brightblade",
-                                                                Picture = "http://i.imgur.com/jtoOF.jpg",
-                                                                UserName = "Sturm.Brightblade"
-                                                            }
-                   };
+            {
+                AccessToken = "EstSularusOthMithas-MyHonorIsMyLife",
+                AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),
+                UserInformation = UserInformation ?? new UserInformation
+                {
+                    Gender = GenderType.Male,
+                    Id = "FakeId-" + Guid.NewGuid().ToString(),
+                    Locale = "en-au",
+                    Name = "Sturm Brightblade",
+                    Picture = "http://i.imgur.com/jtoOF.jpg",
+                    UserName = "Sturm.Brightblade"
+                }
+            };
         }
 
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings { get; private set; }

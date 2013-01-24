@@ -17,10 +17,10 @@
     @if (Model.Exception != null)
     {
       <h2>Error Information</h2>
-      <p>>Message: @Model.Exception.Message<br />
+      <p>
+        >Message: @Model.Exception.Message<br />
       </p>
       <p>StackTrace: @Model.Exception.StackTrace</p>
-
     }
     else
     {
@@ -35,8 +35,10 @@
       <p>Locale: @Model.AuthenticatedClient.UserInformation.Locale</p>
       if (!string.IsNullOrEmpty(Model.AuthenticatedClient.UserInformation.Picture))
       {
-      <p>Picture:<br />
-        <img alt="Provider Image" src="@Model.AuthenticatedClient.UserInformation.Picture" /></p>
+      <p>
+        Picture:<br />
+        <img alt="Provider Image" src="@Model.AuthenticatedClient.UserInformation.Picture" />
+      </p>
       }
       <p>Gender: @Model.AuthenticatedClient.UserInformation.Gender.ToString()</p>
     }

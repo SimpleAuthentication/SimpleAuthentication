@@ -44,6 +44,42 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             }
         }
 
+        public class CheckCallbackFacts
+        {
+            [Fact]
+            public void GiveAMissingProviderKeyQuerystringValue_CheckCallback_ThrowsAnException()
+            {
+                // Arrange.
+                var authenticationService = new AuthenticationService();
+
+                // Act.
+                var result =
+                    Assert.Throws<ArgumentNullException>(
+                        () => authenticationService.GetAuthenticatedClient(null, null, null));
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal("value should not be null or an empty string.\r\nParameter name: value", result.Message);
+            }
+
+            [Fact]
+            public void GivenAnInvalidProviderKey_CheckCallback_ThrowsAnException()
+            {
+                // Arrange.
+                const string providerKey = "aaa";
+                const string state = "asd";
+                var querystringParams = new NameValueCollection();
+                var authenticationService = new AuthenticationService();
+
+                // Act and Assert.
+                var result = Assert.Throws<AuthenticationException>(
+                    () => authenticationService.GetAuthenticatedClient(providerKey, querystringParams, state));
+
+                Assert.NotNull(result);
+                Assert.Equal("No 'aaa' provider has been added.", result.Message);
+            }
+        }
+
         public class RedirectToAuthenticationProviderFacts
         {
             [Fact]
@@ -69,11 +105,14 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 authenticationService.AddProvider(new FacebookProvider("aa", "bb"));
 
                 // Act.
-                var result = authenticationService.RedirectToAuthenticationProvider("Facebook", new Uri("http://www.whatever.com"));
+                var result = authenticationService.RedirectToAuthenticationProvider("Facebook",
+                                                                                    new Uri("http://www.whatever.com"));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("https://www.facebook.com/dialog/oauth?client_id=aa&scope=email&redirect_uri=http://www.whatever.com/", result.AbsoluteUri);
+                Assert.Equal(
+                    "https://www.facebook.com/dialog/oauth?client_id=aa&scope=email&redirect_uri=http://www.whatever.com/",
+                    result.AbsoluteUri);
             }
 
             [Fact]
@@ -91,41 +130,9 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("https://www.facebook.com/dialog/oauth?client_id=aa&state=pewpew&scope=email&redirect_uri=http://www.whatever.com/", result.AbsoluteUri);
-            }
-        }
-
-        public class CheckCallbackFacts
-        {
-            [Fact]
-            public void GiveAMissingProviderKeyQuerystringValue_CheckCallback_ThrowsAnException()
-            {
-                // Arrange.
-                var authenticationService = new AuthenticationService();
-
-                // Act.
-                var result = Assert.Throws<ArgumentNullException>(() => authenticationService.GetAuthenticatedClient(null, null, null));
-
-                // Assert.
-                Assert.NotNull(result);
-                Assert.Equal("value should not be null or an empty string.\r\nParameter name: value", result.Message);
-            }
-
-            [Fact]
-            public void GivenAnInvalidProviderKey_CheckCallback_ThrowsAnException()
-            {
-                // Arrange.
-                const string providerKey = "aaa";
-                const string state = "asd";
-                var querystringParams = new NameValueCollection();
-                var authenticationService = new AuthenticationService();
-
-                // Act and Assert.
-                var result = Assert.Throws<AuthenticationException>(
-                    () => authenticationService.GetAuthenticatedClient(providerKey, querystringParams, state));
-
-                Assert.NotNull(result);
-                Assert.Equal("No 'aaa' provider has been added.", result.Message);
+                Assert.Equal(
+                    "https://www.facebook.com/dialog/oauth?client_id=aa&state=pewpew&scope=email&redirect_uri=http://www.whatever.com/",
+                    result.AbsoluteUri);
             }
         }
     }

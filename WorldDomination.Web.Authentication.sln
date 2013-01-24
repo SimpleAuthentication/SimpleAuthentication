@@ -20,6 +20,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authent
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.Test.NancyFX", "Code\WorldDomination.Web.Authentication.Test\WorldDomination.Web.Authentication.Test.NancyFX\WorldDomination.Web.Authentication.Test.NancyFX.csproj", "{5C6D0C7E-3DEE-42DE-8D9B-CF2F9F14186C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.Test.NancyFX2", "Code\WorldDomination.Web.Authentication.Test\WorldDomination.Web.Authentication.Test.NancyFX2\WorldDomination.Web.Authentication.Test.NancyFX2.csproj", "{837B5D35-57D3-402F-BA87-23E6B8E18433}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nancy.Authentication.WorldDomination", "Code\Nancy.Authentication.WorldDomination\Nancy.Authentication.WorldDomination.csproj", "{94B8D947-6CAD-42C3-B328-F369CE7BC6C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +54,14 @@ Global
 		{5C6D0C7E-3DEE-42DE-8D9B-CF2F9F14186C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C6D0C7E-3DEE-42DE-8D9B-CF2F9F14186C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C6D0C7E-3DEE-42DE-8D9B-CF2F9F14186C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{837B5D35-57D3-402F-BA87-23E6B8E18433}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{837B5D35-57D3-402F-BA87-23E6B8E18433}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{837B5D35-57D3-402F-BA87-23E6B8E18433}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{837B5D35-57D3-402F-BA87-23E6B8E18433}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94B8D947-6CAD-42C3-B328-F369CE7BC6C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94B8D947-6CAD-42C3-B328-F369CE7BC6C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94B8D947-6CAD-42C3-B328-F369CE7BC6C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94B8D947-6CAD-42C3-B328-F369CE7BC6C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
