@@ -33,7 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Nancy">
-      <HintPath>..\packages\Nancy.0.15.3\lib\net40\Nancy.dll</HintPath>
+      <HintPath>..\..\packages\Nancy.0.15.3\lib\net40\Nancy.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -48,13 +48,13 @@
     <Compile Include="WorldDominationAuthenticationModule.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\WorldDomination.Web.Authentication\WorldDomination.Web.Authentication.csproj">
       <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
       <Name>WorldDomination.Web.Authentication</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
