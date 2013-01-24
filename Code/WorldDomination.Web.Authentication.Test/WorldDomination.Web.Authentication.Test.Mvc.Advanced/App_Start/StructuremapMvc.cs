@@ -18,14 +18,19 @@
 using System.Web.Http;
 using System.Web.Mvc;
 using StructureMap;
+using WebActivator;
+using WorldDomination.Web.Authentication.Test.Mvc.Advanced.App_Start;
 using WorldDomination.Web.Authentication.Test.Mvc.Advanced.DependencyResolution;
 
-[assembly: WebActivator.PreApplicationStartMethod(typeof(WorldDomination.Web.Authentication.Test.Mvc.Advanced.App_Start.StructuremapMvc), "Start")]
+[assembly: PreApplicationStartMethod(typeof (StructuremapMvc), "Start")]
 
-namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.App_Start {
-    public static class StructuremapMvc {
-        public static void Start() {
-			IContainer container = IoC.Initialize();
+namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.App_Start
+{
+    public static class StructuremapMvc
+    {
+        public static void Start()
+        {
+            IContainer container = IoC.Initialize();
             DependencyResolver.SetResolver(new StructureMapDependencyResolver(container));
             GlobalConfiguration.Configuration.DependencyResolver = new StructureMapDependencyResolver(container);
         }

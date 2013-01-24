@@ -15,31 +15,36 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Fakes.Controllers
 
         public HomeController()
         {
-            var facebookProvider = new FakeFacebookProvider(new Uri("http://localhost:1338/home/AuthenticateCallback?providerKey=facebook"));
-            var twitterProvider = new FakeTwitterProvider(new Uri("http://localhost:1338/home/AuthenticateCallback?providerKey=twitter"));
-            var googleProvider = new FakeGoogleProvider(new Uri("http://localhost:1338/home/AuthenticateCallback?providerKey=google"));
+            var facebookProvider =
+                new FakeFacebookProvider(new Uri("http://localhost:1338/home/AuthenticateCallback?providerKey=facebook"));
+            var twitterProvider =
+                new FakeTwitterProvider(new Uri("http://localhost:1338/home/AuthenticateCallback?providerKey=twitter"));
+            var googleProvider =
+                new FakeGoogleProvider(new Uri("http://localhost:1338/home/AuthenticateCallback?providerKey=google"));
 
             _authenticationService = new AuthenticationService();
             _authenticationService.AddProvider(facebookProvider);
             _authenticationService.AddProvider(twitterProvider);
             _authenticationService.AddProvider(googleProvider);
 
-
             // Some providers that error.
             var facebookProviderThatErrors =
-                new FakeFacebookProvider(new Uri("http://localhost:1338/home/AuthenticateCallbackThatErrors?providerKey=facebook"))
+                new FakeFacebookProvider(
+                    new Uri("http://localhost:1338/home/AuthenticateCallbackThatErrors?providerKey=facebook"))
                 {
                     AuthenticateClientExceptionMessage =
                         "ZOMG! Something nasty has occured! ID10T Error!1!1!1. -le sad panda-"
                 };
             var twitterProviderThatErrors =
-                new FakeTwitterProvider(new Uri("http://localhost:1338/home/AuthenticateCallbackThatErrors?providerKey=twitter"))
+                new FakeTwitterProvider(
+                    new Uri("http://localhost:1338/home/AuthenticateCallbackThatErrors?providerKey=twitter"))
                 {
                     AuthenticateClientExceptionMessage =
                         "ZOMG! Something nasty has occured! ID10T Error!1!1!1. -le sad panda-"
                 };
             var googleProviderThatErrors =
-                new FakeGoogleProvider(new Uri("http://localhost:1338/home/AuthenticateCallbackThatErrors?providerKey=google"))
+                new FakeGoogleProvider(
+                    new Uri("http://localhost:1338/home/AuthenticateCallbackThatErrors?providerKey=google"))
                 {
                     AuthenticateClientExceptionMessage =
                         "ZOMG! Something nasty has occured! ID10T Error!1!1!1. -le sad panda-"
@@ -98,7 +103,8 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Fakes.Controllers
             var model = new AuthenticateCallbackViewModel();
             try
             {
-                model.AuthenticatedClient = _authenticationServiceThatErrors.GetAuthenticatedClient(providerKey, Request.Params);
+                model.AuthenticatedClient = _authenticationServiceThatErrors.GetAuthenticatedClient(providerKey,
+                                                                                                    Request.Params);
             }
             catch (Exception exception)
             {

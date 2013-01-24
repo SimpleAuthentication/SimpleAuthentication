@@ -12,46 +12,6 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
     public class FacebookProviderFacts
     {
-        public class RedirectToAuthenticateFacts
-        {
-            [Fact]
-            public void GivenDefaultSettingsRequested_RedirectToAuthenticate_ReturnsAUri()
-            {
-                // Arrange.
-                var facebookProvider = new FacebookProvider("aa", "bb");
-                var facebookAuthenticationServiceSettings = new FacebookAuthenticationServiceSettings
-                                                            {
-                                                                CallBackUri = new Uri("http://www.2p1s.com")
-                                                            };
-
-                // Act.
-                var result = facebookProvider.RedirectToAuthenticate(facebookAuthenticationServiceSettings);
-
-                // Assert.
-                Assert.NotNull(result);
-                Assert.Equal("https://www.facebook.com/dialog/oauth?client_id=aa&scope=email&redirect_uri=http://www.2p1s.com/", result.AbsoluteUri);
-            }
-
-            [Fact]
-            public void GivenMobileAndDisplayAreRequested_RedirectToAuthenticate_ReturnsAUri()
-            {
-                // Arrange.
-                var facebookProvider = new FacebookProvider("aa", "bb");
-                var facebookAuthenticationServiceSettings = new FacebookAuthenticationServiceSettings
-                                                            {
-                                                                CallBackUri = new Uri("http://www.2p1s.com"),
-                                                                IsMobile = true,
-                                                                Display = DisplayType.Touch
-                                                            };
-                // Act.
-                var result = facebookProvider.RedirectToAuthenticate(facebookAuthenticationServiceSettings);
-
-                // Assert.
-                Assert.NotNull(result);
-                Assert.Equal("https://m.facebook.com/dialog/oauth?client_id=aa&scope=email&display=touch&redirect_uri=http://www.2p1s.com/", result.AbsoluteUri);
-            }
-        }
-
         public class AuthenticateClientFacts
         {
             [Fact]
@@ -63,21 +23,26 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, mockRestClient.Object);
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"code", "aaa"},
-                                                {"state", "bbb"}
-                                            };
+                {
+                    {"code", "aaa"},
+                    {"state", "bbb"}
+                };
 
                 // Act.
-                var result = Assert.Throws<AuthenticationException>( () => facebookProvider.AuthenticateClient(queryStringParameters, "meh"));
+                var result =
+                    Assert.Throws<AuthenticationException>(
+                        () => facebookProvider.AuthenticateClient(queryStringParameters, "meh"));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("The states do not match. It's possible that you may be a victim of a CSRF.", result.Message);
+                Assert.Equal("The states do not match. It's possible that you may be a victim of a CSRF.",
+                             result.Message);
             }
 
             [Fact]
-            public void GivenSomeErrorOccuredWhileTryingToRetrieveAccessToken_AuthenticateClient_ThrowsAnAuthenticationException()
+            public void
+                GivenSomeErrorOccuredWhileTryingToRetrieveAccessToken_AuthenticateClient_ThrowsAnAuthenticationException
+                ()
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
@@ -86,15 +51,17 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                                                             null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"state", existingState},
-                                                {"error_reason", "aaa"},
-                                                {"error", "bbb"},
-                                                {"error_description", "ccc"}
-                                            };
+                {
+                    {"state", existingState},
+                    {"error_reason", "aaa"},
+                    {"error", "bbb"},
+                    {"error_description", "ccc"}
+                };
 
                 // Act.
-                var result = Assert.Throws<AuthenticationException>(() => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
+                var result =
+                    Assert.Throws<AuthenticationException>(
+                        () => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -111,12 +78,14 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                                                             null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"state", existingState} // No code param.
-                                            };
+                {
+                    {"state", existingState} // No code param.
+                };
 
                 // Act.
-                var result = Assert.Throws<AuthenticationException>(() => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
+                var result =
+                    Assert.Throws<AuthenticationException>(
+                        () => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -124,24 +93,29 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             }
 
             [Fact]
-            public void GivenAnExceptionOccursWhileTryingToRequestAnAccessToken_AuthenticateClient_ThrowsAnAuthenticationException()
+            public void
+                GivenAnExceptionOccursWhileTryingToRequestAnAccessToken_AuthenticateClient_ThrowsAnAuthenticationException
+                ()
             {
                 // Arrange.
-                const string exceptionMessage = "1st World Problems: Too many rooms in my house. Can't decide where to sleep.";
+                const string exceptionMessage =
+                    "1st World Problems: Too many rooms in my house. Can't decide where to sleep.";
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
-                    .Throws(new Exception(exceptionMessage));
+                              .Throws(new Exception(exceptionMessage));
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"state", existingState},
-                                                {"code", "whatever"}
-                                            };
+                {
+                    {"state", existingState},
+                    {"code", "whatever"}
+                };
 
                 // Act.
-                var result = Assert.Throws<AuthenticationException>(() => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
+                var result =
+                    Assert.Throws<AuthenticationException>(
+                        () => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -161,23 +135,26 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
-                    .Returns(mockRestResponse.Object);
+                              .Returns(mockRestResponse.Object);
 
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"state", existingState},
-                                                {"code", "whatever"}
-                                            };
+                {
+                    {"state", existingState},
+                    {"code", "whatever"}
+                };
 
                 // Act.
-                var result = Assert.Throws<AuthenticationException>(() => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
+                var result =
+                    Assert.Throws<AuthenticationException>(
+                        () => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorised. Error Content: {error:hi there asshat}",
+                Assert.Equal(
+                    "Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorised. Error Content: {error:hi there asshat}",
                     result.Message);
             }
 
@@ -188,27 +165,32 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 var mockRestResponse = new Mock<IRestResponse>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.BadRequest);
                 mockRestResponse.Setup(x => x.StatusDescription).Returns("Bad Request");
-                mockRestResponse.Setup(x => x.Content).Returns("{\"error\":{\"message\":\"Missing redirect_uri parameter.\",\"type\":\"OAuthException\",\"code\":191}}");
+                mockRestResponse.Setup(x => x.Content)
+                                .Returns(
+                                    "{\"error\":{\"message\":\"Missing redirect_uri parameter.\",\"type\":\"OAuthException\",\"code\":191}}");
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
-                    .Returns(mockRestResponse.Object);
+                              .Returns(mockRestResponse.Object);
 
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"state", existingState},
-                                                {"code", "whatever"}
-                                            };
+                {
+                    {"state", existingState},
+                    {"code", "whatever"}
+                };
 
                 // Act.
-                var result = Assert.Throws<AuthenticationException>(() => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
+                var result =
+                    Assert.Throws<AuthenticationException>(
+                        () => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: BadRequest. Response Description: Bad Request. Error Content: {\"error\":{\"message\":\"Missing redirect_uri parameter.\",\"type\":\"OAuthException\",\"code\":191}}",
+                Assert.Equal(
+                    "Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: BadRequest. Response Description: Bad Request. Error Content: {\"error\":{\"message\":\"Missing redirect_uri parameter.\",\"type\":\"OAuthException\",\"code\":191}}",
                     result.Message);
             }
 
@@ -222,52 +204,59 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
-                    .Returns(mockRestResponse.Object);
+                              .Returns(mockRestResponse.Object);
 
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"state", existingState},
-                                                {"code", "whatever"}
-                                            };
+                {
+                    {"state", existingState},
+                    {"code", "whatever"}
+                };
 
                 // Act.
-                var result = Assert.Throws<AuthenticationException>(() => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
+                var result =
+                    Assert.Throws<AuthenticationException>(
+                        () => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Retrieved a Facebook Access Token but it doesn't contain both the access_token and expires_on parameters.",
+                Assert.Equal(
+                    "Retrieved a Facebook Access Token but it doesn't contain both the access_token and expires_on parameters.",
                     result.Message);
             }
 
             [Fact]
-            public void GivenAValidAccessTokenButApiMeThrowsAnException_AuthenticateClient_ThrowsAnAuthenticationException()
+            public void
+                GivenAValidAccessTokenButApiMeThrowsAnException_AuthenticateClient_ThrowsAnAuthenticationException()
             {
                 // Arrange.
-                const string exceptionMessage = "1st World Problems: The Pizza guy arrived. Before I finished downloading the movie.";
+                const string exceptionMessage =
+                    "1st World Problems: The Pizza guy arrived. Before I finished downloading the movie.";
                 var mockRestResponse = new Mock<IRestResponse>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponse.Setup(x => x.Content).Returns("access_token=foo&expires=1000");
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
-                    .Returns(mockRestResponse.Object);
+                              .Returns(mockRestResponse.Object);
                 mockRestClient.Setup(x => x.Execute<MeResult>(It.IsAny<IRestRequest>()))
-                    .Throws(new Exception(exceptionMessage));
+                              .Throws(new Exception(exceptionMessage));
 
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"state", existingState},
-                                                {"code", "whatever"}
-                                            };
+                {
+                    {"state", existingState},
+                    {"code", "whatever"}
+                };
 
                 // Act.
-                var result = Assert.Throws<AuthenticationException>(() => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
+                var result =
+                    Assert.Throws<AuthenticationException>(
+                        () => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -288,25 +277,28 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
-                    .Returns(mockRestResponse.Object);
+                              .Returns(mockRestResponse.Object);
                 mockRestClient.Setup(x => x.Execute<MeResult>(It.IsAny<IRestRequest>()))
-                    .Returns(mockRestResponseApiMe.Object);
+                              .Returns(mockRestResponseApiMe.Object);
 
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"state", existingState},
-                                                {"code", "whatever"}
-                                            };
+                {
+                    {"state", existingState},
+                    {"code", "whatever"}
+                };
 
                 // Act.
-                var result = Assert.Throws<AuthenticationException>(() => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
+                var result =
+                    Assert.Throws<AuthenticationException>(
+                        () => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Failed to obtain some Me data from the Facebook api OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
+                Assert.Equal(
+                    "Failed to obtain some Me data from the Facebook api OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
                     result.Message);
             }
 
@@ -319,17 +311,17 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 mockRestResponseAccessToken.Setup(x => x.Content).Returns("access_token=foo&expires=1000");
 
                 var meResult = new MeResult
-                               {
-                                   Id = 1,
-                                   FirstName = "some firstname",
-                                   LastName = "some lastname",
-                                   Link = "http://whatever",
-                                   Locale = "en-au",
-                                   Name = "Hi there",
-                                   Timezone = 10,
-                                   Username = "PewPew",
-                                   Verified = true
-                               };
+                {
+                    Id = 1,
+                    FirstName = "some firstname",
+                    LastName = "some lastname",
+                    Link = "http://whatever",
+                    Locale = "en-au",
+                    Name = "Hi there",
+                    Timezone = 10,
+                    Username = "PewPew",
+                    Verified = true
+                };
 
                 var mockRestResponseApiMe = new Mock<IRestResponse<MeResult>>();
                 mockRestResponseApiMe.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
@@ -337,18 +329,18 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
-                    .Returns(mockRestResponseAccessToken.Object);
+                              .Returns(mockRestResponseAccessToken.Object);
                 mockRestClient.Setup(x => x.Execute<MeResult>(It.IsAny<IRestRequest>()))
-                    .Returns(mockRestResponseApiMe.Object);
+                              .Returns(mockRestResponseApiMe.Object);
 
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, mockRestClient.Object);
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
-                                            {
-                                                {"state", existingState},
-                                                {"code", "whatever"}
-                                            };
+                {
+                    {"state", existingState},
+                    {"code", "whatever"}
+                };
                 // Act.
                 var result =
                     facebookProvider.AuthenticateClient(queryStringParameters, existingState);
@@ -361,6 +353,50 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 Assert.False(string.IsNullOrEmpty(result.UserInformation.Id));
                 Assert.NotNull(result.UserInformation.Name);
                 Assert.NotNull(result.UserInformation.UserName);
+            }
+        }
+
+        public class RedirectToAuthenticateFacts
+        {
+            [Fact]
+            public void GivenDefaultSettingsRequested_RedirectToAuthenticate_ReturnsAUri()
+            {
+                // Arrange.
+                var facebookProvider = new FacebookProvider("aa", "bb");
+                var facebookAuthenticationServiceSettings = new FacebookAuthenticationServiceSettings
+                {
+                    CallBackUri = new Uri("http://www.2p1s.com")
+                };
+
+                // Act.
+                var result = facebookProvider.RedirectToAuthenticate(facebookAuthenticationServiceSettings);
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal(
+                    "https://www.facebook.com/dialog/oauth?client_id=aa&scope=email&redirect_uri=http://www.2p1s.com/",
+                    result.AbsoluteUri);
+            }
+
+            [Fact]
+            public void GivenMobileAndDisplayAreRequested_RedirectToAuthenticate_ReturnsAUri()
+            {
+                // Arrange.
+                var facebookProvider = new FacebookProvider("aa", "bb");
+                var facebookAuthenticationServiceSettings = new FacebookAuthenticationServiceSettings
+                {
+                    CallBackUri = new Uri("http://www.2p1s.com"),
+                    IsMobile = true,
+                    Display = DisplayType.Touch
+                };
+                // Act.
+                var result = facebookProvider.RedirectToAuthenticate(facebookAuthenticationServiceSettings);
+
+                // Assert.
+                Assert.NotNull(result);
+                Assert.Equal(
+                    "https://m.facebook.com/dialog/oauth?client_id=aa&scope=email&display=touch&redirect_uri=http://www.2p1s.com/",
+                    result.AbsoluteUri);
             }
         }
     }

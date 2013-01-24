@@ -1,4 +1,3 @@
-using System;
 using System.Configuration;
 using StructureMap;
 using WorldDomination.Web.Authentication.Facebook;
@@ -12,17 +11,17 @@ namespace WorldDomination.Web.Authentication.Test.Mvc.Advanced.DependencyResolut
         public static IContainer Initialize()
         {
             ObjectFactory.Initialize(x =>
-                                     {
-                                         var authenticationRegistry = new AuthenticationRegistry(
-                                             new FacebookProvider(ConfigurationManager.AppSettings["FacebookAppId"],
-                                                                  ConfigurationManager.AppSettings["FacebookAppSecret"]),
-                                             new GoogleProvider(ConfigurationManager.AppSettings["GoogleConsumerKey"],
-                                                                ConfigurationManager.AppSettings["GoogleConsumerSecret"]),
-                                             new TwitterProvider(ConfigurationManager.AppSettings["TwitterConsumerKey"],
-                                                                 ConfigurationManager.AppSettings["TwitterConsumerSecret"])
-                                             );
-                                         x.AddRegistry(authenticationRegistry);
-                                     });
+            {
+                var authenticationRegistry = new AuthenticationRegistry(
+                    new FacebookProvider(ConfigurationManager.AppSettings["FacebookAppId"],
+                                         ConfigurationManager.AppSettings["FacebookAppSecret"]),
+                    new GoogleProvider(ConfigurationManager.AppSettings["GoogleConsumerKey"],
+                                       ConfigurationManager.AppSettings["GoogleConsumerSecret"]),
+                    new TwitterProvider(ConfigurationManager.AppSettings["TwitterConsumerKey"],
+                                        ConfigurationManager.AppSettings["TwitterConsumerSecret"])
+                    );
+                x.AddRegistry(authenticationRegistry);
+            });
             return ObjectFactory.Container;
         }
     }
