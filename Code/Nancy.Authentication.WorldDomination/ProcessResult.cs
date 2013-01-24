@@ -2,8 +2,6 @@
 {
     public class ProcessResult
     {
-        #region ActionEnum enum
-
         public enum ActionEnum
         {
             /// <summary>
@@ -17,8 +15,6 @@
             /// </summary>
             RenderView
         }
-
-        #endregion
 
         public ProcessResult(ActionEnum action)
         {
