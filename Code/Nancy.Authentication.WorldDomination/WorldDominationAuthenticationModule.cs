@@ -25,7 +25,7 @@ namespace Nancy.Authentication.WorldDomination
                     throw new ArgumentException(
                         "You need to supply a valid provider key so we know where to redirect the user.");
                 }
-
+                
                 var settings = authenticationService.GetAuthenticateServiceSettings((string)_.providerkey);
                 var guidString = Guid.NewGuid().ToString();
 
@@ -66,7 +66,7 @@ namespace Nancy.Authentication.WorldDomination
                     model.Exception = exception;
                 }
 
-                var result = authenticationCallbackProvider.Process(model);
+                var result = authenticationCallbackProvider.Process(Context, model);
 
                 if (result.Action == ProcessResult.ActionEnum.Redirect)
                 {

@@ -14,7 +14,7 @@ namespace WorldDomination.Web.Authentication.Test.NancyFX2.Modules
 
     public class Test : IAuthenticationCallbackProvider
     {
-        public ProcessResult Process(AuthenticateCallbackData model)
+        public ProcessResult Process(NancyContext nancyContext, AuthenticateCallbackData model)
         {
             return new ProcessResult(ProcessResult.ActionEnum.RenderView)
             {

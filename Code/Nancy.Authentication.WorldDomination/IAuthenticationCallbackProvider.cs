@@ -2,6 +2,6 @@
 {
     public interface IAuthenticationCallbackProvider
     {
-        ProcessResult Process(AuthenticateCallbackData model);
+        ProcessResult Process(NancyContext nancyContext, AuthenticateCallbackData model);
     }
 }
