@@ -68,12 +68,9 @@ namespace Nancy.Authentication.WorldDomination
 
                 var result = authenticationCallbackProvider.Process(Context, model);
 
-                if (result.Action == ProcessResult.ActionEnum.Redirect)
-                {
-                    return Response.AsRedirect(result.RedirectTo);
-                }
-
-                return View[result.View, result.ViewModel];
+                return result.Action == ProcessResult.ActionType.Redirect
+                           ? Response.AsRedirect(result.RedirectTo)
+                           : View[result.View, result.ViewModel];
             };
         }
 
@@ -84,6 +81,12 @@ namespace Nancy.Authentication.WorldDomination
                               Path = relativeUrl,
                               Query = "providerkey=" + provider.ToLowerInvariant()
                           };
+
+            // Don't include port 80/443 in the Uri.
+            if (builder.Uri.IsDefaultPort)
+            {
+                builder.Port = -1;
+            }
 
             return builder.Uri;
         }
