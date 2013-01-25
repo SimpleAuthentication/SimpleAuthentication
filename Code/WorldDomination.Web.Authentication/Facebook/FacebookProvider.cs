@@ -217,7 +217,7 @@ namespace WorldDomination.Web.Authentication.Facebook
 
             var userInformation = RetrieveMe(accessToken);
 
-            return new AuthenticatedClient(ProviderType.Facebook)
+            return new AuthenticatedClient(Name.ToLowerInvariant())
             {
                 AccessToken = accessToken,
                 AccessTokenExpiresOn = DateTime.UtcNow,

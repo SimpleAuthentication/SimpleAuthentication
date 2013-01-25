@@ -11,9 +11,9 @@ namespace WorldDomination.Web.Authentication
         /// Initializes a new instance of an AuthenticatedClient.
         /// </summary>
         /// <param name="providerType">A Provider.</param>
-        public AuthenticatedClient(ProviderType providerType)
+        public AuthenticatedClient(string providerType)
         {
-            ProviderType = providerType;
+            ProviderName = providerType;
         }
 
         #region Implementation of IAuthenticatedClient
@@ -21,7 +21,7 @@ namespace WorldDomination.Web.Authentication
         /// <summary>
         /// An Authentication Provider.
         /// </summary>
-        public ProviderType ProviderType { get; private set; }
+        public string ProviderName { get; private set; }
 
         /// <summary>
         /// User information retrieved.

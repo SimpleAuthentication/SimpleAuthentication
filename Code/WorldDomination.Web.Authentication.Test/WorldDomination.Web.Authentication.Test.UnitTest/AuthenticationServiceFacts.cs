@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using WorldDomination.Web.Authentication.Facebook;
+using WorldDomination.Web.Authentication.Twitter;
 using Xunit;
 
 namespace WorldDomination.Web.Authentication.Test.UnitTest
@@ -18,13 +19,13 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 var authenticationService = new AuthenticationService();
 
                 // Act.
-                authenticationService.AddProvider(new FacebookProvider("a", "b"));
+                authenticationService.AddProvider(new TwitterProvider("a", "b"));
 
                 // Assert.
                 var providers = authenticationService.AuthenticationProviders;
                 Assert.NotNull(providers);
-                Assert.Equal(1, providers.Count);
-                Assert.NotNull(providers["facebook"]);
+                Assert.Equal(3, providers.Count);
+                Assert.NotNull(providers["twitter"]);
             }
 
             [Fact]
@@ -33,8 +34,8 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 // Arrange.
                 var authenticationService = new AuthenticationService();
                 var facebookProvider = new FacebookProvider("a", "b");
+
                 // Act.
-                authenticationService.AddProvider(facebookProvider);
                 var result = Assert.Throws<AuthenticationException>(
                     () => authenticationService.AddProvider(facebookProvider));
 
@@ -102,7 +103,6 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             {
                 // Arrange.
                 var authenticationService = new AuthenticationService();
-                authenticationService.AddProvider(new FacebookProvider("aa", "bb"));
 
                 // Act.
                 var result = authenticationService.RedirectToAuthenticationProvider("Facebook",
@@ -111,7 +111,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "https://www.facebook.com/dialog/oauth?client_id=aa&scope=email&redirect_uri=http://www.whatever.com/",
+                    "https://www.facebook.com/dialog/oauth?client_id=testKey&scope=email&redirect_uri=http://www.whatever.com/",
                     result.AbsoluteUri);
             }
 
@@ -120,7 +120,6 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             {
                 // Arrange.
                 var authenticationService = new AuthenticationService();
-                authenticationService.AddProvider(new FacebookProvider("aa", "bb"));
 
                 // Act.
                 var authenticationServiceSettings = authenticationService.GetAuthenticateServiceSettings("facebook");
@@ -131,7 +130,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "https://www.facebook.com/dialog/oauth?client_id=aa&state=pewpew&scope=email&redirect_uri=http://www.whatever.com/",
+                    "https://www.facebook.com/dialog/oauth?client_id=testKey&state=pewpew&scope=email&redirect_uri=http://www.whatever.com/",
                     result.AbsoluteUri);
             }
         }

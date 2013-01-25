@@ -42,7 +42,7 @@ namespace WorldDomination.Web.Authentication.Facebook
                 throw new AuthenticationException(AuthenticateClientExceptionMessage);
             }
 
-            return new AuthenticatedClient(ProviderType.Facebook)
+            return new AuthenticatedClient("facebook")
             {
                 AccessToken = "IAmALittleTeaPotShortAndStout",
                 AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),

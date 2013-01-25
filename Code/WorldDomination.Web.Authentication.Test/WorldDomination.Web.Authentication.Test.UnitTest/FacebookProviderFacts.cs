@@ -347,7 +347,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal(ProviderType.Facebook, result.ProviderType);
+                Assert.Equal("facebook", result.ProviderName);
                 Assert.NotNull(result.AccessToken);
                 Assert.NotNull(result.UserInformation);
                 Assert.False(string.IsNullOrEmpty(result.UserInformation.Id));

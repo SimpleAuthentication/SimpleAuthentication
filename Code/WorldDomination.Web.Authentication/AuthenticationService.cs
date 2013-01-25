@@ -50,7 +50,7 @@ namespace WorldDomination.Web.Authentication
                         break;
                     default:
                         throw new ApplicationException(
-                            "Unhandled ProviderType found - unable to know which Provider Type to create.");
+                            "Unhandled ProviderName found - unable to know which Provider Type to create.");
                 }
 
                 AddProvider(authenticationProvider);

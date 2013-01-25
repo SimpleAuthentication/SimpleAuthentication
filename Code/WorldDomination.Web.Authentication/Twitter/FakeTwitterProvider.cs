@@ -42,7 +42,7 @@ namespace WorldDomination.Web.Authentication.Twitter
                 throw new AuthenticationException(AuthenticateClientExceptionMessage);
             }
 
-            return new AuthenticatedClient(ProviderType.Facebook)
+            return new AuthenticatedClient("facebook")
             {
                 AccessToken = "EstSularusOthMithas-MyHonorIsMyLife",
                 AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),

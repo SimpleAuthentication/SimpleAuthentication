@@ -10,7 +10,7 @@ namespace WorldDomination.Web.Authentication
         /// <summary>
         /// An Authentication Provider.
         /// </summary>
-        ProviderType ProviderType { get; }
+        string ProviderName { get; }
 
         /// <summary>
         /// User information retrieved.

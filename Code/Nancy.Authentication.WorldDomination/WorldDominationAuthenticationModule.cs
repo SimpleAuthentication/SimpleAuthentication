@@ -66,11 +66,7 @@ namespace Nancy.Authentication.WorldDomination
                     model.Exception = exception;
                 }
 
-                var result = authenticationCallbackProvider.Process(Context, model);
-
-                return result.Action == ProcessResult.ActionType.Redirect
-                           ? Response.AsRedirect(result.RedirectTo)
-                           : View[result.View, result.ViewModel];
+                return authenticationCallbackProvider.Process(this, model);
             };
         }
 

@@ -359,7 +359,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal(ProviderType.Google, result.ProviderType);
+                Assert.Equal("google", result.ProviderName);
                 Assert.Equal(accessToken, result.AccessToken);
                 Assert.True(DateTime.UtcNow < result.AccessTokenExpiresOn);
                 Assert.NotNull(result.UserInformation);

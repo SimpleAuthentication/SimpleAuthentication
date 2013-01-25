@@ -270,7 +270,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal(ProviderType.Twitter, result.ProviderType);
+                Assert.Equal("twitter", result.ProviderName);
                 Assert.NotNull(result.UserInformation);
                 Assert.NotNull(result.UserInformation.Id);
                 Assert.NotNull(result.UserInformation.Locale);

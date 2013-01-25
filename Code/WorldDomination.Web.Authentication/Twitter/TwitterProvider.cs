@@ -219,7 +219,7 @@ namespace WorldDomination.Web.Authentication.Twitter
             // Grab the user information.
             var verifyCredentialsResult = VerifyCredentials(oAuthAccessToken);
 
-            return new AuthenticatedClient(ProviderType.Twitter)
+            return new AuthenticatedClient(Name.ToLowerInvariant())
             {
                 UserInformation = new UserInformation
                 {

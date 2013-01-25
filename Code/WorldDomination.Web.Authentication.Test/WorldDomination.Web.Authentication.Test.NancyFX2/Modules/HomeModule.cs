@@ -1,5 +1,4 @@
-﻿using System;
-using Nancy;
+﻿using Nancy;
 using Nancy.Authentication.WorldDomination;
 
 namespace WorldDomination.Web.Authentication.Test.NancyFX2.Modules
@@ -14,13 +13,9 @@ namespace WorldDomination.Web.Authentication.Test.NancyFX2.Modules
 
     public class Test : IAuthenticationCallbackProvider
     {
-        public ProcessResult Process(NancyContext nancyContext, AuthenticateCallbackData model)
+        public dynamic Process(NancyModule nancyModule, AuthenticateCallbackData model)
         {
-            return new ProcessResult(ProcessResult.ActionType.RenderView)
-            {
-                View = "AuthenticateCallback.cshtml",
-                ViewModel = model
-            };
+            return nancyModule.Negotiate.WithView("AuthenticateCallback").WithModel(model);
         }
     }
 }

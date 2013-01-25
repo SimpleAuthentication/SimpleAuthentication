@@ -221,7 +221,7 @@ namespace WorldDomination.Web.Authentication.Google
             // Grab the user information.
             var userInfo = RetrieveUserInfo(oAuthAccessToken.AccessToken);
 
-            return new AuthenticatedClient(ProviderType.Google)
+            return new AuthenticatedClient(Name.ToLowerInvariant())
             {
                 AccessToken = oAuthAccessToken.AccessToken,
                 AccessTokenExpiresOn = DateTime.UtcNow.AddSeconds(oAuthAccessToken.ExpiresIn),
