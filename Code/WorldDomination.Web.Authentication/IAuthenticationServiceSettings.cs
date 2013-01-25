@@ -10,12 +10,7 @@ namespace WorldDomination.Web.Authentication
         /// <summary>
         /// The Provider's unique name.
         /// </summary>
-        string ProviderKey { get; }
-
-        /// <summary>
-        /// The type of provider.
-        /// </summary>
-        ProviderType ProviderType { get; }
+        string ProviderName { get; }
 
         /// <summary>
         /// Optional: The default callBack uri.

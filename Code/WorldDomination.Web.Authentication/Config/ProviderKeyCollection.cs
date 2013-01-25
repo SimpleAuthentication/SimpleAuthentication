@@ -4,7 +4,7 @@ namespace WorldDomination.Web.Authentication.Config
 {
     public class ProviderKeyCollection : KeyValueConfigurationCollection
     {
-        public ProviderKey this[ProviderType provider]
+        public new ProviderKey this[string provider]
         {
             get { return BaseGet(provider) as ProviderKey; }
             set
@@ -25,7 +25,7 @@ namespace WorldDomination.Web.Authentication.Config
 
         protected override object GetElementKey(ConfigurationElement element)
         {
-            return ((ProviderKey) element).Name;
+            return ((ProviderKey)element).Name;
         }
     }
 }

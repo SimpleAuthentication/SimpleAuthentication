@@ -37,15 +37,15 @@ namespace WorldDomination.Web.Authentication
             foreach (ProviderKey provider in providerConfiguration.Providers)
             {
                 IAuthenticationProvider authenticationProvider;
-                switch (provider.Name)
+                switch (provider.Name.ToLowerInvariant())
                 {
-                    case ProviderType.Facebook:
+                    case "facebook":
                         authenticationProvider = new FacebookProvider(provider, scope, restClient);
                         break;
-                    case ProviderType.Google:
+                    case "google":
                         authenticationProvider = new GoogleProvider(provider, scope, restClient);
                         break;
-                    case ProviderType.Twitter:
+                    case "twitter":
                         authenticationProvider = new TwitterProvider(provider, restClient);
                         break;
                     default:
@@ -112,12 +112,11 @@ namespace WorldDomination.Web.Authentication
         public Uri RedirectToAuthenticationProvider(IAuthenticationServiceSettings authenticationServiceSettings)
         {
             Condition.Requires(authenticationServiceSettings).IsNotNull();
-            Condition.Requires(authenticationServiceSettings.ProviderKey).IsNotNullOrEmpty();
-            Condition.Requires(authenticationServiceSettings.ProviderType).IsNotEqualTo(ProviderType.Unknown);
+            Condition.Requires(authenticationServiceSettings.ProviderName).IsNotNullOrEmpty();
             Condition.Requires(authenticationServiceSettings.CallBackUri).IsNotNull();
             Condition.Requires(authenticationServiceSettings.CallBackUri.AbsoluteUri).IsNotNullOrEmpty();
 
-            var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderKey);
+            var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderName);
 
             return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
         }
@@ -136,20 +135,13 @@ namespace WorldDomination.Web.Authentication
         {
             Condition.Requires(providerKey).IsNotNullOrEmpty();
 
-            // Convert the string to an enumeration.
-            ProviderType providerType;
-            if (!Enum.TryParse(providerKey, true, out providerType))
+            switch (providerKey.ToLowerInvariant())
             {
-                return null;
-            }
-
-            switch (providerType)
-            {
-                case ProviderType.Facebook:
+                case "facebook":
                     return new FacebookAuthenticationServiceSettings();
-                case ProviderType.Google:
+                case "google":
                     return new GoogleAuthenticationServiceSettings();
-                case ProviderType.Twitter:
+                case "twitter":
                     return new TwitterAuthenticationServiceSettings();
                 default:
                     throw new AuthenticationException(

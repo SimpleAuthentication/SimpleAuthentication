@@ -19,7 +19,7 @@ namespace WorldDomination.Web.Authentication.Config
         [ConfigurationProperty("providers")]
         public ProviderKeyCollection Providers
         {
-            get { return this["providers"] as ProviderKeyCollection; }
+            get { return (ProviderKeyCollection)this["providers"]; }
         }
     }
 }

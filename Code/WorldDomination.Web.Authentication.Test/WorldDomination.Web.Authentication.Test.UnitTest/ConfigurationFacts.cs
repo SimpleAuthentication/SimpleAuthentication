@@ -18,7 +18,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
             // Act.
             var authenticationProviders = ProviderConfigHelper.UseConfig();
-            var facebookProvider = authenticationProviders.Providers[ProviderType.Facebook];
+            var facebookProvider = authenticationProviders.Providers["facebook"];
 
             // Assert.
             Assert.Equal(new Uri("http://www.mywebsite.com/authenticationCallback").AbsoluteUri,
@@ -46,10 +46,10 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             var authenticationProviders = ProviderConfigHelper.UseConfig();
 
             // Act.
-            var facebookProvider = authenticationProviders.Providers[ProviderType.Twitter];
+            var missingProvider = authenticationProviders.Providers["foo"];
 
             // Assert.
-            Assert.Null(facebookProvider);
+            Assert.Null(missingProvider);
         }
 
         [Fact]
@@ -58,7 +58,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
             // Arrange.
 
             // Act & Assert.
-            Assert.Throws<KeyNotFoundException>(() => { ProviderConfigHelper.UseConfig().For(ProviderType.Twitter); });
+            Assert.Throws<KeyNotFoundException>(() => { ProviderConfigHelper.UseConfig().For("twitter"); });
         }
 
         [Fact]
@@ -69,7 +69,7 @@ namespace WorldDomination.Web.Authentication.Test.UnitTest
 
             // Act & Assert.
             Assert.Throws<ApplicationException>(
-                () => { ProviderConfigHelper.UseConfig(fileName).For(ProviderType.Twitter); });
+                () => { ProviderConfigHelper.UseConfig(fileName).For("twitter"); });
         }
 
         [Fact]

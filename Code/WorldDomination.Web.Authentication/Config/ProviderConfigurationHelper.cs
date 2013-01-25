@@ -64,13 +64,13 @@ namespace WorldDomination.Web.Authentication.Config
             return providerConfig;
         }
 
-        public static ProviderKey For(this ProviderConfiguration section, ProviderType providerEnumKey)
+        public static ProviderKey For(this ProviderConfiguration section, string providerKey)
         {
-            var provider = section.Providers[providerEnumKey];
+            var provider = section.Providers[providerKey];
 
             if (provider == null)
             {
-                throw new KeyNotFoundException(string.Format("There is no configuration for {0}", providerEnumKey));
+                throw new KeyNotFoundException(string.Format("There is no configuration for {0}", providerKey));
             }
 
             return provider;

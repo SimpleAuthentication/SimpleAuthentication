@@ -16,7 +16,7 @@ namespace WorldDomination.Web.Authentication
         {
             Condition.Requires(providerKey).IsNotNullOrEmpty();
 
-            ProviderKey = providerKey;
+            ProviderName = providerKey;
         }
 
         #region Implementation of IAuthenticationServiceSettings
@@ -24,24 +24,7 @@ namespace WorldDomination.Web.Authentication
         /// <summary>
         /// The Provider's unique name.
         /// </summary>
-        public string ProviderKey { get; private set; }
-
-        /// <summary>
-        /// The type of provider.
-        /// </summary>
-        public ProviderType ProviderType
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(ProviderKey))
-                {
-                    return ProviderType.Unknown;
-                }
-
-                ProviderType providerType;
-                return Enum.TryParse(ProviderKey, out providerType) ? providerType : ProviderType.Other;
-            }
-        }
+        public string ProviderName { get; private set; }
 
         /// <summary>
         /// Optional: The default callBack uri.
