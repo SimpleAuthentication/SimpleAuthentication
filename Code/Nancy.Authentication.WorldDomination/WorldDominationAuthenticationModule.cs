@@ -31,7 +31,7 @@ namespace Nancy.Authentication.WorldDomination
 
                 Session[StateKey] = guidString;
                 settings.State = guidString;
-                settings.CallBackUri = GetReturnUrl(Context, "/authentication/authenticatecallback",
+                settings.CallBackUri = GetReturnUrl("/authentication/authenticatecallback",
                                                     (string)_.providerkey);
 
                 Uri uri = authenticationService.RedirectToAuthenticationProvider(settings);
@@ -77,18 +77,15 @@ namespace Nancy.Authentication.WorldDomination
             };
         }
 
-        private Uri GetReturnUrl(NancyContext context, string relativeUrl, string provider)
+        private Uri GetReturnUrl(string relativeUrl, string provider)
         {
-            if (!relativeUrl.StartsWith("/"))
-            {
-                relativeUrl = relativeUrl.Insert(0, "/");
-            }
+            var builder = new UriBuilder(Request.Url)
+                          {
+                              Path = relativeUrl,
+                              Query = "providerkey=" + provider.ToLowerInvariant()
+                          };
 
-            var url = context.Request.Url;
-            var port = url.Port != 80 ? (":" + url.Port) : string.Empty;
-
-            return new Uri(string.Format("{0}://{1}{2}{3}?providerkey={4}",
-                                         url.Scheme, url.HostName, port, relativeUrl, provider.ToLower()));
+            return builder.Uri;
         }
     }
 }
