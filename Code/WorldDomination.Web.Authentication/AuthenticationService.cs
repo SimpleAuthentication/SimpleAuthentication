@@ -17,12 +17,10 @@ namespace WorldDomination.Web.Authentication
         {
             var providerConfig = ConfigurationManager.GetSection("authenticationProviders") as ProviderConfiguration;
 
-            if (providerConfig == null)
+            if (providerConfig != null)
             {
-                throw new ApplicationException("Missing the config section [authenticationProviders] from your .config file");
+                Initialize(providerConfig);
             }
-
-            Initialize(providerConfig);
         }
 
         public AuthenticationService(ProviderConfiguration providerConfiguration,
