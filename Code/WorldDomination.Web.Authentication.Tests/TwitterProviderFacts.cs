@@ -6,7 +6,7 @@ using RestSharp;
 using WorldDomination.Web.Authentication.Twitter;
 using Xunit;
 
-namespace WorldDomination.Web.Authentication.Test.UnitTest
+namespace WorldDomination.Web.Authentication.Tests
 {
     // ReSharper disable InconsistentNaming
 

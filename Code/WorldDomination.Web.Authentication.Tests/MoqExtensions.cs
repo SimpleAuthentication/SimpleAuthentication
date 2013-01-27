@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Moq.Language.Flow;
 
-namespace WorldDomination.Web.Authentication.Test.UnitTest
+namespace WorldDomination.Web.Authentication.Tests
 {
     public static class MoqExtensions
     {
