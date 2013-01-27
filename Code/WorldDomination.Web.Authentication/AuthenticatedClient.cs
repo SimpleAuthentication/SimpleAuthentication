@@ -10,10 +10,10 @@ namespace WorldDomination.Web.Authentication
         /// <summary>
         /// Initializes a new instance of an AuthenticatedClient.
         /// </summary>
-        /// <param name="providerType">A Provider.</param>
-        public AuthenticatedClient(string providerType)
+        /// <param name="providerName">A Provider's name.</param>
+        public AuthenticatedClient(string providerName)
         {
-            ProviderName = providerType;
+            ProviderName = providerName;
         }
 
         #region Implementation of IAuthenticatedClient

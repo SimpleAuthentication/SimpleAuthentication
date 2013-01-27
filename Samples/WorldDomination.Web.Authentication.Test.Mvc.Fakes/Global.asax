@@ -1,0 +1,1 @@
+﻿<%@ Application Codebehind="Global.asax.cs" Inherits="WorldDomination.Web.Authentication.Samples.Mvc.Fakes.MvcApplication" Language="C#" %>
