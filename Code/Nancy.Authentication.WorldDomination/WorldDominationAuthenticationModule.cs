@@ -12,7 +12,7 @@ namespace Nancy.Authentication.WorldDomination
             : this(authenticationService, null)
         {
             throw new ApplicationException(
-                "World Domination requires you implement your own IAuthenticationCallbackProvider");
+                "World Domination requires you implement your own IAuthenticationCallbackProvider.");
         }
 
         public WorldDominationAuthenticationModule(IAuthenticationService authenticationService,
@@ -70,12 +70,22 @@ namespace Nancy.Authentication.WorldDomination
             };
         }
 
-        private Uri GetReturnUrl(string relativeUrl, string provider)
+        private Uri GetReturnUrl(string relativeUrl, string providerKey)
         {
+            if (string.IsNullOrEmpty(relativeUrl))
+            {
+                throw new ArgumentNullException("relativeUrl");
+            }
+
+            if (string.IsNullOrEmpty(providerKey))
+            {
+                throw new ArgumentNullException("providerKey");
+            }
+
             var builder = new UriBuilder(Request.Url)
                           {
                               Path = relativeUrl,
-                              Query = "providerkey=" + provider.ToLowerInvariant()
+                              Query = "providerkey=" + providerKey.ToLowerInvariant()
                           };
 
             // Don't include port 80/443 in the Uri.
