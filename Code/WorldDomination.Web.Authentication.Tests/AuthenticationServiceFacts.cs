@@ -60,7 +60,7 @@ namespace WorldDomination.Web.Authentication.Tests
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("value should not be null or an empty string.\r\nParameter name: value", result.Message);
+                Assert.Equal("Value cannot be null.\r\nParameter name: providerKey", result.Message);
             }
 
             [Fact]
@@ -70,6 +70,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 const string providerKey = "aaa";
                 const string state = "asd";
                 var querystringParams = new NameValueCollection();
+                querystringParams.Add("a", "b");
                 var authenticationService = new AuthenticationService();
 
                 // Act and Assert.

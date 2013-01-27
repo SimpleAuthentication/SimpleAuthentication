@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Net;
-using CuttingEdge.Conditions;
 using RestSharp;
 using RestSharp.Authenticators;
 using RestSharp.Contrib;
@@ -27,8 +26,15 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         public TwitterProvider(string consumerKey, string consumerSecret, IRestClient restClient = null)
         {
-            Condition.Requires(consumerKey).IsNotNullOrEmpty();
-            Condition.Requires(consumerSecret).IsNotNullOrEmpty();
+            if (string.IsNullOrEmpty(consumerKey))
+            {
+                throw new ArgumentNullException("consumerKey");
+            }
+
+            if (string.IsNullOrEmpty(consumerSecret))
+            {
+                throw new ArgumentNullException("consumerSecret");
+            }
 
             _consumerKey = consumerKey;
             _consumerSecret = consumerSecret;
@@ -84,7 +90,15 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         private static VerifierResult RetrieveOAuthVerifier(NameValueCollection parameters)
         {
-            Condition.Requires(parameters).IsNotNull();
+            if (parameters == null)
+            {
+                throw new ArgumentNullException("parameters");
+            }
+
+            if (parameters.Count <= 0)
+            {
+                throw new ArgumentOutOfRangeException("parameters");
+            }
 
             var denied = parameters[DeniedKey];
             if (!string.IsNullOrEmpty(denied))
@@ -112,9 +126,20 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         private AccessTokenResult RetrieveAccessToken(VerifierResult verifierResult)
         {
-            Condition.Requires(verifierResult).IsNotNull();
-            Condition.Requires(verifierResult.OAuthToken).IsNotNullOrEmpty();
-            Condition.Requires(verifierResult.OAuthVerifier).IsNotNullOrEmpty();
+            if (verifierResult == null)
+            {
+                throw new ArgumentNullException("verifierResult");
+            }
+
+            if (string.IsNullOrEmpty(verifierResult.OAuthToken))
+            {
+                throw new ArgumentException("verifierResult.OAuthToken");
+            }
+
+            if (string.IsNullOrEmpty(verifierResult.OAuthToken))
+            {
+                throw new ArgumentException("verifierResult.OAuthVerifier");
+            }
 
             IRestResponse response;
             try
@@ -150,9 +175,20 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         private VerifyCredentialsResult VerifyCredentials(AccessTokenResult accessTokenResult)
         {
-            Condition.Requires(accessTokenResult).IsNotNull();
-            Condition.Requires(accessTokenResult.AccessToken).IsNotNullOrEmpty();
-            Condition.Requires(accessTokenResult.AccessTokenSecret).IsNotNullOrEmpty();
+            if (accessTokenResult == null)
+            {
+                throw new ArgumentNullException("accessTokenResult");
+            }
+
+            if (string.IsNullOrEmpty(accessTokenResult.AccessToken))
+            {
+                throw new ArgumentException("accessTokenResult.AccessToken");
+            }
+
+            if (string.IsNullOrEmpty(accessTokenResult.AccessTokenSecret))
+            {
+                throw new ArgumentException("accessTokenResult.AccessTokenSecret");
+            }
 
             IRestResponse<VerifyCredentialsResult> response;
             try
@@ -194,7 +230,15 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            Condition.Requires(authenticationServiceSettings).IsNotNull();
+            if (authenticationServiceSettings == null)
+            {
+                throw new ArgumentNullException("authenticationServiceSettings");
+            }
+
+            if (authenticationServiceSettings.CallBackUri == null)
+            {
+                throw new ArgumentException("authenticationServiceSettings.CallBackUri");
+            }
 
             CallBackUri = authenticationServiceSettings.CallBackUri;
 

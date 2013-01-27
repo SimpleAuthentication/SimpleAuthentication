@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using CuttingEdge.Conditions;
-
 namespace WorldDomination.Web.Authentication.Config
 {
     public static class ProviderConfigHelper
@@ -16,8 +14,15 @@ namespace WorldDomination.Web.Authentication.Config
         /// <returns>ProviderConfiguration: some configuration data.</returns>
         public static ProviderConfiguration UseConfig(string file, string sectionName)
         {
-            Condition.Requires(file).IsNotNullOrEmpty();
-            Condition.Requires(sectionName).IsNotNullOrEmpty();
+            if (string.IsNullOrEmpty(file))
+            {
+                throw new ArgumentNullException("file");
+            }
+
+            if (string.IsNullOrEmpty(sectionName))
+            {
+                throw new ArgumentNullException("sectionName");
+            }
 
             var currentConfig = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
             var path = currentConfig.Substring(0, currentConfig.LastIndexOf(@"\", StringComparison.Ordinal));
@@ -52,7 +57,10 @@ namespace WorldDomination.Web.Authentication.Config
         /// <returns>ProviderConfiguration: some configuration data.</returns>
         public static ProviderConfiguration UseConfig(string sectionName = "authenticationProviders")
         {
-            Condition.Requires(sectionName).IsNotNullOrEmpty();
+            if (string.IsNullOrEmpty(sectionName))
+            {
+                throw new ArgumentNullException(sectionName);
+            }
             
             var providerConfig = ConfigurationManager.GetSection(sectionName) as ProviderConfiguration;
 

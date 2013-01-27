@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
-using CuttingEdge.Conditions;
 using RestSharp;
 using WorldDomination.Web.Authentication.Config;
 
@@ -31,8 +30,15 @@ namespace WorldDomination.Web.Authentication.Google
         public GoogleProvider(string clientId, string clientSecret,
                               IList<string> scope = null, IRestClient restClient = null)
         {
-            Condition.Requires(clientId).IsNotNullOrEmpty();
-            Condition.Requires(clientSecret).IsNotNullOrEmpty();
+            if (string.IsNullOrEmpty(clientId))
+            {
+                throw new ArgumentNullException("clientId");
+            }
+
+            if (string.IsNullOrEmpty(clientSecret))
+            {
+                throw new ArgumentNullException("clientSecret");
+            }
 
             _clientId = clientId;
             _clientSecret = clientSecret;
@@ -51,7 +57,15 @@ namespace WorldDomination.Web.Authentication.Google
 
         private static string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState = null)
         {
-            Condition.Requires(parameters).IsNotNull().IsLongerThan(0);
+            if (parameters == null)
+            {
+                throw new ArgumentNullException("parameters");
+            }
+
+            if (parameters.Count <= 0)
+            {
+                throw new ArgumentOutOfRangeException("parameters");
+            }
 
             /* Documentation:
                Google returns an authorization code to your application if the user grants your application the permissions it requested. 
@@ -88,7 +102,10 @@ namespace WorldDomination.Web.Authentication.Google
 
         private AccessTokenResult RetrieveAccessToken(string authorizationCode)
         {
-            Condition.Requires(authorizationCode).IsNotNullOrEmpty();
+            if (string.IsNullOrEmpty(authorizationCode))
+            {
+                throw new ArgumentNullException("authorizationCode");
+            }
 
             IRestResponse<AccessTokenResult> response;
 
@@ -135,7 +152,10 @@ namespace WorldDomination.Web.Authentication.Google
 
         private UserInfoResult RetrieveUserInfo(string accessToken)
         {
-            Condition.Requires(accessToken).IsNotNullOrEmpty();
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                throw new ArgumentNullException("accessToken");
+            }
 
             IRestResponse<UserInfoResult> response;
 
@@ -186,8 +206,15 @@ namespace WorldDomination.Web.Authentication.Google
 
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            Condition.Requires(authenticationServiceSettings).IsNotNull();
-            Condition.Requires(authenticationServiceSettings.CallBackUri).IsNotNull();
+            if (authenticationServiceSettings == null)
+            {
+                throw new ArgumentNullException("authenticationServiceSettings");
+            }
+
+            if (authenticationServiceSettings.CallBackUri == null)
+            {
+                throw new ArgumentException("authenticationServiceSettings.CallBackUri");
+            }
 
             // Remember the callback uri.
             CallBackUri = authenticationServiceSettings.CallBackUri;

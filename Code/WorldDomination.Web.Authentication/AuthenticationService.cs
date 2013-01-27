@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
-using CuttingEdge.Conditions;
 using RestSharp;
 using WorldDomination.Web.Authentication.Config;
 using WorldDomination.Web.Authentication.Facebook;
@@ -31,8 +30,15 @@ namespace WorldDomination.Web.Authentication
 
         public void Initialize(ProviderConfiguration providerConfiguration, IList<string> scope = null, IRestClient restClient = null)
         {
-            Condition.Requires(providerConfiguration).IsNotNull();
-            Condition.Requires(providerConfiguration.Providers).IsNotNull();
+            if (providerConfiguration == null)
+            {
+                throw new ArgumentNullException("providerConfiguration");
+            }
+
+            if (providerConfiguration.Providers == null)
+            {
+                throw new ArgumentException("providerConfiguration.Providers");
+            }
 
             foreach (ProviderKey provider in providerConfiguration.Providers)
             {
@@ -92,7 +98,10 @@ namespace WorldDomination.Web.Authentication
 
         public Uri RedirectToAuthenticationProvider(string providerKey, Uri callBackUri = null)
         {
-            Condition.Requires(providerKey).IsNotNullOrEmpty();
+            if (string.IsNullOrEmpty(providerKey))
+            {
+                throw new ArgumentNullException("providerKey");
+            }
 
             // Determine the provider.
             var authenticationProvider = GetAuthenticationProvider(providerKey);
@@ -111,21 +120,45 @@ namespace WorldDomination.Web.Authentication
 
         public Uri RedirectToAuthenticationProvider(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            Condition.Requires(authenticationServiceSettings).IsNotNull();
-            Condition.Requires(authenticationServiceSettings.ProviderName).IsNotNullOrEmpty();
-            Condition.Requires(authenticationServiceSettings.CallBackUri).IsNotNull();
-            Condition.Requires(authenticationServiceSettings.CallBackUri.AbsoluteUri).IsNotNullOrEmpty();
+            if (authenticationServiceSettings == null)
+            {
+                throw new ArgumentNullException("authenticationServiceSettings");
+            }
+
+            if (string.IsNullOrEmpty(authenticationServiceSettings.ProviderName))
+            {
+                throw new ArgumentException("authenticationServiceSettings.providerName");
+            }
+
+            if (authenticationServiceSettings.CallBackUri == null ||
+                string.IsNullOrEmpty(authenticationServiceSettings.CallBackUri.AbsoluteUri))
+            {
+                throw new ArgumentException("authenticationServiceSettings.CallBackUri");
+            }
 
             var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderName);
 
             return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
         }
 
-        public IAuthenticatedClient GetAuthenticatedClient(string providerKey, NameValueCollection requestParameters,
+        public IAuthenticatedClient GetAuthenticatedClient(string providerKey, 
+                                                           NameValueCollection requestParameters,
                                                            string state = null)
         {
-            Condition.Requires(providerKey).IsNotNullOrEmpty();
-            Condition.Requires(requestParameters).IsNotNull();
+            if (string.IsNullOrEmpty(providerKey))
+            {
+                throw new ArgumentNullException("providerKey");
+            }
+
+            if (requestParameters == null)
+            {
+                throw new ArgumentNullException("requestParameters");
+            }
+
+            if (requestParameters.Count <= 0)
+            {
+                throw new ArgumentOutOfRangeException("requestParameters");
+            }
 
             var authenticationProvider = GetAuthenticationProvider(providerKey);
             return authenticationProvider.AuthenticateClient(requestParameters, state);
@@ -133,7 +166,10 @@ namespace WorldDomination.Web.Authentication
 
         public IAuthenticationServiceSettings GetAuthenticateServiceSettings(string providerKey)
         {
-            Condition.Requires(providerKey).IsNotNullOrEmpty();
+            if (string.IsNullOrEmpty(providerKey))
+            {
+                throw new ArgumentNullException("providerKey");
+            }
 
             switch (providerKey.ToLowerInvariant())
             {

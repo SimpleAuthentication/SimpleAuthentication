@@ -1,5 +1,4 @@
 ﻿using System;
-using CuttingEdge.Conditions;
 
 namespace WorldDomination.Web.Authentication
 {
@@ -14,7 +13,10 @@ namespace WorldDomination.Web.Authentication
         /// <param name="providerKey">The Provider key.</param>
         protected BaseAuthenticationServiceSettings(string providerKey)
         {
-            Condition.Requires(providerKey).IsNotNullOrEmpty();
+            if (string.IsNullOrEmpty(providerKey))
+            {
+                throw new ArgumentNullException("providerKey");
+            }
 
             ProviderName = providerKey;
         }

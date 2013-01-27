@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Specialized;
-using CuttingEdge.Conditions;
 
 namespace WorldDomination.Web.Authentication.Twitter
 {
@@ -10,8 +9,15 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         public FakeTwitterProvider(Uri redirectToAuthenticateUri)
         {
-            Condition.Requires(redirectToAuthenticateUri);
-            Condition.Requires(redirectToAuthenticateUri.AbsoluteUri).IsNotNull();
+            if (redirectToAuthenticateUri == null)
+            {
+                throw new ArgumentNullException("redirectToAuthenticateUri");
+            }
+
+            if (string.IsNullOrEmpty(redirectToAuthenticateUri.AbsoluteUri))
+            {
+                throw new ArgumentException("redirectToAuthenticateUri.AbsoluteUri");
+            }
 
             _redirectToAuthenticateUri = redirectToAuthenticateUri;
         }
@@ -27,8 +33,15 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            Condition.WithExceptionOnFailure<AuthenticationException>()
-                     .Requires(RedirectToAuthenticateExceptionMessage).IsNotNullOrEmpty();
+            if (authenticationServiceSettings == null)
+            {
+                throw new ArgumentNullException("authenticationServiceSettings");
+            }
+
+            if (authenticationServiceSettings.CallBackUri == null)
+            {
+                throw new ArgumentException("authenticationServiceSettings.CallBackUri");
+            }
 
             CallBackUri = authenticationServiceSettings.CallBackUri;
 

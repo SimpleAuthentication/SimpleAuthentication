@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
-using CuttingEdge.Conditions;
 using RestSharp;
 using RestSharp.Contrib;
 using WorldDomination.Web.Authentication.Config;
@@ -27,8 +26,15 @@ namespace WorldDomination.Web.Authentication.Facebook
         public FacebookProvider(string clientId, string clientSecret,
                                 IList<string> scope = null, IRestClient restClient = null)
         {
-            Condition.Requires(clientId).IsNotNullOrEmpty();
-            Condition.Requires(clientSecret).IsNotNullOrEmpty();
+            if (string.IsNullOrEmpty(clientId))
+            {
+                throw new ArgumentNullException("clientId");
+            }
+
+            if (string.IsNullOrEmpty(clientSecret))
+            {
+                throw new ArgumentNullException("clientSecret");
+            }
 
             _clientId = clientId;
             _clientSecret = clientSecret;
@@ -40,7 +46,15 @@ namespace WorldDomination.Web.Authentication.Facebook
 
         private static string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState = null)
         {
-            Condition.Requires(parameters).IsNotNull().IsLongerThan(0);
+            if (parameters == null)
+            {
+                throw new ArgumentNullException("parameters");
+            }
+
+            if (parameters.Count <= 0)
+            {
+                throw new ArgumentOutOfRangeException("parameters");
+            }
 
             // Is this a facebook callback?
             var code = parameters["code"];
@@ -79,7 +93,10 @@ namespace WorldDomination.Web.Authentication.Facebook
 
         private string RetrieveAccessToken(string code)
         {
-            Condition.Requires(code).IsNotNullOrEmpty();
+            if (string.IsNullOrEmpty(code))
+            {
+                throw new ArgumentNullException("code");
+            }
 
             IRestResponse response;
             try
@@ -131,7 +148,10 @@ namespace WorldDomination.Web.Authentication.Facebook
 
         private UserInformation RetrieveMe(string accessToken)
         {
-            Condition.Requires(accessToken).IsNotNull();
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                throw new ArgumentNullException("accessToken");
+            }
 
             IRestResponse<MeResult> response;
 
@@ -179,10 +199,16 @@ namespace WorldDomination.Web.Authentication.Facebook
 
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            Condition.Requires(authenticationServiceSettings).IsNotNull();
+            if (authenticationServiceSettings == null)
+            {
+                throw new ArgumentNullException("authenticationServiceSettings");
+            }
 
             var facebookAuthenticationSettings = authenticationServiceSettings as FacebookAuthenticationServiceSettings;
-            Condition.Requires(facebookAuthenticationSettings).IsNotNull();
+            if (facebookAuthenticationSettings == null)
+            {
+                throw new InvalidOperationException("AuthenticationServiceSettings instance is not of type FacebookAuthenticationServiceSettings.");
+            }
 
             // Remember the callback uri.
             CallBackUri = authenticationServiceSettings.CallBackUri;
