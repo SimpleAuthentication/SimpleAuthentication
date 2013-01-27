@@ -203,7 +203,7 @@ namespace WorldDomination.Web.Authentication.Twitter
 
             // Now we need the user to enter their name/password/accept this app @ Twitter.
             // This means we need to redirect them to the Twitter website.
-            var request = new RestRequest("oauth/authorize");
+            var request = new RestRequest("oauth/authenticate");
             request.AddParameter(OAuthTokenKey, oAuthToken.OAuthToken);
             return _restClient.BuildUri(request);
         }
