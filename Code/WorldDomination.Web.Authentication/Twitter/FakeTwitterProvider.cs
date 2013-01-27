@@ -71,7 +71,7 @@ namespace WorldDomination.Web.Authentication.Twitter
             };
         }
 
-        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings { get; private set; }
+        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings { get { return new TwitterAuthenticationServiceSettings(); } }
 
         #endregion
 

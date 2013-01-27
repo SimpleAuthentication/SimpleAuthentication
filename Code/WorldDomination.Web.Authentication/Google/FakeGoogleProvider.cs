@@ -55,7 +55,7 @@ namespace WorldDomination.Web.Authentication.Google
                 throw new AuthenticationException(AuthenticateClientExceptionMessage);
             }
 
-            return new AuthenticatedClient("facebook")
+            return new AuthenticatedClient("google")
             {
                 AccessToken = "SomethingWonderfulHasHappened.AniImPregnant",
                 AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),
