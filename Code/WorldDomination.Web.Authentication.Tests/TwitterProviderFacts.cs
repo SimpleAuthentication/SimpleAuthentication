@@ -49,13 +49,12 @@ namespace WorldDomination.Web.Authentication.Tests
 
                 // Act.
                 var result =
-                    Assert.Throws<AuthenticationException>(
+                    Assert.Throws<ArgumentOutOfRangeException>(
                         () => twitterProvider.AuthenticateClient(nameValueCollection, "aa"));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal(
-                    "Failed to retrieve an oauth_token and an oauth_token_secret after the client has signed and approved via Twitter.",
+                Assert.Equal("Specified argument was out of the range of valid values.\r\nParameter name: parameters",
                     result.Message);
             }
 
