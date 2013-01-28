@@ -45,7 +45,7 @@
       <HintPath>..\..\..\packages\Nancy.0.15.3\lib\net40\Nancy.dll</HintPath>
     </Reference>
     <Reference Include="Nancy.Hosting.Aspnet">
-      <HintPath>..\..\..\packages\Nancy.Hosting.Aspnet.0.15.3\lib\net40\Nancy.Hosting.Aspnet.dll</HintPath>
+      <HintPath>..\..\packages\Nancy.Hosting.Aspnet.0.15.3\lib\net40\Nancy.Hosting.Aspnet.dll</HintPath>
     </Reference>
     <Reference Include="Nancy.ViewEngines.Razor">
       <HintPath>..\..\..\packages\Nancy.Viewengines.Razor.0.15.3\lib\net40\Nancy.ViewEngines.Razor.dll</HintPath>
@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\facebook_32.png" />
+    <Content Include="Content\github_32.png" />
     <Content Include="Content\google_32.png" />
     <Content Include="Content\main.css" />
     <Content Include="Content\twitter_32.png" />
@@ -84,7 +85,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="packages.config" />
+    <Content Include="packages.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Views\AuthenticateCallback.cshtml" />
     <Content Include="Views\login.cshtml" />
     <None Include="Web.Debug.config">

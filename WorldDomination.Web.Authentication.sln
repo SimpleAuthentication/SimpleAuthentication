@@ -14,8 +14,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nancy.Authentication.WorldD
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.Samples.NancyFX2", "Samples\WorldDomination.Web.Authentication.Test.NancyFX2\WorldDomination.Web.Authentication.Samples.NancyFX2.csproj", "{837B5D35-57D3-402F-BA87-23E6B8E18433}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.Samples.Mvc.Advanced", "Samples\WorldDomination.Web.Authentication.Test.Mvc.Advanced\WorldDomination.Web.Authentication.Samples.Mvc.Advanced.csproj", "{6EDC5354-2B54-4AD7-B0AB-CF873C8ED6E9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.Samples.Mvc.Fakes", "Samples\WorldDomination.Web.Authentication.Test.Mvc.Fakes\WorldDomination.Web.Authentication.Samples.Mvc.Fakes.csproj", "{D2D252E1-B10E-4802-A2AF-895E02C478F2}"
@@ -23,6 +21,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.Samples.Mvc.Simple", "Samples\WorldDomination.Web.Authentication.Test.Mvc.Simple\WorldDomination.Web.Authentication.Samples.Mvc.Simple.csproj", "{EFF9B222-5F74-422C-8587-B9EF2FD6B794}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.Samples.NancyFX", "Samples\WorldDomination.Web.Authentication.Test.NancyFX\WorldDomination.Web.Authentication.Samples.NancyFX.csproj", "{5C6D0C7E-3DEE-42DE-8D9B-CF2F9F14186C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.Samples.NancyFX2", "Samples\WorldDomination.Web.Authentication.Test.NancyFX2\WorldDomination.Web.Authentication.Samples.NancyFX2.csproj", "{837B5D35-57D3-402F-BA87-23E6B8E18433}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.Tests", "Code\WorldDomination.Web.Authentication.Tests\WorldDomination.Web.Authentication.Tests.csproj", "{14AC417B-A1F8-4DEC-8FF0-EB6788C1C1AA}"
 EndProject
@@ -40,10 +40,6 @@ Global
 		{94B8D947-6CAD-42C3-B328-F369CE7BC6C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94B8D947-6CAD-42C3-B328-F369CE7BC6C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94B8D947-6CAD-42C3-B328-F369CE7BC6C0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{837B5D35-57D3-402F-BA87-23E6B8E18433}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{837B5D35-57D3-402F-BA87-23E6B8E18433}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{837B5D35-57D3-402F-BA87-23E6B8E18433}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{837B5D35-57D3-402F-BA87-23E6B8E18433}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6EDC5354-2B54-4AD7-B0AB-CF873C8ED6E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6EDC5354-2B54-4AD7-B0AB-CF873C8ED6E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EDC5354-2B54-4AD7-B0AB-CF873C8ED6E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -60,6 +56,10 @@ Global
 		{5C6D0C7E-3DEE-42DE-8D9B-CF2F9F14186C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C6D0C7E-3DEE-42DE-8D9B-CF2F9F14186C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C6D0C7E-3DEE-42DE-8D9B-CF2F9F14186C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{837B5D35-57D3-402F-BA87-23E6B8E18433}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{837B5D35-57D3-402F-BA87-23E6B8E18433}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{837B5D35-57D3-402F-BA87-23E6B8E18433}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{837B5D35-57D3-402F-BA87-23E6B8E18433}.Release|Any CPU.Build.0 = Release|Any CPU
 		{14AC417B-A1F8-4DEC-8FF0-EB6788C1C1AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{14AC417B-A1F8-4DEC-8FF0-EB6788C1C1AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14AC417B-A1F8-4DEC-8FF0-EB6788C1C1AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -69,10 +69,10 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{837B5D35-57D3-402F-BA87-23E6B8E18433} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}
 		{6EDC5354-2B54-4AD7-B0AB-CF873C8ED6E9} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}
 		{D2D252E1-B10E-4802-A2AF-895E02C478F2} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}
 		{EFF9B222-5F74-422C-8587-B9EF2FD6B794} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}
 		{5C6D0C7E-3DEE-42DE-8D9B-CF2F9F14186C} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}
+		{837B5D35-57D3-402F-BA87-23E6B8E18433} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}
 	EndGlobalSection
 EndGlobal

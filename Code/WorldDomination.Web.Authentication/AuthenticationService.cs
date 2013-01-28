@@ -9,6 +9,8 @@ using WorldDomination.Web.Authentication.Twitter;
 
 namespace WorldDomination.Web.Authentication
 {
+    using GitHub;
+
     public class AuthenticationService : IAuthenticationService
     {
         public AuthenticationService()
@@ -52,6 +54,9 @@ namespace WorldDomination.Web.Authentication
                         break;
                     case "twitter":
                         authenticationProvider = new TwitterProvider(provider, restClientFactory);
+                        break;
+                    case "github":
+                        authenticationProvider = new GitHubProvider(provider, restClientFactory);
                         break;
                     default:
                         throw new ApplicationException(
@@ -178,6 +183,8 @@ namespace WorldDomination.Web.Authentication
                     return new GoogleAuthenticationServiceSettings();
                 case "twitter":
                     return new TwitterAuthenticationServiceSettings();
+                case "github":
+                    return new GitHubAuthenticationServiceSettings();
                 default:
                     throw new AuthenticationException(
                         "Unhandled provider type while trying to determine which AuthenticationServiceSettings to instanciate.");

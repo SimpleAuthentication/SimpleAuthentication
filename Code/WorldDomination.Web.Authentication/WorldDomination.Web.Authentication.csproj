@@ -54,6 +54,11 @@
     <Compile Include="Facebook\FakeFacebookProvider.cs" />
     <Compile Include="Facebook\MeResult.cs" />
     <Compile Include="GenderType.cs" />
+    <Compile Include="GitHub\AccessTokenResult.cs" />
+    <Compile Include="GitHub\FakeGitHubProvider.cs" />
+    <Compile Include="GitHub\GitHubAuthenticationServiceSettings.cs" />
+    <Compile Include="GitHub\GitHubProvider.cs" />
+    <Compile Include="GitHub\UserInfoResult.cs" />
     <Compile Include="Google\AccessTokenResult.cs" />
     <Compile Include="Google\FakeGoogleProvider.cs" />
     <Compile Include="Google\GoogleAuthenticationServiceSettings.cs" />
