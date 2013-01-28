@@ -18,17 +18,20 @@ namespace WorldDomination.Web.Authentication.Google
 
         private readonly string _clientId;
         private readonly string _clientSecret;
-        private readonly IRestClient _restClient;
+        //private readonly IRestClient _restClient;
         private readonly IList<string> _scope;
+        private readonly IRestClientFactory _restClientFactory;
 
         public GoogleProvider(ProviderKey providerKey,
-                              IList<string> scope = null, IRestClient restClient = null)
-            : this(providerKey.Key, providerKey.Secret, scope, restClient)
+                              IList<string> scope = null,
+                              IRestClientFactory restClientFactory = null)
+            : this(providerKey.Key, providerKey.Secret, scope, restClientFactory)
         {
         }
 
         public GoogleProvider(string clientId, string clientSecret,
-                              IList<string> scope = null, IRestClient restClient = null)
+                              IList<string> scope = null,
+                              IRestClientFactory restClientFactory = null)
         {
             if (string.IsNullOrEmpty(clientId))
             {
@@ -52,7 +55,7 @@ namespace WorldDomination.Web.Authentication.Google
                              "https://www.googleapis.com/auth/userinfo.email"
                          }
                          : scope;
-            _restClient = restClient ?? new RestClient("https://accounts.google.com");
+            _restClientFactory = restClientFactory ?? new RestClientFactory();
         }
 
         private static string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState = null)
@@ -120,7 +123,8 @@ namespace WorldDomination.Web.Authentication.Google
                 }
                 request.AddParameter("code", authorizationCode);
                 request.AddParameter("grant_type", "authorization_code");
-                response = _restClient.Execute<AccessTokenResult>(request);
+                var restClient = _restClientFactory.CreateRestClient("https://accounts.google.com");
+                response = restClient.Execute<AccessTokenResult>(request);
             }
             catch (Exception exception)
             {
@@ -164,8 +168,8 @@ namespace WorldDomination.Web.Authentication.Google
                 var request = new RestRequest("/oauth2/v2/userinfo", Method.GET);
                 request.AddParameter(AccessTokenKey, accessToken);
 
-                _restClient.BaseUrl = "https://www.googleapis.com";
-                response = _restClient.Execute<UserInfoResult>(request);
+                var restClient = _restClientFactory.CreateRestClient("https://www.googleapis.com");
+                response = restClient.Execute<UserInfoResult>(request);
             }
             catch (Exception exception)
             {

@@ -10,6 +10,7 @@ namespace WorldDomination.Web.Authentication.Twitter
 {
     public class TwitterProvider : IAuthenticationProvider
     {
+        private const string BaseUrl = "https://api.twitter.com";
         private const string DeniedKey = "denied";
         private const string OAuthTokenKey = "oauth_token";
         private const string OAuthTokenSecretKey = "oauth_token_secret";
@@ -17,14 +18,14 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         private readonly string _consumerKey;
         private readonly string _consumerSecret;
-        private readonly IRestClient _restClient;
+        private readonly IRestClientFactory _restClientFactory;
 
-        public TwitterProvider(ProviderKey providerKey, IRestClient restClient = null)
-            : this(providerKey.Key, providerKey.Secret, restClient)
+        public TwitterProvider(ProviderKey providerKey, IRestClientFactory restClientFactory = null)
+            : this(providerKey.Key, providerKey.Secret, restClientFactory)
         {
         }
 
-        public TwitterProvider(string consumerKey, string consumerSecret, IRestClient restClient = null)
+        public TwitterProvider(string consumerKey, string consumerSecret, IRestClientFactory restClientFactory = null)
         {
             if (string.IsNullOrEmpty(consumerKey))
             {
@@ -39,8 +40,8 @@ namespace WorldDomination.Web.Authentication.Twitter
             _consumerKey = consumerKey;
             _consumerSecret = consumerSecret;
 
-            // IRestClient can be optional.
-            _restClient = restClient ?? new RestClient("https://api.twitter.com");
+            // IRestClientFactory can be optional.
+            _restClientFactory = restClientFactory ?? new RestClientFactory();
         }
 
         private RequestTokenResult RetrieveRequestToken()
@@ -49,10 +50,11 @@ namespace WorldDomination.Web.Authentication.Twitter
 
             try
             {
-                _restClient.Authenticator = OAuth1Authenticator.ForRequestToken(_consumerKey, _consumerSecret,
+                var restClient = _restClientFactory.CreateRestClient(BaseUrl);
+                restClient.Authenticator = OAuth1Authenticator.ForRequestToken(_consumerKey, _consumerSecret,
                                                                                 CallBackUri.AbsoluteUri);
                 var request = new RestRequest("oauth/request_token", Method.POST);
-                response = _restClient.Execute(request);
+                response = restClient.Execute(request);
             }
             catch (Exception exception)
             {
@@ -145,10 +147,11 @@ namespace WorldDomination.Web.Authentication.Twitter
             try
             {
                 var request = new RestRequest("oauth/access_token", Method.POST);
-                _restClient.Authenticator = OAuth1Authenticator.ForAccessToken(_consumerKey, _consumerSecret,
+                var restClient = _restClientFactory.CreateRestClient(BaseUrl);
+                restClient.Authenticator = OAuth1Authenticator.ForAccessToken(_consumerKey, _consumerSecret,
                                                                                verifierResult.OAuthToken,
                                                                                null, verifierResult.OAuthVerifier);
-                response = _restClient.Execute(request);
+                response = restClient.Execute(request);
             }
             catch (Exception exception)
             {
@@ -193,11 +196,12 @@ namespace WorldDomination.Web.Authentication.Twitter
             IRestResponse<VerifyCredentialsResult> response;
             try
             {
-                _restClient.Authenticator = OAuth1Authenticator.ForProtectedResource(_consumerKey, _consumerSecret,
+                var restClient = _restClientFactory.CreateRestClient(BaseUrl);
+                restClient.Authenticator = OAuth1Authenticator.ForProtectedResource(_consumerKey, _consumerSecret,
                                                                                      accessTokenResult.AccessToken,
                                                                                      accessTokenResult.AccessTokenSecret);
                 var request = new RestRequest("1.1/account/verify_credentials.json");
-                response = _restClient.Execute<VerifyCredentialsResult>(request);
+                response = restClient.Execute<VerifyCredentialsResult>(request);
             }
             catch (Exception exception)
             {
@@ -249,7 +253,8 @@ namespace WorldDomination.Web.Authentication.Twitter
             // This means we need to redirect them to the Twitter website.
             var request = new RestRequest("oauth/authenticate");
             request.AddParameter(OAuthTokenKey, oAuthToken.OAuthToken);
-            return _restClient.BuildUri(request);
+            var restClient = _restClientFactory.CreateRestClient(BaseUrl);
+            return restClient.BuildUri(request);
         }
 
         public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)

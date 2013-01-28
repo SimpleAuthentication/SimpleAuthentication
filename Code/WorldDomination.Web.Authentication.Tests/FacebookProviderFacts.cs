@@ -21,7 +21,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>())).Returns(It.IsAny<IRestResponse>);
                 var facebookProvider = new FacebookProvider("a", "b",
-                                                            null, mockRestClient.Object);
+                                                            null, new RestClientFactory(mockRestClient.Object));
                 var queryStringParameters = new NameValueCollection
                 {
                     {"code", "aaa"},
@@ -48,7 +48,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>())).Returns(It.IsAny<IRestResponse>);
                 var facebookProvider = new FacebookProvider("a", "b",
-                                                            null, mockRestClient.Object);
+                                                            null, new RestClientFactory(mockRestClient.Object));
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -75,7 +75,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>())).Returns(It.IsAny<IRestResponse>);
                 var facebookProvider = new FacebookProvider("a", "b",
-                                                            null, mockRestClient.Object);
+                                                            null, new RestClientFactory(mockRestClient.Object));
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -104,7 +104,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                               .Throws(new Exception(exceptionMessage));
                 var facebookProvider = new FacebookProvider("a", "b",
-                                                            null, mockRestClient.Object);
+                                                            null, new RestClientFactory(mockRestClient.Object));
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -138,7 +138,7 @@ namespace WorldDomination.Web.Authentication.Tests
                               .Returns(mockRestResponse.Object);
 
                 var facebookProvider = new FacebookProvider("a", "b",
-                                                            null, mockRestClient.Object);
+                                                            null, new RestClientFactory(mockRestClient.Object));
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -174,7 +174,7 @@ namespace WorldDomination.Web.Authentication.Tests
                               .Returns(mockRestResponse.Object);
 
                 var facebookProvider = new FacebookProvider("a", "b",
-                                                            null, mockRestClient.Object);
+                                                            null, new RestClientFactory(mockRestClient.Object));
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -207,7 +207,7 @@ namespace WorldDomination.Web.Authentication.Tests
                               .Returns(mockRestResponse.Object);
 
                 var facebookProvider = new FacebookProvider("a", "b",
-                                                            null, mockRestClient.Object);
+                                                            null, new RestClientFactory(mockRestClient.Object));
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -245,7 +245,7 @@ namespace WorldDomination.Web.Authentication.Tests
                               .Throws(new Exception(exceptionMessage));
 
                 var facebookProvider = new FacebookProvider("a", "b",
-                                                            null, mockRestClient.Object);
+                                                            null, new RestClientFactory(mockRestClient.Object));
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -282,7 +282,7 @@ namespace WorldDomination.Web.Authentication.Tests
                               .Returns(mockRestResponseApiMe.Object);
 
                 var facebookProvider = new FacebookProvider("a", "b",
-                                                            null, mockRestClient.Object);
+                                                            null, new RestClientFactory(mockRestClient.Object));
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -334,7 +334,7 @@ namespace WorldDomination.Web.Authentication.Tests
                               .Returns(mockRestResponseApiMe.Object);
 
                 var facebookProvider = new FacebookProvider("a", "b",
-                                                            null, mockRestClient.Object);
+                                                            null, new RestClientFactory(mockRestClient.Object));
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                 {

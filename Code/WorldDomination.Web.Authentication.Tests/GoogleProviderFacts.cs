@@ -95,7 +95,7 @@ namespace WorldDomination.Web.Authentication.Tests
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
                 var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        mockRestClient.Object);
+                                                        new RestClientFactory(mockRestClient.Object));
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -124,7 +124,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                               .Throws(new InvalidOperationException(errorMessage));
                 var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        mockRestClient.Object);
+                                                        new RestClientFactory(mockRestClient.Object));
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -155,7 +155,7 @@ namespace WorldDomination.Web.Authentication.Tests
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
                 var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        mockRestClient.Object);
+                                                        new RestClientFactory(mockRestClient.Object));
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -186,7 +186,7 @@ namespace WorldDomination.Web.Authentication.Tests
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
                 var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        mockRestClient.Object);
+                                                        new RestClientFactory(mockRestClient.Object));
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -234,7 +234,7 @@ namespace WorldDomination.Web.Authentication.Tests
                               .Returns(mockRestResponseUserInfo.Object);
 
                 var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        mockRestClient.Object);
+                                                        new RestClientFactory(mockRestClient.Object));
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -282,7 +282,7 @@ namespace WorldDomination.Web.Authentication.Tests
                               .Returns(mockRestResponseUserInfo.Object);
 
                 var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        mockRestClient.Object);
+                                                        new RestClientFactory(mockRestClient.Object));
                 const string existingState = "http://2p1s.com";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -345,7 +345,7 @@ namespace WorldDomination.Web.Authentication.Tests
                               .Returns(mockRestResponseUserInfo.Object);
 
                 var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        mockRestClient.Object);
+                                                        new RestClientFactory(mockRestClient.Object));
                 const string existingState = "http://2p1s.com";
 
                 var queryStringParameters = new NameValueCollection

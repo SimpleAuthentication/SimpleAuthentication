@@ -12,19 +12,23 @@ namespace WorldDomination.Web.Authentication.Facebook
 
     public class FacebookProvider : IAuthenticationProvider
     {
+        private const string BaseUrl = "https://graph.facebook.com";
         private readonly string _clientId;
         private readonly string _clientSecret;
-        private readonly IRestClient _restClient;
         private readonly IList<string> _scope;
+        private readonly IRestClientFactory _restClientFactory;
 
         public FacebookProvider(ProviderKey providerKey,
-                                IList<string> scope = null, IRestClient restClient = null) :
-                                    this(providerKey.Key, providerKey.Secret, scope, restClient)
+                                IList<string> scope = null,
+                                IRestClientFactory restClientFactory = null) :
+                                    this(providerKey.Key, providerKey.Secret, scope, restClientFactory)
         {
         }
 
-        public FacebookProvider(string clientId, string clientSecret,
-                                IList<string> scope = null, IRestClient restClient = null)
+        public FacebookProvider(string clientId,
+                                string clientSecret,
+                                IList<string> scope = null,
+                                IRestClientFactory restClientFactory = null)
         {
             if (string.IsNullOrEmpty(clientId))
             {
@@ -41,7 +45,7 @@ namespace WorldDomination.Web.Authentication.Facebook
 
             // Optionals.
             _scope = scope ?? new List<string> {"email"};
-            _restClient = restClient ?? new RestClient("https://graph.facebook.com");
+            _restClientFactory = restClientFactory ?? new RestClientFactory();
         }
 
         private static string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState = null)
@@ -109,7 +113,9 @@ namespace WorldDomination.Web.Authentication.Facebook
                 {
                     restRequest.AddParameter("redirect_uri", CallBackUri.AbsoluteUri);
                 }
-                response = _restClient.Execute(restRequest);
+
+                var restClient = _restClientFactory.CreateRestClient(BaseUrl);
+                response = restClient.Execute(restRequest);
             }
             catch (Exception exception)
             {
@@ -160,7 +166,8 @@ namespace WorldDomination.Web.Authentication.Facebook
                 var restRequest = new RestRequest("me");
                 restRequest.AddParameter("access_token", accessToken);
 
-                response = _restClient.Execute<MeResult>(restRequest);
+                var restClient = _restClientFactory.CreateRestClient(BaseUrl);
+                response = restClient.Execute<MeResult>(restRequest);
             }
             catch (Exception exception)
             {

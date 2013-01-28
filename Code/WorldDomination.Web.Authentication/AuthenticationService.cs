@@ -23,12 +23,12 @@ namespace WorldDomination.Web.Authentication
         }
 
         public AuthenticationService(ProviderConfiguration providerConfiguration,
-                                     IList<string> scope = null, IRestClient restClient = null)
+                                     IList<string> scope = null, IRestClientFactory restClientFactory = null)
         {
-            Initialize(providerConfiguration, scope, restClient);
+            Initialize(providerConfiguration, scope, restClientFactory);
         }
 
-        public void Initialize(ProviderConfiguration providerConfiguration, IList<string> scope = null, IRestClient restClient = null)
+        public void Initialize(ProviderConfiguration providerConfiguration, IList<string> scope = null, IRestClientFactory restClientFactory = null)
         {
             if (providerConfiguration == null)
             {
@@ -46,13 +46,13 @@ namespace WorldDomination.Web.Authentication
                 switch (provider.Name.ToLowerInvariant())
                 {
                     case "facebook":
-                        authenticationProvider = new FacebookProvider(provider, scope, restClient);
+                        authenticationProvider = new FacebookProvider(provider, scope, restClientFactory);
                         break;
                     case "google":
-                        authenticationProvider = new GoogleProvider(provider, scope, restClient);
+                        authenticationProvider = new GoogleProvider(provider, scope, restClientFactory);
                         break;
                     case "twitter":
-                        authenticationProvider = new TwitterProvider(provider, restClient);
+                        authenticationProvider = new TwitterProvider(provider, restClientFactory);
                         break;
                     default:
                         throw new ApplicationException(
