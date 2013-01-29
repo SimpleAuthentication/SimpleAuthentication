@@ -187,13 +187,10 @@ namespace WorldDomination.Web.Authentication.Google
             }
 
             // Lets check to make sure we have some bare minimum data.
-            if (string.IsNullOrEmpty(response.Data.Id) ||
-                string.IsNullOrEmpty(response.Data.Email) ||
-                string.IsNullOrEmpty(response.Data.Name) ||
-                string.IsNullOrEmpty(response.Data.Locale))
+            if (string.IsNullOrEmpty(response.Data.Id))
             {
                 throw new AuthenticationException(
-                    "Retrieve some user info from the Google Api, but we're missing one or more of either: Id, Email, Name and Locale.");
+                    "We were unable to retrieve the User Id from Google API, the user may have denied the authorization.");
             }
 
             return response.Data;
