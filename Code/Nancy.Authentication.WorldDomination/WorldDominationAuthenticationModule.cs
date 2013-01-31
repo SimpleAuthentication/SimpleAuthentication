@@ -48,18 +48,11 @@ namespace Nancy.Authentication.WorldDomination
 
                 var existingState = (Session[StateKey] as string) ?? string.Empty;
                 var model = new AuthenticateCallbackData();
-                var querystringParameters = new NameValueCollection();
-
-                foreach (var item in Request.Query)
-                {
-                    querystringParameters.Add(item, Request.Query[item]);
-                }
 
                 try
                 {
                     model.AuthenticatedClient =
-                        authenticationService.GetAuthenticatedClient((string) Request.Query.providerKey,
-                                                                     querystringParameters, existingState);
+                        authenticationService.GetAuthenticatedClient((string) Request.Query.providerKey, Request.Query, existingState);
                 }
                 catch (Exception exception)
                 {

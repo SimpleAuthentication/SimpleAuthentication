@@ -139,6 +139,20 @@ namespace WorldDomination.Web.Authentication
 
             return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
         }
+        
+        public IAuthenticatedClient GetAuthenticatedClient(string providerKey,
+                                                           dynamic requestParameters,
+                                                           string state = null)
+        {
+            var querystringParameters = new NameValueCollection();
+
+            foreach (var item in requestParameters)
+            {
+                querystringParameters.Add(item, requestParameters[item]);
+            }
+
+            return GetAuthenticatedClient(providerKey, querystringParameters, state);
+        }
 
         public IAuthenticatedClient GetAuthenticatedClient(string providerKey, 
                                                            NameValueCollection requestParameters,
