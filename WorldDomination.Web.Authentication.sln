@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authent
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.Tests", "Code\WorldDomination.Web.Authentication.Tests\WorldDomination.Web.Authentication.Tests.csproj", "{14AC417B-A1F8-4DEC-8FF0-EB6788C1C1AA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.ExtraProviders", "Code\WorldDomination.Web.Authentication.ExtraProviders\WorldDomination.Web.Authentication.ExtraProviders.csproj", "{D75207D5-FA68-4DC6-939A-2AC3CAD4BEAD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +66,10 @@ Global
 		{14AC417B-A1F8-4DEC-8FF0-EB6788C1C1AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14AC417B-A1F8-4DEC-8FF0-EB6788C1C1AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14AC417B-A1F8-4DEC-8FF0-EB6788C1C1AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D75207D5-FA68-4DC6-939A-2AC3CAD4BEAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D75207D5-FA68-4DC6-939A-2AC3CAD4BEAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D75207D5-FA68-4DC6-939A-2AC3CAD4BEAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D75207D5-FA68-4DC6-939A-2AC3CAD4BEAD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
