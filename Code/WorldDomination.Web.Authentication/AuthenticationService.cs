@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
+using System.Linq;
 using WorldDomination.Web.Authentication.Config;
 using WorldDomination.Web.Authentication.Facebook;
 using WorldDomination.Web.Authentication.Google;
@@ -54,12 +55,37 @@ namespace WorldDomination.Web.Authentication
                         authenticationProvider = new TwitterProvider(provider, restClientFactory);
                         break;
                     default:
-                        throw new ApplicationException(
-                            "Unhandled ProviderName found - unable to know which Provider Type to create.");
+                        authenticationProvider = FindAndAddProvider(provider, restClientFactory);
+                        break;
                 }
 
                 AddProvider(authenticationProvider);
             }
+        }
+
+        public IAuthenticationProvider FindAndAddProvider(ProviderKey providerKey, IRestClientFactory restClientFactory)
+        {
+            var name = providerKey.Name.ToLowerInvariant();
+            var types = AppDomain.CurrentDomain.GetAssemblies()
+                                 .SelectMany(s => s.GetTypes())
+                                 .Where(x => x.GetInterfaces().Any(y => y == typeof(IAuthenticationProvider)) &&
+                                             !x.IsAbstract && x.IsClass);
+
+            var provider = types.SingleOrDefault(x => x.Name.ToLowerInvariant().StartsWith(name));
+
+            if (provider != null)
+            {
+                var parameters = new object[]
+                {
+                    providerKey.Key,
+                    providerKey.Secret,
+                    restClientFactory
+                };
+
+                return Activator.CreateInstance(provider, parameters) as IAuthenticationProvider;
+            }
+
+            throw new ApplicationException("Unhandled ProviderName found - unable to know which Provider Type to create.");
         }
 
         #region Implementation of IAuthenticationService
@@ -179,8 +205,7 @@ namespace WorldDomination.Web.Authentication
                 case "twitter":
                     return new TwitterAuthenticationServiceSettings();
                 default:
-                    throw new AuthenticationException(
-                        "Unhandled provider type while trying to determine which AuthenticationServiceSettings to instanciate.");
+                    return AuthenticationProviders[providerKey.ToLowerInvariant()].DefaultAuthenticationServiceSettings;
             }
         }
 
