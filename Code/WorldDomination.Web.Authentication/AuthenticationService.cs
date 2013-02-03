@@ -112,7 +112,7 @@ namespace WorldDomination.Web.Authentication
             // Does this provider already exist?
             if (AuthenticationProviders.ContainsKey(providerName))
             {
-                throw new AuthenticationException(string.Format("Trying to add a {0} provider, but one already exists.", providerName);
+                throw new AuthenticationException(string.Format("Trying to add a {0} provider, but one already exists.", providerName));
             }
 
             AuthenticationProviders.Add(providerName, authenticationProvider);

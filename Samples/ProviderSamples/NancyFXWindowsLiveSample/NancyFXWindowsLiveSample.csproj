@@ -120,7 +120,7 @@
           <AutoAssignPort>False</AutoAssignPort>
           <DevelopmentServerPort>80</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://thisisatesturl.com:9099/</IISUrl>
+          <IISUrl>http://worlddomination.localtest.me:9099</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>
