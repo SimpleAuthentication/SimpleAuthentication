@@ -84,10 +84,10 @@ namespace WorldDomination.Web.Authentication.Tests
 
             // Assert.
             Assert.NotNull(authenticationService);
-            Assert.Equal(providerCount, authenticationService.Providers.Count());
-            var firstProvider = authenticationService.Providers.First();
+            Assert.Equal(providerCount, authenticationService.AuthenticationProviders.Count());
+            var firstProvider = authenticationService.AuthenticationProviders.First();
             Assert.NotNull(firstProvider);
-            Assert.Equal("Facebook", firstProvider.Name);
+            Assert.Equal("Facebook", firstProvider.Value.Name);
         }
     }
 

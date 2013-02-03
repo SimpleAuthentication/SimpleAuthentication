@@ -7,6 +7,8 @@ namespace Nancy.Authentication.WorldDomination
     public class WorldDominationAuthenticationModule : NancyModule
     {
         private const string StateKey = "WorldDomination-StateKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
+        public static string RedirectRoute = "/authentication/redirect/{providerkey}";
+        public static string CallbackRoute = "/authentication/authenticatecallback";
 
         public WorldDominationAuthenticationModule(IAuthenticationService authenticationService)
             : this(authenticationService, null)
@@ -18,7 +20,7 @@ namespace Nancy.Authentication.WorldDomination
         public WorldDominationAuthenticationModule(IAuthenticationService authenticationService,
                                                    IAuthenticationCallbackProvider authenticationCallbackProvider)
         {
-            Get["/authentication/redirect/{providerkey}"] = _ =>
+            Get[RedirectRoute] = _ =>
             {
                 if (string.IsNullOrEmpty((string)_.providerkey))
                 {
@@ -39,7 +41,7 @@ namespace Nancy.Authentication.WorldDomination
                 return Response.AsRedirect(uri.AbsoluteUri);
             };
 
-            Get["/authentication/authenticatecallback"] = _ =>
+            Get[CallbackRoute] = _ =>
             {
                 if (string.IsNullOrEmpty(Request.Query.providerkey))
                 {

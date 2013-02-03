@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
+using System.Linq;
 using WorldDomination.Web.Authentication.Config;
 using WorldDomination.Web.Authentication.Facebook;
 using WorldDomination.Web.Authentication.Google;
@@ -11,6 +12,9 @@ namespace WorldDomination.Web.Authentication
 {
     public class AuthenticationService : IAuthenticationService
     {
+        private IEnumerable<Type> _discoveredProviders;
+        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; private set; }
+
         public AuthenticationService()
         {
             var providerConfig = ConfigurationManager.GetSection("authenticationProviders") as ProviderConfiguration;
@@ -42,6 +46,7 @@ namespace WorldDomination.Web.Authentication
             foreach (ProviderKey provider in providerConfiguration.Providers)
             {
                 IAuthenticationProvider authenticationProvider;
+
                 switch (provider.Name.ToLowerInvariant())
                 {
                     case "facebook":
@@ -54,27 +59,46 @@ namespace WorldDomination.Web.Authentication
                         authenticationProvider = new TwitterProvider(provider, restClientFactory);
                         break;
                     default:
-                        throw new ApplicationException(
-                            "Unhandled ProviderName found - unable to know which Provider Type to create.");
+                        authenticationProvider = DiscoverProvider(provider, restClientFactory);
+                        break;
                 }
 
                 AddProvider(authenticationProvider);
             }
         }
 
-        #region Implementation of IAuthenticationService
-
-        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; private set; }
-
-        public IEnumerable<IAuthenticationProvider> Providers
+        private IAuthenticationProvider DiscoverProvider(ProviderKey providerKey, IRestClientFactory restClientFactory)
         {
-            get
+            var name = providerKey.Name.ToLowerInvariant();
+
+            if (_discoveredProviders == null)
             {
-                return AuthenticationProviders != null && AuthenticationProviders.Count > 0
-                           ? AuthenticationProviders.Values
-                           : null;
+                _discoveredProviders
+                    = AppDomain.CurrentDomain.GetAssemblies()
+                               .SelectMany(s => s.GetTypes())
+                               .Where(x => x.GetInterfaces()
+                                            .Any(y => y == typeof (IAuthenticationProvider)) &&
+                                           !x.IsAbstract && x.IsClass);
             }
+
+            var provider = _discoveredProviders.SingleOrDefault(x => x.Name.ToLowerInvariant().StartsWith(name));
+
+            if (provider == null)
+            {
+                throw new ApplicationException(string.Format("Unable to find provider {0}, ensure you registered in the web.config or via code.", name));
+            }
+
+            var parameters = new CustomProviderParams
+            {
+                Key = providerKey.Key,
+                Secret = providerKey.Secret,
+                RestClientFactory = restClientFactory
+            };
+
+            return Activator.CreateInstance(provider, parameters) as IAuthenticationProvider;
         }
+
+        #region Implementation of IAuthenticationService
 
         public void AddProvider(IAuthenticationProvider authenticationProvider)
         {
@@ -88,8 +112,7 @@ namespace WorldDomination.Web.Authentication
             // Does this provider already exist?
             if (AuthenticationProviders.ContainsKey(providerName))
             {
-                throw new AuthenticationException("Trying to add a " + providerName +
-                                                  " provider, but one already exists.");
+                throw new AuthenticationException(string.Format("Trying to add a {0} provider, but one already exists.", providerName));
             }
 
             AuthenticationProviders.Add(providerName, authenticationProvider);
@@ -160,17 +183,20 @@ namespace WorldDomination.Web.Authentication
             }
 
             var authenticationProvider = GetAuthenticationProvider(providerKey);
+
             return authenticationProvider.AuthenticateClient(requestParameters, state);
         }
 
         public IAuthenticationServiceSettings GetAuthenticateServiceSettings(string providerKey)
         {
+            var name = providerKey.ToLowerInvariant();
+
             if (string.IsNullOrEmpty(providerKey))
             {
                 throw new ArgumentNullException("providerKey");
             }
 
-            switch (providerKey.ToLowerInvariant())
+            switch (name)
             {
                 case "facebook":
                     return new FacebookAuthenticationServiceSettings();
@@ -179,8 +205,7 @@ namespace WorldDomination.Web.Authentication
                 case "twitter":
                     return new TwitterAuthenticationServiceSettings();
                 default:
-                    throw new AuthenticationException(
-                        "Unhandled provider type while trying to determine which AuthenticationServiceSettings to instanciate.");
+                    return AuthenticationProviders[name].DefaultAuthenticationServiceSettings;
             }
         }
 
@@ -189,6 +214,7 @@ namespace WorldDomination.Web.Authentication
         private IAuthenticationProvider GetAuthenticationProvider(string providerKey)
         {
             IAuthenticationProvider authenticationProvider = null;
+            
             if (AuthenticationProviders != null)
             {
                 AuthenticationProviders.TryGetValue(providerKey.ToLowerInvariant(), out authenticationProvider);
@@ -196,8 +222,9 @@ namespace WorldDomination.Web.Authentication
 
             if (authenticationProvider == null)
             {
-                throw new AuthenticationException("No '" + providerKey + "' provider has been added.");
+                throw new AuthenticationException(string.Format("No '{0}' provider has been added.", providerKey));
             }
+
             return authenticationProvider;
         }
     }
