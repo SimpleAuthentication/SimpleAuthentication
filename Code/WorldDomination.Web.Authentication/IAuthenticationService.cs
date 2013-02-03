@@ -10,11 +10,6 @@ namespace WorldDomination.Web.Authentication
     public interface IAuthenticationService
     {
         /// <summary>
-        /// A collection of Authentication providers that have been registered with this service.
-        /// </summary>
-        IEnumerable<IAuthenticationProvider> Providers { get; }
-
-        /// <summary>
         /// Registering a provider with this service.
         /// </summary>
         /// <param name="authenticationProvider">An Authentication Provider.</param>
