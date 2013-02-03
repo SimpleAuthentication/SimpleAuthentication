@@ -13,7 +13,6 @@ namespace WorldDomination.Web.Authentication
     public class AuthenticationService : IAuthenticationService
     {
         private IEnumerable<Type> _discoveredProviders;
-
         public IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; private set; }
 
         public AuthenticationService()
