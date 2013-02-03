@@ -37,8 +37,16 @@ namespace WorldDomination.Web.Authentication
         /// <param name="requestParameters">QueryString parameters from the callback uri.</param>
         /// <param name="state">Any optional state value. (Can be null for no state checks)</param>
         /// <returns>An authenticatedClient with either user information or some error message(s).</returns>
-        IAuthenticatedClient GetAuthenticatedClient(string providerKey, NameValueCollection requestParameters,
-                                                    string state = null);
+        IAuthenticatedClient GetAuthenticatedClient(string providerKey, NameValueCollection requestParameters, string state = null);
+
+        /// <summary>
+        /// Retrieve the user information from the Authentication Provider.
+        /// </summary>
+        /// <param name="providerKey">A Provider keyname.</param>
+        /// <param name="requestParameters">QueryString parameters from the callback uri (Used by NancyFX).</param>
+        /// <param name="state">Any optional state value. (Can be null for no state checks)</param>
+        /// <returns>An authenticatedClient with either user information or some error message(s).</returns>
+        IAuthenticatedClient GetAuthenticatedClient(string providerKey, dynamic requestParameters, string state = null);
 
         /// <summary>
         /// Retrieves the settings for an authentication service.
