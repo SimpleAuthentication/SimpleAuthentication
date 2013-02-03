@@ -42,18 +42,12 @@ namespace WorldDomination.Web.Authentication.Samples.NancyFX.Modules
                 // CSRF check.
                 var existingState = (Guid) (Session[SessionGuidKey] ?? Guid.NewGuid());
                 var model = new AuthenticateCallbackViewModel();
-                var querystringParameters = new NameValueCollection();
-
-                foreach (var item in Request.Query)
-                {
-                    querystringParameters.Add(item, Request.Query[item]);
-                }
-
+                
                 try
                 {
                     model.AuthenticatedClient =
                         authenticationService.GetAuthenticatedClient(Request.Query.providerKey,
-                                                                     querystringParameters,
+                                                                     Request.Query,
                                                                      existingState.ToString());
                 }
                 catch (Exception exception)
