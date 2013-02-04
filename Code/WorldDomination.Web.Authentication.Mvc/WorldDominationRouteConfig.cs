@@ -9,8 +9,8 @@ namespace WorldDomination.Web.Authentication.Mvc
         {
             routes.MapRoute(
                 name: "WorldDominationAutomatedMvc-Redirect",
-                url: "authentication/redirect/{providerkey}",
-                defaults: new { controller = "WorldDominationAuthentication", action = "RedirectToProvider" }
+                url: "authentication/redirect/{providerkey}/{additionaldata}",
+                defaults: new { controller = "WorldDominationAuthentication", action = "RedirectToProvider", additionaldata = UrlParameter.Optional }
             );
             routes.MapRoute(
                 name: "WorldDominationAutomatedMvc-AuthenticateCallback",
