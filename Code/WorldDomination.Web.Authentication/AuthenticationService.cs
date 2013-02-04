@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel.Composition.Hosting;
+using System.ComponentModel.Composition.Primitives;
+using System.ComponentModel.Composition.ReflectionModel;
 using System.Configuration;
 using System.Linq;
 using WorldDomination.Web.Authentication.Config;
@@ -12,7 +15,7 @@ namespace WorldDomination.Web.Authentication
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private IEnumerable<Type> _discoveredProviders;
+        private readonly Lazy<IEnumerable<Type>> _discoveredProviders = new Lazy<IEnumerable<Type>>(GetExportedTypes<IAuthenticationProvider>);
         public IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; private set; }
 
         public AuthenticationService()
@@ -67,21 +70,36 @@ namespace WorldDomination.Web.Authentication
             }
         }
 
+        private static IEnumerable<Type> GetExportedTypes<T>()
+        {
+            var catalog = new AggregateCatalog(
+                new DirectoryCatalog(@".", "*"),
+                new DirectoryCatalog(@".\bin", "*")
+                );
+
+            return catalog.Parts
+                .Select(part => ComposablePartExportType<T>(part))
+                .Where(t => t != null)
+                .ToList();
+        }
+
+        private static Type ComposablePartExportType<T>(ComposablePartDefinition part)
+        {
+            if (part.ExportDefinitions.Any(
+                def => def.Metadata.ContainsKey("ExportTypeIdentity") &&
+                    def.Metadata["ExportTypeIdentity"].Equals(typeof(T).FullName)))
+            {
+                return ReflectionModelServices.GetPartType(part).Value;
+            }
+
+            return null;
+        }
+
         private IAuthenticationProvider DiscoverProvider(ProviderKey providerKey, IRestClientFactory restClientFactory)
         {
             var name = providerKey.Name.ToLowerInvariant();
 
-            if (_discoveredProviders == null)
-            {
-                _discoveredProviders
-                    = AppDomain.CurrentDomain.GetAssemblies()
-                               .SelectMany(s => s.GetTypes())
-                               .Where(x => x.GetInterfaces()
-                                            .Any(y => y == typeof (IAuthenticationProvider)) &&
-                                           !x.IsAbstract && x.IsClass);
-            }
-
-            var provider = _discoveredProviders.SingleOrDefault(x => x.Name.ToLowerInvariant().StartsWith(name));
+            var provider = _discoveredProviders.Value.SingleOrDefault(x => x.Name.ToLowerInvariant().StartsWith(name));
 
             if (provider == null)
             {
