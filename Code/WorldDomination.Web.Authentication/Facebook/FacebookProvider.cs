@@ -65,8 +65,7 @@ namespace WorldDomination.Web.Authentication.Facebook
             var state = parameters["state"];
 
             // CSRF (state) check.
-            if (!string.IsNullOrEmpty(state) &&
-                state != existingState)
+            if (!string.IsNullOrEmpty(state) && state != existingState)
             {
                 throw new AuthenticationException(
                     "The states do not match. It's possible that you may be a victim of a CSRF.");

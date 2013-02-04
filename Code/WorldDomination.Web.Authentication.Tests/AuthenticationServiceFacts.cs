@@ -69,8 +69,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 // Arrange.
                 const string providerKey = "aaa";
                 const string state = "asd";
-                var querystringParams = new NameValueCollection();
-                querystringParams.Add("a", "b");
+                var querystringParams = new NameValueCollection {{"a", "b"}};
                 var authenticationService = new AuthenticationService();
 
                 // Act and Assert.

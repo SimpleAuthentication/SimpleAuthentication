@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Specialized;
 using Nancy;
 using WorldDomination.Web.Authentication.Samples.NancyFX.Model;
 
