@@ -1,7 +1,6 @@
-﻿using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 
-namespace MvcAutomatedSample
+namespace MvcAutomatedSample.App_Start
 {
     public class FilterConfig
     {
