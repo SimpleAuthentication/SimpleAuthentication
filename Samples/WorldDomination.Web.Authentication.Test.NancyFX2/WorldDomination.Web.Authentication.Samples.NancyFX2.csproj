@@ -101,6 +101,10 @@
       <Project>{94b8d947-6cad-42c3-b328-f369ce7bc6c0}</Project>
       <Name>Nancy.Authentication.WorldDomination</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Code\WorldDomination.Web.Authentication.ExtraProviders\WorldDomination.Web.Authentication.ExtraProviders.csproj">
+      <Project>{d75207d5-fa68-4dc6-939a-2ac3cad4bead}</Project>
+      <Name>WorldDomination.Web.Authentication.ExtraProviders</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Code\WorldDomination.Web.Authentication\WorldDomination.Web.Authentication.csproj">
       <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
       <Name>WorldDomination.Web.Authentication</Name>
