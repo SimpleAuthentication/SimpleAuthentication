@@ -7,10 +7,10 @@
    You've nuget installed this package so I don't to explain what this shiz does ;)
 
 
-   1. Simple Mvc example: : http://bit.ly/V1RJYD
-   2. Advanced Mvc example : http://bit.ly/V1RRHy
-   3. NancyFx example: http://bit.ly/V43viS
-   4. Fake (In Memory) Mvc example: http://bit.ly/Tm1YYo
+   1. NancyFX Manual Setup - https://github.com/PureKrome/WorldDomination.Web.Authentication/wiki/NancyFX-Manual-Setup
+   2. NancyFX Automatic Setup - https://github.com/PureKrome/WorldDomination.Web.Authentication/wiki/NancyFX-Automatic-Setup
+   3. MVC Manual Setup - https://github.com/PureKrome/WorldDomination.Web.Authentication/wiki/Mvc-Manual-Setup
+   4. MVC Automatic Setup - https://github.com/PureKrome/WorldDomination.Web.Authentication/wiki/Mvc-Automatic-Setup
 
 
    PRO TIP: It's -strongly- recommended that you provide some 'state' value when
@@ -33,3 +33,4 @@ More Pro Tips
 Now go forth and execute World Domination! Seriously. Go. Dominate. Even a wee bit. Go.
 
 -Pure Krome [from Melbourne, Australia ... mate :) ]-
+-Phillip Haydon [from Auckland, New Zealand... kia ora... BRO!]-
