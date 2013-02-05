@@ -77,10 +77,10 @@ namespace Nancy.Authentication.WorldDomination
             }
 
             var builder = new UriBuilder(Request.Url)
-                          {
-                              Path = relativeUrl,
-                              Query = "providerkey=" + providerKey.ToLowerInvariant()
-                          };
+            {
+                Path = relativeUrl,
+                Query = "providerkey=" + providerKey.ToLowerInvariant()
+            };
 
             // Don't include port 80/443 in the Uri.
             if (builder.Uri.IsDefaultPort)
