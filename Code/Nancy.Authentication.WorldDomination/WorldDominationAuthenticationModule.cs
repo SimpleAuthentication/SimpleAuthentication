@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Specialized;
 using WorldDomination.Web.Authentication;
 
 namespace Nancy.Authentication.WorldDomination

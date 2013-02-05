@@ -43,8 +43,28 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             return new Uri(oauthDialogUri);
         }
 
-        public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)
+        public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState = null)
         {
+            if (parameters == null)
+            {
+                throw new ArgumentNullException("parameters");
+            }
+
+            if (parameters.Count <= 0)
+            {
+                throw new ArgumentOutOfRangeException("parameters");
+            }
+
+            var state = parameters["state"];
+
+            // CSRF (state) check.
+            // NOTE: There is always a state provided. Even if an error is returned.
+            if (!string.IsNullOrEmpty(existingState) && state != existingState)
+            {
+                throw new AuthenticationException(
+                    "The states do not match. It's possible that you may be a victim of a CSRF.");
+            }
+
             var reponse = RetrieveToken(parameters);
             var userInfo = RetrieveUserInfo(reponse);
 
@@ -59,8 +79,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
                     UserName = userInfo.name,
                     Id = userInfo.id,
                     Email = userInfo.emails.preferred,
-                    Gender = (GenderType) Enum.Parse(typeof (GenderType), userInfo.gender ?? "Unknown", true),
-
+                    Gender = (GenderType) Enum.Parse(typeof (GenderType), userInfo.gender ?? "Unknown", true)
                 }
             };
 

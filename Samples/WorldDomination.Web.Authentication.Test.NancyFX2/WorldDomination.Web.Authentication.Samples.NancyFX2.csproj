@@ -76,7 +76,9 @@
     <Content Include="Content\google_32.png" />
     <Content Include="Content\main.css" />
     <Content Include="Content\twitter_32.png" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\AuthenticateCallbackViewModel.cs" />
