@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("WorldDomination.Web.Authentication.ExtraProviders")]
+[assembly: AssemblyTitle("WorldDomination.Web.Authentication.Mvc")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("WorldDomination.Web.Authentication.ExtraProviders")]
+[assembly: AssemblyProduct("WorldDomination.Web.Authentication.Mvc")]
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("7ae1d663-b1e8-458b-bd1f-db16e8b82d4e")]
+[assembly: Guid("977bf69b-1363-4bcf-bd24-4f8445361ebe")]
 
 // Version information for an assembly consists of the following four values:
 //

@@ -51,8 +51,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
             // CSRF (state) check.
             // NOTE: There is always a state provided. Even if an error is returned.
-            if (!string.IsNullOrEmpty(existingState) &&
-                state != existingState)
+            if (!string.IsNullOrEmpty(existingState) && state != existingState)
             {
                 throw new AuthenticationException(
                     "The states do not match. It's possible that you may be a victim of a CSRF.");
