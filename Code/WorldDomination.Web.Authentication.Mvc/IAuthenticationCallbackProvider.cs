@@ -11,9 +11,9 @@ namespace WorldDomination.Web.Authentication.Mvc
         /// <summary>
         /// Custom processing during the callback from an Authentication Provider.
         /// </summary>
-        /// <param name="nancyModule">The current module.</param>
+        /// <param name="context">The current HttpContext passed from the controller.</param>
         /// <param name="model">Some data related to the callback, such as an error or some authenticated user data.</param>
         /// <returns></returns>
-        ActionResult Process(HttpContextBase nancyModule, AuthenticateCallbackData model);
+        ActionResult Process(HttpContextBase context, AuthenticateCallbackData model);
     }
 }

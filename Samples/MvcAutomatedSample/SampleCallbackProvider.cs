@@ -4,15 +4,15 @@ using WorldDomination.Web.Authentication.Mvc;
 
 namespace MvcAutomatedSample
 {
-public class SampleCallbackProvider : IAuthenticationCallbackProvider
-{
-    public ActionResult Process(HttpContextBase nancyModule, AuthenticateCallbackData model)
+    public class SampleCallbackProvider : IAuthenticationCallbackProvider
     {
-        return new ViewResult
+        public ActionResult Process(HttpContextBase context, AuthenticateCallbackData model)
         {
-            ViewName = "AuthenticateCallback",
-            ViewData = new ViewDataDictionary(model)
-        };
+            return new ViewResult
+            {
+                ViewName = "AuthenticateCallback",
+                ViewData = new ViewDataDictionary(model)
+            };
+        }
     }
-}
 }
