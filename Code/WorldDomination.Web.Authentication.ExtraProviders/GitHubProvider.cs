@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Net;
-using WorldDomination.Web.Authentication.Config;
 using WorldDomination.Web.Authentication.ExtraProviders.GitHub;
 using RestSharp;
 
 namespace WorldDomination.Web.Authentication.ExtraProviders
 {
-    using System.Collections.Generic;
-
     public class GitHubProvider : IAuthenticationProvider
     {
         private readonly string _clientId;

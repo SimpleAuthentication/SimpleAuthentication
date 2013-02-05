@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.ComponentModel.Composition;
 
 namespace WorldDomination.Web.Authentication
 {
     /// <summary>
     /// Defines the contract that an Authentication Provider must impliemnt.
     /// </summary>
+    [InheritedExport]
     public interface IAuthenticationProvider
     {
         /// <summary>
