@@ -38,6 +38,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authent
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvcAutomatedSample", "Samples\MvcAutomatedSample\MvcAutomatedSample.csproj", "{F31BEB50-1976-438E-B781-D7B045F84877}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.ExtraProviders.OpenId", "Code\WorldDomination.Web.Authentication.ExtraProviders.OpenId\WorldDomination.Web.Authentication.ExtraProviders.OpenId.csproj", "{51F918AA-3A27-4216-BB55-66262CB941C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NancyFXOpenId", "Samples\ProviderSamples\NancyFXOpenId\NancyFXOpenId.csproj", "{6E460E39-191A-4AC6-B9FB-551F177CEBA2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -96,6 +100,14 @@ Global
 		{F31BEB50-1976-438E-B781-D7B045F84877}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F31BEB50-1976-438E-B781-D7B045F84877}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F31BEB50-1976-438E-B781-D7B045F84877}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51F918AA-3A27-4216-BB55-66262CB941C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51F918AA-3A27-4216-BB55-66262CB941C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51F918AA-3A27-4216-BB55-66262CB941C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51F918AA-3A27-4216-BB55-66262CB941C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E460E39-191A-4AC6-B9FB-551F177CEBA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E460E39-191A-4AC6-B9FB-551F177CEBA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E460E39-191A-4AC6-B9FB-551F177CEBA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E460E39-191A-4AC6-B9FB-551F177CEBA2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -109,5 +121,6 @@ Global
 		{8ACA3380-6810-4CA1-B8CA-D93ECE18131A} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}
 		{F31BEB50-1976-438E-B781-D7B045F84877} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}
 		{492C44EA-C148-46F8-ADF2-C29BB9B25E0E} = {8ACA3380-6810-4CA1-B8CA-D93ECE18131A}
+		{6E460E39-191A-4AC6-B9FB-551F177CEBA2} = {8ACA3380-6810-4CA1-B8CA-D93ECE18131A}
 	EndGlobalSection
 EndGlobal
