@@ -53,10 +53,15 @@
     <Compile Include="FacebookProviderFacts.cs" />
     <Compile Include="GoogleProviderFacts.cs" />
     <Compile Include="MoqExtensions.cs" />
+    <Compile Include="OpenIdProviderFacts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TwitterProviderFacts.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\WorldDomination.Web.Authentication.ExtraProviders.OpenId\WorldDomination.Web.Authentication.ExtraProviders.OpenId.csproj">
+      <Project>{51f918aa-3a27-4216-bb55-66262cb941c3}</Project>
+      <Name>WorldDomination.Web.Authentication.ExtraProviders.OpenId</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WorldDomination.Web.Authentication\WorldDomination.Web.Authentication.csproj">
       <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
       <Name>WorldDomination.Web.Authentication</Name>

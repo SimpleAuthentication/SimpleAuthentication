@@ -1,15 +1,22 @@
 ﻿using System;
 using System.Collections.Specialized;
-using DotNetOpenAuth.OpenId;
-using DotNetOpenAuth.OpenId.Extensions.SimpleRegistration;
-using DotNetOpenAuth.OpenId.RelyingParty;
+using System.Linq;
+using System.Net;
+using System.Xml.Linq;
+using RestSharp;
 
 namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
 {
     public class OpenIdProvider : IAuthenticationProvider
     {
-        private static readonly OpenIdRelyingParty OpenIdRelyingParty =
-            new OpenIdRelyingParty(new StandardRelyingPartyApplicationStore());
+        private readonly IRestClientFactory _restClientFactory;
+
+        public OpenIdProvider(IRestClientFactory restClientFactory = null)
+        {
+            _restClientFactory = restClientFactory;
+        }
+
+        private const string XrdsHeaderKey = "X-XRDS-Location";
 
         public string Name
         {
@@ -27,32 +34,18 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
                 throw new ArgumentNullException("authenticationServiceSettings");
             }
 
-            //local server
-            string realm = "http://" + settings.CallBackUri.Authority;
+            // First we need to do a YADIS Discover, so we can get the real endpoint.
+            var xrdsEndPoint = YadisDiscoverXrdsEndPoint(settings.Identifier);
 
-            Identifier identifier;
-            if (!DotNetOpenAuth.OpenId.Identifier.TryParse(Identifier(settings), out identifier))
+            if (xrdsEndPoint == null ||
+                string.IsNullOrEmpty(xrdsEndPoint.AbsoluteUri))
             {
-                throw new InvalidOperationException();
+                // We don't know where to go :(
+                return null;
             }
 
-            //create the openid request
-            //and add request for personal information
-            var request = OpenIdRelyingParty.CreateRequest(identifier, new Realm(realm), settings.CallBackUri);
-            request.AddExtension(new ClaimsRequest
-                                 {
-                                     FullName = DemandLevel.Request,
-                                     Language = DemandLevel.Request,
-                                     Country = DemandLevel.Request,
-                                     Email = DemandLevel.Request,
-                                     Gender = DemandLevel.Request,
-                                 });
-
-            var response = request.RedirectingResponse;
-
-            //grab the redirect from the headers of the response
-            //eg: https://www.myopenid.com/server?openid.claimed_id=<identifier>%2F&openid.identity=<server>%2F&openid.assoc_handle=%7BHMAC-SHA256%7D%7B5109e243%7D%7BBMe45Q%3D%3D%7D&openid.return_to=http%3A%2F%2Flocalhost%3A6969%2FOpenId%2FAuthenticateCallback%3FproviderKey%3Dopenid%26dnoa.userSuppliedIdentifier%3Dhttp%253A%252F%252Fbendornis.com%252F&openid.realm=http%3A%2F%2Flocalhost%3A6969%2F&openid.mode=checkid_setup&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.ns.sreg=http%3A%2F%2Fopenid.net%2Fextensions%2Fsreg%2F1.1&openid.sreg.required=&openid.sreg.optional=email%2Cfullname%2Cgender%2Ccountry%2Clanguage&no_ssl=true
-            return new Uri(response.Headers["Location"]);
+            // If we have an endpoint, lets query that!
+            return YadisDiscoverOpenIdEndPoint(xrdsEndPoint);
         }
 
         public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)
@@ -60,9 +53,112 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
             throw new NotImplementedException();
         }
 
-        protected virtual string Identifier(IOpenIdAuthenticationServiceSettings settings)
+        protected virtual Uri Identifier(IOpenIdAuthenticationServiceSettings settings)
         {
             return settings.Identifier;
+        }
+
+        private Uri YadisDiscoverXrdsEndPoint(Uri identifier)
+        {
+            if (identifier == null || 
+                string.IsNullOrEmpty(identifier.AbsoluteUri))
+            {
+                throw new ArgumentNullException("identifier");
+            }
+
+            // Try and retrieve an XRDS.
+            IRestResponse restResponse;
+            try
+            {
+                var restRequest = new RestRequest(Method.GET);
+                var restClientFactory = _restClientFactory ?? new RestClientFactory();
+                var restClient = restClientFactory.CreateRestClient(identifier.AbsoluteUri);
+                restResponse = restClient.Execute(restRequest);
+            }
+            catch (Exception exception)
+            {
+                throw new AuthenticationException("Error occured while trying to determine Xrds endpoint for identity [" + identifier.AbsoluteUri + "].", exception);
+            }
+
+            if (restResponse == null)
+            {
+                throw new AuthenticationException("No response was created while trying to determine the Xrds endpoint for identity [" + identifier.AbsoluteUri + "].");
+            }
+
+            // If we have a 301 or 302, lets recurse.
+            if (restResponse.StatusCode == HttpStatusCode.MovedPermanently ||
+                restResponse.StatusCode == HttpStatusCode.Redirect)
+            {
+                // We need to move to a new location. But where?
+                var newLocation = restResponse.Headers.SingleOrDefault(x => x.Name == "Location");
+                return newLocation == null 
+                    ? null // No idea where to go, so we can't continue.
+                    : YadisDiscoverXrdsEndPoint(new Uri((string)newLocation.Value));
+            }
+
+            // Lets check the header to see if we can score the XDRS location, now.
+            var endpoint = restResponse.Headers.SingleOrDefault(x => x.Name == XrdsHeaderKey);
+            return endpoint == null
+                       ? null
+                       : new Uri((string)endpoint.Value);
+        }
+
+        private Uri YadisDiscoverOpenIdEndPoint(Uri xrdsUri)
+        {
+            if (xrdsUri == null ||
+                string.IsNullOrEmpty(xrdsUri.AbsoluteUri))
+            {
+                throw new ArgumentNullException("xrdsUri");
+            }
+
+            IRestResponse restResponse;
+            try
+            {
+                var restRequest = new RestRequest(Method.GET);
+                var restClientFactory = _restClientFactory ?? new RestClientFactory();
+                var restClient = restClientFactory.CreateRestClient(xrdsUri.AbsoluteUri);
+                restResponse = restClient.Execute(restRequest);
+            }
+            catch (Exception exception)
+            {
+                throw new AuthenticationException("Error occured while trying to determine OpenId endpoint for identity [" + xrdsUri.AbsoluteUri + "].", exception);
+            }
+
+            if (restResponse == null)
+            {
+                throw new AuthenticationException("No response was created while trying to determine the OpenId endpoint for identity [" + xrdsUri.AbsoluteUri + "].");
+            }
+
+            var content = restResponse.Content;
+            if (string.IsNullOrEmpty(content))
+            {
+                throw new AuthenticationException("Retrieved an Xrds document but there was no content!");
+            }
+
+            // Find the first URI element in .. wait for it.. wait for it .. some XML! ffs.
+            return ParseXrdsDocument(content);
+        }
+
+        private Uri ParseXrdsDocument(string xmlContent)
+        {
+            if (string.IsNullOrEmpty(xmlContent))
+            {
+                throw new ArgumentNullException("xmlContent");
+            }
+
+            // Find the first URI element.
+            var xDocument = XDocument.Parse(xmlContent);
+            XNamespace ns = "xri://$xrd*($v*2.0)";
+
+            /*
+             * xmlns:xrds="xri://$xrds"
+    xmlns:ux="http://specs.openid.net/extensions/ux/1.0"
+    xmlns="xri://$xrd*($v*2.0)">
+             */
+
+            // Find the first URI element.
+            var uris = xDocument.Descendants(ns + "URI").ToList();
+            return uris.Count <= 0 ? null : new Uri(uris.First().Value);
         }
     }
 }

@@ -1,11 +1,14 @@
-﻿namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
+﻿using System;
+
+namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
 {
-    internal class OpenIdAuthenticationServiceSettings : BaseAuthenticationServiceSettings, IOpenIdAuthenticationServiceSettings
+    public class OpenIdAuthenticationServiceSettings : BaseAuthenticationServiceSettings,
+                                                       IOpenIdAuthenticationServiceSettings
     {
         public OpenIdAuthenticationServiceSettings() : base("openid")
         {
         }
 
-        public string Identifier { get; set; }
+        public Uri Identifier { get; set; }
     }
 }
