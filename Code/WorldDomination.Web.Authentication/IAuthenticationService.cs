@@ -29,6 +29,8 @@ namespace WorldDomination.Web.Authentication
         /// <returns>The uri to redirect to.</returns>
         Uri RedirectToAuthenticationProvider(IAuthenticationServiceSettings authenticationServiceSettings);
 
+        Uri RedirectToOpenIdProvider(IAuthenticationServiceSettings authenticationServiceSettings, string identifier);
+
         /// <summary>
         /// Retrieve the user information from the Authentication Provider.
         /// </summary>

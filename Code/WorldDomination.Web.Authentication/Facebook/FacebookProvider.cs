@@ -10,7 +10,7 @@ namespace WorldDomination.Web.Authentication.Facebook
 {
     // REFERENCE: http://developers.facebook.com/docs/authentication/server-side/
 
-    public class FacebookProvider : IAuthenticationProvider
+    public class FacebookProvider : IOAuthAuthenticationProvider
     {
         private const string BaseUrl = "https://graph.facebook.com";
         private readonly string _clientId;

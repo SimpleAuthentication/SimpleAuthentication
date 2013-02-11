@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using RestSharp;
 
 namespace WorldDomination.Web.Authentication
@@ -22,7 +23,9 @@ namespace WorldDomination.Web.Authentication
             _restClientDictionary = new Dictionary<string, IRestClient>
                                     {
                                         {
-                                            restClient.BaseUrl.ToLowerInvariant(),
+                                            string.IsNullOrEmpty(restClient.BaseUrl)
+                                                ? Guid.NewGuid().ToString()
+                                                : restClient.BaseUrl.ToLowerInvariant(),
                                             restClient
                                         }
                                     };
@@ -53,13 +56,16 @@ namespace WorldDomination.Web.Authentication
             // Safety conversion: Convert before we try to use it.
             baseUrl = baseUrl.ToLowerInvariant();
 
-            // Use the provided one (which in effect, ignores the provided baseUrl) 
-            // OR new up a new instance.
+            // If we have provided some restClients, use the one for the baseUrl.
+            // Otherwise, just use the first one.
+            // ASSUMPTION: We've manually provided at least one restClient, so we never want
+            //             to new up a new RestClient(..) .. but use one of those provided ones.
             IRestClient existingRestClient = null;
-            if (_restClientDictionary != null &&
-                _restClientDictionary.ContainsKey(baseUrl))
+            if (_restClientDictionary != null)
             {
-                existingRestClient = _restClientDictionary[baseUrl];
+                existingRestClient = _restClientDictionary.ContainsKey(baseUrl)
+                                         ? _restClientDictionary[baseUrl]
+                                         : _restClientDictionary.First().Value;
             }
             return existingRestClient ?? new RestClient(baseUrl);
         }

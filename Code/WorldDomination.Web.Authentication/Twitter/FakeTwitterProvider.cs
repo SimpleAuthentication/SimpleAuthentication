@@ -3,7 +3,7 @@ using System.Collections.Specialized;
 
 namespace WorldDomination.Web.Authentication.Twitter
 {
-    public class FakeTwitterProvider : IFakeAuthenticationProvider
+    public class FakeTwitterProvider : IFakeOAuthAuthenticationProvider
     {
         private readonly Uri _redirectToAuthenticateUri;
 

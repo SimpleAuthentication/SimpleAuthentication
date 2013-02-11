@@ -75,6 +75,7 @@
     <Content Include="Content\facebook_32.png" />
     <Content Include="Content\google_32.png" />
     <Content Include="Content\main.css" />
+    <Content Include="Content\myopenid_64.png" />
     <Content Include="Content\twitter_32.png" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
@@ -102,6 +103,10 @@
     <ProjectReference Include="..\..\Code\Nancy.Authentication.WorldDomination\Nancy.Authentication.WorldDomination.csproj">
       <Project>{94b8d947-6cad-42c3-b328-f369ce7bc6c0}</Project>
       <Name>Nancy.Authentication.WorldDomination</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Code\WorldDomination.Web.Authentication.ExtraProviders.OpenId\WorldDomination.Web.Authentication.ExtraProviders.OpenId.csproj">
+      <Project>{51f918aa-3a27-4216-bb55-66262cb941c3}</Project>
+      <Name>WorldDomination.Web.Authentication.ExtraProviders.OpenId</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Code\WorldDomination.Web.Authentication.ExtraProviders\WorldDomination.Web.Authentication.ExtraProviders.csproj">
       <Project>{d75207d5-fa68-4dc6-939a-2ac3cad4bead}</Project>

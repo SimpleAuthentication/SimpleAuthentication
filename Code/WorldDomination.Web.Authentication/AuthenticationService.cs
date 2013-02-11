@@ -144,7 +144,11 @@ namespace WorldDomination.Web.Authentication
             }
 
             // Determine the provider.
-            var authenticationProvider = GetAuthenticationProvider(providerKey);
+            var authenticationProvider = GetAuthenticationProvider(providerKey) as IOAuthAuthenticationProvider;
+            if (authenticationProvider == null)
+            {
+                throw new InvalidOperationException("No provider was found for the key: " + providerKey);
+            }
 
             // Retrieve the default settings for this provider.
             var authenticationServiceSettings = authenticationProvider.DefaultAuthenticationServiceSettings;
@@ -176,11 +180,26 @@ namespace WorldDomination.Web.Authentication
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
 
-            var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderName);
+            var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderName) as IOAuthAuthenticationProvider;
+            if (authenticationProvider == null)
+            {
+                throw new InvalidOperationException("No OAuth provider found for the Provider Name: " + authenticationServiceSettings.ProviderName);
+            }
 
-            return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
+             return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
         }
-        
+
+        public Uri RedirectToOpenIdProvider(IAuthenticationServiceSettings authenticationServiceSettings, string identifier)
+        {
+            var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderName) as IOpenIdAuthenticationProvider;
+            if (authenticationProvider == null)
+            {
+                throw new InvalidOperationException("No OpenId provider found for the Provider Name: " + authenticationServiceSettings.ProviderName);
+            }
+
+            return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings, identifier);
+        }
+
         public IAuthenticatedClient GetAuthenticatedClient(string providerKey,
                                                            dynamic requestParameters,
                                                            string state = null)

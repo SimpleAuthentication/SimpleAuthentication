@@ -4,7 +4,6 @@ using System.Net;
 using Moq;
 using RestSharp;
 using WorldDomination.Web.Authentication.ExtraProviders.OpenId;
-using WorldDomination.Web.Authentication.Google;
 using Xunit;
 
 namespace WorldDomination.Web.Authentication.Tests
@@ -60,7 +59,7 @@ namespace WorldDomination.Web.Authentication.Tests
 
                 const string yahooXrdsXml =
                     "<?xml version=\"1.0\" encoding=\"UTF-8\"?><xrds:XRDS    xmlns:xrds=\"xri://$xrds\" xmlns:openid=\"http://openid.net/xmlns/1.0\" xmlns=\"xri://$xrd*($v*2.0)\"><XRD><Service priority=\"0\"><Type>http://specs.openid.net/auth/2.0/server</Type><Type>http://specs.openid.net/extensions/pape/1.0</Type><Type>http://openid.net/srv/ax/1.0</Type><Type>http://specs.openid.net/extensions/oauth/1.0</Type><Type>http://specs.openid.net/extensions/ui/1.0/lang-pref</Type><Type>http://specs.openid.net/extensions/ui/1.0/mode/popup</Type><Type>http://schemas.xmlsoap.org/ws/2005/05/identity/claims/privatepersonalidentifier</Type><Type>http://www.idmanagement.gov/schema/2009/05/icam/no-pii.pdf</Type><Type>http://www.idmanagement.gov/schema/2009/05/icam/openid-trust-level1.pdf</Type><Type>http://csrc.nist.gov/publications/nistpubs/800-63/SP800-63V1_0_2.pdf</Type><URI>https://open.login.yahooapis.com/openid/op/auth</URI></Service></XRD></xrds:XRDS>";
-                var myOpenIdXrdsXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><xrds:XRDS xmlns:xrds=\"xri://$xrds\" xmlns:ux=\"http://specs.openid.net/extensions/ux/1.0\" xmlns=\"xri://$xrd*($v*2.0)\"> <XRD> <Service priority=\"0\"><Type>http://specs.openid.net/auth/2.0/server</Type><Type>http://openid.net/sreg/1.0</Type><URI priority=\"0\">https://www.myopenid.com/server</URI></Service><Service><Type>http://specs.openid.net/extensions/ux/1.0/friendlyname</Type><ux:friendlyname>MyOpenID</ux:friendlyname></Service><Service><Type>http://specs.openid.net/extensions/ux/1.0/img</Type><ux:img url=\"https://www.myopenid.com/static/images/myopenid_selector.png\" width=\"48\" height=\"48\"></ux:img></Service></XRD></xrds:XRDS>";
+                const string myOpenIdXrdsXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><xrds:XRDS xmlns:xrds=\"xri://$xrds\" xmlns:ux=\"http://specs.openid.net/extensions/ux/1.0\" xmlns=\"xri://$xrd*($v*2.0)\"> <XRD> <Service priority=\"0\"><Type>http://specs.openid.net/auth/2.0/server</Type><Type>http://openid.net/sreg/1.0</Type><URI priority=\"0\">https://www.myopenid.com/server</URI></Service><Service><Type>http://specs.openid.net/extensions/ux/1.0/friendlyname</Type><ux:friendlyname>MyOpenID</ux:friendlyname></Service><Service><Type>http://specs.openid.net/extensions/ux/1.0/img</Type><ux:img url=\"https://www.myopenid.com/static/images/myopenid_selector.png\" width=\"48\" height=\"48\"></ux:img></Service></XRD></xrds:XRDS>";
                 var mockRestResponseXrds = new Mock<IRestResponse>();
                 mockRestResponseXrds.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponseXrds.Setup(x => x.Content).Returns(myOpenIdXrdsXml);
@@ -89,7 +88,8 @@ namespace WorldDomination.Web.Authentication.Tests
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("https://www.myopenid.com/server", result.AbsoluteUri);
+                Assert.Equal("https://www.myopenid.com/server?openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select&openid.identity=http://specs.openid.net/auth/2.0/identifier_select&openid.return_to=http://whatever.com:9999/&openid.realm=http://whatever.com:9999/&openid.mode=checkid_setup&openid.ns=http://specs.openid.net/auth/2.0&openid.ns.sreg=http://openid.net/extensions/sreg/1.1&openid.sreg.required=&openid.sreg.optional=email,fullname,gender,country,language&no_ssl=true",
+                    result.AbsoluteUri);
             }
 
             [Fact(Skip = "")]

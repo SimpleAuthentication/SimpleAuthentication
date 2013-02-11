@@ -12,6 +12,18 @@ namespace WorldDomination.Web.Authentication.Tests
 
     public class GoogleProviderFacts
     {
+        private static Mock<IRestClient> MockRestClient
+        {
+            get
+            {
+                var mockRestClient = new Mock<IRestClient>();
+                mockRestClient.Setup(x => x.BaseUrl).Returns("http://www.whatever.com/");
+                mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>())).Returns(It.IsAny<IRestResponse>);
+
+                return mockRestClient;
+            }
+        }
+
         public class AuthenticateClientFacts
         {
             [Fact]
@@ -86,11 +98,11 @@ namespace WorldDomination.Web.Authentication.Tests
             public void GivenANullCallbackUriWhileTryingToRetrieveAnAccessToken_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var mockRestClient = new Mock<IRestClient>();
                 var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.BadRequest);
                 mockRestResponse.Setup(x => x.StatusDescription).Returns("Bad Request");
                 mockRestResponse.Setup(x => x.Content).Returns("{\n  \"error\" : \"invalid_request\"\n}");
+                var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
@@ -118,9 +130,9 @@ namespace WorldDomination.Web.Authentication.Tests
             public void GivenAnErrorOccuredWhileTryingToRetrieveAnAccessToken_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var mockRestClient = new Mock<IRestClient>();
                 const string errorMessage =
-                    "If God says he was not created by a creator, does that mean: god is an aetheist?";
+                    "If God says he was not created by a creator, does that mean: god is an aetheist?"; 
+                var mockRestClient = MockRestClient;
                 mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                               .Throws(new InvalidOperationException(errorMessage));
                 var googleProvider = new GoogleProvider("aa", "bb", null,
@@ -147,10 +159,10 @@ namespace WorldDomination.Web.Authentication.Tests
             public void GivenAnInvalidRequestToken_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var mockRestClient = new Mock<IRestClient>();
                 var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
                 mockRestResponse.Setup(x => x.StatusDescription).Returns("Unauthorized");
+                var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
@@ -178,10 +190,11 @@ namespace WorldDomination.Web.Authentication.Tests
             public void GivenAnRequestTokenWithMissingParameters_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var mockRestClient = new Mock<IRestClient>();
+                
                 var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult());
+                var mockRestClient = MockRestClient;
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
@@ -224,11 +237,10 @@ namespace WorldDomination.Web.Authentication.Tests
                 mockRestResponseUserInfo.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
                 mockRestResponseUserInfo.Setup(x => x.StatusDescription).Returns("Unauthorized");
 
-                var mockRestClient = new Mock<IRestClient>();
+                var mockRestClient = MockRestClient;
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-
                 mockRestClient.
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
@@ -272,11 +284,10 @@ namespace WorldDomination.Web.Authentication.Tests
                 mockRestResponseUserInfo.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponseUserInfo.Setup(x => x.Data).Returns(new UserInfoResult()); // Missing required info.
 
-                var mockRestClient = new Mock<IRestClient>();
+                var mockRestClient = MockRestClient;
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-
                 mockRestClient.
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
@@ -335,7 +346,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 mockRestResponseUserInfo.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponseUserInfo.Setup(x => x.Data).Returns(userInfoResult);
 
-                var mockRestClient = new Mock<IRestClient>();
+                var mockRestClient = MockRestClient;
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);

@@ -40,6 +40,27 @@ namespace Nancy.Authentication.WorldDomination
                 return Response.AsRedirect(uri.AbsoluteUri);
             };
 
+            Post[RedirectRoute] = _ =>
+            {
+                if (string.IsNullOrEmpty((string)_.providerkey))
+                {
+                    throw new ArgumentException(
+                        "You need to supply a valid provider key so we know where to redirect the user.");
+                }
+
+                var settings = authenticationService.GetAuthenticateServiceSettings((string)_.providerkey);
+                var guidString = Guid.NewGuid().ToString();
+
+                Session[StateKey] = guidString;
+                settings.State = guidString;
+                settings.CallBackUri = GetReturnUrl("/authentication/authenticatecallback",
+                                                    (string)_.providerkey);
+
+                Uri uri = authenticationService.RedirectToAuthenticationProvider(settings);
+
+                return Response.AsRedirect(uri.AbsoluteUri);
+            };
+
             Get[CallbackRoute] = _ =>
             {
                 if (string.IsNullOrEmpty(Request.Query.providerkey))
