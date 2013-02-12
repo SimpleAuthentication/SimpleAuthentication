@@ -3,7 +3,7 @@ using System.Collections.Specialized;
 
 namespace WorldDomination.Web.Authentication.Facebook
 {
-    public class FakeFacebookProvider : IFakeOAuthAuthenticationProvider
+    public class FakeFacebookProvider : IFakeAuthenticationProvider
     {
         private readonly Uri _redirectToAuthenticateUri;
 

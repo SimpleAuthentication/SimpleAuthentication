@@ -3,7 +3,7 @@ using System.Collections.Specialized;
 
 namespace WorldDomination.Web.Authentication.Google
 {
-    public class FakeGoogleProvider : IFakeOAuthAuthenticationProvider
+    public class FakeGoogleProvider : IFakeAuthenticationProvider
     {
         private readonly Uri _redirectToAuthenticateUri;
 

@@ -26,6 +26,13 @@ namespace WorldDomination.Web.Authentication
         IAuthenticationServiceSettings DefaultAuthenticationServiceSettings { get; }
 
         /// <summary>
+        /// Uri to redirect to the Authentication Provider with all querystring parameters defined.
+        /// </summary>
+        /// <param name="authenticationServiceSettings">Specific authentication service settings to be passed along to the Authentication Provider.</param>
+        /// <returns>The uri to redirect to.</returns>
+        Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings);
+
+        /// <summary>
         /// Retrieve the user information from the Authentication Provider, now that we have authenticated.
         /// </summary>
         /// <param name="parameters">QueryString parameters from the callback.</param>

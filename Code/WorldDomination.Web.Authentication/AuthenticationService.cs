@@ -144,7 +144,7 @@ namespace WorldDomination.Web.Authentication
             }
 
             // Determine the provider.
-            var authenticationProvider = GetAuthenticationProvider(providerKey) as IOAuthAuthenticationProvider;
+            var authenticationProvider = GetAuthenticationProvider(providerKey);
             if (authenticationProvider == null)
             {
                 throw new InvalidOperationException("No provider was found for the key: " + providerKey);
@@ -180,24 +180,13 @@ namespace WorldDomination.Web.Authentication
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
 
-            var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderName) as IOAuthAuthenticationProvider;
+            var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderName);
             if (authenticationProvider == null)
             {
-                throw new InvalidOperationException("No OAuth provider found for the Provider Name: " + authenticationServiceSettings.ProviderName);
+                throw new InvalidOperationException("No Provider found for the Provider Name: " + authenticationServiceSettings.ProviderName);
             }
 
              return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
-        }
-
-        public Uri RedirectToOpenIdProvider(IAuthenticationServiceSettings authenticationServiceSettings, string identifier)
-        {
-            var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderName) as IOpenIdAuthenticationProvider;
-            if (authenticationProvider == null)
-            {
-                throw new InvalidOperationException("No OpenId provider found for the Provider Name: " + authenticationServiceSettings.ProviderName);
-            }
-
-            return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings, identifier);
         }
 
         public IAuthenticatedClient GetAuthenticatedClient(string providerKey,

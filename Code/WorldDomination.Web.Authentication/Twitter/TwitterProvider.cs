@@ -8,7 +8,7 @@ using WorldDomination.Web.Authentication.Config;
 
 namespace WorldDomination.Web.Authentication.Twitter
 {
-    public class TwitterProvider : IOAuthAuthenticationProvider
+    public class TwitterProvider : IAuthenticationProvider
     {
         private const string BaseUrl = "https://api.twitter.com";
         private const string DeniedKey = "denied";

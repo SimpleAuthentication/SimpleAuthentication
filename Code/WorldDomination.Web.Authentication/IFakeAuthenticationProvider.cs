@@ -3,7 +3,7 @@
     /// <summary>
     /// Defines the contract that a Fake Authentication Provider must impliemnt.
     /// </summary>
-    public interface IFakeAuthenticationProvider
+    public interface IFakeAuthenticationProvider : IAuthenticationProvider
     {
         /// <summary>
         /// Error message if the redirect is suppose to fail.

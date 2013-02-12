@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
+namespace WorldDomination.Web.Authentication
 {
     public interface IOpenIdAuthenticationServiceSettings : IAuthenticationServiceSettings
     {

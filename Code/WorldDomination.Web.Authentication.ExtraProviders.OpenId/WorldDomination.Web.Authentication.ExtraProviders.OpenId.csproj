@@ -43,7 +43,6 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IOpenIdAuthenticationServiceSettings.cs" />
     <Compile Include="OpenIdAuthenticationServiceSettings.cs" />
     <Compile Include="OpenIdProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -48,7 +48,18 @@ namespace Nancy.Authentication.WorldDomination
                         "You need to supply a valid provider key so we know where to redirect the user.");
                 }
 
+                Uri identifier;
+                if (string.IsNullOrEmpty(Request.Form.Identifier) ||
+                    !Uri.TryCreate(Request.Form.Identifier, UriKind.RelativeOrAbsolute, out identifier))
+                {
+                    throw new ArgumentException(
+                        "You need to POST the identifier to redirect the user. Eg. http://myopenid.com");
+                }
+
                 var settings = authenticationService.GetAuthenticateServiceSettings((string)_.providerkey);
+
+                ((IOpenIdAuthenticationServiceSettings) settings).Identifier = new Uri(Request.Form.Identifier);
+
                 var guidString = Guid.NewGuid().ToString();
 
                 Session[StateKey] = guidString;
