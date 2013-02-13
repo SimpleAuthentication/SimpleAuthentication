@@ -69,8 +69,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
             const string mode = "openid.mode=checkid_setup";
             const string openidNamespace = "openid.ns=http://specs.openid.net/auth/2.0";
             const string namespaceSReg = "openid.ns.sreg=http://openid.net/extensions/sreg/1.1";
-            const string sRegRequird = "openid.sreg.required=";
-            const string sRegOptional = "openid.sreg.optional=email,fullname,gender,country,language";
+            const string sRegRequird = "openid.sreg.required=nickname";
+            const string sRegOptional = "openid.sreg.optional=email,fullname,gender,language";
             const string noSsl = "no_ssl=true";
             var x = string.Format("{0}?{1}&{2}&{3}&{4}&{5}&{6}&{7}&{8}&{9}&{10}",
                                   openIdEndPoint.AbsoluteUri,
@@ -90,7 +90,51 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
 
         public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)
         {
-            throw new NotImplementedException();
+            /*
+             *  Sample Query String results - Failure
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                providerkey:openid
+                openid.mode:cancel
+                openid.ns:http://specs.openid.net/auth/2.0
+              
+               Sample Query String results - Success
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                providerkey:openid
+                openid.assoc_handle:{HMAC-SHA1}{511b67b9}{DpzYWQ==}
+                openid.claimed_id:http://username.myopenid.com/
+                openid.identity:http://username.myopenid.com/
+                openid.mode:id_res
+                openid.ns:http://specs.openid.net/auth/2.0
+                openid.ns.sreg:http://openid.net/extensions/sreg/1.1
+                openid.op_endpoint:http://www.myopenid.com/server
+                openid.response_nonce:2013-02-13T10:15:21ZhAJdyG
+                openid.return_to:http://localhost:7000/authentication/authenticatecallback?providerkey=openid
+                openid.sig:1+pvowBKpRFQFoxIVx7KDGDsGSg=
+                openid.signed:assoc_handle,claimed_id,identity,mode,ns,ns.sreg,op_endpoint,response_nonce,return_to,signed,sreg.country,sreg.email,sreg.fullname,sreg.gender,sreg.language
+                openid.sreg.email:someuser@blah.blah.com
+                openid.sreg.fullname:FirstName Surname
+                openid.sreg.gender:F
+                openid.sreg.language:EN
+             */
+            if (parameters == null ||
+                !parameters.AllKeys.Any(x => x.StartsWith("openid.")))
+            {
+                throw new ArgumentException("No openid.XXX Query String paramters found.");
+            }
+
+            // Check if this is a cancel.
+            var mode = parameters.AllKeys.SingleOrDefault(x => x == "openid.mode");
+            if (string.IsNullOrEmpty(mode) ||
+                mode == "cancel")
+            {
+                throw new AuthenticationException(
+                    "OpenId provider returned a Cancel state. No user information was (therefore) provided.");
+            }
+
+            return new AuthenticatedClient(Name.ToLowerInvariant())
+                   {
+                       UserInformation = RetrieveMe(parameters)
+                   };
         }
 
         protected virtual Uri Identifier(IOpenIdAuthenticationServiceSettings settings)
@@ -187,7 +231,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
             return ParseXrdsDocument(content);
         }
 
-        private Uri ParseXrdsDocument(string xmlContent)
+        private static Uri ParseXrdsDocument(string xmlContent)
         {
             if (string.IsNullOrEmpty(xmlContent))
             {
@@ -209,6 +253,47 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
             // Find the first URI element.
             var uris = xDocument.Descendants(ns + "URI").ToList();
             return uris.Count <= 0 ? null : new Uri(uris.First().Value);
+        }
+
+        private UserInformation RetrieveMe(NameValueCollection parameters)
+        {
+            // SIMPLE REGISTRATION Extension reference (ie. what user data can come back): http://openid.net/specs/openid-simple-registration-extension-1_0.html#response_format
+
+            //openid.claimed_id:http://username.myopenid.com/
+            //openid.sreg.email:someuser@blah.blah.com
+            //openid.sreg.fullname:FirstName Surname
+            //openid.sreg.gender:F
+            //openid.sreg.language:EN
+
+            if (parameters == null)
+            {
+                throw new ArgumentNullException("parameters");
+            }
+
+            var genderCharacter = parameters["openid.sreg.gender"];
+            GenderType gender;
+            switch (genderCharacter)
+            {
+                case "F":
+                    gender = GenderType.Female;
+                    break;
+                case "M":
+                    gender = GenderType.Male;
+                    break;
+                default:
+                    gender = GenderType.Unknown;
+                    break;
+            }
+
+            return new UserInformation
+                   {
+                       Email = parameters["openid.sreg.email"],
+                       Gender = gender,
+                       Id = parameters["openid.claimed_id"],
+                       Locale = parameters["openid.sreg.language"],
+                       Name = parameters["openid.sreg.fullname"],
+                       UserName = parameters["openid.sreg.nickname"]
+                   };
         }
     }
 }
