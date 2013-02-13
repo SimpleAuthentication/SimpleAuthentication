@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
@@ -11,6 +12,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
     {
         private const string XrdsHeaderKey = "X-XRDS-Location";
         private readonly IRestClientFactory _restClientFactory;
+        private static readonly IDictionary<string, Uri> YadisXrdsEndPointUris = new Dictionary<string, Uri>();
+        private static readonly IDictionary<string, Uri> YadisOpenIdEndPointUris = new Dictionary<string, Uri>();
 
         public OpenIdProvider(CustomProviderParams providerParams)
         {
@@ -51,8 +54,6 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
                 // We don't know where to go :(
                 return null;
             }
-
-            // //eg: openid.claimed_id=<identifier>%2F&openid.identity=<server>%2F&openid.assoc_handle=%7BHMAC-SHA256%7D%7B5109e243%7D%7BBMe45Q%3D%3D%7D&openid.return_to=http%3A%2F%2Flocalhost%3A6969%2FOpenId%2FAuthenticateCallback%3FproviderKey%3Dopenid%26dnoa.userSuppliedIdentifier%3Dhttp%253A%252F%252Fbendornis.com%252F&openid.realm=http%3A%2F%2Flocalhost%3A6969%2F&openid.mode=checkid_setup&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.ns.sreg=http%3A%2F%2Fopenid.net%2Fextensions%2Fsreg%2F1.1&openid.sreg.required=&openid.sreg.optional=email%2Cfullname%2Cgender%2Ccountry%2Clanguage&no_ssl=true
 
             // If we have an endpoint, lets query that!
             var openIdEndPoint = YadisDiscoverOpenIdEndPoint(xrdsEndPoint);
@@ -150,6 +151,12 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
                 throw new ArgumentNullException("identifier");
             }
 
+            // Have we cached this?
+            if (YadisXrdsEndPointUris.ContainsKey(identifier.AbsoluteUri))
+            {
+                return YadisXrdsEndPointUris[identifier.AbsoluteUri];
+            }
+
             // Try and retrieve an XRDS.
             IRestResponse restResponse;
             try
@@ -186,9 +193,14 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
 
             // Lets check the header to see if we can score the XDRS location, now.
             var endpoint = restResponse.Headers.SingleOrDefault(x => x.Name == XrdsHeaderKey);
-            return endpoint == null
-                       ? null
-                       : new Uri((string) endpoint.Value);
+            var endPointUri = endpoint == null
+                                  ? null
+                                  : new Uri((string) endpoint.Value);
+            
+            // Cache this result :)
+            YadisXrdsEndPointUris.Add(identifier.AbsoluteUri, endPointUri);
+
+            return endPointUri;
         }
 
         private Uri YadisDiscoverOpenIdEndPoint(Uri xrdsUri)
@@ -197,6 +209,12 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
                 string.IsNullOrEmpty(xrdsUri.AbsoluteUri))
             {
                 throw new ArgumentNullException("xrdsUri");
+            }
+
+            // Is this already cached?
+            if (YadisOpenIdEndPointUris.ContainsKey(xrdsUri.AbsoluteUri))
+            {
+                return YadisOpenIdEndPointUris[xrdsUri.AbsoluteUri];
             }
 
             IRestResponse restResponse;
@@ -228,7 +246,11 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
             }
 
             // Find the first URI element in .. wait for it.. wait for it .. some XML! ffs.
-            return ParseXrdsDocument(content);
+            var openIdUri = ParseXrdsDocument(content);
+
+            YadisOpenIdEndPointUris.Add(xrdsUri.AbsoluteUri, openIdUri);
+
+            return openIdUri;
         }
 
         private static Uri ParseXrdsDocument(string xmlContent)
@@ -255,7 +277,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
             return uris.Count <= 0 ? null : new Uri(uris.First().Value);
         }
 
-        private UserInformation RetrieveMe(NameValueCollection parameters)
+        private static UserInformation RetrieveMe(NameValueCollection parameters)
         {
             // SIMPLE REGISTRATION Extension reference (ie. what user data can come back): http://openid.net/specs/openid-simple-registration-extension-1_0.html#response_format
 
