@@ -51,6 +51,8 @@
     <Compile Include="GitHub\FakeGitHubProvider.cs" />
     <Compile Include="GitHub\GitHubAuthenticationServiceSettings.cs" />
     <Compile Include="GitHub\UserInfoResult.cs" />
+    <Compile Include="OpenIdProvider.cs" />
+    <Compile Include="OpenId\OpenIdAuthenticationServiceSettings.cs" />
     <Compile Include="WindowsLiveProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WindowsLive\WindowsLiveAuthenticationServiceSettings.cs" />
