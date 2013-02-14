@@ -40,6 +40,10 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
             var oauthDialogUri = string.Format(RedirectUrl, _clientId, CallBackUri, _scope);
 
+            oauthDialogUri += string.IsNullOrEmpty(authenticationServiceSettings.State)
+                            ? string.Empty
+                            : "&state=" + authenticationServiceSettings.State;
+
             return new Uri(oauthDialogUri);
         }
 
