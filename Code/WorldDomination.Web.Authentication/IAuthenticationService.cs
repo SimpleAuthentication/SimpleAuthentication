@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 
 namespace WorldDomination.Web.Authentication
@@ -53,5 +54,10 @@ namespace WorldDomination.Web.Authentication
         /// <param name="providerKey">A Provider keyname.</param>
         /// <returns>The authentication service settings.</returns>
         IAuthenticationServiceSettings GetAuthenticateServiceSettings(string providerKey);
+
+        /// <summary>
+        /// Returns a list of Unique Providers that are currently configured
+        /// </summary>
+        IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; }
     }
 }
