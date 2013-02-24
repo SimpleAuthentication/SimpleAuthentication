@@ -21,39 +21,58 @@ namespace Nancy.Authentication.WorldDomination
         {
             Get[RedirectRoute] = _ =>
             {
-                if (string.IsNullOrEmpty((string)_.providerkey))
+                var providerKey = (string)_.providerkey;
+                if (string.IsNullOrEmpty(providerKey))
                 {
                     throw new ArgumentException(
                         "You need to supply a valid provider key so we know where to redirect the user.");
                 }
                 
-                var settings = authenticationService.GetAuthenticateServiceSettings((string)_.providerkey);
-                var guidString = Guid.NewGuid().ToString();
+                // Kthxgo!
+                return RedirectToAuthenticationProvider(authenticationService, providerKey);
+            };
 
-                Session[StateKey] = guidString;
-                settings.State = guidString;
-                settings.CallBackUri = GetReturnUrl("/authentication/authenticatecallback",
-                                                    (string)_.providerkey);
+            Post[RedirectRoute] = _ =>
+            {
+                var providerKey = (string)_.providerkey;
+                if (string.IsNullOrEmpty(providerKey))
+                {
+                    throw new ArgumentException(
+                        "You need to supply a valid provider key so we know where to redirect the user.");
+                }
 
-                Uri uri = authenticationService.RedirectToAuthenticationProvider(settings);
+                Uri identifier = null;
+                if (string.IsNullOrEmpty(Request.Form.Identifier) ||
+                    !Uri.TryCreate(Request.Form.Identifier, UriKind.RelativeOrAbsolute, out identifier))
+                {
+                    throw new ArgumentException(
+                        "You need to POST the identifier to redirect the user. Eg. http://myopenid.com");
+                }
 
-                return Response.AsRedirect(uri.AbsoluteUri);
+                return RedirectToAuthenticationProvider(authenticationService, providerKey, identifier);
             };
 
             Get[CallbackRoute] = _ =>
             {
-                if (string.IsNullOrEmpty(Request.Query.providerkey))
+                var providerKey = Request != null && Request.Query != null
+                                    ? (string)Request.Query.providerkey
+                                    : null;
+
+                if (string.IsNullOrEmpty(providerKey))
                 {
                     throw new ArgumentException("No provider key was supplied on the callback.");
                 }
 
-                var existingState = (Session[StateKey] as string) ?? string.Empty;
+                var settings = authenticationService.GetAuthenticateServiceSettings(providerKey, Request.Url);
+
+                settings.State = (Session[StateKey] as string) ?? string.Empty;
+
                 var model = new AuthenticateCallbackData();
 
                 try
                 {
-                    model.AuthenticatedClient =
-                        authenticationService.GetAuthenticatedClient((string) Request.Query.providerKey, Request.Query, existingState);
+                    model.AuthenticatedClient = authenticationService.GetAuthenticatedClient(settings, Request.Query);
+                    Session.Delete(StateKey); // Clean up :)
                 }
                 catch (Exception exception)
                 {
@@ -64,11 +83,12 @@ namespace Nancy.Authentication.WorldDomination
             };
         }
 
-        private Uri GetReturnUrl(string relativeUrl, string providerKey)
+        private Response RedirectToAuthenticationProvider(IAuthenticationService authenticationService,
+            string providerKey, Uri identifier = null)
         {
-            if (string.IsNullOrEmpty(relativeUrl))
+            if (authenticationService == null)
             {
-                throw new ArgumentNullException("relativeUrl");
+                throw new ArgumentNullException();
             }
 
             if (string.IsNullOrEmpty(providerKey))
@@ -76,19 +96,25 @@ namespace Nancy.Authentication.WorldDomination
                 throw new ArgumentNullException("providerKey");
             }
 
-            var builder = new UriBuilder(Request.Url)
-            {
-                Path = relativeUrl,
-                Query = "providerkey=" + providerKey.ToLowerInvariant()
-            };
+            // Grab the required Provider settings.
 
-            // Don't include port 80/443 in the Uri.
-            if (builder.Uri.IsDefaultPort)
+            var settings = authenticationService.GetAuthenticateServiceSettings(providerKey, Request.Url);
+
+            // An OpenId specific settings provided?
+            if (identifier != null && 
+                settings is IOpenIdAuthenticationServiceSettings)
             {
-                builder.Port = -1;
+                ((IOpenIdAuthenticationServiceSettings) settings).Identifier = identifier;
             }
 
-            return builder.Uri;
+            // Remember the State value (for CSRF protection).
+            Session[StateKey] = settings.State;
+
+            // Determine the provider's end point Url we need to redirect to.
+            var uri = authenticationService.RedirectToAuthenticationProvider(settings);
+
+            // Kthxgo!
+            return Response.AsRedirect(uri.AbsoluteUri);
         }
     }
 }

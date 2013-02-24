@@ -14,12 +14,15 @@ namespace WorldDomination.Web.Authentication.Tests
     {
         public class AuthenticateClientFacts
         {
+            
+
             [Fact]
             public void GivenAFailedCSRFStateCheck_AuthenticateClient_ThrowsAnAuthenticationException()
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>())).Returns(It.IsAny<IRestResponse>);
+
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, new RestClientFactory(mockRestClient.Object));
                 var queryStringParameters = new NameValueCollection

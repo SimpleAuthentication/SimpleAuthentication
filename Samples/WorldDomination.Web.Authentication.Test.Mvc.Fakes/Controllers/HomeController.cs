@@ -10,6 +10,8 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Fakes.Controllers
 {
     public class HomeController : Controller
     {
+        private const string StateKey = "WorldDomination-StateKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
+
         private readonly AuthenticationService _authenticationService;
 
         private readonly AuthenticationService _authenticationServiceThatErrors;
@@ -64,20 +66,33 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Fakes.Controllers
 
         public RedirectResult RedirectToAuthenticate(string providerKey)
         {
-            // Determine the callback Uri based on the server details.
-            var callBackUri = new Uri(ToAbsoluteUrl(Url.Action("AuthenticateCallback", new { providerKey })));
+            // Grab the required Provider settings.
+            var settings = _authenticationService.GetAuthenticateServiceSettings(providerKey, Request.Url);
 
-            var uri = _authenticationService.RedirectToAuthenticationProvider(providerKey, callBackUri);
+            // Remember the State value (for CSRF protection).
+            Session[StateKey] = settings.State;
+
+            // Determine the provider's end point Url we need to redirect to.
+            var uri = _authenticationService.RedirectToAuthenticationProvider(settings);
+
+            // Kthxgo!
             return Redirect(uri.AbsoluteUri);
         }
 
         public RedirectResult RedirectToAuthenticateWithError(string providerKey)
         {
-            // Determine the callback Uri based on the server details.
-            var callBackUri = new Uri(ToAbsoluteUrl(Url.Action("AuthenticateCallback", new { providerKey })));
+            // Grab the required Provider settings.
+            var settings = _authenticationServiceThatErrors.GetAuthenticateServiceSettings(providerKey, Request.Url);
 
-            var uri = _authenticationServiceThatErrors.RedirectToAuthenticationProvider(providerKey, callBackUri);
+            // Remember the State value (for CSRF protection).
+            Session[StateKey] = settings.State;
+
+            // Determine the provider's end point Url we need to redirect to.
+            var uri = _authenticationServiceThatErrors.RedirectToAuthenticationProvider(settings);
+
+            // Kthxgo!
             return Redirect(uri.AbsoluteUri);
+
         }
 
         public ActionResult AuthenticateCallback(string providerKey)
@@ -87,10 +102,19 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Fakes.Controllers
                 throw new ArgumentNullException("providerKey");
             }
 
+            // Determine which settings we need, based on the Provider.
+            var settings = _authenticationService.GetAuthenticateServiceSettings(providerKey, Request.Url);
+
+            // Make sure we use our 'previous' State value.
+            settings.State = (Session[StateKey] as string) ?? string.Empty;
+
             var model = new AuthenticateCallbackViewModel();
+
             try
             {
-                model.AuthenticatedClient = _authenticationService.GetAuthenticatedClient(providerKey, Request.Params);
+                // Grab the authenticated client information.
+                model.AuthenticatedClient = _authenticationService.GetAuthenticatedClient(settings, Request.QueryString);
+                Session.Remove(StateKey);
             }
             catch (Exception exception)
             {
@@ -107,11 +131,19 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Fakes.Controllers
                 throw new ArgumentNullException("providerKey");
             }
 
+            // Determine which settings we need, based on the Provider.
+            var settings = _authenticationServiceThatErrors.GetAuthenticateServiceSettings(providerKey, Request.Url);
+
+            // Make sure we use our 'previous' State value.
+            settings.State = (Session[StateKey] as string) ?? string.Empty;
+
             var model = new AuthenticateCallbackViewModel();
+
             try
             {
-                model.AuthenticatedClient = _authenticationServiceThatErrors.GetAuthenticatedClient(providerKey,
-                                                                                                    Request.Params);
+                // Grab the authenticated client information.
+                model.AuthenticatedClient = _authenticationServiceThatErrors.GetAuthenticatedClient(settings, Request.QueryString);
+                Session.Remove(StateKey);
             }
             catch (Exception exception)
             {
@@ -119,35 +151,6 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Fakes.Controllers
             }
 
             return View("AuthenticateCallback", model);
-        }
-
-        // Based upon StackOverflow Q: http://stackoverflow.com/questions/3681052/get-absolute-url-from-relative-path-refactored-method
-        private string ToAbsoluteUrl(string relativeUrl)
-        {
-            if (string.IsNullOrEmpty(relativeUrl))
-            {
-                return relativeUrl;
-            }
-
-            if (HttpContext == null)
-            {
-                return relativeUrl;
-            }
-
-            if (relativeUrl.StartsWith("/"))
-            {
-                relativeUrl = relativeUrl.Insert(0, "~");
-            }
-            if (!relativeUrl.StartsWith("~/"))
-            {
-                relativeUrl = relativeUrl.Insert(0, "~/");
-            }
-
-            var url = HttpContext.Request.Url;
-            var port = url.Port != 80 ? (":" + url.Port) : string.Empty;
-
-            return string.Format("{0}://{1}{2}{3}",
-                                 url.Scheme, url.Host, port, VirtualPathUtility.ToAbsolute(relativeUrl));
         }
     }
 }

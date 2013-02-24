@@ -18,7 +18,6 @@ namespace WorldDomination.Web.Authentication.Google
 
         private readonly string _clientId;
         private readonly string _clientSecret;
-        //private readonly IRestClient _restClient;
         private readonly IList<string> _scope;
         private readonly IRestClientFactory _restClientFactory;
 

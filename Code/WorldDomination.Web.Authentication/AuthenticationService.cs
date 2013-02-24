@@ -116,6 +116,55 @@ namespace WorldDomination.Web.Authentication
             return Activator.CreateInstance(provider, parameters) as IAuthenticationProvider;
         }
 
+        private IAuthenticationProvider GetAuthenticationProvider(string providerKey)
+        {
+            IAuthenticationProvider authenticationProvider = null;
+
+            if (AuthenticationProviders != null)
+            {
+                AuthenticationProviders.TryGetValue(providerKey.ToLowerInvariant(), out authenticationProvider);
+            }
+
+            if (authenticationProvider == null)
+            {
+                throw new AuthenticationException(string.Format("No '{0}' provider has been added.", providerKey));
+            }
+
+            return authenticationProvider;
+        }
+
+        private static Uri CreateCallBackUri(string providerKey, Uri requestUrl, string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException("path");
+            }
+
+            if (string.IsNullOrEmpty(providerKey))
+            {
+                throw new ArgumentNullException("providerKey");
+            }
+
+            if (requestUrl == null)
+            {
+                throw new ArgumentNullException("requestUrl");
+            }
+
+            var builder = new UriBuilder(requestUrl)
+            {
+                Path = path,
+                Query = "providerkey=" + providerKey.ToLowerInvariant()
+            };
+
+            // Don't include port 80/443 in the Uri.
+            if (builder.Uri.IsDefaultPort)
+            {
+                builder.Port = -1;
+            }
+
+            return builder.Uri;
+        }
+
         #region Implementation of IAuthenticationService
 
         public void AddProvider(IAuthenticationProvider authenticationProvider)
@@ -145,6 +194,10 @@ namespace WorldDomination.Web.Authentication
 
             // Determine the provider.
             var authenticationProvider = GetAuthenticationProvider(providerKey);
+            if (authenticationProvider == null)
+            {
+                throw new InvalidOperationException("No provider was found for the key: " + providerKey);
+            }
 
             // Retrieve the default settings for this provider.
             var authenticationServiceSettings = authenticationProvider.DefaultAuthenticationServiceSettings;
@@ -177,13 +230,16 @@ namespace WorldDomination.Web.Authentication
             }
 
             var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderName);
+            if (authenticationProvider == null)
+            {
+                throw new InvalidOperationException("No Provider found for the Provider Name: " + authenticationServiceSettings.ProviderName);
+            }
 
-            return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
+             return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
         }
-        
-        public IAuthenticatedClient GetAuthenticatedClient(string providerKey,
-                                                           dynamic requestParameters,
-                                                           string state = null)
+
+        public IAuthenticatedClient GetAuthenticatedClient(IAuthenticationServiceSettings authenticationServiceSettings,
+                                                           dynamic requestParameters)
         {
             var querystringParameters = new NameValueCollection();
 
@@ -192,16 +248,15 @@ namespace WorldDomination.Web.Authentication
                 querystringParameters.Add(item, requestParameters[item]);
             }
 
-            return GetAuthenticatedClient(providerKey, querystringParameters, state);
+            return GetAuthenticatedClient(authenticationServiceSettings, querystringParameters);
         }
 
-        public IAuthenticatedClient GetAuthenticatedClient(string providerKey, 
-                                                           NameValueCollection requestParameters,
-                                                           string state = null)
+        public IAuthenticatedClient GetAuthenticatedClient(IAuthenticationServiceSettings authenticationServiceSettings,
+                                                           NameValueCollection requestParameters)
         {
-            if (string.IsNullOrEmpty(providerKey))
+            if (authenticationServiceSettings == null)
             {
-                throw new ArgumentNullException("providerKey");
+                throw new ArgumentNullException("authenticationServiceSettings");
             }
 
             if (requestParameters == null)
@@ -214,12 +269,13 @@ namespace WorldDomination.Web.Authentication
                 throw new ArgumentOutOfRangeException("requestParameters");
             }
 
-            var authenticationProvider = GetAuthenticationProvider(providerKey);
+            var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderName);
 
-            return authenticationProvider.AuthenticateClient(requestParameters, state);
+            return authenticationProvider.AuthenticateClient(requestParameters, authenticationServiceSettings.State);
         }
 
-        public IAuthenticationServiceSettings GetAuthenticateServiceSettings(string providerKey)
+        public IAuthenticationServiceSettings GetAuthenticateServiceSettings(string providerKey, Uri requestUrl,
+            string path = "/authentication/authenticatecallback")
         {
             var name = providerKey.ToLowerInvariant();
 
@@ -228,36 +284,30 @@ namespace WorldDomination.Web.Authentication
                 throw new ArgumentNullException("providerKey");
             }
 
+            IAuthenticationServiceSettings settings;
             switch (name)
             {
                 case "facebook":
-                    return new FacebookAuthenticationServiceSettings();
+                    settings = new FacebookAuthenticationServiceSettings();
+                    break;
                 case "google":
-                    return new GoogleAuthenticationServiceSettings();
+                    settings = new GoogleAuthenticationServiceSettings();
+                    break;
                 case "twitter":
-                    return new TwitterAuthenticationServiceSettings();
+                    settings = new TwitterAuthenticationServiceSettings();
+                    break;
                 default:
-                    return AuthenticationProviders[name].DefaultAuthenticationServiceSettings;
+                    settings = AuthenticationProviders[name].DefaultAuthenticationServiceSettings;
+                    break;
             }
+
+            // Setup up some defaults.
+            settings.State = Guid.NewGuid().ToString();
+            settings.CallBackUri = CreateCallBackUri(providerKey, requestUrl, path);
+
+            return settings;
         }
 
         #endregion
-
-        private IAuthenticationProvider GetAuthenticationProvider(string providerKey)
-        {
-            IAuthenticationProvider authenticationProvider = null;
-            
-            if (AuthenticationProviders != null)
-            {
-                AuthenticationProviders.TryGetValue(providerKey.ToLowerInvariant(), out authenticationProvider);
-            }
-
-            if (authenticationProvider == null)
-            {
-                throw new AuthenticationException(string.Format("No '{0}' provider has been added.", providerKey));
-            }
-
-            return authenticationProvider;
-        }
     }
 }

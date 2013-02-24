@@ -89,10 +89,11 @@ namespace WorldDomination.Web.Authentication.Tests
             public void GivenAnInvalidRequestToken_AuthenticateClient_ThrowsAnAuthenticationException()
             {
                 // Arrange.
-                var mockRestClient = new Mock<IRestClient>();
                 var mockRestResponse = new Mock<IRestResponse>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
                 mockRestResponse.Setup(x => x.StatusDescription).Returns("Unauthorized");
+                
+                var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
@@ -118,9 +119,10 @@ namespace WorldDomination.Web.Authentication.Tests
             public void GivenAnRequestTokenWithMissingParameters_AuthenticateClient_ThrowsAnAuthenticationException()
             {
                 // Arrange.
-                var mockRestClient = new Mock<IRestClient>();
                 var mockRestResponse = new Mock<IRestResponse>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
+                
+                var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
@@ -191,8 +193,6 @@ namespace WorldDomination.Web.Authentication.Tests
             public void GivenAnInvalidVerifyCredentials_RetrieveUserInformation_ThrowsAnAuthenticationException()
             {
                 // Arrange.
-                var mockRestClient = new Mock<IRestClient>();
-
                 var mockRestResponseRetrieveRequestToken = new Mock<IRestResponse>();
                 mockRestResponseRetrieveRequestToken.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponseRetrieveRequestToken.Setup(x => x.Content)
@@ -202,6 +202,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 mockRestResponseVerifyCredentials.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
                 mockRestResponseVerifyCredentials.Setup(x => x.StatusDescription).Returns("Unauthorized");
 
+                var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponseRetrieveRequestToken.Object);
@@ -231,8 +232,6 @@ namespace WorldDomination.Web.Authentication.Tests
             public void GivenSomeValidVerifyCredentials_RetrieveUserInformation_ReturnsAnAuthenticatedClient()
             {
                 // Arrange.
-                var mockRestClient = new Mock<IRestClient>();
-
                 var mockRestResponseRetrieveRequestToken = new Mock<IRestResponse>();
                 mockRestResponseRetrieveRequestToken.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponseRetrieveRequestToken.Setup(x => x.Content)
@@ -249,6 +248,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 mockRestResponseVerifyCredentials.Setup(x => x.Data).Returns(verifyCredentialsResult);
                 mockRestResponseVerifyCredentials.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
 
+                var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponseRetrieveRequestToken.Object);

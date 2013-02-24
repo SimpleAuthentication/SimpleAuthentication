@@ -56,28 +56,26 @@ namespace WorldDomination.Web.Authentication.Tests
                 // Act.
                 var result =
                     Assert.Throws<ArgumentNullException>(
-                        () => authenticationService.GetAuthenticatedClient(null, null, null));
+                        () => authenticationService.GetAuthenticatedClient(null, null));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Value cannot be null.\r\nParameter name: providerKey", result.Message);
+                Assert.Equal("Value cannot be null.\r\nParameter name: authenticationServiceSettings", result.Message);
             }
 
             [Fact]
-            public void GivenAnInvalidProviderKey_CheckCallback_ThrowsAnException()
+            public void GivenANullIAuthenticationServiceSettings_CheckCallback_ThrowsAnException()
             {
                 // Arrange.
-                const string providerKey = "aaa";
-                const string state = "asd";
                 var querystringParams = new NameValueCollection {{"a", "b"}};
                 var authenticationService = new AuthenticationService();
 
                 // Act and Assert.
-                var result = Assert.Throws<AuthenticationException>(
-                    () => authenticationService.GetAuthenticatedClient(providerKey, querystringParams, state));
+                var result = Assert.Throws<ArgumentNullException>(
+                    () => authenticationService.GetAuthenticatedClient(null, querystringParams));
 
                 Assert.NotNull(result);
-                Assert.Equal("No 'aaa' provider has been added.", result.Message);
+                Assert.Equal("Value cannot be null.\r\nParameter name: authenticationServiceSettings", result.Message);
             }
         }
 
@@ -122,15 +120,14 @@ namespace WorldDomination.Web.Authentication.Tests
                 var authenticationService = new AuthenticationService();
 
                 // Act.
-                var authenticationServiceSettings = authenticationService.GetAuthenticateServiceSettings("facebook");
-                authenticationServiceSettings.State = "pewpew";
-                authenticationServiceSettings.CallBackUri = new Uri("http://www.whatever.com");
+                var authenticationServiceSettings = authenticationService.GetAuthenticateServiceSettings("facebook", new Uri("http://www.whatever.com"));
+                authenticationServiceSettings.State = "pewpew"; // Override, otherwise it's always random.
                 var result = authenticationService.RedirectToAuthenticationProvider(authenticationServiceSettings);
 
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "https://www.facebook.com/dialog/oauth?client_id=testKey&state=pewpew&scope=email&redirect_uri=http://www.whatever.com/",
+                    "https://www.facebook.com/dialog/oauth?client_id=testKey&state=pewpew&scope=email&redirect_uri=http://www.whatever.com/authentication/authenticatecallback?providerkey=facebook",
                     result.AbsoluteUri);
             }
         }
