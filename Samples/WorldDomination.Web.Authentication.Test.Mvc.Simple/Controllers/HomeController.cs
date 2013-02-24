@@ -43,12 +43,21 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Simple.Controllers
 
         public RedirectResult RedirectToAuthenticate(string providerKey)
         {
-            // Determine the callback Uri based on the server details.
-            var callBackUri = new Uri(ToAbsoluteUrl(Url.Action("AuthenticateCallback", new {providerKey})));
+            if (string.IsNullOrEmpty(providerKey))
+            {
+                throw new ArgumentNullException("providerKey");
+            }
 
-            // Determine the full redirect uri.
-            var uri = AuthenticationService.RedirectToAuthenticationProvider(providerKey, callBackUri);
+            // Grab the required Provider settings.
+            var settings = AuthenticationService.GetAuthenticateServiceSettings(providerKey, Request.Url, "home/authenticatecallback");
 
+            // Do use a state key.
+            settings.State = null; 
+
+            // Determine the provider's end point Url we need to redirect to.
+            var uri = AuthenticationService.RedirectToAuthenticationProvider(settings);
+
+            // Kthxgo!
             return Redirect(uri.AbsoluteUri);
         }
 
@@ -59,10 +68,18 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Simple.Controllers
                 throw new ArgumentNullException("providerKey");
             }
 
+            // Determine which settings we need, based on the Provider.
+            var settings = AuthenticationService.GetAuthenticateServiceSettings(providerKey, Request.Url, "home/authenticatecallback");
+
+            // Don't check for somet State.
+            settings.State = null;
+
             var model = new AuthenticateCallbackViewModel();
+
             try
             {
-                model.AuthenticatedClient = AuthenticationService.GetAuthenticatedClient(providerKey, Request.Params);
+                // Grab the authenticated client information.
+                model.AuthenticatedClient = AuthenticationService.GetAuthenticatedClient(settings, Request.QueryString);
             }
             catch (Exception exception)
             {
@@ -70,35 +87,6 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Simple.Controllers
             }
 
             return View(model);
-        }
-
-        // Based upon StackOverflow Q: http://stackoverflow.com/questions/3681052/get-absolute-url-from-relative-path-refactored-method
-        private string ToAbsoluteUrl(string relativeUrl)
-        {
-            if (string.IsNullOrEmpty(relativeUrl))
-            {
-                return relativeUrl;
-            }
-
-            if (HttpContext == null)
-            {
-                return relativeUrl;
-            }
-
-            if (relativeUrl.StartsWith("/"))
-            {
-                relativeUrl = relativeUrl.Insert(0, "~");
-            }
-            if (!relativeUrl.StartsWith("~/"))
-            {
-                relativeUrl = relativeUrl.Insert(0, "~/");
-            }
-
-            var url = HttpContext.Request.Url;
-            var port = url.Port != 80 ? (":" + url.Port) : string.Empty;
-
-            return string.Format("{0}://{1}{2}{3}",
-                                 url.Scheme, url.Host, port, VirtualPathUtility.ToAbsolute(relativeUrl));
         }
     }
 }

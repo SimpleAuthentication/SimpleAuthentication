@@ -28,42 +28,33 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
         public RedirectResult RedirectToAuthenticate(string providerKey)
         {
             // Which provider are we after?
-            var settings = _authenticationService.GetAuthenticateServiceSettings(providerKey);
+            var settings = _authenticationService.GetAuthenticateServiceSettings(providerKey, Request.Url, "home/authenticatecallback");
 
-            // Provide the callBack instead of using the config file entry (for the use of this demo).
-            settings.CallBackUri = new Uri(ToAbsoluteUrl(Url.Action("AuthenticateCallback", new {providerKey})));
+            // We need to remember the state for some CRSF protection.
+            Session[SessionStateKey] = settings.State;
 
-            // We need to remember the state for some XSS protection.
-            Session[SessionStateKey] = Guid.NewGuid();
-            settings.State = Session[SessionStateKey].ToString();
-
-            // Grab the Uri we need redirect to.
+            // Determine the provider's end point Url we need to redirect to.
             var uri = _authenticationService.RedirectToAuthenticationProvider(settings);
 
-            // Redirect!
+            // Kthxgo!
             return Redirect(uri.AbsoluteUri);
         }
 
         public RedirectResult RedirectToFacebookMobile()
         {
-            // We need to remember the state for some XSS protection.
-            Session[SessionStateKey] = Guid.NewGuid();
+            // Which provider are we after?
+            var settings = _authenticationService.GetAuthenticateServiceSettings("facebook", Request.Url,"home/authenticatecallback");
 
-            // Grab the Uri we need redirect to.
-            var uri = _authenticationService.RedirectToAuthenticationProvider(new FacebookAuthenticationServiceSettings
-            {
-                CallBackUri =
-                    new Uri(
-                                                                                  ToAbsoluteUrl(
-                                                                                      Url.Action(
-                                                                                          "AuthenticateCallback",
-                                                                                          new {providerKey = "facebook"}))),
-                State =
-                    Session[SessionStateKey].ToString(),
-                IsMobile = true
-            });
+            // We need to remember the state for some CRSF protection.
+            Session[SessionStateKey] = settings.State;
 
-            // Redirect!
+            // Set the IsMobile facebook provider specific settings.
+            ((FacebookAuthenticationServiceSettings) settings).IsMobile = true;
+
+            // Determine the provider's end point Url we need to redirect to.
+            var uri = _authenticationService.RedirectToAuthenticationProvider(settings);
+
+            // Kthxgo!
             return Redirect(uri.AbsoluteUri);
         }
 
@@ -77,15 +68,14 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
             var model = new AuthenticateCallbackViewModel();
             try
             {
-                // Retrieve the state for the XSS check.
-                // It's possible that a person might hit this resource directly, before any session value
-                // has been set. As such, we should just fake some state up, which will not match the
-                // CSRF check.
-                var state = (Guid) (Session[SessionStateKey] ?? Guid.NewGuid());
+                // Determine which settings we need, based on the Provider.
+                var settings = _authenticationService.GetAuthenticateServiceSettings(providerKey, Request.Url);
 
-                // Complete the authentication process by retrieving the UserInformation from the provider.
-                model.AuthenticatedClient = _authenticationService.GetAuthenticatedClient(providerKey, Request.Params,
-                                                                                          state.ToString());
+                // Make sure we use our 'previous' State value.
+                settings.State = (Session[SessionStateKey] as string) ?? string.Empty;
+
+                // Grab the authenticated client information.
+                model.AuthenticatedClient = _authenticationService.GetAuthenticatedClient(settings, Request.QueryString);
 
                 // Clean up after ourselves like a nice little boy/girl/monster we are.
                 Session.Remove(SessionStateKey);
@@ -96,35 +86,6 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
             }
 
             return View(model);
-        }
-
-        // Based upon StackOverflow Q: http://stackoverflow.com/questions/3681052/get-absolute-url-from-relative-path-refactored-method
-        private string ToAbsoluteUrl(string relativeUrl)
-        {
-            if (string.IsNullOrEmpty(relativeUrl))
-            {
-                return relativeUrl;
-            }
-
-            if (HttpContext == null)
-            {
-                return relativeUrl;
-            }
-
-            if (relativeUrl.StartsWith("/"))
-            {
-                relativeUrl = relativeUrl.Insert(0, "~");
-            }
-            if (!relativeUrl.StartsWith("~/"))
-            {
-                relativeUrl = relativeUrl.Insert(0, "~/");
-            }
-
-            var url = HttpContext.Request.Url;
-            var port = url.Port != 80 ? (":" + url.Port) : string.Empty;
-
-            return string.Format("{0}://{1}{2}{3}",
-                                 url.Scheme, url.Host, port, VirtualPathUtility.ToAbsolute(relativeUrl));
         }
     }
 }

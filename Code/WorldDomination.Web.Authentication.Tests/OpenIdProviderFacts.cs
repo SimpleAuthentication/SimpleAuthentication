@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using Moq;
 using RestSharp;
+using WorldDomination.Web.Authentication.ExtraProviders;
 using WorldDomination.Web.Authentication.ExtraProviders.OpenId;
 using Xunit;
 
@@ -88,7 +89,7 @@ namespace WorldDomination.Web.Authentication.Tests
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("https://www.myopenid.com/server?openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select&openid.identity=http://specs.openid.net/auth/2.0/identifier_select&openid.return_to=http://whatever.com:9999/&openid.realm=http://whatever.com:9999/&openid.mode=checkid_setup&openid.ns=http://specs.openid.net/auth/2.0&openid.ns.sreg=http://openid.net/extensions/sreg/1.1&openid.sreg.required=&openid.sreg.optional=email,fullname,gender,country,language&no_ssl=true",
+                Assert.Equal("https://www.myopenid.com/server?openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select&openid.identity=http://specs.openid.net/auth/2.0/identifier_select&openid.mode=checkid_setup&openid.ns=http://specs.openid.net/auth/2.0&openid.ns.sreg=http://openid.net/extensions/sreg/1.1&openid.sreg.required=nickname&openid.sreg.optional=email,fullname,gender,language&no_ssl=true&openid.return_to=http://whatever.com:9999/&openid.realm=http://whatever.com:9999/",
                     result.AbsoluteUri);
             }
 
