@@ -34,7 +34,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 // Act.
                 var result =
                     Assert.Throws<AuthenticationException>(
-                        () => facebookProvider.AuthenticateClient(queryStringParameters, "meh"));
+                        () => facebookProvider.AuthenticateClient(new FacebookAuthenticationServiceSettings(), queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -52,7 +52,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>())).Returns(It.IsAny<IRestResponse>);
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, new RestClientFactory(mockRestClient.Object));
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"state", existingState},
@@ -60,11 +60,14 @@ namespace WorldDomination.Web.Authentication.Tests
                     {"error", "bbb"},
                     {"error_description", "ccc"}
                 };
-
+                var facebookAuthenticationSettings = new FacebookAuthenticationServiceSettings
+                                                     {
+                                                         State = existingState
+                                                     };
                 // Act.
                 var result =
                     Assert.Throws<AuthenticationException>(
-                        () => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
+                        () => facebookProvider.AuthenticateClient(facebookAuthenticationSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -79,16 +82,20 @@ namespace WorldDomination.Web.Authentication.Tests
                 mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>())).Returns(It.IsAny<IRestResponse>);
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, new RestClientFactory(mockRestClient.Object));
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"state", existingState} // No code param.
                 };
+                var facebookAuthenticationSettings = new FacebookAuthenticationServiceSettings
+                                                     {
+                                                         State = existingState
+                                                     };
 
                 // Act.
                 var result =
                     Assert.Throws<AuthenticationException>(
-                        () => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
+                        () => facebookProvider.AuthenticateClient(facebookAuthenticationSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -108,17 +115,22 @@ namespace WorldDomination.Web.Authentication.Tests
                               .Throws(new Exception(exceptionMessage));
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, new RestClientFactory(mockRestClient.Object));
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"state", existingState},
                     {"code", "whatever"}
                 };
+                var facebookAuthenticationSettings = new FacebookAuthenticationServiceSettings
+                                                     {
+                                                         State = existingState,
+                                                         CallBackUri = new Uri("http://2p1s.com")
+                                                     };
 
                 // Act.
                 var result =
                     Assert.Throws<AuthenticationException>(
-                        () => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
+                        () => facebookProvider.AuthenticateClient(facebookAuthenticationSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -142,17 +154,22 @@ namespace WorldDomination.Web.Authentication.Tests
 
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, new RestClientFactory(mockRestClient.Object));
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"state", existingState},
                     {"code", "whatever"}
                 };
+                var facebookAuthenticationSettings = new FacebookAuthenticationServiceSettings
+                                                     {
+                                                         State = existingState,
+                                                         CallBackUri = new Uri("http://2p1s.com")
+                                                     };
 
                 // Act.
                 var result =
                     Assert.Throws<AuthenticationException>(
-                        () => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
+                        () => facebookProvider.AuthenticateClient(facebookAuthenticationSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -178,17 +195,22 @@ namespace WorldDomination.Web.Authentication.Tests
 
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, new RestClientFactory(mockRestClient.Object));
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"state", existingState},
                     {"code", "whatever"}
                 };
+                var facebookAuthenticationSettings = new FacebookAuthenticationServiceSettings
+                                                     {
+                                                         State = existingState,
+                                                         CallBackUri = new Uri("http://2p1s.com")
+                                                     };
 
                 // Act.
                 var result =
                     Assert.Throws<AuthenticationException>(
-                        () => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
+                        () => facebookProvider.AuthenticateClient(facebookAuthenticationSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -211,17 +233,22 @@ namespace WorldDomination.Web.Authentication.Tests
 
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, new RestClientFactory(mockRestClient.Object));
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"state", existingState},
                     {"code", "whatever"}
                 };
+                var facebookAuthenticationSettings = new FacebookAuthenticationServiceSettings
+                                                     {
+                                                         State = existingState,
+                                                         CallBackUri = new Uri("http://2p1s.com")
+                                                     };
 
                 // Act.
                 var result =
                     Assert.Throws<AuthenticationException>(
-                        () => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
+                        () => facebookProvider.AuthenticateClient(facebookAuthenticationSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -249,17 +276,22 @@ namespace WorldDomination.Web.Authentication.Tests
 
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, new RestClientFactory(mockRestClient.Object));
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"state", existingState},
                     {"code", "whatever"}
                 };
+                var facebookAuthenticationSettings = new FacebookAuthenticationServiceSettings
+                                                     {
+                                                         State = existingState,
+                                                         CallBackUri = new Uri("http://2p1s.com")
+                                                     };
 
                 // Act.
                 var result =
                     Assert.Throws<AuthenticationException>(
-                        () => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
+                        () => facebookProvider.AuthenticateClient(facebookAuthenticationSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -286,17 +318,22 @@ namespace WorldDomination.Web.Authentication.Tests
 
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, new RestClientFactory(mockRestClient.Object));
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"state", existingState},
                     {"code", "whatever"}
                 };
+                var facebookAuthenticationSettings = new FacebookAuthenticationServiceSettings
+                                                     {
+                                                         State = existingState,
+                                                         CallBackUri = new Uri("http://2p1s.com")
+                                                     };
 
                 // Act.
                 var result =
                     Assert.Throws<AuthenticationException>(
-                        () => facebookProvider.AuthenticateClient(queryStringParameters, existingState));
+                        () => facebookProvider.AuthenticateClient(facebookAuthenticationSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -338,15 +375,21 @@ namespace WorldDomination.Web.Authentication.Tests
 
                 var facebookProvider = new FacebookProvider("a", "b",
                                                             null, new RestClientFactory(mockRestClient.Object));
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"state", existingState},
                     {"code", "whatever"}
                 };
+                var facebookAuthenticationSettings = new FacebookAuthenticationServiceSettings
+                                                     {
+                                                         State = existingState,
+                                                         CallBackUri = new Uri("http://2p1s.com")
+                                                     };
+
                 // Act.
                 var result =
-                    facebookProvider.AuthenticateClient(queryStringParameters, existingState);
+                    facebookProvider.AuthenticateClient(facebookAuthenticationSettings, queryStringParameters);
 
                 // Assert.
                 Assert.NotNull(result);

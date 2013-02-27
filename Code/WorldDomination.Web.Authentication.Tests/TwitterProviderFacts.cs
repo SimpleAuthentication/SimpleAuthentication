@@ -26,7 +26,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 // Act.
                 var result =
                     Assert.Throws<AuthenticationException>(
-                        () => twitterProvider.AuthenticateClient(nameValueCollection, null));
+                        () => twitterProvider.AuthenticateClient(new TwitterAuthenticationServiceSettings(), nameValueCollection));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -49,11 +49,11 @@ namespace WorldDomination.Web.Authentication.Tests
                 // Act.
                 var result =
                     Assert.Throws<ArgumentOutOfRangeException>(
-                        () => twitterProvider.AuthenticateClient(nameValueCollection, "aa"));
+                        () => twitterProvider.AuthenticateClient(new TwitterAuthenticationServiceSettings(), nameValueCollection));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Specified argument was out of the range of valid values.\r\nParameter name: parameters",
+                Assert.Equal("Specified argument was out of the range of valid values.\r\nParameter name: queryStringParameters",
                     result.Message);
             }
 
@@ -76,7 +76,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 // Act.
                 var result =
                     Assert.Throws<AuthenticationException>(
-                        () => twitterProvider.AuthenticateClient(nameValueCollection, "aa"));
+                        () => twitterProvider.AuthenticateClient(new TwitterAuthenticationServiceSettings(), nameValueCollection));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -106,7 +106,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 // Act.
                 var result =
                     Assert.Throws<AuthenticationException>(
-                        () => twitterProvider.AuthenticateClient(nameValueCollection, "asas"));
+                        () => twitterProvider.AuthenticateClient(new TwitterAuthenticationServiceSettings(), nameValueCollection));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -134,7 +134,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 // Act.
                 var result =
                     Assert.Throws<AuthenticationException>(
-                        () => twitterProvider.AuthenticateClient(nameValueCollection, "asd"));
+                        () => twitterProvider.AuthenticateClient(new TwitterAuthenticationServiceSettings(), nameValueCollection));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -182,7 +182,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 // Act.
                 var result =
                     Assert.Throws<AuthenticationException>(
-                        () => twitterProvider.AuthenticateClient(nameValueCollection, "asd"));
+                        () => twitterProvider.AuthenticateClient(new TwitterAuthenticationServiceSettings(), nameValueCollection));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -219,7 +219,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 // Act.
                 var result =
                     Assert.Throws<AuthenticationException>(
-                        () => twitterProvider.AuthenticateClient(nameValueCollection, "asd"));
+                        () => twitterProvider.AuthenticateClient(new TwitterAuthenticationServiceSettings(), nameValueCollection));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -264,7 +264,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 };
 
                 // Act.
-                var result = twitterProvider.AuthenticateClient(nameValueCollection, "asd");
+                var result = twitterProvider.AuthenticateClient(new TwitterAuthenticationServiceSettings(), nameValueCollection);
 
                 // Assert.
                 Assert.NotNull(result);

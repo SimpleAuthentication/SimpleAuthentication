@@ -5,18 +5,23 @@ using System.Collections.Specialized;
 namespace WorldDomination.Web.Authentication
 {
     /// <summary>
-    /// Defines the contract that an authentication service must impliment.
+    ///     Defines the contract that an authentication service must impliment.
     /// </summary>
     public interface IAuthenticationService
     {
         /// <summary>
-        /// Registering a provider with this service.
+        ///     Returns a list of Unique Providers that are currently configured
+        /// </summary>
+        IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; }
+
+        /// <summary>
+        ///     Registering a provider with this service.
         /// </summary>
         /// <param name="authenticationProvider">An Authentication Provider.</param>
         void AddProvider(IAuthenticationProvider authenticationProvider);
 
         /// <summary>
-        /// Determine the uri which is used to redirect to a given Provider.
+        ///     Determine the uri which is used to redirect to a given Provider.
         /// </summary>
         /// <param name="providerKey">A Provider keyname.</param>
         /// <param name="callBackUri">The uri to call back to, after the Authentication Provider has completed it's authentication process.</param>
@@ -24,40 +29,39 @@ namespace WorldDomination.Web.Authentication
         Uri RedirectToAuthenticationProvider(string providerKey, Uri callBackUri = null);
 
         /// <summary>
-        /// Determine the uri which is used to redirect to a given Provider.
+        ///     Determine the uri which is used to redirect to a given Provider.
         /// </summary>
         /// <param name="authenticationServiceSettings">Specific authentication service settings to be passed along to the Authentication Provider.</param>
         /// <returns>The uri to redirect to.</returns>
         Uri RedirectToAuthenticationProvider(IAuthenticationServiceSettings authenticationServiceSettings);
 
         /// <summary>
-        /// Retrieve the user information from the Authentication Provider.
+        ///     Retrieve the user information from the Authentication Provider.
         /// </summary>
-        /// <param name="providerKey">A Provider keyname.</param>
-        /// <param name="requestParameters">QueryString parameters from the callback uri.</param>
-        /// <param name="state">Any optional state value. (Can be null for no state checks)</param>
+        /// <param name="authenticationServiceSettings">Specific authentication service settings to be passed along to the Authentication Provider.</param>
+        /// <param name="queryStringParameters">QueryString parameters from the callback uri.</param>
         /// <returns>An authenticatedClient with either user information or some error message(s).</returns>
-        IAuthenticatedClient GetAuthenticatedClient(IAuthenticationServiceSettings authenticationServiceSettings , NameValueCollection requestParameters);
+        IAuthenticatedClient GetAuthenticatedClient(IAuthenticationServiceSettings authenticationServiceSettings,
+                                                    NameValueCollection queryStringParameters);
 
         /// <summary>
-        /// Retrieve the user information from the Authentication Provider.
+        ///     Retrieve the user information from the Authentication Provider.
         /// </summary>
-        /// <param name="providerKey">A Provider keyname.</param>
+        /// <param name="authenticationServiceSettings">Specific authentication service settings to be passed along to the Authentication Provider.</param>
         /// <param name="requestParameters">QueryString parameters from the callback uri (Used by NancyFX).</param>
-        /// <param name="state">Any optional state value. (Can be null for no state checks)</param>
         /// <returns>An authenticatedClient with either user information or some error message(s).</returns>
-        IAuthenticatedClient GetAuthenticatedClient(IAuthenticationServiceSettings authenticationServiceSettings, dynamic requestParameters);
+        IAuthenticatedClient GetAuthenticatedClient(IAuthenticationServiceSettings authenticationServiceSettings,
+                                                    dynamic requestParameters);
 
         /// <summary>
-        /// Retrieves the settings for an authentication service.
+        ///     Retrieves the settings for an authentication service.
         /// </summary>
         /// <param name="providerKey">A Provider keyname.</param>
+        /// <param name="requestUrl"></param>
+        /// /// <param name="path"></param>
         /// <returns>The authentication service settings.</returns>
-        IAuthenticationServiceSettings GetAuthenticateServiceSettings(string providerKey, Uri requestUrl, string path = "/authentication/authenticatecallback");
-
-        /// <summary>
-        /// Returns a list of Unique Providers that are currently configured
-        /// </summary>
-        IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; }
+        IAuthenticationServiceSettings GetAuthenticateServiceSettings(string providerKey,
+                                                                      Uri requestUrl,
+                                                                      string path = "/authentication/authenticatecallback");
     }
 }

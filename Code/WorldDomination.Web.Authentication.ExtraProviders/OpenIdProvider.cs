@@ -26,111 +26,6 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             _restClientFactory = restClientFactory;
         }
 
-        public string Name
-        {
-            get { return "OpenId"; }
-        }
-
-        public Uri CallBackUri { get; private set; }
-
-        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
-        {
-            get { return new OpenIdAuthenticationServiceSettings(); }
-        }
-
-        public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
-        {
-            var settings = authenticationServiceSettings as IOpenIdAuthenticationServiceSettings;
-
-            if (settings == null)
-            {
-                throw new ArgumentException("authenticationServiceSettings is null or not of type IOpenIdAuthenticationServiceSettings", "authenticationServiceSettings");
-            }
-
-            // First we need to do a YADIS Discover, so we can get the real endpoint.
-            var xrdsEndPoint = YadisDiscoverXrdsEndPoint(settings.Identifier);
-
-            if (xrdsEndPoint == null || string.IsNullOrEmpty(xrdsEndPoint.AbsoluteUri))
-            {
-                // We don't know where to go :(
-                return null;
-            }
-
-            // If we have an endpoint, lets query that!
-            var openIdEndPoint = YadisDiscoverOpenIdEndPoint(xrdsEndPoint);
-
-            if (openIdEndPoint == null)
-            {
-                return null;
-            }
-
-            var urlParts = new[]
-            {
-                "openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select",
-                "openid.identity=http://specs.openid.net/auth/2.0/identifier_select",
-                "openid.mode=checkid_setup",
-                "openid.ns=http://specs.openid.net/auth/2.0",
-                "openid.ns.sreg=http://openid.net/extensions/sreg/1.1",
-                "openid.sreg.required=nickname",
-                "openid.sreg.optional=email,fullname,gender,language",
-                "no_ssl=true",
-                "openid.return_to=" + authenticationServiceSettings.CallBackUri.AbsoluteUri,
-                "openid.realm=" + authenticationServiceSettings.CallBackUri.AbsoluteUri
-            };
-
-            var url = string.Concat(openIdEndPoint.AbsoluteUri, "?", string.Join("&", urlParts));
-
-            return new Uri(url);
-        }
-
-        public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)
-        {
-            /*
-             *  Sample Query String results - Failure
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                providerkey:openid
-                openid.mode:cancel
-                openid.ns:http://specs.openid.net/auth/2.0
-              
-               Sample Query String results - Success
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                providerkey:openid
-                openid.assoc_handle:{HMAC-SHA1}{511b67b9}{DpzYWQ==}
-                openid.claimed_id:http://username.myopenid.com/
-                openid.identity:http://username.myopenid.com/
-                openid.mode:id_res
-                openid.ns:http://specs.openid.net/auth/2.0
-                openid.ns.sreg:http://openid.net/extensions/sreg/1.1
-                openid.op_endpoint:http://www.myopenid.com/server
-                openid.response_nonce:2013-02-13T10:15:21ZhAJdyG
-                openid.return_to:http://localhost:7000/authentication/authenticatecallback?providerkey=openid
-                openid.sig:1+pvowBKpRFQFoxIVx7KDGDsGSg=
-                openid.signed:assoc_handle,claimed_id,identity,mode,ns,ns.sreg,op_endpoint,response_nonce,return_to,signed,sreg.country,sreg.email,sreg.fullname,sreg.gender,sreg.language
-                openid.sreg.email:someuser@blah.blah.com
-                openid.sreg.fullname:FirstName Surname
-                openid.sreg.gender:F
-                openid.sreg.language:EN
-             */
-            if (parameters == null || !parameters.AllKeys.Any(x => x.StartsWith("openid.")))
-            {
-                throw new ArgumentException("No openid.XXX Query String paramters found.");
-            }
-
-            // Check if this is a cancel.
-            var mode = parameters.AllKeys.SingleOrDefault(x => x == "openid.mode");
-
-            if (string.IsNullOrEmpty(mode) || parameters[mode] == "cancel")
-            {
-                throw new AuthenticationException(
-                    "OpenId provider returned a Cancel state. No user information was (therefore) provided.");
-            }
-
-            return new AuthenticatedClient(Name.ToLowerInvariant())
-            {
-                UserInformation = RetrieveMe(parameters)
-            };
-        }
-
         protected virtual Uri Identifier(IOpenIdAuthenticationServiceSettings settings)
         {
             return settings.Identifier;
@@ -270,7 +165,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             return uris.Count <= 0 ? null : new Uri(uris.First().Value);
         }
 
-        private static UserInformation RetrieveMe(NameValueCollection parameters)
+        private static UserInformation RetrieveMe(NameValueCollection queryStringParameters)
         {
             // SIMPLE REGISTRATION Extension reference (ie. what user data can come back): http://openid.net/specs/openid-simple-registration-extension-1_0.html#response_format
 
@@ -280,12 +175,12 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             //openid.sreg.gender:F
             //openid.sreg.language:EN
 
-            if (parameters == null)
+            if (queryStringParameters == null)
             {
-                throw new ArgumentNullException("parameters");
+                throw new ArgumentNullException("queryStringParameters");
             }
 
-            var genderCharacter = parameters["openid.sreg.gender"];
+            var genderCharacter = queryStringParameters["openid.sreg.gender"];
             GenderType gender;
 
             switch (genderCharacter)
@@ -303,13 +198,127 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
             return new UserInformation
             {
-                Email = parameters["openid.sreg.email"],
+                Email = queryStringParameters["openid.sreg.email"],
                 Gender = gender,
-                Id = parameters["openid.claimed_id"],
-                Locale = parameters["openid.sreg.language"],
-                Name = parameters["openid.sreg.fullname"],
-                UserName = parameters["openid.sreg.nickname"]
+                Id = queryStringParameters["openid.claimed_id"],
+                Locale = queryStringParameters["openid.sreg.language"],
+                Name = queryStringParameters["openid.sreg.fullname"],
+                UserName = queryStringParameters["openid.sreg.nickname"]
             };
         }
+
+        #region Implementation of IAuthenticationProvider
+
+        public string Name
+        {
+            get { return "OpenId"; }
+        }
+
+        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
+        {
+            get { return new OpenIdAuthenticationServiceSettings(); }
+        }
+
+        public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
+        {
+            var settings = authenticationServiceSettings as IOpenIdAuthenticationServiceSettings;
+
+            if (settings == null)
+            {
+                throw new ArgumentException("authenticationServiceSettings is null or not of type IOpenIdAuthenticationServiceSettings", "authenticationServiceSettings");
+            }
+
+            // First we need to do a YADIS Discover, so we can get the real endpoint.
+            var xrdsEndPoint = YadisDiscoverXrdsEndPoint(settings.Identifier);
+
+            if (xrdsEndPoint == null || string.IsNullOrEmpty(xrdsEndPoint.AbsoluteUri))
+            {
+                // We don't know where to go :(
+                return null;
+            }
+
+            // If we have an endpoint, lets query that!
+            var openIdEndPoint = YadisDiscoverOpenIdEndPoint(xrdsEndPoint);
+
+            if (openIdEndPoint == null)
+            {
+                return null;
+            }
+
+            var urlParts = new[]
+            {
+                "openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select",
+                "openid.identity=http://specs.openid.net/auth/2.0/identifier_select",
+                "openid.mode=checkid_setup",
+                "openid.ns=http://specs.openid.net/auth/2.0",
+                "openid.ns.sreg=http://openid.net/extensions/sreg/1.1",
+                "openid.sreg.required=nickname",
+                "openid.sreg.optional=email,fullname,gender,language",
+                "no_ssl=true",
+                "openid.return_to=" + authenticationServiceSettings.CallBackUri.AbsoluteUri,
+                "openid.realm=" + authenticationServiceSettings.CallBackUri.AbsoluteUri
+            };
+
+            var url = string.Concat(openIdEndPoint.AbsoluteUri, "?", string.Join("&", urlParts));
+
+            return new Uri(url);
+        }
+
+        public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
+                                                       NameValueCollection queryStringParameters)
+        {
+            if (authenticationServiceSettings == null)
+            {
+                throw new ArgumentNullException("authenticationServiceSettings");
+            }
+
+            /*
+             *  Sample Query String results - Failure
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                providerkey:openid
+                openid.mode:cancel
+                openid.ns:http://specs.openid.net/auth/2.0
+              
+               Sample Query String results - Success
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                providerkey:openid
+                openid.assoc_handle:{HMAC-SHA1}{511b67b9}{DpzYWQ==}
+                openid.claimed_id:http://username.myopenid.com/
+                openid.identity:http://username.myopenid.com/
+                openid.mode:id_res
+                openid.ns:http://specs.openid.net/auth/2.0
+                openid.ns.sreg:http://openid.net/extensions/sreg/1.1
+                openid.op_endpoint:http://www.myopenid.com/server
+                openid.response_nonce:2013-02-13T10:15:21ZhAJdyG
+                openid.return_to:http://localhost:7000/authentication/authenticatecallback?providerkey=openid
+                openid.sig:1+pvowBKpRFQFoxIVx7KDGDsGSg=
+                openid.signed:assoc_handle,claimed_id,identity,mode,ns,ns.sreg,op_endpoint,response_nonce,return_to,signed,sreg.country,sreg.email,sreg.fullname,sreg.gender,sreg.language
+                openid.sreg.email:someuser@blah.blah.com
+                openid.sreg.fullname:FirstName Surname
+                openid.sreg.gender:F
+                openid.sreg.language:EN
+             */
+            if (queryStringParameters == null || 
+                !queryStringParameters.AllKeys.Any(x => x.StartsWith("openid.")))
+            {
+                throw new ArgumentException("No openid.XXX Query String paramters found.");
+            }
+
+            // Check if this is a cancel.
+            var mode = queryStringParameters.AllKeys.SingleOrDefault(x => x == "openid.mode");
+
+            if (string.IsNullOrEmpty(mode) || queryStringParameters[mode] == "cancel")
+            {
+                throw new AuthenticationException(
+                    "OpenId provider returned a Cancel state. No user information was (therefore) provided.");
+            }
+
+            return new AuthenticatedClient(Name.ToLowerInvariant())
+            {
+                UserInformation = RetrieveMe(queryStringParameters)
+            };
+        }
+
+        #endregion
     }
 }

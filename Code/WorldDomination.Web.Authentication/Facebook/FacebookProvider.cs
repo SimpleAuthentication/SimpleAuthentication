@@ -48,21 +48,21 @@ namespace WorldDomination.Web.Authentication.Facebook
             _restClientFactory = restClientFactory ?? new RestClientFactory();
         }
 
-        private static string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState = null)
+        private static string RetrieveAuthorizationCode(NameValueCollection queryStringParameters, string existingState = null)
         {
-            if (parameters == null)
+            if (queryStringParameters == null)
             {
-                throw new ArgumentNullException("parameters");
+                throw new ArgumentNullException("queryStringParameters");
             }
 
-            if (parameters.Count <= 0)
+            if (queryStringParameters.Count <= 0)
             {
-                throw new ArgumentOutOfRangeException("parameters");
+                throw new ArgumentOutOfRangeException("queryStringParameters");
             }
 
             // Is this a facebook callback?
-            var code = parameters["code"];
-            var state = parameters["state"];
+            var code = queryStringParameters["code"];
+            var state = queryStringParameters["state"];
 
             // CSRF (state) check.
             if (!string.IsNullOrEmpty(state) && state != existingState)
@@ -72,9 +72,9 @@ namespace WorldDomination.Web.Authentication.Facebook
             }
 
             // Maybe we have an error?
-            var errorReason = parameters["error_reason"];
-            var error = parameters["error"];
-            var errorDescription = parameters["error_description"];
+            var errorReason = queryStringParameters["error_reason"];
+            var error = queryStringParameters["error"];
+            var errorDescription = queryStringParameters["error_description"];
             if (!string.IsNullOrEmpty(errorReason) &&
                 !string.IsNullOrEmpty(error) &&
                 !string.IsNullOrEmpty(errorDescription))
@@ -94,11 +94,17 @@ namespace WorldDomination.Web.Authentication.Facebook
             return code;
         }
 
-        private string RetrieveAccessToken(string code)
+        private string RetrieveAccessToken(string code, Uri redirectUri)
         {
             if (string.IsNullOrEmpty(code))
             {
                 throw new ArgumentNullException("code");
+            }
+
+            if (redirectUri == null ||
+                string.IsNullOrEmpty(redirectUri.AbsoluteUri))
+            {
+                throw new ArgumentNullException("redirectUri");
             }
 
             IRestResponse response;
@@ -108,10 +114,7 @@ namespace WorldDomination.Web.Authentication.Facebook
                 restRequest.AddParameter("client_id", _clientId);
                 restRequest.AddParameter("client_secret", _clientSecret);
                 restRequest.AddParameter("code", code);
-                if (CallBackUri != null)
-                {
-                    restRequest.AddParameter("redirect_uri", CallBackUri.AbsoluteUri);
-                }
+                restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
 
                 var restClient = _restClientFactory.CreateRestClient(BaseUrl);
                 response = restClient.Execute(restRequest);
@@ -201,8 +204,6 @@ namespace WorldDomination.Web.Authentication.Facebook
             get { return "Facebook"; }
         }
 
-        public Uri CallBackUri { get; private set; }
-
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
             if (authenticationServiceSettings == null)
@@ -215,9 +216,6 @@ namespace WorldDomination.Web.Authentication.Facebook
             {
                 throw new InvalidOperationException("AuthenticationServiceSettings instance is not of type FacebookAuthenticationServiceSettings.");
             }
-
-            // Remember the callback uri.
-            CallBackUri = authenticationServiceSettings.CallBackUri;
 
             var baseUri = facebookAuthenticationSettings.IsMobile
                               ? "https://m.facebook.com"
@@ -236,16 +234,23 @@ namespace WorldDomination.Web.Authentication.Facebook
             // NOTE: Facebook is case-sensitive anal retentive with regards to their uri + querystring params.
             //       So ... we'll lowercase the entire biatch. Thanks, Facebook :(
             var oauthDialogUri = string.Format("{0}/dialog/oauth?client_id={1}{2}{3}{4}&redirect_uri={5}",
-                                               baseUri, _clientId, state, scope, display, CallBackUri.AbsoluteUri);
+                                               baseUri, _clientId, state, scope, display, 
+                                               authenticationServiceSettings.CallBackUri.AbsoluteUri);
 
             return new Uri(oauthDialogUri);
         }
 
-        public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)
+        public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
+                                                       NameValueCollection queryStringParameters)
         {
-            var authorizationCode = RetrieveAuthorizationCode(parameters, existingState);
+            if (authenticationServiceSettings == null)
+            {
+                throw new ArgumentNullException("authenticationServiceSettings");
+            }
 
-            var accessToken = RetrieveAccessToken(authorizationCode);
+            var authorizationCode = RetrieveAuthorizationCode(queryStringParameters, authenticationServiceSettings.State);
+
+            var accessToken = RetrieveAccessToken(authorizationCode, authenticationServiceSettings.CallBackUri);
 
             var userInformation = RetrieveMe(accessToken);
 

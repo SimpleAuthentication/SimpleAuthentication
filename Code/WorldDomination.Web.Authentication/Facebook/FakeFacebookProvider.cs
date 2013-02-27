@@ -29,8 +29,6 @@ namespace WorldDomination.Web.Authentication.Facebook
             get { return "Facebook"; }
         }
 
-        public Uri CallBackUri { get; private set; }
-
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
             if (authenticationServiceSettings == null)
@@ -43,13 +41,17 @@ namespace WorldDomination.Web.Authentication.Facebook
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
 
-            CallBackUri = authenticationServiceSettings.CallBackUri;
-
             return _redirectToAuthenticateUri ?? new Uri("http://some.fake.uri/with/lots/of/pewpew");
         }
 
-        public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)
+        public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
+                                                       NameValueCollection queryStringParameters)
         {
+            if (authenticationServiceSettings == null)
+            {
+                throw new ArgumentNullException("authenticationServiceSettings");
+            }
+
             if (!string.IsNullOrEmpty(AuthenticateClientExceptionMessage))
             {
                 throw new AuthenticationException(AuthenticateClientExceptionMessage);

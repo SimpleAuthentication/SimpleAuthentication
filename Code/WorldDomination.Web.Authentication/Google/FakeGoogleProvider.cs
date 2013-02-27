@@ -29,8 +29,6 @@ namespace WorldDomination.Web.Authentication.Google
             get { return "Google"; }
         }
 
-        public Uri CallBackUri { get; private set; }
-
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
             if (authenticationServiceSettings == null)
@@ -43,13 +41,17 @@ namespace WorldDomination.Web.Authentication.Google
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
 
-            CallBackUri = authenticationServiceSettings.CallBackUri;
-
             return _redirectToAuthenticateUri ?? new Uri("http://bit.ly/RD3lQT");
         }
 
-        public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)
+        public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
+                                                       NameValueCollection queryStringParameters)
         {
+            if (authenticationServiceSettings == null)
+            {
+                throw new ArgumentNullException("authenticationServiceSettings");
+            }
+
             if (!string.IsNullOrEmpty(AuthenticateClientExceptionMessage))
             {
                 throw new AuthenticationException(AuthenticateClientExceptionMessage);

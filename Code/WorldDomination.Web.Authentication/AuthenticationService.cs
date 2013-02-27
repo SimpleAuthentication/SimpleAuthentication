@@ -252,26 +252,27 @@ namespace WorldDomination.Web.Authentication
         }
 
         public IAuthenticatedClient GetAuthenticatedClient(IAuthenticationServiceSettings authenticationServiceSettings,
-                                                           NameValueCollection requestParameters)
+                                                           NameValueCollection queryStringParameters)
         {
             if (authenticationServiceSettings == null)
             {
                 throw new ArgumentNullException("authenticationServiceSettings");
             }
 
-            if (requestParameters == null)
+            if (queryStringParameters == null)
             {
-                throw new ArgumentNullException("requestParameters");
+                throw new ArgumentNullException("queryStringParameters");
             }
 
-            if (requestParameters.Count <= 0)
+            if (queryStringParameters.Count <= 0)
             {
-                throw new ArgumentOutOfRangeException("requestParameters");
+                throw new ArgumentOutOfRangeException("queryStringParameters");
             }
 
+            // Grab the Authentication Client.
             var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderName);
 
-            return authenticationProvider.AuthenticateClient(requestParameters, authenticationServiceSettings.State);
+            return authenticationProvider.AuthenticateClient(authenticationServiceSettings, queryStringParameters);
         }
 
         public IAuthenticationServiceSettings GetAuthenticateServiceSettings(string providerKey, Uri requestUrl,
