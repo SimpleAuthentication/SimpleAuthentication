@@ -1,5 +1,4 @@
-﻿using System;
-using Nancy;
+﻿using Nancy;
 using Nancy.Authentication.WorldDomination;
 using WorldDomination.Web.Authentication.Samples.NancyFX2.Model;
 
@@ -9,7 +8,7 @@ namespace WorldDomination.Web.Authentication.Samples.NancyFX2.Modules
     {
         public HomeModule()
         {
-            Get["/"] = parameters => View["login"];
+            Get["/"] = parameters => View["login", new IndexViewModel()];
         }
     }
 
