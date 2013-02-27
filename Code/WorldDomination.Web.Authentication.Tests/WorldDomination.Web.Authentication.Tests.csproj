@@ -51,6 +51,7 @@
     <Compile Include="AuthenticationServiceFacts.cs" />
     <Compile Include="ConfigurationFacts.cs" />
     <Compile Include="FacebookProviderFacts.cs" />
+    <Compile Include="GitHubProviderFacts.cs" />
     <Compile Include="GoogleProviderFacts.cs" />
     <Compile Include="MoqExtensions.cs" />
     <Compile Include="OpenIdProviderFacts.cs" />

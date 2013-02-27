@@ -24,9 +24,10 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.GitHub
 
         #region Implementation of IAuthenticationProvider
 
-        public string Name { get { return "GitHub"; } }
-        
-        public Uri CallBackUri { get; private set; }
+        public string Name
+        {
+            get { return "GitHub"; }
+        }
 
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
@@ -40,14 +41,26 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.GitHub
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
 
-            CallBackUri = authenticationServiceSettings.CallBackUri;
-
             return _redirectToAuthenticateUri ?? new Uri("http://a.fake.git.hub/uri");
         }
 
-        public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)
+        public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
+                                                       NameValueCollection queryStringParameters)
         {
-            return null;
+            return new AuthenticatedClient("github")
+            {
+                AccessToken = "EstSularusOthMithas-MyHonorIsMyLife",
+                AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),
+                UserInformation = UserInformation ?? new UserInformation
+                {
+                    Gender = GenderType.Male,
+                    Id = "FakeId-" + Guid.NewGuid().ToString(),
+                    Locale = "en-au",
+                    Name = "Sturm Brightblade",
+                    Picture = "http://i.imgur.com/jtoOF.jpg",
+                    UserName = "Sturm.Brightblade"
+                }
+            };
         }
 
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
@@ -56,7 +69,6 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.GitHub
         }
 
         #endregion
-
 
         #region Implementation of IFakeAuthenticationProvider
 

@@ -3,10 +3,11 @@ using System.Collections.Specialized;
 using System.Net;
 using Moq;
 using RestSharp;
+using WorldDomination.Web.Authentication.ExtraProviders;
 using WorldDomination.Web.Authentication.ExtraProviders.GitHub;
 using Xunit;
 
-namespace WorldDomination.Web.Authentication.ExtraProviders.Tests
+namespace WorldDomination.Web.Authentication.Tests
 {
     // ReSharper disable InconsistentNaming
 
@@ -24,10 +25,14 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.Tests
                     {"code", "a"},
                     {"state", "b"}
                 };
-
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings()
+                                                          {
+                                                              State = "as",
+                                                              CallBackUri = new Uri("http://2p1s.com")
+                                                          };
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => githubProvider.AuthenticateClient(queryStringParameters, "foo"));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -40,7 +45,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.Tests
             {
                 // Arrange.
                 var githubProvider = new GitHubProvider("aa", "bb", null);
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {
@@ -49,10 +54,13 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.Tests
                     },
                     {"state", existingState}
                 };
-
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
+                                                          {
+                                                              State = existingState
+                                                          };
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => githubProvider.AuthenticateClient(queryStringParameters, existingState));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -66,16 +74,20 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.Tests
             {
                 // Arrange.
                 var githubProvider = new GitHubProvider("aa", "bb", null);
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"aaa", "bbb"},
                     {"state", existingState}
                 };
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
+                                                          {
+                                                              State = existingState
+                                                          };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => githubProvider.AuthenticateClient(queryStringParameters, existingState));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -95,16 +107,21 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.Tests
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
                 var githubProvider = new GitHubProvider("aa", "bb", new RestClientFactory(mockRestClient.Object));
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"code", "aaa"},
                     {"state", existingState}
                 };
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
+                                                          {
+                                                              CallBackUri = new Uri("http://2p1s.com"),
+                                                              State = existingState
+                                                          };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => githubProvider.AuthenticateClient(queryStringParameters, existingState));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -118,21 +135,25 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.Tests
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
-                const string errorMessage =
-                    "If God says he was not created by a creator, does that mean: god is an aetheist?";
+                const string errorMessage = "If God says he was not created by a creator, does that mean: god is an aetheist?";
                 mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                               .Throws(new InvalidOperationException(errorMessage));
                 var githubProvider = new GitHubProvider("aa", "bb", new RestClientFactory(mockRestClient.Object));
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"code", "aaa"},
                     {"state", existingState}
                 };
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
+                                                          {
+                                                              State = existingState,
+                                                              CallBackUri = new Uri("http://2p1s.com")
+                                                          };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => githubProvider.AuthenticateClient(queryStringParameters, existingState));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -153,16 +174,21 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.Tests
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
                 var githubProvider = new GitHubProvider("aa", "bb", new RestClientFactory(mockRestClient.Object));
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"code", "aaa"},
                     {"state", existingState}
                 };
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
+                                                          {
+                                                              CallBackUri = new Uri("http://2p1s.com"),
+                                                              State = existingState
+                                                          };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => githubProvider.AuthenticateClient(queryStringParameters, existingState));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -183,16 +209,21 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.Tests
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
                 var githubProvider = new GitHubProvider("aa", "bb", new RestClientFactory(mockRestClient.Object));
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"code", "aaa"},
                     {"state", existingState}
                 };
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
+                                                          {
+                                                              State = existingState,
+                                                              CallBackUri = new Uri("http://2p1s.com")
+                                                          };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => githubProvider.AuthenticateClient(queryStringParameters, existingState));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -227,16 +258,21 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.Tests
                               .Returns(mockRestResponseUserInfo.Object);
 
                 var githubProvider = new GitHubProvider("aa", "bb", new RestClientFactory(mockRestClient.Object));
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"code", "aaa"},
                     {"state", existingState}
                 };
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
+                                                          {
+                                                              State = existingState,
+                                                              CallBackUri = new Uri("http://2p1s.com")
+                                                          };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => githubProvider.AuthenticateClient(queryStringParameters, existingState));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -271,16 +307,21 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.Tests
                               .Returns(mockRestResponseUserInfo.Object);
 
                 var githubProvider = new GitHubProvider("aa", "bb", new RestClientFactory(mockRestClient.Object));
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"code", "aaa"},
                     {"state", existingState}
                 };
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
+                                                          {
+                                                              State = existingState,
+                                                              CallBackUri = new Uri("http://2p1s.com")
+                                                          };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => githubProvider.AuthenticateClient(queryStringParameters, existingState));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -324,16 +365,21 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.Tests
                               .Returns(mockRestResponseUserInfo.Object);
 
                 var githubProvider = new GitHubProvider("aa", "bb", new RestClientFactory(mockRestClient.Object));
-                const string existingState = "http://2p1s.com";
+                const string existingState = "Oops! - Tasselhoff Burrfoot";
 
                 var queryStringParameters = new NameValueCollection
                 {
                     {"code", accessToken},
                     {"state", existingState}
                 };
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
+                                                          {
+                                                              State = existingState,
+                                                              CallBackUri = new Uri("http://2p1s.com")
+                                                          };
 
                 // Act.
-                var result = githubProvider.AuthenticateClient(queryStringParameters, existingState);
+                var result = githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters);
 
                 // Assert.
                 Assert.NotNull(result);

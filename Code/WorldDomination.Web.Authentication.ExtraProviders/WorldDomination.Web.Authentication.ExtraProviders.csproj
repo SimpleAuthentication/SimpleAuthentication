@@ -55,6 +55,9 @@
     <Compile Include="OpenId\OpenIdAuthenticationServiceSettings.cs" />
     <Compile Include="WindowsLiveProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WindowsLive\AuthenticatedToken.cs" />
+    <Compile Include="WindowsLive\Emails.cs" />
+    <Compile Include="WindowsLive\UserInfo.cs" />
     <Compile Include="WindowsLive\WindowsLiveAuthenticationServiceSettings.cs" />
   </ItemGroup>
   <ItemGroup>

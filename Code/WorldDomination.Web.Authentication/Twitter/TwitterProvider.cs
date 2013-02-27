@@ -44,15 +44,21 @@ namespace WorldDomination.Web.Authentication.Twitter
             _restClientFactory = restClientFactory ?? new RestClientFactory();
         }
 
-        private RequestTokenResult RetrieveRequestToken()
+        private RequestTokenResult RetrieveRequestToken(Uri callBackUri)
         {
+            if (callBackUri == null ||
+                string.IsNullOrEmpty(callBackUri.AbsoluteUri))
+            {
+                throw new ArgumentNullException("callBackUri");
+            }
+
             IRestResponse response;
 
             try
             {
                 var restClient = _restClientFactory.CreateRestClient(BaseUrl);
                 restClient.Authenticator = OAuth1Authenticator.ForRequestToken(_consumerKey, _consumerSecret,
-                                                                                CallBackUri.AbsoluteUri);
+                                                                                callBackUri.AbsoluteUri);
                 var request = new RestRequest("oauth/request_token", Method.POST);
                 response = restClient.Execute(request);
             }
@@ -90,27 +96,27 @@ namespace WorldDomination.Web.Authentication.Twitter
             };
         }
 
-        private static VerifierResult RetrieveOAuthVerifier(NameValueCollection parameters)
+        private static VerifierResult RetrieveOAuthVerifier(NameValueCollection queryStringParameters)
         {
-            if (parameters == null)
+            if (queryStringParameters == null)
             {
-                throw new ArgumentNullException("parameters");
+                throw new ArgumentNullException("queryStringParameters");
             }
 
-            if (parameters.Count <= 0)
+            if (queryStringParameters.Count <= 0)
             {
-                throw new ArgumentOutOfRangeException("parameters");
+                throw new ArgumentOutOfRangeException("queryStringParameters");
             }
 
-            var denied = parameters[DeniedKey];
+            var denied = queryStringParameters[DeniedKey];
             if (!string.IsNullOrEmpty(denied))
             {
                 throw new AuthenticationException(
                     "Failed to accept the Twitter App Authorization. Therefore, authentication didn't proceed.");
             }
 
-            var oAuthToken = parameters[OAuthTokenKey];
-            var oAuthVerifier = parameters[OAuthVerifierKey];
+            var oAuthToken = queryStringParameters[OAuthTokenKey];
+            var oAuthVerifier = queryStringParameters[OAuthVerifierKey];
 
             if (string.IsNullOrEmpty(oAuthToken) ||
                 string.IsNullOrEmpty(oAuthVerifier))
@@ -230,8 +236,6 @@ namespace WorldDomination.Web.Authentication.Twitter
             get { return "Twitter"; }
         }
 
-        public Uri CallBackUri { get; private set; }
-
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
             if (authenticationServiceSettings == null)
@@ -244,10 +248,8 @@ namespace WorldDomination.Web.Authentication.Twitter
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
 
-            CallBackUri = authenticationServiceSettings.CallBackUri;
-
             // First we need to grab a request token.
-            var oAuthToken = RetrieveRequestToken();
+            var oAuthToken = RetrieveRequestToken(authenticationServiceSettings.CallBackUri);
 
             // Now we need the user to enter their name/password/accept this app @ Twitter.
             // This means we need to redirect them to the Twitter website.
@@ -257,10 +259,16 @@ namespace WorldDomination.Web.Authentication.Twitter
             return restClient.BuildUri(request);
         }
 
-        public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)
+        public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
+                                                       NameValueCollection queryStringParameters)
         {
+            if (authenticationServiceSettings == null)
+            {
+                throw new ArgumentNullException("authenticationServiceSettings");
+            }
+
             // Retrieve the OAuth Verifier.
-            var oAuthVerifier = RetrieveOAuthVerifier(parameters);
+            var oAuthVerifier = RetrieveOAuthVerifier(queryStringParameters);
 
             // Convert the Request Token to an Access Token, now that we have a verifier.
             var oAuthAccessToken = RetrieveAccessToken(oAuthVerifier);

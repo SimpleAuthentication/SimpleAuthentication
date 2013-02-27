@@ -7,11 +7,14 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 {
     public class WindowsLiveProvider : IAuthenticationProvider
     {
+        private const string RedirectUrl =
+            "https://login.live.com/oauth20_authorize.srf?client_id={0}&scope={2}&response_type=code&redirect_uri={1}";
+
         private readonly string _clientId;
         private readonly string _clientSecret;
         private readonly IRestClientFactory _restClientFactory;
-        private const string RedirectUrl = "https://login.live.com/oauth20_authorize.srf?client_id={0}&scope={2}&response_type=code&redirect_uri={1}";
-        private readonly string _scope = string.Join(" ", new[] { "wl.signin", "wl.basic", "wl.emails" });
+
+        private readonly string _scope = string.Join(" ", new[] {"wl.signin", "wl.basic", "wl.emails"});
 
         public WindowsLiveProvider(CustomProviderParams providerParams)
         {
@@ -27,78 +30,26 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             _restClientFactory = restClientFactory ?? new RestClientFactory();
         }
 
-        public string Name { get { return "WindowsLive"; } }
-        public Uri CallBackUri { get; private set; }
-        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
+        private AuthenticatedToken RetrieveToken(NameValueCollection queryStringParameters, Uri redirectUri)
         {
-            get { return new WindowsLiveAuthenticationServiceSettings(); }
-        }
-
-        public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
-        {
-            CallBackUri = authenticationServiceSettings.CallBackUri;
-
-            var oauthDialogUri = string.Format(RedirectUrl, _clientId, CallBackUri, _scope);
-
-            oauthDialogUri += string.IsNullOrEmpty(authenticationServiceSettings.State)
-                            ? string.Empty
-                            : "&state=" + authenticationServiceSettings.State;
-
-            return new Uri(oauthDialogUri);
-        }
-
-        public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState = null)
-        {
-            if (parameters == null)
+            if (queryStringParameters == null)
             {
-                throw new ArgumentNullException("parameters");
+                throw new ArgumentNullException();
             }
 
-            if (parameters.Count <= 0)
+            if (redirectUri == null ||
+                string.IsNullOrEmpty(redirectUri.AbsoluteUri))
             {
-                throw new ArgumentOutOfRangeException("parameters");
+                throw new ArgumentNullException();
             }
 
-            var state = parameters["state"];
-
-            // CSRF (state) check.
-            // NOTE: There is always a state provided. Even if an error is returned.
-            if (!string.IsNullOrEmpty(existingState) && state != existingState)
-            {
-                throw new AuthenticationException(
-                    "The states do not match. It's possible that you may be a victim of a CSRF.");
-            }
-
-            var reponse = RetrieveToken(parameters);
-            var userInfo = RetrieveUserInfo(reponse);
-
-            var result = new AuthenticatedClient(Name)
-            {
-                AccessToken = reponse.access_token,
-                AccessTokenExpiresOn = DateTime.UtcNow.AddSeconds(int.Parse(reponse.expires_in)),
-                UserInformation = new UserInformation
-                {
-                    Name = string.Join(" ", userInfo.first_name, userInfo.last_name),
-                    Locale = userInfo.locale,
-                    UserName = userInfo.name,
-                    Id = userInfo.id,
-                    Email = userInfo.emails.preferred,
-                    Gender = (GenderType) Enum.Parse(typeof (GenderType), userInfo.gender ?? "Unknown", true)
-                }
-            };
-
-            return result;
-        }
-
-        private AuthenticatedToken RetrieveToken(NameValueCollection parameters)
-        {
             var request = new RestRequest("/oauth20_token.srf");
             var client = _restClientFactory.CreateRestClient("https://login.live.com/oauth20_token.srf");
-            
+
             request.AddParameter("client_id", _clientId);
-            request.AddParameter("redirect_uri", CallBackUri);
+            request.AddParameter("redirect_uri", redirectUri);
             request.AddParameter("client_secret", _clientSecret);
-            request.AddParameter("code", parameters["code"]);
+            request.AddParameter("code", queryStringParameters["code"]);
             request.AddParameter("grant_type", "authorization_code");
 
             return client.Execute<AuthenticatedToken>(request).Data;
@@ -114,34 +65,80 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             return userClient.Execute<UserInfo>(userRequest).Data;
         }
 
-        // ReSharper disable InconsistentNaming
-        protected class UserInfo
+        #region Implementation of IAuthenticationProvider
+
+        public string Name
         {
-            public string id { get; set; }
-            public string name { get; set; }
-            public string first_name { get; set; }
-            public string last_name { get; set; }
-            public string link { get; set; }
-            public string gender { get; set; }
-            public string locale { get; set; }
-            public string updated_time { get; set; }
-            public Emails emails { get; set; }
+            get { return "WindowsLive"; }
         }
 
-        protected class Emails
+        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
-            public string preferred { get; set; }
+            get { return new WindowsLiveAuthenticationServiceSettings(); }
         }
 
-        protected class AuthenticatedToken
+        public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            public string token_type { get; set; }
-            public string expires_in { get; set; }
-            public string scope { get; set; }
-            public string access_token { get; set; }
-            public string refresh_token { get; set; }
-            public string authentication_token { get; set; }
+            var oauthDialogUri = string.Format(RedirectUrl, _clientId, authenticationServiceSettings.CallBackUri.AbsoluteUri, _scope);
+
+            oauthDialogUri += string.IsNullOrEmpty(authenticationServiceSettings.State)
+                                  ? string.Empty
+                                  : "&state=" + authenticationServiceSettings.State;
+
+            return new Uri(oauthDialogUri);
         }
-        // ReSharper restore InconsistentNaming
+
+        public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
+                                                        NameValueCollection queryStringParameters)
+        {
+            if (authenticationServiceSettings == null)
+            {
+                throw new ArgumentNullException("authenticationServiceSettings");
+            }
+
+            if (queryStringParameters == null)
+            {
+                throw new ArgumentNullException("queryStringParameters");
+            }
+
+            if (queryStringParameters.Count <= 0)
+            {
+                throw new ArgumentOutOfRangeException("queryStringParameters");
+            }
+
+            var state = queryStringParameters["state"];
+
+            // CSRF (state) check.
+            // NOTE: There is always a state provided. Even if an error is returned.
+            if (!string.IsNullOrEmpty(state) && state != authenticationServiceSettings.State)
+            {
+                throw new AuthenticationException("The states do not match. It's possible that you may be a victim of a CSRF.");
+            }
+
+            var reponse = RetrieveToken(queryStringParameters, authenticationServiceSettings.CallBackUri);
+            var userInfo = RetrieveUserInfo(reponse);
+
+            var result = new AuthenticatedClient(Name)
+                         {
+                             AccessToken = reponse.access_token,
+                             AccessTokenExpiresOn = DateTime.UtcNow.AddSeconds(int.Parse(reponse.expires_in)),
+                             UserInformation = new UserInformation
+                                               {
+                                                   Name = string.Join(" ", userInfo.first_name, userInfo.last_name),
+                                                   Locale = userInfo.locale,
+                                                   UserName = userInfo.name,
+                                                   Id = userInfo.id,
+                                                   Email = userInfo.emails.Preferred,
+                                                   Gender =
+                                                       (GenderType)
+                                                       Enum.Parse(typeof (GenderType), userInfo.gender ?? "Unknown",
+                                                                  true)
+                                               }
+                         };
+
+            return result;
+        }
+
+        #endregion
     }
 }

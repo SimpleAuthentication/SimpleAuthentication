@@ -73,11 +73,17 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             return code;
         }
 
-        private AccessTokenResult RetrieveAccessToken(string authorizationCode)
+        private AccessTokenResult RetrieveAccessToken(string authorizationCode, Uri redirectUri)
         {
             if (string.IsNullOrEmpty(authorizationCode))
             {
                 throw new ArgumentNullException("authorizationCode");
+            }
+
+            if (redirectUri == null ||
+                string.IsNullOrEmpty(redirectUri.AbsoluteUri))
+            {
+                throw new ArgumentNullException("redirectUri");
             }
 
             IRestResponse<AccessTokenResult> response;
@@ -87,10 +93,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
                 var request = new RestRequest("/login/oauth/access_token", Method.POST);
                 request.AddParameter("client_id", _clientId);
                 request.AddParameter("client_secret", _clientSecret);
-                if (CallBackUri != null)
-                {
-                    request.AddParameter("redirect_uri", CallBackUri.AbsoluteUri);
-                }
+                request.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
                 request.AddParameter("code", authorizationCode);
                 request.AddParameter("grant_type", "authorization_code");
                 var restClient = _restClientFactory.CreateRestClient("https://github.com");
@@ -171,7 +174,6 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
         #region Implementation of IAuthenticationProvider
 
         public string Name { get { return "GitHub"; } }
-        public Uri CallBackUri { get; private set; }
 
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
@@ -190,9 +192,6 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
 
-            // Remember the callback uri.
-            CallBackUri = authenticationServiceSettings.CallBackUri;
-
             var state = string.IsNullOrEmpty(authenticationServiceSettings.State)
                             ? string.Empty
                             : "&state=" + authenticationServiceSettings.State;
@@ -200,17 +199,24 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             var oauthDialogUri =
                 string.Format(
                     "https://github.com/login/oauth/authorize?client_id={0}&redirect_uri={1}&response_type=code{2}",
-                    _clientId, CallBackUri.AbsoluteUri, state);
+                    _clientId, authenticationServiceSettings.CallBackUri.AbsoluteUri, state);
 
             return new Uri(oauthDialogUri);
         }
 
-        public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)
-        { // First up - an authorization token.
-            var authorizationCode = RetrieveAuthorizationCode(parameters, existingState);
+        public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
+                                                       NameValueCollection queryStringParameters)
+        {
+            if (authenticationServiceSettings == null)
+            {
+                throw new ArgumentNullException("authenticationServiceSettings");
+            }
+
+            // First up - an authorization token.
+            var authorizationCode = RetrieveAuthorizationCode(queryStringParameters, authenticationServiceSettings.State);
 
             // Get an Access Token.
-            var oAuthAccessToken = RetrieveAccessToken(authorizationCode);
+            var oAuthAccessToken = RetrieveAccessToken(authorizationCode, authenticationServiceSettings.CallBackUri);
 
             // Grab the user information.
             var userInfo = RetrieveUserInfo(oAuthAccessToken.AccessToken);

@@ -57,25 +57,25 @@ namespace WorldDomination.Web.Authentication.Google
             _restClientFactory = restClientFactory ?? new RestClientFactory();
         }
 
-        private static string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState = null)
+        private static string RetrieveAuthorizationCode(NameValueCollection queryStringParameters, string existingState = null)
         {
-            if (parameters == null)
+            if (queryStringParameters == null)
             {
-                throw new ArgumentNullException("parameters");
+                throw new ArgumentNullException("queryStringParameters");
             }
 
-            if (parameters.Count <= 0)
+            if (queryStringParameters.Count <= 0)
             {
-                throw new ArgumentOutOfRangeException("parameters");
+                throw new ArgumentOutOfRangeException("queryStringParameters");
             }
 
             /* Documentation:
                Google returns an authorization code to your application if the user grants your application the permissions it requested. 
                The authorization code is returned to your application in the query string parameter code. If the state parameter was included in the request,
                then it is also included in the response. */
-            var code = parameters["code"];
-            var state = parameters["state"];
-            var error = parameters["error"];
+            var code = queryStringParameters["code"];
+            var state = queryStringParameters["state"];
+            var error = queryStringParameters["error"];
 
             // CSRF (state) check.
             // NOTE: There is always a state provided. Even if an error is returned.
@@ -102,11 +102,17 @@ namespace WorldDomination.Web.Authentication.Google
             return code;
         }
 
-        private AccessTokenResult RetrieveAccessToken(string authorizationCode)
+        private AccessTokenResult RetrieveAccessToken(string authorizationCode, Uri redirectUri)
         {
             if (string.IsNullOrEmpty(authorizationCode))
             {
                 throw new ArgumentNullException("authorizationCode");
+            }
+
+            if (redirectUri == null ||
+                string.IsNullOrEmpty(redirectUri.AbsoluteUri))
+            {
+                throw new ArgumentNullException("redirectUri");
             }
 
             IRestResponse<AccessTokenResult> response;
@@ -116,10 +122,7 @@ namespace WorldDomination.Web.Authentication.Google
                 var request = new RestRequest("/o/oauth2/token", Method.POST);
                 request.AddParameter("client_id", _clientId);
                 request.AddParameter("client_secret", _clientSecret);
-                if (CallBackUri != null)
-                {
-                    request.AddParameter("redirect_uri", CallBackUri.AbsoluteUri);
-                }
+                request.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
                 request.AddParameter("code", authorizationCode);
                 request.AddParameter("grant_type", "authorization_code");
                 var restClient = _restClientFactory.CreateRestClient("https://accounts.google.com");
@@ -202,8 +205,6 @@ namespace WorldDomination.Web.Authentication.Google
             get { return "Google"; }
         }
 
-        public Uri CallBackUri { get; private set; }
-
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
             if (authenticationServiceSettings == null)
@@ -215,9 +216,6 @@ namespace WorldDomination.Web.Authentication.Google
             {
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
-
-            // Remember the callback uri.
-            CallBackUri = authenticationServiceSettings.CallBackUri;
 
             // Do we have any scope options?
             // NOTE: Google uses a space-delimeted string for their scope key.
@@ -232,18 +230,24 @@ namespace WorldDomination.Web.Authentication.Google
             var oauthDialogUri =
                 string.Format(
                     "https://accounts.google.com/o/oauth2/auth?client_id={0}&redirect_uri={1}&response_type=code{2}{3}",
-                    _clientId, CallBackUri.AbsoluteUri, state, scope);
+                    _clientId, authenticationServiceSettings.CallBackUri.AbsoluteUri, state, scope);
 
             return new Uri(oauthDialogUri);
         }
 
-        public IAuthenticatedClient AuthenticateClient(NameValueCollection parameters, string existingState)
+        public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
+                                                       NameValueCollection queryStringParameters)
         {
+            if (authenticationServiceSettings == null)
+            {
+                throw new ArgumentNullException("authenticationServiceSettings");
+            }
+
             // First up - an authorization token.
-            var authorizationCode = RetrieveAuthorizationCode(parameters, existingState);
+            var authorizationCode = RetrieveAuthorizationCode(queryStringParameters, authenticationServiceSettings.State);
 
             // Get an Access Token.
-            var oAuthAccessToken = RetrieveAccessToken(authorizationCode);
+            var oAuthAccessToken = RetrieveAccessToken(authorizationCode, authenticationServiceSettings.CallBackUri);
 
             // Grab the user information.
             var userInfo = RetrieveUserInfo(oAuthAccessToken.AccessToken);
