@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Web;
 using System.Web.Mvc;
 using CuttingEdge.Conditions;
 using WorldDomination.Web.Authentication.Facebook;
@@ -28,7 +27,9 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
         public RedirectResult RedirectToAuthenticate(string providerKey)
         {
             // Which provider are we after?
-            var settings = _authenticationService.GetAuthenticateServiceSettings(providerKey, Request.Url, "home/authenticatecallback");
+            // NOTE: We don't want to use the default callback route, so we're specifying our own route, here.
+            var settings = _authenticationService.GetAuthenticateServiceSettings(providerKey, Request.Url,
+                                                                                 "home/authenticatecallback");
 
             // We need to remember the state for some CRSF protection.
             Session[SessionStateKey] = settings.State;
@@ -43,7 +44,9 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
         public RedirectResult RedirectToFacebookMobile()
         {
             // Which provider are we after?
-            var settings = _authenticationService.GetAuthenticateServiceSettings("facebook", Request.Url,"home/authenticatecallback");
+            // NOTE: We don't want to use the default callback route, so we're specifying our own route, here.
+            var settings = _authenticationService.GetAuthenticateServiceSettings("facebook", Request.Url,
+                                                                                 "home/authenticatecallback");
 
             // We need to remember the state for some CRSF protection.
             Session[SessionStateKey] = settings.State;
@@ -69,7 +72,9 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
             try
             {
                 // Determine which settings we need, based on the Provider.
-                var settings = _authenticationService.GetAuthenticateServiceSettings(providerKey, Request.Url);
+                // NOTE: We don't want to use the default callback route, so we're specifying our own route, here.
+                var settings = _authenticationService.GetAuthenticateServiceSettings(providerKey, Request.Url,
+                                                                                     "home/authenticatecallback");
 
                 // Make sure we use our 'previous' State value.
                 settings.State = (Session[SessionStateKey] as string) ?? string.Empty;
