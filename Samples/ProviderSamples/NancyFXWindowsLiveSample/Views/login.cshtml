@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<dynamic>
+
+<!DOCTYPE html>
 <html>
   <head>
     <title>Login Page</title>
@@ -6,10 +8,16 @@
   </head>
   <body>
     <div id="container">
-      <fieldset title="Login">
-        <legend>Login:</legend>
-        <a href="/authentication/redirect/WindowsLive">Windows Live</a>
-      </fieldset>
+        <fieldset title="Login">
+            <legend>Login:</legend>
+            <a href="/authentication/redirect/WindowsLive">Windows Live</a>
+        </fieldset>
+        
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <h2>Error Information</h2>
+                <p>Message: @Model.ErrorMessage</p>
+            }
     </div>
   </body>
 </html>

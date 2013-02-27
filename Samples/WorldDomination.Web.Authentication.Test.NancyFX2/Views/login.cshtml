@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<dynamic>
+<!DOCTYPE html>
 <html>
     <head>
         <title>Login Page</title>
@@ -17,6 +18,12 @@
                 Identifier: <input type="text" id="identifier" name="identifier" value="http://myopenid.com"/>
                 <input type="submit" value="openid? k go."/>
             </form>
+            
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <h2>Error Information</h2>
+                <p>Message: @Model.ErrorMessage</p>
+            }
         </div>
         
         <script type="text/javascript"> </script>

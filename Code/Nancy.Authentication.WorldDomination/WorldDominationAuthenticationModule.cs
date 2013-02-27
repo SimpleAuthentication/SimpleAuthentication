@@ -29,7 +29,7 @@ namespace Nancy.Authentication.WorldDomination
                 }
                 
                 // Kthxgo!
-                return RedirectToAuthenticationProvider(authenticationService, providerKey);
+                return RedirectToAuthenticationProvider(authenticationService, authenticationCallbackProvider, providerKey);
             };
 
             Post[RedirectRoute] = _ =>
@@ -49,7 +49,7 @@ namespace Nancy.Authentication.WorldDomination
                         "You need to POST the identifier to redirect the user. Eg. http://myopenid.com");
                 }
 
-                return RedirectToAuthenticationProvider(authenticationService, providerKey, identifier);
+                return RedirectToAuthenticationProvider(authenticationService, authenticationCallbackProvider, providerKey, identifier);
             };
 
             Get[CallbackRoute] = _ =>
@@ -84,11 +84,17 @@ namespace Nancy.Authentication.WorldDomination
         }
 
         private Response RedirectToAuthenticationProvider(IAuthenticationService authenticationService,
+            IAuthenticationCallbackProvider authenticationCallbackProvider,
             string providerKey, Uri identifier = null)
         {
             if (authenticationService == null)
             {
                 throw new ArgumentNullException();
+            }
+
+            if (authenticationCallbackProvider == null)
+            {
+                throw new ArgumentNullException("authenticationCallbackProvider");
             }
 
             if (string.IsNullOrEmpty(providerKey))
@@ -112,6 +118,10 @@ namespace Nancy.Authentication.WorldDomination
 
             // Determine the provider's end point Url we need to redirect to.
             var uri = authenticationService.RedirectToAuthenticationProvider(settings);
+            if (uri == null || string.IsNullOrEmpty(uri.AbsoluteUri))
+            {
+                return authenticationCallbackProvider.OnRedirectToAuthenticationProviderError(this, "No valid Uri was found - not sure where to redirect to?");
+            }
 
             // Kthxgo!
             return Response.AsRedirect(uri.AbsoluteUri);
