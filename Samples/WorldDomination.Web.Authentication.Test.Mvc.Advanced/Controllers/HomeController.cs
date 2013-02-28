@@ -8,7 +8,9 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
 {
     public class HomeController : Controller
     {
-        private const string SessionStateKey = "SomeKey";
+        private const string SessionStateKey = "SessionStateKey";
+        private const string ReferrerKey = "ReferrerKey";
+
 
         private readonly IAuthenticationService _authenticationService;
 
@@ -34,6 +36,15 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
             // We need to remember the state for some CRSF protection.
             Session[SessionStateKey] = settings.State;
 
+            // For shits and giggles, we'll remember the referrer to highlight that we can
+            // redirect back to where we started, if we want to.
+            if (Request != null &&
+                Request.UrlReferrer != null &&
+                !string.IsNullOrEmpty(Request.UrlReferrer.AbsoluteUri))
+            {
+                Session[ReferrerKey] = Request.UrlReferrer.AbsoluteUri;
+            }
+
             // Determine the provider's end point Url we need to redirect to.
             var uri = _authenticationService.RedirectToAuthenticationProvider(settings);
 
@@ -50,6 +61,15 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
 
             // We need to remember the state for some CRSF protection.
             Session[SessionStateKey] = settings.State;
+
+            // For shits and giggles, we'll remember the referrer to highlight that we can
+            // redirect back to where we started, if we want to.
+            if (Request != null &&
+                Request.UrlReferrer != null &&
+                !string.IsNullOrEmpty(Request.UrlReferrer.AbsoluteUri))
+            {
+                Session[ReferrerKey] = Request.UrlReferrer.AbsoluteUri;
+            }
 
             // Set the IsMobile facebook provider specific settings.
             ((FacebookAuthenticationServiceSettings) settings).IsMobile = true;
@@ -82,8 +102,15 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
                 // Grab the authenticated client information.
                 model.AuthenticatedClient = _authenticationService.GetAuthenticatedClient(settings, Request.QueryString);
 
+                var referrer = Session[ReferrerKey] as string;
+                if (!string.IsNullOrEmpty(referrer))
+                {
+                    model.Referrer = new Uri(referrer);
+                }
+
                 // Clean up after ourselves like a nice little boy/girl/monster we are.
                 Session.Remove(SessionStateKey);
+                Session.Remove(ReferrerKey);
             }
             catch (Exception exception)
             {

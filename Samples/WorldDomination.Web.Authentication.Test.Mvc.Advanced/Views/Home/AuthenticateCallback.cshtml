@@ -30,6 +30,18 @@
         <p>Gender: @Model.AuthenticatedClient.UserInformation.Gender.ToString()</p>
     }
 
+    <br/>
+    <br/>
+    <br/>
+
+    @if (Model.Referrer != null)
+    {
+        <h2>Some optional redirect url info</h2>
+        <p>Url: @Model.Referrer.AbsoluteUri</p>
+    }
+    
+    <br/>
+    <br/>
 
     @Html.ActionLink("Lets go back home.", "Index")
 </div>

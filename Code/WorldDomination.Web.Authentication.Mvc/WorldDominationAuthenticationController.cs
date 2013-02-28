@@ -7,7 +7,7 @@ namespace WorldDomination.Web.Authentication.Mvc
     public class WorldDominationAuthenticationController : Controller
     {
         private const string StateKey = "WorldDomination-StateKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
-        private const string ReturnUrlKey = "WorldDomination-ReturnUrlKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
+        private const string RedirectUrlKey = "WorldDomination-RedirectUrlKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
 
         protected IAuthenticationService AuthenticationService { get; private set; }
         public IAuthenticationCallbackProvider CallbackProvider { get; private set; }
@@ -45,17 +45,18 @@ namespace WorldDomination.Web.Authentication.Mvc
             // Remember the State value (for CSRF protection).
             Session[StateKey] = settings.State;
 
+            // Convention: If no redirectUrl data has been provided, then default to the Referrer, if one exists.
             if (RedirectUrl != null &&
                 !string.IsNullOrEmpty(RedirectUrl.AbsoluteUri))
             {
                 // We have extra state information we will need to retrieve.
-                Session[ReturnUrlKey] = RedirectUrl.AbsoluteUri;
+                Session[RedirectUrlKey] = RedirectUrl.AbsoluteUri;
             }
             else if (Request != null &&
                 Request.UrlReferrer != null &&
                 !string.IsNullOrEmpty(Request.UrlReferrer.AbsoluteUri))
             {
-                Session[ReturnUrlKey] = Request.UrlReferrer.AbsoluteUri;
+                Session[RedirectUrlKey] = Request.UrlReferrer.AbsoluteUri;
             }
 
             // Determine the provider's end point Url we need to redirect to.
@@ -92,13 +93,13 @@ namespace WorldDomination.Web.Authentication.Mvc
             }
 
             // If we have a redirect Url, lets grab this :)
-            var redirectUrl = Session[ReturnUrlKey] as string;
+            var redirectUrl = Session[RedirectUrlKey] as string;
             if (!string.IsNullOrEmpty(redirectUrl))
             {
                 model.RedirectUrl = new Uri(redirectUrl);
             }
             
-            Session.Remove(ReturnUrlKey);
+            Session.Remove(RedirectUrlKey);
 
             // Finally! We can hand over the logic to the consumer to do whatever they want.
             return CallbackProvider.Process(HttpContext, model);

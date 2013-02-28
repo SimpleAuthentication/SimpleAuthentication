@@ -6,8 +6,11 @@ namespace Nancy.Authentication.WorldDomination
     public class WorldDominationAuthenticationModule : NancyModule
     {
         private const string StateKey = "WorldDomination-StateKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
+        private const string RedirectUrlKey = "WorldDomination-RedirectUrlKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
         public static string RedirectRoute = "/authentication/redirect/{providerkey}";
         public static string CallbackRoute = "/authentication/authenticatecallback";
+
+        protected Uri RedirectUrl { get; set; }
 
         public WorldDominationAuthenticationModule(IAuthenticationService authenticationService)
             : this(authenticationService, null)
@@ -79,6 +82,12 @@ namespace Nancy.Authentication.WorldDomination
                     model.Exception = exception;
                 }
 
+                var redirectUrl = Session[RedirectUrlKey] as string;
+                if (!string.IsNullOrEmpty(redirectUrl))
+                {
+                    model.RedirectUrl = new Uri(redirectUrl);
+                }
+
                 return authenticationCallbackProvider.Process(this, model);
             };
         }
@@ -116,7 +125,22 @@ namespace Nancy.Authentication.WorldDomination
             // Remember the State value (for CSRF protection).
             Session[StateKey] = settings.State;
 
+            //// Convention: If no redirectUrl data has been provided, then default to the Referrer, if one exists.
+            //if (RedirectUrl != null &&
+            //    !string.IsNullOrEmpty(RedirectUrl.AbsoluteUri))
+            //{
+            //    // We have extra state information we will need to retrieve.
+            //    Session[RedirectUrlKey] = RedirectUrl.AbsoluteUri;
+            //}
+            //else if (Request != null &&
+            //    Request. != null &&
+            //    !string.IsNullOrEmpty(Request.UrlReferrer.AbsoluteUri))
+            //{
+            //    Session[RedirectUrlKey] = Request.UrlReferrer.AbsoluteUri;
+            //}
+
             // Determine the provider's end point Url we need to redirect to.
+            // NOTE: It's possible we're trying to goto an OpenId endpoint. But the user has entered
             var uri = authenticationService.RedirectToAuthenticationProvider(settings);
             if (uri == null || string.IsNullOrEmpty(uri.AbsoluteUri))
             {
