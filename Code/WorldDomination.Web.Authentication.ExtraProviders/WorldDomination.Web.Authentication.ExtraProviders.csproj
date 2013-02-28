@@ -46,6 +46,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Shared Assembly Info\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="GitHubProvider.cs" />
     <Compile Include="GitHub\AccessTokenResult.cs" />
     <Compile Include="GitHub\FakeGitHubProvider.cs" />

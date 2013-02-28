@@ -43,6 +43,9 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Shared Assembly Info\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="AuthenticatedClient.cs" />
     <Compile Include="AuthenticationException.cs" />
     <Compile Include="BaseAuthenticationServiceSettings.cs" />

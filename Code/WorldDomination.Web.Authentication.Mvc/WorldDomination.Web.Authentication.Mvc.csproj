@@ -41,6 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Shared Assembly Info\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="AuthenticateCallbackData.cs" />
     <Compile Include="IAuthenticationCallbackError.cs" />
     <Compile Include="WorldDominationAuthenticationController.cs" />

@@ -34,6 +34,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authent
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvcAutomatedSample", "Samples\MvcAutomatedSample\MvcAutomatedSample.csproj", "{F31BEB50-1976-438E-B781-D7B045F84877}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared Assembly Info", "Shared Assembly Info", "{FF22FCB1-00D1-4E4D-88C9-3AE3040F512B}"
+	ProjectSection(SolutionItems) = preProject
+		Code\Shared Assembly Info\SharedAssemblyInfo.cs = Code\Shared Assembly Info\SharedAssemblyInfo.cs
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
