@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Web.Mvc;
 
 namespace WorldDomination.Web.Authentication.Mvc
@@ -6,16 +7,31 @@ namespace WorldDomination.Web.Authentication.Mvc
     public class WorldDominationAuthenticationController : Controller
     {
         private const string StateKey = "WorldDomination-StateKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
-        private readonly IAuthenticationService _authenticationService;
-        private readonly IAuthenticationCallbackProvider _callbackProvider;
+        private const string ReturnUrlKey = "WorldDomination-ReturnUrlKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
 
-        public WorldDominationAuthenticationController(IAuthenticationService authenticationService, IAuthenticationCallbackProvider callbackProvider)
+        protected IAuthenticationService AuthenticationService { get; private set; }
+        public IAuthenticationCallbackProvider CallbackProvider { get; private set; }
+
+        protected Uri RedirectUrl { get; set; }
+
+        public WorldDominationAuthenticationController(IAuthenticationService authenticationService, 
+                                                       IAuthenticationCallbackProvider callbackProvider)
         {
-            _authenticationService = authenticationService;
-            _callbackProvider = callbackProvider;
+            if (authenticationService == null)
+            {
+                throw new ArgumentNullException("authenticationService");
+            }
+
+            if (callbackProvider == null)
+            {
+                throw new ArgumentNullException("callbackProvider");
+            }
+
+            AuthenticationService = authenticationService;
+            CallbackProvider = callbackProvider;
         }
 
-        public RedirectResult RedirectToProvider(string providerkey, string additionaldata = null)
+        public RedirectResult RedirectToProvider(string providerkey)
         {
             if (string.IsNullOrEmpty(providerkey))
             {
@@ -24,13 +40,26 @@ namespace WorldDomination.Web.Authentication.Mvc
             }
 
             // Grab the required Provider settings.
-            var settings = _authenticationService.GetAuthenticateServiceSettings(providerkey, Request.Url);
+            var settings = AuthenticationService.GetAuthenticateServiceSettings(providerkey, Request.Url);
 
             // Remember the State value (for CSRF protection).
             Session[StateKey] = settings.State;
 
+            if (RedirectUrl != null &&
+                !string.IsNullOrEmpty(RedirectUrl.AbsoluteUri))
+            {
+                // We have extra state information we will need to retrieve.
+                Session[ReturnUrlKey] = RedirectUrl.AbsoluteUri;
+            }
+            else if (Request != null &&
+                Request.UrlReferrer != null &&
+                !string.IsNullOrEmpty(Request.UrlReferrer.AbsoluteUri))
+            {
+                Session[ReturnUrlKey] = Request.UrlReferrer.AbsoluteUri;
+            }
+
             // Determine the provider's end point Url we need to redirect to.
-            var  uri = _authenticationService.RedirectToAuthenticationProvider(settings);
+            var  uri = AuthenticationService.RedirectToAuthenticationProvider(settings);
             
             // Kthxgo!
             return Redirect(uri.AbsoluteUri);
@@ -44,7 +73,7 @@ namespace WorldDomination.Web.Authentication.Mvc
             }
 
             // Determine which settings we need, based on the Provider.
-            var settings = _authenticationService.GetAuthenticateServiceSettings(providerkey, Request.Url);
+            var settings = AuthenticationService.GetAuthenticateServiceSettings(providerkey, Request.Url);
 
             // Make sure we use our 'previous' State value.
             settings.State = (Session[StateKey] as string) ?? string.Empty;
@@ -54,7 +83,7 @@ namespace WorldDomination.Web.Authentication.Mvc
             try
             {
                 // Grab the authenticated client information.
-                model.AuthenticatedClient = _authenticationService.GetAuthenticatedClient(settings, Request.QueryString);
+                model.AuthenticatedClient = AuthenticationService.GetAuthenticatedClient(settings, Request.QueryString);
                 Session.Remove(StateKey);
             }
             catch (Exception exception)
@@ -62,7 +91,17 @@ namespace WorldDomination.Web.Authentication.Mvc
                 model.Exception = exception;
             }
 
-            return _callbackProvider.Process(HttpContext, model);
+            // If we have a redirect Url, lets grab this :)
+            var redirectUrl = Session[ReturnUrlKey] as string;
+            if (!string.IsNullOrEmpty(redirectUrl))
+            {
+                model.RedirectUrl = new Uri(redirectUrl);
+            }
+            
+            Session.Remove(ReturnUrlKey);
+
+            // Finally! We can hand over the logic to the consumer to do whatever they want.
+            return CallbackProvider.Process(HttpContext, model);
         }
     }
 }
