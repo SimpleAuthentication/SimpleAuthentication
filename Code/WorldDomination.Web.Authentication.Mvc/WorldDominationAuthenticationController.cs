@@ -137,7 +137,11 @@ namespace WorldDomination.Web.Authentication.Mvc
             }
         
             // Create a cookie.
-            var cookie = new HttpCookie(CsrfCookieName) {Value = token};
+            var cookie = new HttpCookie(CsrfCookieName)
+                         {
+                             Value = token, 
+                             HttpOnly = true
+                         };
             response.Cookies.Add(cookie);
         }
 
