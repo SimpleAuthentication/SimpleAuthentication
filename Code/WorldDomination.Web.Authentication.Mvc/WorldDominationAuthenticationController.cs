@@ -1,21 +1,19 @@
 ﻿using System;
-using System.Collections.Specialized;
+using System.Web;
 using System.Web.Mvc;
+using WorldDomination.Web.Authentication.Csrf;
 
 namespace WorldDomination.Web.Authentication.Mvc
 {
     public class WorldDominationAuthenticationController : Controller
     {
-        private const string StateKey = "WorldDomination-StateKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
-        private const string RedirectUrlKey = "WorldDomination-RedirectUrlKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
+        private const string CookieName = "__WorldDomination.Web.Authentication.Mvc.CsrfToken";
+        private readonly IAntiForgery _antiForgery;
+        private string _cookieName;
 
-        protected IAuthenticationService AuthenticationService { get; private set; }
-        public IAuthenticationCallbackProvider CallbackProvider { get; private set; }
-
-        protected Uri RedirectUrl { get; set; }
-
-        public WorldDominationAuthenticationController(IAuthenticationService authenticationService, 
-                                                       IAuthenticationCallbackProvider callbackProvider)
+        public WorldDominationAuthenticationController(IAuthenticationService authenticationService,
+                                                       IAuthenticationCallbackProvider callbackProvider,
+                                                       IAntiForgery antiForgery = null)
         {
             if (authenticationService == null)
             {
@@ -29,6 +27,20 @@ namespace WorldDomination.Web.Authentication.Mvc
 
             AuthenticationService = authenticationService;
             CallbackProvider = callbackProvider;
+
+            // If no anti forgery class is provided, then we'll just use the default.
+            _antiForgery = antiForgery ?? new AntiForgery();
+        }
+
+        protected IAuthenticationService AuthenticationService { get; private set; }
+        public IAuthenticationCallbackProvider CallbackProvider { get; private set; }
+
+        protected Uri RedirectUrl { get; set; }
+
+        public string CsrfCookieName
+        {
+            get { return string.IsNullOrEmpty(_cookieName) ? CookieName : _cookieName; }
+            set { _cookieName = value; }
         }
 
         public RedirectResult RedirectToProvider(string providerkey)
@@ -42,26 +54,31 @@ namespace WorldDomination.Web.Authentication.Mvc
             // Grab the required Provider settings.
             var settings = AuthenticationService.GetAuthenticateServiceSettings(providerkey, Request.Url);
 
-            // Remember the State value (for CSRF protection).
-            Session[StateKey] = settings.State;
-
-            // Convention: If no redirectUrl data has been provided, then default to the Referrer, if one exists.
+            // Generate the Csrf token. 
+            // Our convention is to remember some redirect url once we are finished in the callback.
+            // NOTE: If no redirectUrl data has been provided, then default to the Referrer, if one exists.
+            string extraData = null;
             if (RedirectUrl != null &&
                 !string.IsNullOrEmpty(RedirectUrl.AbsoluteUri))
             {
                 // We have extra state information we will need to retrieve.
-                Session[RedirectUrlKey] = RedirectUrl.AbsoluteUri;
+                extraData = RedirectUrl.AbsoluteUri;
             }
             else if (Request != null &&
-                Request.UrlReferrer != null &&
-                !string.IsNullOrEmpty(Request.UrlReferrer.AbsoluteUri))
+                     Request.UrlReferrer != null &&
+                     !string.IsNullOrEmpty(Request.UrlReferrer.AbsoluteUri))
             {
-                Session[RedirectUrlKey] = Request.UrlReferrer.AbsoluteUri;
+                extraData = Request.UrlReferrer.AbsoluteUri;
             }
+            var token = _antiForgery.CreateToken(extraData);
+            settings.State = token;
+
+            // Now serialize this token (so we can complete the Csrf, in the callback).
+            SerializeToken(Response, token);
 
             // Determine the provider's end point Url we need to redirect to.
-            var  uri = AuthenticationService.RedirectToAuthenticationProvider(settings);
-            
+            var uri = AuthenticationService.RedirectToAuthenticationProvider(settings);
+
             // Kthxgo!
             return Redirect(uri.AbsoluteUri);
         }
@@ -77,15 +94,20 @@ namespace WorldDomination.Web.Authentication.Mvc
             var settings = AuthenticationService.GetAuthenticateServiceSettings(providerkey, Request.Url);
 
             // Make sure we use our 'previous' State value.
-            settings.State = (Session[StateKey] as string) ?? string.Empty;
-            
+            var token = DeserializeToken(Request);
+            settings.State = token;
+            TokenData tokenData = null;
+            if (!string.IsNullOrEmpty(token))
+            {
+                tokenData = _antiForgery.ValidateToken(token);
+            }
+
             var model = new AuthenticateCallbackData();
 
             try
             {
                 // Grab the authenticated client information.
                 model.AuthenticatedClient = AuthenticationService.GetAuthenticatedClient(settings, Request.QueryString);
-                Session.Remove(StateKey);
             }
             catch (Exception exception)
             {
@@ -93,16 +115,47 @@ namespace WorldDomination.Web.Authentication.Mvc
             }
 
             // If we have a redirect Url, lets grab this :)
-            var redirectUrl = Session[RedirectUrlKey] as string;
-            if (!string.IsNullOrEmpty(redirectUrl))
+            // NOTE: We've implimented the extraData part of the tokenData as the redirect url.
+            if (tokenData != null && !string.IsNullOrEmpty(tokenData.ExtraData))
             {
-                model.RedirectUrl = new Uri(redirectUrl);
+                model.RedirectUrl = new Uri(tokenData.ExtraData);
             }
-            
-            Session.Remove(RedirectUrlKey);
 
             // Finally! We can hand over the logic to the consumer to do whatever they want.
             return CallbackProvider.Process(HttpContext, model);
+        }
+
+        private void SerializeToken(HttpResponseBase response, string token)
+        {
+            if (response == null)
+            {
+                throw new ArgumentNullException("response");
+            }
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new ArgumentNullException("token");
+            }
+        
+            // Create a cookie.
+            var cookie = new HttpCookie(CsrfCookieName) {Value = token};
+            response.Cookies.Add(cookie);
+        }
+
+        private string DeserializeToken(HttpRequestBase request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            // Try and read in the cookie value.
+            var existingCookie = request.Cookies[CsrfCookieName];
+            var token = existingCookie != null ? existingCookie.Value : null;
+
+            // Lets clean up.
+            request.Cookies.Remove(CsrfCookieName);
+
+            return token;
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Web;
 using System.Web.Mvc;
 using CuttingEdge.Conditions;
+using WorldDomination.Web.Authentication.Csrf;
 using WorldDomination.Web.Authentication.Facebook;
 using WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Models;
 
@@ -8,17 +10,19 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
 {
     public class HomeController : Controller
     {
-        private const string SessionStateKey = "SessionStateKey";
-        private const string ReferrerKey = "ReferrerKey";
-
+        private const string CookieName = "__WorldDomination.Web.Authentication.Mvc.CsrfToken";
+        private readonly IAntiForgery _antiForgery;
 
         private readonly IAuthenticationService _authenticationService;
 
-        public HomeController(IAuthenticationService authenticationService)
+        public HomeController(IAuthenticationService authenticationService,
+                              IAntiForgery antiForgery)
         {
             Condition.Requires(authenticationService).IsNotNull();
+            Condition.Requires(antiForgery).IsNotNull();
 
             _authenticationService = authenticationService;
+            _antiForgery = antiForgery;
         }
 
         public ActionResult Index()
@@ -33,17 +37,23 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
             var settings = _authenticationService.GetAuthenticateServiceSettings(providerKey, Request.Url,
                                                                                  "home/authenticatecallback");
 
-            // We need to remember the state for some CRSF protection.
-            Session[SessionStateKey] = settings.State;
-
             // For shits and giggles, we'll remember the referrer to highlight that we can
             // redirect back to where we started, if we want to.
+            string referrer = null;
             if (Request != null &&
                 Request.UrlReferrer != null &&
                 !string.IsNullOrEmpty(Request.UrlReferrer.AbsoluteUri))
             {
-                Session[ReferrerKey] = Request.UrlReferrer.AbsoluteUri;
+                referrer = Request.UrlReferrer.AbsoluteUri;
             }
+
+            // Create teh CRSF Token.
+            var token = _antiForgery.CreateToken(referrer);
+            settings.State = token;
+
+            // Remember this token for when we are handling the callback.
+            var cookie = new HttpCookie(CookieName) { Value = token };
+            Response.Cookies.Add(cookie);
 
             // Determine the provider's end point Url we need to redirect to.
             var uri = _authenticationService.RedirectToAuthenticationProvider(settings);
@@ -59,17 +69,23 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
             var settings = _authenticationService.GetAuthenticateServiceSettings("facebook", Request.Url,
                                                                                  "home/authenticatecallback");
 
-            // We need to remember the state for some CRSF protection.
-            Session[SessionStateKey] = settings.State;
-
             // For shits and giggles, we'll remember the referrer to highlight that we can
             // redirect back to where we started, if we want to.
+            string referrer = null;
             if (Request != null &&
                 Request.UrlReferrer != null &&
                 !string.IsNullOrEmpty(Request.UrlReferrer.AbsoluteUri))
             {
-                Session[ReferrerKey] = Request.UrlReferrer.AbsoluteUri;
+                referrer = Request.UrlReferrer.AbsoluteUri;
             }
+
+            // Create teh CRSF Token.
+            var token = _antiForgery.CreateToken(referrer);
+            settings.State = token;
+
+            // Remember this token for when we are handling the callback.
+            var cookie = new HttpCookie(CookieName) { Value = token };
+            Response.Cookies.Add(cookie);
 
             // Set the IsMobile facebook provider specific settings.
             ((FacebookAuthenticationServiceSettings) settings).IsMobile = true;
@@ -97,20 +113,21 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
                                                                                      "home/authenticatecallback");
 
                 // Make sure we use our 'previous' State value.
-                settings.State = (Session[SessionStateKey] as string) ?? string.Empty;
+                var existingCookie = Request.Cookies[CookieName];
+                var token = existingCookie != null ? existingCookie.Value : null;
+                settings.State = token;
+
+                // Lets clean up.
+                Request.Cookies.Remove(CookieName);
 
                 // Grab the authenticated client information.
                 model.AuthenticatedClient = _authenticationService.GetAuthenticatedClient(settings, Request.QueryString);
 
-                var referrer = Session[ReferrerKey] as string;
-                if (!string.IsNullOrEmpty(referrer))
+                var tokenData = _antiForgery.ValidateToken(token);
+                if (tokenData != null && !string.IsNullOrEmpty(tokenData.ExtraData))
                 {
-                    model.Referrer = new Uri(referrer);
+                    model.Referrer = new Uri(tokenData.ExtraData);
                 }
-
-                // Clean up after ourselves like a nice little boy/girl/monster we are.
-                Session.Remove(SessionStateKey);
-                Session.Remove(ReferrerKey);
             }
             catch (Exception exception)
             {

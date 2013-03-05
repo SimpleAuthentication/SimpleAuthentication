@@ -46,6 +46,7 @@
     <Compile Include="..\Shared Assembly Info\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Csrf\AntiForgery.cs" />
     <Compile Include="AuthenticatedClient.cs" />
     <Compile Include="AuthenticationException.cs" />
     <Compile Include="BaseAuthenticationServiceSettings.cs" />
@@ -53,6 +54,7 @@
     <Compile Include="Config\ProviderConfigurationHelper.cs" />
     <Compile Include="Config\ProviderKey.cs" />
     <Compile Include="Config\ProviderKeyCollection.cs" />
+    <Compile Include="Csrf\TokenData.cs" />
     <Compile Include="CustomProviderParams.cs" />
     <Compile Include="Facebook\DisplayType.cs" />
     <Compile Include="Facebook\FacebookAuthenticationServiceSettings.cs" />
@@ -64,6 +66,7 @@
     <Compile Include="Google\GoogleAuthenticationServiceSettings.cs" />
     <Compile Include="Google\GoogleProvider.cs" />
     <Compile Include="Google\UserInfoResult.cs" />
+    <Compile Include="Csrf\IAntiForgery.cs" />
     <Compile Include="IAuthenticationService.cs" />
     <Compile Include="IAuthenticatedClient.cs" />
     <Compile Include="AuthenticationService.cs" />

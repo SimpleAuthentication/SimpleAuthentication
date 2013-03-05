@@ -1,4 +1,5 @@
 ﻿using StructureMap.Configuration.DSL;
+using WorldDomination.Web.Authentication.Csrf;
 
 namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.DependencyResolution
 {
@@ -26,8 +27,10 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.DependencyReso
             }
 
             For<IAuthenticationService>()
-                .Use(authenticationService)
-                .Named("Authentication Service.");
+                .Use(authenticationService);
+
+            For<IAntiForgery>()
+                .Use<AntiForgery>();
         }
     }
 }

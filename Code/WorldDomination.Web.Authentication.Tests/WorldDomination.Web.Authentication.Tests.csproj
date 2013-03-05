@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="AuthenticationServiceFacts.cs" />
     <Compile Include="ConfigurationFacts.cs" />
+    <Compile Include="CsrfFacts.cs" />
     <Compile Include="FacebookProviderFacts.cs" />
     <Compile Include="GitHubProviderFacts.cs" />
     <Compile Include="GoogleProviderFacts.cs" />
