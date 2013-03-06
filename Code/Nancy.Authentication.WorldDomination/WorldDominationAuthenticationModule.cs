@@ -44,7 +44,8 @@ namespace Nancy.Authentication.WorldDomination
                         "You need to supply a valid provider key so we know where to redirect the user.");
                 }
 
-                Uri identifier = null;
+                Uri identifier;
+
                 if (string.IsNullOrEmpty(Request.Form.Identifier) ||
                     !Uri.TryCreate(Request.Form.Identifier, UriKind.RelativeOrAbsolute, out identifier))
                 {
@@ -92,7 +93,7 @@ namespace Nancy.Authentication.WorldDomination
             };
         }
 
-        private Response RedirectToAuthenticationProvider(IAuthenticationService authenticationService,
+        private dynamic RedirectToAuthenticationProvider(IAuthenticationService authenticationService,
             IAuthenticationCallbackProvider authenticationCallbackProvider,
             string providerKey, Uri identifier = null)
         {
@@ -116,7 +117,7 @@ namespace Nancy.Authentication.WorldDomination
             var settings = authenticationService.GetAuthenticateServiceSettings(providerKey, Request.Url);
 
             // An OpenId specific settings provided?
-            if (identifier != null && 
+            if (identifier != null &&
                 settings is IOpenIdAuthenticationServiceSettings)
             {
                 ((IOpenIdAuthenticationServiceSettings) settings).Identifier = identifier;
@@ -144,7 +145,8 @@ namespace Nancy.Authentication.WorldDomination
             var uri = authenticationService.RedirectToAuthenticationProvider(settings);
             if (uri == null || string.IsNullOrEmpty(uri.AbsoluteUri))
             {
-                return authenticationCallbackProvider.OnRedirectToAuthenticationProviderError(this, "No valid Uri was found - not sure where to redirect to?");
+                return authenticationCallbackProvider.OnRedirectToAuthenticationProviderError(this,
+                                                                                                "No valid Uri was found - not sure where to redirect to?");
             }
 
             // Kthxgo!
