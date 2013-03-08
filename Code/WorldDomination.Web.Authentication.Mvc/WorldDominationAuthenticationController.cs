@@ -137,11 +137,7 @@ namespace WorldDomination.Web.Authentication.Mvc
             }
         
             // Create a cookie.
-            var cookie = new HttpCookie(CsrfCookieName)
-                         {
-                             Value = token, 
-                             HttpOnly = true
-                         };
+            var cookie = CreateAYummyCookie(token);
             response.Cookies.Add(cookie);
         }
 
@@ -157,9 +153,30 @@ namespace WorldDomination.Web.Authentication.Mvc
             var token = existingCookie != null ? existingCookie.Value : null;
 
             // Lets clean up.
-            request.Cookies.Remove(CsrfCookieName);
+            // To remove a cookie (from the client), we need to reset it's time to the past.
+            var cookie = CreateAYummyCookie(null, DateTime.UtcNow.AddDays(-7));
+            Response.Cookies.Add(cookie);
 
             return token;
+        }
+
+        private HttpCookie CreateAYummyCookie(string token, DateTime? expiryDate = null)
+        {
+            // Note: Token - can be null.
+
+            // Create a cookie.
+            var cookie = new HttpCookie(CsrfCookieName)
+                         {
+                             Value = token,
+                             HttpOnly = true
+                         };
+            
+            if (expiryDate.HasValue)
+            {
+                cookie.Expires = expiryDate.Value;
+            }
+
+            return cookie;
         }
     }
 }
