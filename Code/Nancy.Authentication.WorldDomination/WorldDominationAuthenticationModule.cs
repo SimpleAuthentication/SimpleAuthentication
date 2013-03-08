@@ -44,7 +44,7 @@ namespace Nancy.Authentication.WorldDomination
                         "You need to supply a valid provider key so we know where to redirect the user.");
                 }
 
-                Uri identifier;
+                Uri identifier = null;
 
                 if (string.IsNullOrEmpty(Request.Form.Identifier) ||
                     !Uri.TryCreate(Request.Form.Identifier, UriKind.RelativeOrAbsolute, out identifier))
