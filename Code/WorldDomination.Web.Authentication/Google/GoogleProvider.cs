@@ -252,6 +252,7 @@ namespace WorldDomination.Web.Authentication.Google
             // Grab the user information.
             var userInfo = RetrieveUserInfo(oAuthAccessToken.AccessToken);
 
+            
             return new AuthenticatedClient(Name.ToLowerInvariant())
             {
                 AccessToken = oAuthAccessToken.AccessToken,
@@ -259,8 +260,9 @@ namespace WorldDomination.Web.Authentication.Google
                 UserInformation = new UserInformation
                 {
                     Id = userInfo.Id,
-                    Gender =
-                        (GenderType) Enum.Parse(typeof (GenderType), userInfo.Gender, true),
+                    Gender = string.IsNullOrEmpty(userInfo.Gender) 
+                        ? GenderType.Unknown 
+                        : GenderTypeHelpers.ToGenderType(userInfo.Gender),
                     Name = userInfo.Name,
                     Email = userInfo.Email,
                     Locale = userInfo.Locale,
