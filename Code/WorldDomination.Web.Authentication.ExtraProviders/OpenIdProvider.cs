@@ -183,17 +183,24 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             var genderCharacter = queryStringParameters["openid.sreg.gender"];
             GenderType gender;
 
-            switch (genderCharacter)
+            if (string.IsNullOrEmpty(genderCharacter))
             {
-                case "F":
-                    gender = GenderType.Female;
-                    break;
-                case "M":
-                    gender = GenderType.Male;
-                    break;
-                default:
-                    gender = GenderType.Unknown;
-                    break;
+                gender = GenderType.Unknown;
+            }
+            else
+            {
+                switch (genderCharacter.ToLowerInvariant())
+                {
+                    case "f":
+                        gender = GenderType.Female;
+                        break;
+                    case "m":
+                        gender = GenderType.Male;
+                        break;
+                    default:
+                        gender = GenderType.Unknown;
+                        break;
+                }
             }
 
             return new UserInformation
