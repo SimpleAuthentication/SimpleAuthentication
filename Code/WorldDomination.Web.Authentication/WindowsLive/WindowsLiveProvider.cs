@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Specialized;
 using RestSharp;
-using WorldDomination.Web.Authentication.ExtraProviders.WindowsLive;
 
-namespace WorldDomination.Web.Authentication.ExtraProviders
+namespace WorldDomination.Web.Authentication.WindowsLive
 {
     public class WindowsLiveProvider : IAuthenticationProvider
     {
+        // *********************************************************************
+        // REFERENCE: http://msdn.microsoft.com/en-us/library/live/hh243647.aspx
+        // *********************************************************************
+
+
         private const string RedirectUrl =
             "https://login.live.com/oauth20_authorize.srf?client_id={0}&scope={2}&response_type=code&redirect_uri={1}";
 
@@ -60,7 +64,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             var userRequest = new RestRequest("/v5.0/me");
             var userClient = _restClientFactory.CreateRestClient("https://apis.live.net");
 
-            userRequest.AddParameter("access_token", reponse.access_token);
+            userRequest.AddParameter("access_token", reponse.AccessToken);
 
             return userClient.Execute<UserInfo>(userRequest).Data;
         }
@@ -120,8 +124,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
             var result = new AuthenticatedClient(Name)
                          {
-                             AccessToken = reponse.access_token,
-                             AccessTokenExpiresOn = DateTime.UtcNow.AddSeconds(int.Parse(reponse.expires_in)),
+                             AccessToken = reponse.AccessToken,
+                             AccessTokenExpiresOn = DateTime.UtcNow.AddSeconds(int.Parse(reponse.ExpiresIn)),
                              UserInformation = new UserInformation
                                                {
                                                    Name = string.Join(" ", userInfo.first_name, userInfo.last_name),

@@ -1,12 +1,22 @@
 ﻿@{
-  Layout = "/Views/Shared/_Layout.cshtml";
+    Layout = "/Views/Shared/_Layout.cshtml";
 }
 
 <div id="container">
-  <fieldset title="Login">
-    <legend>Login:</legend>
-    <a href="/authentication/redirect/twitter"><img src="/Content/twitter_32.png"/></a>
-    <a href="/authentication/redirect/facebook"><img src="/Content/facebook_32.png" /></a>
-    <a href="/authentication/redirect/google"><img src="/Content/google_32.png"/></a>
-  </fieldset>
+    <fieldset title="Login">
+        <legend>Primary Logins:</legend>
+        <a href="/authentication/redirect/twitter"><img src="/Content/twitter_32.png" alt="Login with your Twitter account."/></a>
+        <a href="/authentication/redirect/facebook"><img src="/Content/facebook_32.png" alt="Login with your Facebook account."/></a>
+        <a href="/authentication/redirect/google"><img src="/Content/google_32.png" alt="Login with your Google account."/></a>
+        <a href="/authentication/redirect/WindowsLive"><img src="/Content/windowslive_32.png" alt="Login with your Windows Live account."/></a>
+    </fieldset>
+    
+    <hr/>
+    
+    <fieldset title="Login">
+        <legend>Extra Logins:</legend>
+        <a href="/authentication/redirect/github"><img src="/Content/github_32.png" alt="Login with your GitHub account."/></a>
+        <a href="/authentication/redirect/bitbucket"><img src="/Content/bitbucket_32.png" alt="Login with your BitBucket account."/></a>
+    </fieldset>
+
 </div>

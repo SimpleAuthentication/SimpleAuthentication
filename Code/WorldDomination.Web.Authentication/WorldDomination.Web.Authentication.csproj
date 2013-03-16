@@ -86,6 +86,11 @@
     <Compile Include="Twitter\VerifierResult.cs" />
     <Compile Include="Twitter\VerifyCredentialsResult.cs" />
     <Compile Include="UserInformation.cs" />
+    <Compile Include="WindowsLive\AuthenticatedToken.cs" />
+    <Compile Include="WindowsLive\Emails.cs" />
+    <Compile Include="WindowsLive\UserInfo.cs" />
+    <Compile Include="WindowsLive\WindowsLiveAuthenticationServiceSettings.cs" />
+    <Compile Include="WindowsLive\WindowsLiveProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

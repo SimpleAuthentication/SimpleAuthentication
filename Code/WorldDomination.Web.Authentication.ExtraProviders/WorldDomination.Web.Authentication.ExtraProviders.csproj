@@ -49,6 +49,12 @@
     <Compile Include="..\Shared Assembly Info\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="BitBucket\AccessTokenResult.cs" />
+    <Compile Include="BitBucket\BitBucketProvider.cs" />
+    <Compile Include="BitBucket\BitBucketAuthenticationServiceSettings.cs" />
+    <Compile Include="BitBucket\RequestTokenResult.cs" />
+    <Compile Include="BitBucket\VerifierResult.cs" />
+    <Compile Include="BitBucket\VerifyCredentialsResult.cs" />
     <Compile Include="GitHubProvider.cs" />
     <Compile Include="GitHub\AccessTokenResult.cs" />
     <Compile Include="GitHub\FakeGitHubProvider.cs" />
@@ -56,12 +62,7 @@
     <Compile Include="GitHub\UserInfoResult.cs" />
     <Compile Include="OpenIdProvider.cs" />
     <Compile Include="OpenId\OpenIdAuthenticationServiceSettings.cs" />
-    <Compile Include="WindowsLiveProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WindowsLive\AuthenticatedToken.cs" />
-    <Compile Include="WindowsLive\Emails.cs" />
-    <Compile Include="WindowsLive\UserInfo.cs" />
-    <Compile Include="WindowsLive\WindowsLiveAuthenticationServiceSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WorldDomination.Web.Authentication\WorldDomination.Web.Authentication.csproj">

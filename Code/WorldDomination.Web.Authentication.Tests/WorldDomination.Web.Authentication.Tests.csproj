@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthenticationServiceFacts.cs" />
+    <Compile Include="BitBucketProviderFacts.cs" />
     <Compile Include="ConfigurationFacts.cs" />
     <Compile Include="CsrfFacts.cs" />
     <Compile Include="FacebookProviderFacts.cs" />

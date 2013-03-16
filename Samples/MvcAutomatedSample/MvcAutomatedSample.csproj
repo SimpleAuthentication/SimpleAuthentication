@@ -154,6 +154,10 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Code\WorldDomination.Web.Authentication.ExtraProviders\WorldDomination.Web.Authentication.ExtraProviders.csproj">
+      <Project>{d75207d5-fa68-4dc6-939a-2ac3cad4bead}</Project>
+      <Name>WorldDomination.Web.Authentication.ExtraProviders</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Code\WorldDomination.Web.Authentication.Mvc\WorldDomination.Web.Authentication.Mvc.csproj">
       <Project>{02c40d4a-17f3-465b-88d6-64d238a32396}</Project>
       <Name>WorldDomination.Web.Authentication.Mvc</Name>
