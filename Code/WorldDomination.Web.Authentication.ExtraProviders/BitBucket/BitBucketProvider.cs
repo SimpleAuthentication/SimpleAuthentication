@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Net;
+using System.Runtime.Caching;
 using RestSharp;
 using RestSharp.Authenticators;
 using RestSharp.Contrib;
@@ -17,6 +18,10 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.BitBucket
         private readonly string _consumerKey;
         private readonly string _consumerSecret;
         private readonly IRestClientFactory _restClientFactory;
+
+        private System.Runtime.Caching.ObjectCache _memoryCache = MemoryCache.Default;
+        private const int CacheExpiryInMinutes = 10;
+
 
         public BitBucketProvider(CustomProviderParams providerParams)
         {
@@ -82,6 +87,10 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.BitBucket
             var oAuthToken = querystringParameters[OAuthTokenKey];
             var oAuthTokenSecret = querystringParameters[OAuthTokenSecretKey];
 
+
+            // Cache the TokenSecret, for later.
+            _memoryCache.Add(oAuthToken, oAuthTokenSecret, DateTime.Now.AddMinutes(CacheExpiryInMinutes));
+
             if (string.IsNullOrEmpty(oAuthToken) ||
                 string.IsNullOrEmpty(oAuthTokenSecret))
             {
@@ -122,7 +131,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.BitBucket
                 string.IsNullOrEmpty(oAuthVerifier))
             {
                 throw new AuthenticationException(
-                    "Failed to retrieve an oauth_token and an oauth_token_secret after the client has signed and approved via Twitter.");
+                    "Failed to retrieve an oauth_token and an oauth_token_secret after the client has signed and approved via BitBucket.");
             }
 
             return new VerifierResult
@@ -154,14 +163,23 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.BitBucket
             {
                 var request = new RestRequest("!api/1.0/oauth/access_token", Method.POST);
                 var restClient = _restClientFactory.CreateRestClient(BaseUrl);
+
+                // Retrieve the token secret from the cache :)
+                string tokenSecret = null;
+                if (_memoryCache != null && _memoryCache.Contains(verifierResult.OAuthToken))
+                {
+                    tokenSecret = (string)_memoryCache.Get(verifierResult.OAuthToken);
+                    _memoryCache.Remove(verifierResult.OAuthToken);
+                }
+
                 restClient.Authenticator = OAuth1Authenticator.ForAccessToken(_consumerKey, _consumerSecret,
                                                                               verifierResult.OAuthToken,
-                                                                              null, verifierResult.OAuthVerifier);
+                                                                              tokenSecret, verifierResult.OAuthVerifier);
                 response = restClient.Execute(request);
             }
             catch (Exception exception)
             {
-                throw new AuthenticationException("Failed to convert Request Token to an Access Token, from Twitter.",
+                throw new AuthenticationException("Failed to convert Request Token to an Access Token, from BitBucket.",
                                                   exception);
             }
 
@@ -169,7 +187,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.BitBucket
             {
                 throw new AuthenticationException(
                     string.Format(
-                        "Failed to obtain an Access Token from Twitter OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
+                        "Failed to obtain an Access Token from " + Name + " OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
                         response == null ? "-- null response --" : response.StatusCode.ToString(),
                         response == null ? string.Empty : response.StatusDescription));
             }
@@ -274,7 +292,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.BitBucket
 
             // Retrieve the OAuth Verifier.
             var oAuthVerifier = RetrieveOAuthVerifier(queryStringParameters);
-
+            
             // Convert the Request Token to an Access Token, now that we have a verifier.
             var oAuthAccessToken = RetrieveAccessToken(oAuthVerifier);
 

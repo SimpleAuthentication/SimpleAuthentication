@@ -21,5 +21,10 @@ namespace WorldDomination.Web.Authentication
         /// Some optional state for this authentication process.
         /// </summary>
         string State { get; set; }
+
+        /// <summary>
+        /// Extra data which the provider might require during the callback and needs to be persisted.
+        /// </summary>
+        //string ExtraData { get; set; }
     }
 }

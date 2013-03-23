@@ -3,7 +3,7 @@
 }
 
 <div id="container">
-    <fieldset title="Login">
+    <fieldset title="Primary Logins">
         <legend>Primary Logins:</legend>
         <a href="/authentication/redirect/twitter"><img src="/Content/twitter_32.png" alt="Login with your Twitter account."/></a>
         <a href="/authentication/redirect/facebook"><img src="/Content/facebook_32.png" alt="Login with your Facebook account."/></a>
@@ -13,10 +13,27 @@
     
     <hr/>
     
-    <fieldset title="Login">
+    <fieldset title="Extra Login">
         <legend>Extra Logins:</legend>
         <a href="/authentication/redirect/github"><img src="/Content/github_32.png" alt="Login with your GitHub account."/></a>
         <a href="/authentication/redirect/bitbucket"><img src="/Content/bitbucket_32.png" alt="Login with your BitBucket account."/></a>
+    </fieldset>
+    
+    <hr/>
+    
+    <fieldset title="OpenId">
+        <legend>Open Id:</legend>
+        <form action="/authentication/redirect/openid" method="POST">
+            <img src="/Content/myopenid_32.png" alt="Login with your OpenId account." height="32" width="32"/> 
+            Identifier: <input type="text" id="identifier" name="identifier" value="http://myopenid.com"/>
+            <input type="submit" value="k go!"/>
+        </form>
+       @*     
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <h2>Error Information</h2>
+            <p>Message: @Model.ErrorMessage</p>
+        }*@
     </fieldset>
 
 </div>

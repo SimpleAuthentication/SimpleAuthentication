@@ -125,7 +125,7 @@ namespace WorldDomination.Web.Authentication.Mvc
             return CallbackProvider.Process(HttpContext, model);
         }
 
-        private void SerializeToken(HttpResponseBase response, string token)
+        private void SerializeToken(HttpResponseBase response, string token) 
         {
             if (response == null)
             {
