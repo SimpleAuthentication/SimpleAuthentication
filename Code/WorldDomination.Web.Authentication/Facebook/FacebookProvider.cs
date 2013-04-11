@@ -62,14 +62,6 @@ namespace WorldDomination.Web.Authentication.Facebook
 
             // Is this a facebook callback?
             var code = queryStringParameters["code"];
-            var state = queryStringParameters["state"];
-
-            // CSRF (state) check.
-            if (!string.IsNullOrEmpty(state) && state != existingState)
-            {
-                throw new AuthenticationException(
-                    "The states do not match. It's possible that you may be a victim of a CSRF.");
-            }
 
             // Maybe we have an error?
             var errorReason = queryStringParameters["error_reason"];

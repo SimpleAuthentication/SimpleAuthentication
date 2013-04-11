@@ -1,8 +1,21 @@
 ﻿namespace WorldDomination.Web.Authentication.Csrf
 {
-    public class TokenData
+    public class TokenPair
     {
-        public string State { get; set; }
-        public string ExtraData { get; set; }
+        /// <summary>
+        /// Gets the token to send along with the request.
+        /// </summary>
+        public string ToSend { get; private set; }
+
+        /// <summary>
+        /// Gets the token to keep on the client (in a Cookie, for example)
+        /// </summary>
+        public string ToKeep { get; private set; }
+
+        public TokenPair(string toSend, string toKeep)
+        {
+            ToSend = toSend;
+            ToKeep = toKeep;
+        }
     }
 }

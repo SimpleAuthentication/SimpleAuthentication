@@ -16,31 +16,6 @@ namespace WorldDomination.Web.Authentication.Tests
         public class AuthenticateClientFacts
         {
             [Fact]
-            public void GivenADifferentStateValue_AuthenticateClient_ThrowsAnException()
-            {
-                // Arrange.
-                var githubProvider = new GitHubProvider("aa", "bb", null);
-                var queryStringParameters = new NameValueCollection
-                {
-                    {"code", "a"},
-                    {"state", "b"}
-                };
-                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings()
-                                                          {
-                                                              State = "as",
-                                                              CallBackUri = new Uri("http://2p1s.com")
-                                                          };
-                // Act.
-                var result = Assert.Throws<AuthenticationException>(
-                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
-
-                // Assert.
-                Assert.NotNull(result);
-                Assert.Equal("The states do not match. It's possible that you may be a victim of a CSRF.",
-                             result.Message);
-            }
-
-            [Fact]
             public void GivenGitHubReturnedAnError_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.

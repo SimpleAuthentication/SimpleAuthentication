@@ -46,16 +46,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
                The authorization code is returned to your application in the query string parameter code. If the state parameter was included in the request,
                then it is also included in the response. */
             var code = parameters["code"];
-            var state = parameters["state"];
             var error = parameters["error"];
-
-            // CSRF (state) check.
-            // NOTE: There is always a state provided. Even if an error is returned.
-            if (!string.IsNullOrEmpty(existingState) && state != existingState)
-            {
-                throw new AuthenticationException(
-                    "The states do not match. It's possible that you may be a victim of a CSRF.");
-            }
 
             // First check for any errors.
             if (!string.IsNullOrEmpty(error))

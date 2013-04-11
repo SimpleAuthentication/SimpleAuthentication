@@ -7,7 +7,6 @@ namespace WorldDomination.Web.Authentication.Mvc
 {
     public class WorldDominationAuthenticationController : Controller
     {
-        private const string CookieName = "__WorldDomination.Web.Authentication.Mvc.CsrfToken";
         private readonly IAntiForgery _antiForgery;
         private string _cookieName;
 
@@ -39,7 +38,7 @@ namespace WorldDomination.Web.Authentication.Mvc
 
         public string CsrfCookieName
         {
-            get { return string.IsNullOrEmpty(_cookieName) ? CookieName : _cookieName; }
+            get { return _cookieName ?? (_cookieName = _antiForgery.DefaultCookieName); }
             set { _cookieName = value; }
         }
 
@@ -70,11 +69,15 @@ namespace WorldDomination.Web.Authentication.Mvc
             {
                 extraData = Request.UrlReferrer.AbsoluteUri;
             }
-            var token = _antiForgery.CreateToken(extraData);
-            settings.State = token;
 
-            // Now serialize this token (so we can complete the Csrf, in the callback).
-            SerializeToken(Response, token);
+            // Generate a token pair.
+            var token = _antiForgery.CreateToken(extraData);
+
+            // Put the "ToSend" value in the state parameter to send along to the OAuth Provider.
+            settings.State = token.ToSend;
+
+            // Serialize the ToKeep value in the cookie.
+            SerializeToken(Response, token.ToKeep);
 
             // Determine the provider's end point Url we need to redirect to.
             var uri = AuthenticationService.RedirectToAuthenticationProvider(settings);
@@ -93,13 +96,16 @@ namespace WorldDomination.Web.Authentication.Mvc
             // Determine which settings we need, based on the Provider.
             var settings = AuthenticationService.GetAuthenticateServiceSettings(providerkey, Request.Url);
 
-            // Make sure we use our 'previous' State value.
-            var token = DeserializeToken(Request);
-            settings.State = token;
-            TokenData tokenData = null;
-            if (!string.IsNullOrEmpty(token))
+            // Pull the "ToKeep" token from the cookie and the "ToSend" token from the query string
+            var keptToken = DeserializeToken(Request);
+            var recievedToken = Request.QueryString["state"];
+
+            // If we kept a token...
+            string extraData = null;
+            if (!String.IsNullOrEmpty(keptToken))
             {
-                tokenData = _antiForgery.ValidateToken(token);
+                // Validate it against the recieved one and grab extra data
+                extraData = _antiForgery.ValidateToken(keptToken, recievedToken);
             }
 
             var model = new AuthenticateCallbackData();
@@ -116,16 +122,16 @@ namespace WorldDomination.Web.Authentication.Mvc
 
             // If we have a redirect Url, lets grab this :)
             // NOTE: We've implimented the extraData part of the tokenData as the redirect url.
-            if (tokenData != null && !string.IsNullOrEmpty(tokenData.ExtraData))
+            if (!string.IsNullOrEmpty(extraData))
             {
-                model.RedirectUrl = new Uri(tokenData.ExtraData);
+                model.RedirectUrl = new Uri(extraData);
             }
 
             // Finally! We can hand over the logic to the consumer to do whatever they want.
             return CallbackProvider.Process(HttpContext, model);
         }
 
-        private void SerializeToken(HttpResponseBase response, string token) 
+        private void SerializeToken(HttpResponseBase response, string token)
         {
             if (response == null)
             {
@@ -135,7 +141,7 @@ namespace WorldDomination.Web.Authentication.Mvc
             {
                 throw new ArgumentNullException("token");
             }
-        
+
             // Create a cookie.
             var cookie = CreateAYummyCookie(token);
             response.Cookies.Add(cookie);
@@ -170,7 +176,7 @@ namespace WorldDomination.Web.Authentication.Mvc
                              Value = token,
                              HttpOnly = true
                          };
-            
+
             if (expiryDate.HasValue)
             {
                 cookie.Expires = expiryDate.Value;

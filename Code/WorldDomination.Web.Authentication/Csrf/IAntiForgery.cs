@@ -2,8 +2,15 @@
 {
     public interface IAntiForgery
     {
-        string CreateToken(string extraData = null);
-
-        TokenData ValidateToken(string token);
+        string DefaultCookieName { get; }
+        TokenPair CreateToken(string extraData = null);
+ 
+        /// <summary>
+        /// Validates the token pair and returns the extra data
+        /// </summary>
+        /// <param name="keptToken"></param>
+        /// <param name="recievedToken"></param>
+        /// <returns></returns>
+        string ValidateToken(string keptToken, string recievedToken);
     }
 }

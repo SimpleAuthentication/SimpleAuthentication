@@ -14,34 +14,6 @@ namespace WorldDomination.Web.Authentication.Tests
     {
         public class AuthenticateClientFacts
         {
-            
-
-            [Fact]
-            public void GivenAFailedCSRFStateCheck_AuthenticateClient_ThrowsAnAuthenticationException()
-            {
-                // Arrange.
-                var mockRestClient = new Mock<IRestClient>();
-                mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>())).Returns(It.IsAny<IRestResponse>);
-
-                var facebookProvider = new FacebookProvider("a", "b",
-                                                            null, new RestClientFactory(mockRestClient.Object));
-                var queryStringParameters = new NameValueCollection
-                {
-                    {"code", "aaa"},
-                    {"state", "bbb"}
-                };
-
-                // Act.
-                var result =
-                    Assert.Throws<AuthenticationException>(
-                        () => facebookProvider.AuthenticateClient(new FacebookAuthenticationServiceSettings(), queryStringParameters));
-
-                // Assert.
-                Assert.NotNull(result);
-                Assert.Equal("The states do not match. It's possible that you may be a victim of a CSRF.",
-                             result.Message);
-            }
-
             [Fact]
             public void
                 GivenSomeErrorOccuredWhileTryingToRetrieveAccessToken_AuthenticateClient_ThrowsAnAuthenticationException

@@ -7,53 +7,63 @@ namespace WorldDomination.Web.Authentication.Csrf
     {
         private const string Delimeter = "|";
 
-        public string CreateToken(string extraData = null)
+        public string DefaultCookieName { get { return "__WorldDomination.Web.Authentication.Mvc.CsrfToken"; } }
+
+        public TokenPair CreateToken(string extraData = null)
         {
             // Create the state.
-            var state = Guid.NewGuid().ToString();
+            var toSend = Guid.NewGuid().ToString();
+            var toKeep = toSend;
 
             // Base64 Encode any extra data.
             if (extraData != null)
             {
                 // We're hardocding the delimeter. So, I'm base64 encoding the extra data first, 
                 // in case the delimeter might exist in the extra data!
-                var encodedExtraValue = Convert.ToBase64String(Encoding.Unicode.GetBytes(extraData));
-                state = string.Format("{0}{1}{2}", state, Delimeter, encodedExtraValue);
+                var encodedExtraValue = Convert.ToBase64String(Encoding.UTF8.GetBytes(extraData));
+                toKeep = string.Format("{0}{1}{2}", toKeep, Delimeter, encodedExtraValue);
             }
 
-            return state;
+            return new TokenPair(toSend, toKeep);
         }
 
-        public TokenData ValidateToken(string token)
+        public string ValidateToken(string keptToken, string recievedToken)
         {
-            if (string.IsNullOrEmpty(token))
+            if (string.IsNullOrEmpty(keptToken))
             {
-                throw new ArgumentNullException("token");    
+                throw new ArgumentNullException("keptToken");    
             }
+
+            if (string.IsNullOrEmpty(recievedToken))
+             {
+                throw new ArgumentNullException("recievedToken");
+             }
             
-            var tokenData = new TokenData
-                            {
-                                State = token
-                            };
 
             // Do we have any extra data?
-            if (token.Contains(Delimeter))
+            string state = keptToken;
+            string extraData = null;
+            if (keptToken.Contains(Delimeter))
             {
                 // Yep.
-                var delimeterIndex = token.IndexOf(Delimeter, StringComparison.Ordinal);
-
-                // Grab the State part.
-                tokenData.State = token.Substring(0, delimeterIndex);
+                var delimeterIndex = keptToken.IndexOf(Delimeter, StringComparison.Ordinal);
 
                 // Grab the extra data part (and bas64 decode it)
-                var extraData = token.Substring(delimeterIndex + 1);
-                if (!string.IsNullOrEmpty(extraData))
+                var dataString = keptToken.Substring(delimeterIndex + 1);
+                if (!string.IsNullOrEmpty(dataString))
                 {
-                    tokenData.ExtraData = Encoding.Unicode.GetString(Convert.FromBase64String(extraData));
+                    extraData = Encoding.UTF8.GetString(Convert.FromBase64String(dataString));
                 }
+                state = keptToken.Substring(0, delimeterIndex);
             }
 
-            return tokenData;
+            // Validate the state
+            if (!String.Equals(recievedToken, state, StringComparison.Ordinal))
+            {
+                throw new AuthenticationException("CSRF token does not match!");
+             }
+ 
+            return extraData;
         }
     }
 }

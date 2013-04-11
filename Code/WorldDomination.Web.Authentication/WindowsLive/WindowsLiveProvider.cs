@@ -110,15 +110,6 @@ namespace WorldDomination.Web.Authentication.WindowsLive
                 throw new ArgumentOutOfRangeException("queryStringParameters");
             }
 
-            var state = queryStringParameters["state"];
-
-            // CSRF (state) check.
-            // NOTE: There is always a state provided. Even if an error is returned.
-            if (!string.IsNullOrEmpty(state) && state != authenticationServiceSettings.State)
-            {
-                throw new AuthenticationException("The states do not match. It's possible that you may be a victim of a CSRF.");
-            }
-
             var reponse = RetrieveToken(queryStringParameters, authenticationServiceSettings.CallBackUri);
             var userInfo = RetrieveUserInfo(reponse);
 

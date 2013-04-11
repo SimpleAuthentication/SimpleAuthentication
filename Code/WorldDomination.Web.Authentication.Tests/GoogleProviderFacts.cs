@@ -27,33 +27,6 @@ namespace WorldDomination.Web.Authentication.Tests
         public class AuthenticateClientFacts
         {
             [Fact]
-            public void GivenADifferentStateValue_AuthenticateClient_ThrowsAnException()
-            {
-                // Arrange.
-                var googleProvider = new GoogleProvider("aa", "bb");
-                var queryStringParameters = new NameValueCollection
-                {
-                    {"code", "a"},
-                    {"state", "b"}
-                };
-                var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
-                                                          {
-                                                              State = "asdasd",
-                                                              CallBackUri = new Uri("http://2p1s.com")
-                                                          };
-                
-
-                // Act.
-                var result = Assert.Throws<AuthenticationException>(
-                    () => googleProvider.AuthenticateClient(googleAuthenticationServiceSettings, queryStringParameters));
-
-                // Assert.
-                Assert.NotNull(result);
-                Assert.Equal("The states do not match. It's possible that you may be a victim of a CSRF.",
-                             result.Message);
-            }
-
-            [Fact]
             public void GivenGoogleReturnedAnError_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.

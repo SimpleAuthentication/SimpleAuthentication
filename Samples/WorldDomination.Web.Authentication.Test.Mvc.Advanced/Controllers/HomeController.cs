@@ -10,7 +10,6 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
 {
     public class HomeController : Controller
     {
-        private const string CookieName = "__WorldDomination.Web.Authentication.Mvc.CsrfToken";
         private readonly IAntiForgery _antiForgery;
 
         private readonly IAuthenticationService _authenticationService;
@@ -47,12 +46,12 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
                 referrer = Request.UrlReferrer.AbsoluteUri;
             }
 
-            // Create teh CRSF Token.
+            // Create the CRSF Token.
             var token = _antiForgery.CreateToken(referrer);
-            settings.State = token;
+            settings.State = token.ToSend;
 
             // Remember this token for when we are handling the callback.
-            var cookie = new HttpCookie(CookieName) { Value = token };
+            var cookie = new HttpCookie(_antiForgery.DefaultCookieName) { Value = token.ToKeep, HttpOnly = true };
             Response.Cookies.Add(cookie);
 
             // Determine the provider's end point Url we need to redirect to.
@@ -79,12 +78,12 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
                 referrer = Request.UrlReferrer.AbsoluteUri;
             }
 
-            // Create teh CRSF Token.
+            // Create the CRSF Token.
             var token = _antiForgery.CreateToken(referrer);
-            settings.State = token;
+            settings.State = token.ToSend;
 
             // Remember this token for when we are handling the callback.
-            var cookie = new HttpCookie(CookieName) { Value = token };
+            var cookie = new HttpCookie(_antiForgery.DefaultCookieName) { Value = token.ToKeep, HttpOnly = true };
             Response.Cookies.Add(cookie);
 
             // Set the IsMobile facebook provider specific settings.
@@ -113,20 +112,22 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers
                                                                                      "home/authenticatecallback");
 
                 // Make sure we use our 'previous' State value.
-                var existingCookie = Request.Cookies[CookieName];
+                var existingCookie = Request.Cookies[_antiForgery.DefaultCookieName];
                 var token = existingCookie != null ? existingCookie.Value : null;
                 settings.State = token;
 
                 // Lets clean up.
-                Request.Cookies.Remove(CookieName);
+                Request.Cookies.Remove(_antiForgery.DefaultCookieName);
+
+                // Validate Cookie
+                var extraData = _antiForgery.ValidateToken(token, Request.QueryString["state"]);
 
                 // Grab the authenticated client information.
                 model.AuthenticatedClient = _authenticationService.GetAuthenticatedClient(settings, Request.QueryString);
 
-                var tokenData = _antiForgery.ValidateToken(token);
-                if (tokenData != null && !string.IsNullOrEmpty(tokenData.ExtraData))
+                if (!string.IsNullOrEmpty(extraData))
                 {
-                    model.Referrer = new Uri(tokenData.ExtraData);
+                    model.Referrer = new Uri(extraData);
                 }
             }
             catch (Exception exception)
