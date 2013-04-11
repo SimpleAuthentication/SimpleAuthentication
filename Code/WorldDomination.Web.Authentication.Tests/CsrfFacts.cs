@@ -18,7 +18,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 var antiForgery = new AntiForgery();
 
                 // Act.
-                var result = antiForgery.CreateToken();
+                var result = antiForgery.CreateToken(existingToKeepToken: "don't care!");
 
                 // Assert.
                 Assert.NotNull(result);

@@ -3,7 +3,7 @@
     public interface IAntiForgery
     {
         string DefaultCookieName { get; }
-        TokenPair CreateToken(string extraData = null);
+        TokenPair CreateToken(string existingKeptToken, string extraData = null);
  
         /// <summary>
         /// Validates the token pair and returns the extra data

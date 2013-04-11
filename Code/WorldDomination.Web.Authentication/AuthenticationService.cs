@@ -15,8 +15,8 @@ namespace WorldDomination.Web.Authentication
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly Lazy<IEnumerable<Type>> _discoveredProviders = new Lazy<IEnumerable<Type>>(GetExportedTypes<IAuthenticationProvider>);
-        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; private set; }
+        private readonly Lazy<IEnumerable<Type>> _discoveredProviders =
+            new Lazy<IEnumerable<Type>>(GetExportedTypes<IAuthenticationProvider>);
 
         public AuthenticationService()
         {
@@ -28,13 +28,25 @@ namespace WorldDomination.Web.Authentication
             }
         }
 
+        public AuthenticationService(IEnumerable<IAuthenticationProvider> providers)
+        {
+            // Skip the config-based initialization, we've got a list of providers directly.
+            foreach (var provider in providers)
+            {
+                AddProvider(provider);
+            }
+        }
+
         public AuthenticationService(ProviderConfiguration providerConfiguration,
                                      IList<string> scope = null, IRestClientFactory restClientFactory = null)
         {
             Initialize(providerConfiguration, scope, restClientFactory);
         }
 
-        public void Initialize(ProviderConfiguration providerConfiguration, IList<string> scope = null, IRestClientFactory restClientFactory = null)
+        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; private set; }
+
+        public void Initialize(ProviderConfiguration providerConfiguration, IList<string> scope = null,
+                               IRestClientFactory restClientFactory = null)
         {
             if (providerConfiguration == null)
             {
@@ -78,16 +90,16 @@ namespace WorldDomination.Web.Authentication
                 );
 
             return catalog.Parts
-                .Select(part => ComposablePartExportType<T>(part))
-                .Where(t => t != null)
-                .ToList();
+                          .Select(part => ComposablePartExportType<T>(part))
+                          .Where(t => t != null)
+                          .ToList();
         }
 
         private static Type ComposablePartExportType<T>(ComposablePartDefinition part)
         {
             if (part.ExportDefinitions.Any(
                 def => def.Metadata.ContainsKey("ExportTypeIdentity") &&
-                    def.Metadata["ExportTypeIdentity"].Equals(typeof(T).FullName)))
+                       def.Metadata["ExportTypeIdentity"].Equals(typeof (T).FullName)))
             {
                 return ReflectionModelServices.GetPartType(part).Value;
             }
@@ -103,15 +115,17 @@ namespace WorldDomination.Web.Authentication
 
             if (provider == null)
             {
-                throw new ApplicationException(string.Format("Unable to find provider {0}, ensure you registered in the web.config or via code.", name));
+                throw new ApplicationException(
+                    string.Format("Unable to find provider {0}, ensure you registered in the web.config or via code.",
+                                  name));
             }
 
             var parameters = new CustomProviderParams
-            {
-                Key = providerKey.Key,
-                Secret = providerKey.Secret,
-                RestClientFactory = restClientFactory
-            };
+                             {
+                                 Key = providerKey.Key,
+                                 Secret = providerKey.Secret,
+                                 RestClientFactory = restClientFactory
+                             };
 
             return Activator.CreateInstance(provider, parameters) as IAuthenticationProvider;
         }
@@ -151,10 +165,10 @@ namespace WorldDomination.Web.Authentication
             }
 
             var builder = new UriBuilder(requestUrl)
-            {
-                Path = path,
-                Query = "providerkey=" + providerKey.ToLowerInvariant()
-            };
+                          {
+                              Path = path,
+                              Query = "providerkey=" + providerKey.ToLowerInvariant()
+                          };
 
             // Don't include port 80/443 in the Uri.
             if (builder.Uri.IsDefaultPort)
@@ -179,7 +193,8 @@ namespace WorldDomination.Web.Authentication
             // Does this provider already exist?
             if (AuthenticationProviders.ContainsKey(providerName))
             {
-                throw new AuthenticationException(string.Format("Trying to add a {0} provider, but one already exists.", providerName));
+                throw new AuthenticationException(string.Format(
+                    "Trying to add a {0} provider, but one already exists.", providerName));
             }
 
             AuthenticationProviders.Add(providerName, authenticationProvider);
@@ -232,10 +247,11 @@ namespace WorldDomination.Web.Authentication
             var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderName);
             if (authenticationProvider == null)
             {
-                throw new InvalidOperationException("No Provider found for the Provider Name: " + authenticationServiceSettings.ProviderName);
+                throw new InvalidOperationException("No Provider found for the Provider Name: " +
+                                                    authenticationServiceSettings.ProviderName);
             }
 
-             return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
+            return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
         }
 
         public IAuthenticatedClient GetAuthenticatedClient(IAuthenticationServiceSettings authenticationServiceSettings,
@@ -276,7 +292,8 @@ namespace WorldDomination.Web.Authentication
         }
 
         public IAuthenticationServiceSettings GetAuthenticateServiceSettings(string providerKey, Uri requestUrl,
-            string path = "/authentication/authenticatecallback")
+                                                                             string path =
+                                                                                 "/authentication/authenticatecallback")
         {
             var name = providerKey.ToLowerInvariant();
 
