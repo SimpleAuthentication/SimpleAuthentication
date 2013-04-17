@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Net;
-using WorldDomination.Web.Authentication.ExtraProviders.GitHub;
 using RestSharp;
 
-namespace WorldDomination.Web.Authentication.ExtraProviders
+namespace WorldDomination.Web.Authentication.ExtraProviders.GitHub
 {
     public class GitHubProvider : IAuthenticationProvider
     {

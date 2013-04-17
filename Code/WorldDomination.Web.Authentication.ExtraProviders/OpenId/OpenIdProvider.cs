@@ -5,9 +5,8 @@ using System.Linq;
 using System.Net;
 using System.Xml.Linq;
 using RestSharp;
-using WorldDomination.Web.Authentication.ExtraProviders.OpenId;
 
-namespace WorldDomination.Web.Authentication.ExtraProviders
+namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
 {
     public class OpenIdProvider : IAuthenticationProvider
     {
