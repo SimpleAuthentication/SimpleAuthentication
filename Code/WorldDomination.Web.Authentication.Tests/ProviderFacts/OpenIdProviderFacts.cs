@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Net;
 using Moq;
 using RestSharp;
-using WorldDomination.Web.Authentication.ExtraProviders;
 using WorldDomination.Web.Authentication.ExtraProviders.OpenId;
 using Xunit;
 
-namespace WorldDomination.Web.Authentication.Tests
+namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 {
     // ReSharper disable InconsistentNaming
 

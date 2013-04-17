@@ -3,34 +3,22 @@ using System.Collections.Specialized;
 using System.Net;
 using Moq;
 using RestSharp;
-using WorldDomination.Web.Authentication.Google;
+using WorldDomination.Web.Authentication.ExtraProviders.GitHub;
 using Xunit;
 
-namespace WorldDomination.Web.Authentication.Tests
+namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 {
     // ReSharper disable InconsistentNaming
 
-    public class GoogleProviderFacts
+    public class GitHubProviderFacts
     {
-        private static Mock<IRestClient> MockRestClient
-        {
-            get
-            {
-                var mockRestClient = new Mock<IRestClient>();
-                mockRestClient.Setup(x => x.BaseUrl).Returns("http://www.whatever.com/");
-                mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>())).Returns(It.IsAny<IRestResponse>);
-
-                return mockRestClient;
-            }
-        }
-
         public class AuthenticateClientFacts
         {
             [Fact]
-            public void GivenGoogleReturnedAnError_AuthenticateClient_ThrowsAnException()
+            public void GivenGitHubReturnedAnError_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var googleProvider = new GoogleProvider("aa", "bb");
+                var githubProvider = new GitHubProvider("aa", "bb", null);
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -40,19 +28,18 @@ namespace WorldDomination.Web.Authentication.Tests
                     },
                     {"state", existingState}
                 };
-                var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
                                                           {
-                                                              State = existingState,
-                                                              CallBackUri = new Uri("http://2p1s.com")
+                                                              State = existingState
                                                           };
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => googleProvider.AuthenticateClient(googleAuthenticationServiceSettings, queryStringParameters));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Failed to retrieve an authorization code from Google. The error provided is: I dont' always use bayonets. But when I do, I transport them on Aircraft Carriers.",
+                    "Failed to retrieve an authorization code from GitHub. The error provided is: I dont' always use bayonets. But when I do, I transport them on Aircraft Carriers.",
                     result.Message);
             }
 
@@ -60,62 +47,60 @@ namespace WorldDomination.Web.Authentication.Tests
             public void GivenNoCodeAndNoErrorWasReturned_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var googleProvider = new GoogleProvider("aa", "bb");
+                var githubProvider = new GitHubProvider("aa", "bb", null);
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"aaa", "bbb"},
                     {"state", existingState}
                 };
-                var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
                                                           {
-                                                              State = existingState,
-                                                              CallBackUri = new Uri("http://2p1s.com")
+                                                              State = existingState
                                                           };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => googleProvider.AuthenticateClient(googleAuthenticationServiceSettings, queryStringParameters));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("No code parameter provided in the response query string from Google.", result.Message);
+                Assert.Equal("No code parameter provided in the response query string from GitHub.", result.Message);
             }
 
             [Fact]
             public void GivenANullCallbackUriWhileTryingToRetrieveAnAccessToken_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
+                var mockRestClient = new Mock<IRestClient>();
                 var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.BadRequest);
                 mockRestResponse.Setup(x => x.StatusDescription).Returns("Bad Request");
                 mockRestResponse.Setup(x => x.Content).Returns("{\n  \"error\" : \"invalid_request\"\n}");
-                var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        new RestClientFactory(mockRestClient.Object));
+                var githubProvider = new GitHubProvider("aa", "bb", new RestClientFactory(mockRestClient.Object));
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"code", "aaa"},
                     {"state", existingState}
                 };
-                var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
                                                           {
-                                                              State = existingState,
-                                                              CallBackUri = new Uri("http://2p1s.com")
+                                                              CallBackUri = new Uri("http://2p1s.com"),
+                                                              State = existingState
                                                           };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => googleProvider.AuthenticateClient(googleAuthenticationServiceSettings, queryStringParameters));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Failed to obtain an Access Token from Google OR the the response was not an HTTP Status 200 OK. Response Status: BadRequest. Response Description: Bad Request",
+                    "Failed to obtain an Access Token from GitHub OR the the response was not an HTTP Status 200 OK. Response Status: BadRequest. Response Description: Bad Request",
                     result.Message);
             }
 
@@ -123,20 +108,18 @@ namespace WorldDomination.Web.Authentication.Tests
             public void GivenAnErrorOccuredWhileTryingToRetrieveAnAccessToken_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                const string errorMessage =
-                    "If God says he was not created by a creator, does that mean: god is an aetheist?"; 
-                var mockRestClient = MockRestClient;
+                var mockRestClient = new Mock<IRestClient>();
+                const string errorMessage = "If God says he was not created by a creator, does that mean: god is an aetheist?";
                 mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                               .Throws(new InvalidOperationException(errorMessage));
-                var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        new RestClientFactory(mockRestClient.Object));
+                var githubProvider = new GitHubProvider("aa", "bb", new RestClientFactory(mockRestClient.Object));
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"code", "aaa"},
                     {"state", existingState}
                 };
-                var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
                                                           {
                                                               State = existingState,
                                                               CallBackUri = new Uri("http://2p1s.com")
@@ -144,11 +127,11 @@ namespace WorldDomination.Web.Authentication.Tests
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => googleProvider.AuthenticateClient(googleAuthenticationServiceSettings, queryStringParameters));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Failed to obtain an Access Token from Google.", result.Message);
+                Assert.Equal("Failed to obtain an Access Token from GitHub.", result.Message);
                 Assert.NotNull(result.InnerException);
                 Assert.Equal(errorMessage, result.InnerException.Message);
             }
@@ -157,35 +140,34 @@ namespace WorldDomination.Web.Authentication.Tests
             public void GivenAnInvalidRequestToken_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
+                var mockRestClient = new Mock<IRestClient>();
                 var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
                 mockRestResponse.Setup(x => x.StatusDescription).Returns("Unauthorized");
-                var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        new RestClientFactory(mockRestClient.Object));
+                var githubProvider = new GitHubProvider("aa", "bb", new RestClientFactory(mockRestClient.Object));
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"code", "aaa"},
                     {"state", existingState}
                 };
-                var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
                                                           {
-                                                              State = existingState,
-                                                              CallBackUri = new Uri("http://2p1s.com")
+                                                              CallBackUri = new Uri("http://2p1s.com"),
+                                                              State = existingState
                                                           };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => googleProvider.AuthenticateClient(googleAuthenticationServiceSettings, queryStringParameters));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Failed to obtain an Access Token from Google OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
+                    "Failed to obtain an Access Token from GitHub OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
                     result.Message);
             }
 
@@ -193,23 +175,21 @@ namespace WorldDomination.Web.Authentication.Tests
             public void GivenAnRequestTokenWithMissingParameters_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                
+                var mockRestClient = new Mock<IRestClient>();
                 var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult());
-                var mockRestClient = MockRestClient;
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        new RestClientFactory(mockRestClient.Object));
+                var githubProvider = new GitHubProvider("aa", "bb", new RestClientFactory(mockRestClient.Object));
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"code", "aaa"},
                     {"state", existingState}
                 };
-                var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
                                                           {
                                                               State = existingState,
                                                               CallBackUri = new Uri("http://2p1s.com")
@@ -217,12 +197,12 @@ namespace WorldDomination.Web.Authentication.Tests
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => googleProvider.AuthenticateClient(googleAuthenticationServiceSettings, queryStringParameters));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Retrieved a Google Access Token but it doesn't contain one or more of either: access_token, expires_in or token_type",
+                    "Retrieved a GitHub Access Token but it doesn't contain one or more of either: access_token or token_type",
                     result.Message);
             }
 
@@ -235,9 +215,6 @@ namespace WorldDomination.Web.Authentication.Tests
                 mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
                 {
                     AccessToken = "aaa",
-                    ExpiresIn = 100,
-                    IdToken =
-                        "What if that sexy girl in that pop up chat really does want to meet people in my area?",
                     TokenType = "overly attached girlfriend"
                 });
 
@@ -245,23 +222,23 @@ namespace WorldDomination.Web.Authentication.Tests
                 mockRestResponseUserInfo.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
                 mockRestResponseUserInfo.Setup(x => x.StatusDescription).Returns("Unauthorized");
 
-                var mockRestClient = MockRestClient;
+                var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
+
                 mockRestClient.
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
 
-                var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        new RestClientFactory(mockRestClient.Object));
+                var githubProvider = new GitHubProvider("aa", "bb", new RestClientFactory(mockRestClient.Object));
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"code", "aaa"},
                     {"state", existingState}
                 };
-                var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
                                                           {
                                                               State = existingState,
                                                               CallBackUri = new Uri("http://2p1s.com")
@@ -269,12 +246,12 @@ namespace WorldDomination.Web.Authentication.Tests
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => googleProvider.AuthenticateClient(googleAuthenticationServiceSettings, queryStringParameters));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Failed to obtain User Info from Google OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
+                    "Failed to obtain User Info from GitHub OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
                     result.Message);
             }
 
@@ -287,9 +264,6 @@ namespace WorldDomination.Web.Authentication.Tests
                 mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
                 {
                     AccessToken = "aaa",
-                    ExpiresIn = 100,
-                    IdToken =
-                        "What if that sexy girl in that pop up chat really does want to meet people in my area?",
                     TokenType = "overly attached girlfriend"
                 });
 
@@ -297,23 +271,23 @@ namespace WorldDomination.Web.Authentication.Tests
                 mockRestResponseUserInfo.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponseUserInfo.Setup(x => x.Data).Returns(new UserInfoResult()); // Missing required info.
 
-                var mockRestClient = MockRestClient;
+                var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
+
                 mockRestClient.
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
 
-                var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        new RestClientFactory(mockRestClient.Object));
+                var githubProvider = new GitHubProvider("aa", "bb", new RestClientFactory(mockRestClient.Object));
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
                     {"code", "aaa"},
                     {"state", existingState}
                 };
-                var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
                                                           {
                                                               State = existingState,
                                                               CallBackUri = new Uri("http://2p1s.com")
@@ -321,12 +295,12 @@ namespace WorldDomination.Web.Authentication.Tests
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => googleProvider.AuthenticateClient(googleAuthenticationServiceSettings, queryStringParameters));
+                    () => githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "We were unable to retrieve the User Id from Google API, the user may have denied the authorization.",
+                    "Retrieve some user info from the GitHub Api, but we're missing one or more of either: Id, Login, and Name.",
                     result.Message);
             }
 
@@ -335,36 +309,27 @@ namespace WorldDomination.Web.Authentication.Tests
             {
                 // Arrange.
                 const string accessToken = "aaa";
-                const int expiresIn = 100;
                 var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
                 {
                     AccessToken = accessToken,
-                    ExpiresIn = expiresIn,
-                    IdToken =
-                        "What if that sexy girl in that pop up chat really does want to meet people in my area?",
                     TokenType = "overly attached girlfriend"
                 });
 
                 var userInfoResult = new UserInfoResult
                 {
                     Email = "aaa",
-                    FamilyName = "bbb",
-                    Gender = "male",
-                    GivenName = "ccc",
-                    Id = "ddd",
-                    Link = "http://2p1s.com",
-                    Locale = "en-au",
+                    Id = 1,
+                    Login = "fun",
                     Name = "eee",
-                    Picture = "http://2p1s.com/zomg",
-                    VerifiedEmail = true
+                    AvatarUrl = "http://2p1s.com/zomg",
                 };
                 var mockRestResponseUserInfo = new Mock<IRestResponse<UserInfoResult>>();
                 mockRestResponseUserInfo.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponseUserInfo.Setup(x => x.Data).Returns(userInfoResult);
 
-                var mockRestClient = MockRestClient;
+                var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
@@ -373,8 +338,7 @@ namespace WorldDomination.Web.Authentication.Tests
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
 
-                var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        new RestClientFactory(mockRestClient.Object));
+                var githubProvider = new GitHubProvider("aa", "bb", new RestClientFactory(mockRestClient.Object));
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
 
                 var queryStringParameters = new NameValueCollection
@@ -382,27 +346,27 @@ namespace WorldDomination.Web.Authentication.Tests
                     {"code", accessToken},
                     {"state", existingState}
                 };
-                var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
+                var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
                                                           {
                                                               State = existingState,
                                                               CallBackUri = new Uri("http://2p1s.com")
                                                           };
 
                 // Act.
-                var result = googleProvider.AuthenticateClient(googleAuthenticationServiceSettings, queryStringParameters);
+                var result = githubProvider.AuthenticateClient(gitHubAuthenticationServiceSettings, queryStringParameters);
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("google", result.ProviderName);
+                Assert.Equal("github", result.ProviderName);
                 Assert.Equal(accessToken, result.AccessToken);
-                Assert.True(DateTime.UtcNow < result.AccessTokenExpiresOn);
+                Assert.Equal(new DateTime(),result.AccessTokenExpiresOn);
                 Assert.NotNull(result.UserInformation);
-                Assert.Equal(GenderType.Male, result.UserInformation.Gender);
-                Assert.Equal(userInfoResult.Id, result.UserInformation.Id);
-                Assert.Equal(userInfoResult.Locale, result.UserInformation.Locale);
+                Assert.Equal(GenderType.Unknown, result.UserInformation.Gender);
+                Assert.Equal(userInfoResult.Id.ToString(), result.UserInformation.Id);
+                Assert.Equal(userInfoResult.Location, result.UserInformation.Locale);
                 Assert.Equal(userInfoResult.Name, result.UserInformation.Name);
-                Assert.Equal(userInfoResult.Picture, result.UserInformation.Picture);
-                Assert.Equal(userInfoResult.GivenName, result.UserInformation.UserName);
+                Assert.Equal(userInfoResult.AvatarUrl, result.UserInformation.Picture);
+                Assert.Equal(userInfoResult.Login, result.UserInformation.UserName);
             }
         }
 
@@ -412,20 +376,21 @@ namespace WorldDomination.Web.Authentication.Tests
             public void GivenSomeState_RedirectToAuthenticate_ReturnsAUri()
             {
                 // Arrange.
-                var googleProvider = new GoogleProvider("aa", "bb");
+                var githubProvider = new GitHubProvider("aa", "bb", null);
 
                 // Act.
                 var result =
-                    googleProvider.RedirectToAuthenticate(new GoogleAuthenticationServiceSettings
+                    githubProvider.RedirectToAuthenticate(new GitHubAuthenticationServiceSettings
                     {
-                        State = "bleh",
-                        CallBackUri = new Uri("http://2p1s.com")
+                        CallBackUri =
+                            new Uri("http://wwww.pewpew.com/"),
+                        State = "bleh"
                     });
 
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "https://accounts.google.com/o/oauth2/auth?client_id=aa&redirect_uri=http://2p1s.com/&response_type=code&state=bleh&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email",
+                    "https://github.com/login/oauth/authorize?client_id=aa&redirect_uri=http://wwww.pewpew.com/&response_type=code&state=bleh",
                     result.AbsoluteUri);
             }
         }
