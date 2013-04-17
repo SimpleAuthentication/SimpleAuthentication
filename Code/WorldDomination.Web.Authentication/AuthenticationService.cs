@@ -20,8 +20,7 @@ namespace WorldDomination.Web.Authentication
 
         public AuthenticationService()
         {
-            var providerConfig = ConfigurationManager.GetSection("authenticationProviders") as ProviderConfiguration;
-
+            var providerConfig = ProviderConfigHelper.UseConfig();
             if (providerConfig != null)
             {
                 Initialize(providerConfig);
@@ -116,7 +115,7 @@ namespace WorldDomination.Web.Authentication
             if (provider == null)
             {
                 throw new ApplicationException(
-                    string.Format("Unable to find provider {0}, ensure you registered in the web.config or via code.",
+                    string.Format("Unable to find the provider [{0}]. Is there a provider dll available? Is there a typo in the provider name? Solution suggestions: Check to make sure the correct dll's are in the 'bin' directory and/or check the name to make sure there's no typo's in there. Example: If you're trying include the GitHub provider, make sure the name is 'github' (any case) and that the ExtraProviders dll exists in the 'bin' directory.",
                                   name));
             }
 

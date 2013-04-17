@@ -5,6 +5,7 @@ using Autofac;
 using Autofac.Integration.Mvc;
 using MvcAutomatedSample.App_Start;
 using WorldDomination.Web.Authentication;
+using WorldDomination.Web.Authentication.Config;
 using WorldDomination.Web.Authentication.Mvc;
 
 namespace MvcAutomatedSample
@@ -24,11 +25,13 @@ namespace MvcAutomatedSample
 
             var builder = new ContainerBuilder();
             builder.RegisterType<SampleCallbackProvider>().As<IAuthenticationCallbackProvider>();
-            builder.RegisterType<AuthenticationService>().As<IAuthenticationService>().SingleInstance();
+            //builder.RegisterType<AuthenticationService>().As<IAuthenticationService>().SingleInstance();
+            builder.Register<IAuthenticationService>(x => new AuthenticationService());
             builder.RegisterControllers(typeof(MvcApplication).Assembly);
             builder.RegisterControllers(typeof(WorldDominationAuthenticationController).Assembly);
             var container = builder.Build();
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));
+
         }
     }
 }

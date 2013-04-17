@@ -101,6 +101,10 @@ namespace WorldDomination.Web.Authentication.Mvc
             // Pull the "ToKeep" token from the cookie and the "ToSend" token from the query string
             var keptToken = DeserializeToken(Request);
             var recievedToken = Request.QueryString["state"];
+            if (string.IsNullOrEmpty(recievedToken))
+            {
+                throw new InvalidOperationException("No state/recievedToken was retrieved from the provider. Are you sure you passed any state/token data to provider .. and .. that the provider can send it back to us? We need this to prevent any Cross site request forgery.");
+            }
 
             // Validate the token against the recieved one and grab extra data
             string extraData = _antiForgery.ValidateToken(keptToken, recievedToken);

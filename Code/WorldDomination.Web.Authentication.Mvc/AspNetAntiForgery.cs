@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web.Helpers;
-using WorldDomination.Web.Authentication.Csrf;
-
-using SystemWebAntiForgery = System.Web.Helpers.AntiForgery;
+﻿using System.Web.Helpers;
 using AntiForgery = WorldDomination.Web.Authentication.Csrf.AntiForgery;
+using SystemWebAntiForgery = System.Web.Helpers.AntiForgery;
 
 namespace WorldDomination.Web.Authentication.Mvc
 {
@@ -30,7 +24,8 @@ namespace WorldDomination.Web.Authentication.Mvc
             toSend = GenerateExtraData(extraData, toSend);
         }
 
-        protected override void SelectTokens(string keptToken, string recievedToken, out string pureToken, out string tokenWithExtraData)
+        protected override void SelectTokens(string keptToken, string recievedToken, out string pureToken,
+                                             out string tokenWithExtraData)
         {
             pureToken = keptToken;
             tokenWithExtraData = recievedToken;
