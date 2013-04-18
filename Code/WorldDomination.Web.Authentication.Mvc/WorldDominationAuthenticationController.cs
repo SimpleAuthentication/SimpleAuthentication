@@ -8,11 +8,13 @@ namespace WorldDomination.Web.Authentication.Mvc
     public class WorldDominationAuthenticationController : Controller
     {
         private readonly IAntiForgery _antiForgery;
+        private readonly LoggingWrapper _log;
         private string _cookieName;
 
         public WorldDominationAuthenticationController(IAuthenticationService authenticationService,
                                                        IAuthenticationCallbackProvider callbackProvider,
-                                                       IAntiForgery antiForgery = null)
+                                                       IAntiForgery antiForgery = null,
+                                                       ILoggingService loggingService = null)
         {
             if (authenticationService == null)
             {
@@ -29,6 +31,9 @@ namespace WorldDomination.Web.Authentication.Mvc
 
             // If no anti forgery class is provided, then we'll just use the default.
             _antiForgery = antiForgery ?? new AspNetAntiForgery();
+
+            // NOTE: loggingService can be null, which means we don't care about logging.
+            _log = new LoggingWrapper(loggingService);
         }
 
         protected IAuthenticationService AuthenticationService { get; private set; }
@@ -44,22 +49,29 @@ namespace WorldDomination.Web.Authentication.Mvc
 
         public RedirectResult RedirectToProvider(RedirectToProviderInputModel inputModel)
         {
+            _log.Debug("RedirectToProvider: starting to redirect to the provider.");
+
             if (!ModelState.IsValid)
             {
-                throw new ArgumentException(
-                    "Some binding errors occured. This means at least one Request value (eg. form post or querystring parameter) provided is invalid. Generally, we need a ProviderName as a string.");
+                const string errorMessage = "Some binding errors occured. This means at least one Request value (eg. form post or querystring parameter) provided is invalid. Generally, we need a ProviderName as a string.";;
+                _log.Error(errorMessage);
+                throw new ArgumentException(errorMessage);
             }
 
             if (string.IsNullOrEmpty(inputModel.ProviderKey))
             {
-                throw new ArgumentException(
-                    "ProviderKey value missing. You need to supply a valid provider key so we know where to redirect the user Eg. google.");
+                const string errorMessage = "ProviderKey value missing. You need to supply a valid provider key so we know where to redirect the user Eg. google.";
+                _log.Error(errorMessage);
+                throw new ArgumentException(errorMessage);
             }
 
             // Grab the required Provider settings.
             var settings = AuthenticationService.GetAuthenticateServiceSettings(inputModel.ProviderKey,
                                                                                 Request.Url,
                                                                                 Url.CallbackFromOAuthProvider());
+
+            _log.Info(string.Format("RedirectToProvider: Provider [{0}].", settings.ProviderName));
+            _log.Info(string.Format("RedirectToProvider: Callback Url [{0}].", settings.CallBackUri));
 
             // An OpenId specific settings provided?
             if (!string.IsNullOrEmpty(inputModel.Identifier) &&
@@ -95,6 +107,8 @@ namespace WorldDomination.Web.Authentication.Mvc
 
             // Put the "ToSend" value in the state parameter to send along to the OAuth Provider.
             settings.State = token.ToSend;
+
+            _log.Info(string.Format("RedirectToProvider: State [{0}].", settings.State));
 
             // Serialize the ToKeep value in the cookie.
             SerializeToken(Response, token.ToKeep);
@@ -193,10 +207,10 @@ namespace WorldDomination.Web.Authentication.Mvc
 
             // Create a cookie.
             var cookie = new HttpCookie(CsrfCookieName)
-                         {
-                             Value = token,
-                             HttpOnly = true
-                         };
+            {
+                Value = token,
+                HttpOnly = true
+            };
 
             if (expiryDate.HasValue)
             {

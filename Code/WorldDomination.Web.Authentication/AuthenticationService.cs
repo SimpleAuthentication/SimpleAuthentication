@@ -4,7 +4,6 @@ using System.Collections.Specialized;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.ComponentModel.Composition.ReflectionModel;
-using System.Configuration;
 using System.Linq;
 using WorldDomination.Web.Authentication.Config;
 using WorldDomination.Web.Authentication.Facebook;
@@ -18,8 +17,12 @@ namespace WorldDomination.Web.Authentication
         private readonly Lazy<IEnumerable<Type>> _discoveredProviders =
             new Lazy<IEnumerable<Type>>(GetExportedTypes<IAuthenticationProvider>);
 
-        public AuthenticationService()
+        private readonly LoggingWrapper _log;
+
+        public AuthenticationService(ILoggingService loggingService = null)
         {
+            _log = new LoggingWrapper(loggingService);
+
             var providerConfig = ProviderConfigHelper.UseConfig();
             if (providerConfig != null)
             {
@@ -27,8 +30,11 @@ namespace WorldDomination.Web.Authentication
             }
         }
 
-        public AuthenticationService(IEnumerable<IAuthenticationProvider> providers)
+        public AuthenticationService(IEnumerable<IAuthenticationProvider> providers,
+                                     ILoggingService loggingService = null)
         {
+            _log = new LoggingWrapper(loggingService);
+
             // Skip the config-based initialization, we've got a list of providers directly.
             foreach (var provider in providers)
             {
@@ -37,8 +43,12 @@ namespace WorldDomination.Web.Authentication
         }
 
         public AuthenticationService(ProviderConfiguration providerConfiguration,
-                                     IList<string> scope = null, IRestClientFactory restClientFactory = null)
+                                     ILoggingService loggingService = null,
+                                     IList<string> scope = null,
+                                     IRestClientFactory restClientFactory = null)
         {
+            _log = new LoggingWrapper(loggingService);
+
             Initialize(providerConfiguration, scope, restClientFactory);
         }
 
@@ -47,8 +57,11 @@ namespace WorldDomination.Web.Authentication
         public void Initialize(ProviderConfiguration providerConfiguration, IList<string> scope = null,
                                IRestClientFactory restClientFactory = null)
         {
+            _log.Debug("Initialize: Starting to initialize the Authentication Service.");
+
             if (providerConfiguration == null)
             {
+                _log.Error("Initialize: providerConfiguration instance is null.");
                 throw new ArgumentNullException("providerConfiguration");
             }
 
@@ -57,8 +70,12 @@ namespace WorldDomination.Web.Authentication
                 throw new ArgumentException("providerConfiguration.Providers");
             }
 
+            _log.Debug("Initialize: Provided scope: " +
+                       (scope == null ? "none special scope provided" : string.Join(", ", scope).Trim()));
+
             foreach (ProviderKey provider in providerConfiguration.Providers)
             {
+                _log.Debug(string.Format("Initialize: Looking up provider [{0}].", provider.Name));
                 IAuthenticationProvider authenticationProvider;
 
                 switch (provider.Name.ToLowerInvariant())
@@ -76,6 +93,8 @@ namespace WorldDomination.Web.Authentication
                         authenticationProvider = DiscoverProvider(provider, restClientFactory);
                         break;
                 }
+
+                _log.Debug(string.Format("Initialize: Found provider instance [{0}]", authenticationProvider.Name));
 
                 AddProvider(authenticationProvider);
             }
@@ -108,23 +127,30 @@ namespace WorldDomination.Web.Authentication
 
         private IAuthenticationProvider DiscoverProvider(ProviderKey providerKey, IRestClientFactory restClientFactory)
         {
+            _log.Debug(string.Format("DiscoverProvider: Trying to find discovered (aka. reflected) provider [{0}]",
+                                     providerKey.Name));
+
             var name = providerKey.Name.ToLowerInvariant();
 
             var provider = _discoveredProviders.Value.SingleOrDefault(x => x.Name.ToLowerInvariant().StartsWith(name));
 
             if (provider == null)
             {
-                throw new ApplicationException(
-                    string.Format("Unable to find the provider [{0}]. Is there a provider dll available? Is there a typo in the provider name? Solution suggestions: Check to make sure the correct dll's are in the 'bin' directory and/or check the name to make sure there's no typo's in there. Example: If you're trying include the GitHub provider, make sure the name is 'github' (any case) and that the ExtraProviders dll exists in the 'bin' directory.",
-                                  name));
+                var errorMessage = string.Format(
+                    "Unable to find the provider [{0}]. Is there a provider dll available? Is there a typo in the provider name? Solution suggestions: Check to make sure the correct dll's are in the 'bin' directory and/or check the name to make sure there's no typo's in there. Example: If you're trying include the GitHub provider, make sure the name is 'github' (any case) and that the ExtraProviders dll exists in the 'bin' directory.",
+                    name);
+                _log.Error(errorMessage);
+                throw new ApplicationException(errorMessage);
             }
 
+            _log.Debug("DiscoverProvider: Found the requested discovered-provider.");
+
             var parameters = new CustomProviderParams
-                             {
-                                 Key = providerKey.Key,
-                                 Secret = providerKey.Secret,
-                                 RestClientFactory = restClientFactory
-                             };
+            {
+                Key = providerKey.Key,
+                Secret = providerKey.Secret,
+                RestClientFactory = restClientFactory
+            };
 
             return Activator.CreateInstance(provider, parameters) as IAuthenticationProvider;
         }
@@ -140,7 +166,10 @@ namespace WorldDomination.Web.Authentication
 
             if (authenticationProvider == null)
             {
-                throw new AuthenticationException(string.Format("No '{0}' provider details have been added/provided. Maybe you forgot to add the name/key/value data into your web.config? Eg. in your web.config configuration/authenticationProviders/providers section add the following (if you want to offer Google authentication): <add name=\"Google\" key=\"someNumber.apps.googleusercontent.com\" secret=\"someSecret\" />", providerKey));
+                throw new AuthenticationException(
+                    string.Format(
+                        "No '{0}' provider details have been added/provided. Maybe you forgot to add the name/key/value data into your web.config? Eg. in your web.config configuration/authenticationProviders/providers section add the following (if you want to offer Google authentication): <add name=\"Google\" key=\"someNumber.apps.googleusercontent.com\" secret=\"someSecret\" />",
+                        providerKey));
             }
 
             return authenticationProvider;
@@ -164,10 +193,10 @@ namespace WorldDomination.Web.Authentication
             }
 
             var builder = new UriBuilder(requestUrl)
-                          {
-                              Path = path,
-                              Query = "providerkey=" + providerKey.ToLowerInvariant()
-                          };
+            {
+                Path = path,
+                Query = "providerkey=" + providerKey.ToLowerInvariant()
+            };
 
             // Don't include port 80/443 in the Uri.
             if (builder.Uri.IsDefaultPort)
@@ -303,7 +332,7 @@ namespace WorldDomination.Web.Authentication
 
             var authenticationProvider = GetAuthenticationProvider(name);
             var settings = authenticationProvider.DefaultAuthenticationServiceSettings;
-            
+
             // Setup up some defaults.
             settings.State = Guid.NewGuid().ToString();
             settings.CallBackUri = CreateCallBackUri(providerKey, requestUrl, path);
