@@ -213,6 +213,11 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
             };
         }
 
+        private static string UrlEncode(string url)
+        {
+            return Uri.EscapeDataString(url).Replace("%20", "+");
+
+        }
         #region Implementation of IAuthenticationProvider
 
         public string Name
@@ -251,6 +256,9 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
                 return null;
             }
 
+            var callbackUri = UrlEncode(string.Format("{0}&state={1}",
+                                                      authenticationServiceSettings.CallBackUri.AbsoluteUri,
+                                                      authenticationServiceSettings.State));
             var urlParts = new[]
             {
                 "openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select",
@@ -261,8 +269,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.OpenId
                 "openid.sreg.required=nickname",
                 "openid.sreg.optional=email,fullname,gender,language",
                 "no_ssl=true",
-                "openid.return_to=" + authenticationServiceSettings.CallBackUri.AbsoluteUri,
-                "openid.realm=" + authenticationServiceSettings.CallBackUri.AbsoluteUri
+                "openid.return_to=" + callbackUri,
+                "openid.realm=" + callbackUri
             };
 
             var url = string.Concat(openIdEndPoint.AbsoluteUri, "?", string.Join("&", urlParts));

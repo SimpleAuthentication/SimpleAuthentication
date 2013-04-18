@@ -140,7 +140,7 @@ namespace WorldDomination.Web.Authentication
 
             if (authenticationProvider == null)
             {
-                throw new AuthenticationException(string.Format("No '{0}' provider has been added.", providerKey));
+                throw new AuthenticationException(string.Format("No '{0}' provider details have been added/provided. Maybe you forgot to add the name/key/value data into your web.config? Eg. in your web.config configuration/authenticationProviders/providers section add the following (if you want to offer Google authentication): <add name=\"Google\" key=\"someNumber.apps.googleusercontent.com\" secret=\"someSecret\" />", providerKey));
             }
 
             return authenticationProvider;
@@ -301,23 +301,9 @@ namespace WorldDomination.Web.Authentication
                 throw new ArgumentNullException("providerKey");
             }
 
-            IAuthenticationServiceSettings settings;
-            switch (name)
-            {
-                case "facebook":
-                    settings = new FacebookAuthenticationServiceSettings();
-                    break;
-                case "google":
-                    settings = new GoogleAuthenticationServiceSettings();
-                    break;
-                case "twitter":
-                    settings = new TwitterAuthenticationServiceSettings();
-                    break;
-                default:
-                    settings = AuthenticationProviders[name].DefaultAuthenticationServiceSettings;
-                    break;
-            }
-
+            var authenticationProvider = GetAuthenticationProvider(name);
+            var settings = authenticationProvider.DefaultAuthenticationServiceSettings;
+            
             // Setup up some defaults.
             settings.State = Guid.NewGuid().ToString();
             settings.CallBackUri = CreateCallBackUri(providerKey, requestUrl, path);

@@ -44,21 +44,32 @@ namespace WorldDomination.Web.Authentication.Twitter
             _restClientFactory = restClientFactory ?? new RestClientFactory();
         }
 
-        private RequestTokenResult RetrieveRequestToken(Uri callBackUri)
+        private RequestTokenResult RetrieveRequestToken(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            if (callBackUri == null ||
-                string.IsNullOrEmpty(callBackUri.AbsoluteUri))
+            if (authenticationServiceSettings == null)
             {
-                throw new ArgumentNullException("callBackUri");
+                throw new ArgumentNullException("authenticationServiceSettings");
+            }
+
+            if (authenticationServiceSettings.CallBackUri == null ||
+                string.IsNullOrEmpty(authenticationServiceSettings.CallBackUri.AbsoluteUri))
+            {
+                throw new ArgumentException("AuthenticationServiceSettings.CallBackUri");
+            }
+
+            if (string.IsNullOrEmpty(authenticationServiceSettings.State))
+            {
+                throw new ArgumentException("AuthenticationServiceSettings.State");
             }
 
             IRestResponse response;
+            var callBackUri = string.Format("{0}&state={1}", authenticationServiceSettings.CallBackUri,
+                                            authenticationServiceSettings.State);
 
             try
             {
                 var restClient = _restClientFactory.CreateRestClient(BaseUrl);
-                restClient.Authenticator = OAuth1Authenticator.ForRequestToken(_consumerKey, _consumerSecret,
-                                                                                callBackUri.AbsoluteUri);
+                restClient.Authenticator = OAuth1Authenticator.ForRequestToken(_consumerKey, _consumerSecret, callBackUri);
                 var request = new RestRequest("oauth/request_token", Method.POST);
                 response = restClient.Execute(request);
             }
@@ -249,7 +260,7 @@ namespace WorldDomination.Web.Authentication.Twitter
             }
 
             // First we need to grab a request token.
-            var oAuthToken = RetrieveRequestToken(authenticationServiceSettings.CallBackUri);
+            var oAuthToken = RetrieveRequestToken(authenticationServiceSettings);
 
             // Now we need the user to enter their name/password/accept this app @ Twitter.
             // This means we need to redirect them to the Twitter website.

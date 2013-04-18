@@ -42,19 +42,38 @@ namespace WorldDomination.Web.Authentication.Mvc
             set { _cookieName = value; }
         }
 
-        public RedirectResult RedirectToProvider(string providerkey)
+        public RedirectResult RedirectToProvider(RedirectToProviderInputModel inputModel)
         {
-            if (string.IsNullOrEmpty(providerkey))
+            if (!ModelState.IsValid)
             {
                 throw new ArgumentException(
-                    "You need to supply a valid provider key so we know where to redirect the user.");
+                    "Some binding errors occured. This means at least one Request value (eg. form post or querystring parameter) provided is invalid. Generally, we need a ProviderName as a string.");
+            }
+
+            if (string.IsNullOrEmpty(inputModel.ProviderKey))
+            {
+                throw new ArgumentException(
+                    "ProviderKey value missing. You need to supply a valid provider key so we know where to redirect the user Eg. google.");
             }
 
             // Grab the required Provider settings.
-            var settings = AuthenticationService.GetAuthenticateServiceSettings(providerkey, Request.Url,
+            var settings = AuthenticationService.GetAuthenticateServiceSettings(inputModel.ProviderKey,
+                                                                                Request.Url,
                                                                                 Url.CallbackFromOAuthProvider());
 
-            // Generate the Csrf token. 
+            // An OpenId specific settings provided?
+            if (!string.IsNullOrEmpty(inputModel.Identifier) &&
+                settings is IOpenIdAuthenticationServiceSettings)
+            {
+                Uri identifier;
+                if (!Uri.TryCreate(inputModel.Identifier, UriKind.RelativeOrAbsolute, out identifier))
+                {
+                    throw new ArgumentException(
+                        "Indentifier value was not in the correct Uri format. Eg. http://myopenid.com or https://yourname.myopenid.com");
+                }
+                ((IOpenIdAuthenticationServiceSettings) settings).Identifier = identifier;
+            }
+
             // Our convention is to remember some redirect url once we are finished in the callback.
             // NOTE: If no redirectUrl data has been provided, then default to the Referrer, if one exists.
             string extraData = null;
@@ -103,7 +122,8 @@ namespace WorldDomination.Web.Authentication.Mvc
             var recievedToken = Request.QueryString["state"];
             if (string.IsNullOrEmpty(recievedToken))
             {
-                throw new InvalidOperationException("No state/recievedToken was retrieved from the provider. Are you sure you passed any state/token data to provider .. and .. that the provider can send it back to us? We need this to prevent any Cross site request forgery.");
+                throw new InvalidOperationException(
+                    "No state/recievedToken was retrieved from the provider. Are you sure you passed any state/token data to provider .. and .. that the provider can send it back to us? We need this to prevent any Cross site request forgery.");
             }
 
             // Validate the token against the recieved one and grab extra data
