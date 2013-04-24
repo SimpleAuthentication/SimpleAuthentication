@@ -29,10 +29,23 @@ namespace WorldDomination.Web.Authentication
 
         public AuthenticationService(IEnumerable<IAuthenticationProvider> providers)
         {
-            // Skip the config-based initialization, we've got a list of providers directly.
-            foreach (var provider in providers)
+            //Temp work around until we refactor the resolving of providers. 
+
+            if (providers == null || !providers.Any())
             {
-                AddProvider(provider);
+                var providerConfig = ProviderConfigHelper.UseConfig();
+                if (providerConfig != null)
+                {
+                    Initialize(providerConfig);
+                }
+            }
+            else
+            {
+                // Skip the config-based initialization, we've got a list of providers directly.
+                foreach (var provider in providers)
+                {
+                    AddProvider(provider);
+                }
             }
         }
 
@@ -120,11 +133,11 @@ namespace WorldDomination.Web.Authentication
             }
 
             var parameters = new CustomProviderParams
-                             {
-                                 Key = providerKey.Key,
-                                 Secret = providerKey.Secret,
-                                 RestClientFactory = restClientFactory
-                             };
+            {
+                Key = providerKey.Key,
+                Secret = providerKey.Secret,
+                RestClientFactory = restClientFactory
+            };
 
             return Activator.CreateInstance(provider, parameters) as IAuthenticationProvider;
         }
@@ -164,10 +177,10 @@ namespace WorldDomination.Web.Authentication
             }
 
             var builder = new UriBuilder(requestUrl)
-                          {
-                              Path = path,
-                              Query = "providerkey=" + providerKey.ToLowerInvariant()
-                          };
+            {
+                Path = path,
+                Query = "providerkey=" + providerKey.ToLowerInvariant()
+            };
 
             // Don't include port 80/443 in the Uri.
             if (builder.Uri.IsDefaultPort)
