@@ -1,0 +1,22 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login Page</title>
+        <link rel="stylesheet" type="text/css" href="/Content/main.css"/>
+    </head>
+    <body>
+        <div id="container">
+            <fieldset title="Login">
+                <legend>Login:</legend>
+                <a href="/authentication/redirect/twitter"><img src="/Content/twitter_32.png"></img></a>
+                <a href="/authentication/redirect/facebook"><img src="/Content/facebook_32.png"></img></a>
+                <a href="/authentication/redirect/google"><img src="/Content/google_32.png"></img></a>
+            </fieldset>
+            
+            @If.HasError
+                <h2>Error Information</h2>
+                <p>Message: @Model.ErrorMessage</p>
+            @EndIf
+        </div>
+    </body>
+</html>
