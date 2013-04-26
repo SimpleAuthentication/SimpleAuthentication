@@ -1,5 +1,6 @@
 ﻿using Nancy;
 using Nancy.Authentication.WorldDomination;
+using WorldDomination.Sample.NancyAuto.Models;
 using WorldDomination.Sample.NancyAuto.Modules;
 
 namespace WorldDomination.Sample.NancyAuto.Helpers

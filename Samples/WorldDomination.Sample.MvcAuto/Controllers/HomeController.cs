@@ -1,4 +1,5 @@
 ﻿using System.Web.Mvc;
+using WorldDomination.Sample.MvcAuto.Models;
 
 namespace WorldDomination.Sample.MvcAuto.Controllers
 {

@@ -1,4 +1,4 @@
-﻿namespace WorldDomination.Sample.MvcAuto.Controllers
+﻿namespace WorldDomination.Sample.MvcAuto.Models
 {
     public class IndexViewModel
     {
