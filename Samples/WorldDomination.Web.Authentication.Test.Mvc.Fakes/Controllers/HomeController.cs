@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Web;
 using System.Web.Mvc;
-using WorldDomination.Web.Authentication.Facebook;
-using WorldDomination.Web.Authentication.Google;
+using WorldDomination.Web.Authentication.Providers.Facebook;
+using WorldDomination.Web.Authentication.Providers.Google;
+using WorldDomination.Web.Authentication.Providers.Twitter;
 using WorldDomination.Web.Authentication.Samples.Mvc.Fakes.Models;
-using WorldDomination.Web.Authentication.Twitter;
 
 namespace WorldDomination.Web.Authentication.Samples.Mvc.Fakes.Controllers
 {

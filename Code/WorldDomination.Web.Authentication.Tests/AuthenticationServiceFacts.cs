@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
-using WorldDomination.Web.Authentication.Facebook;
-using WorldDomination.Web.Authentication.Twitter;
+using WorldDomination.Web.Authentication.Providers;
 using Xunit;
 
 namespace WorldDomination.Web.Authentication.Tests

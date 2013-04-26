@@ -14,19 +14,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nancy.Authentication.WorldD
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.Samples.Mvc.Advanced", "Samples\WorldDomination.Web.Authentication.Test.Mvc.Advanced\WorldDomination.Web.Authentication.Samples.Mvc.Advanced.csproj", "{6EDC5354-2B54-4AD7-B0AB-CF873C8ED6E9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.Samples.Mvc.Fakes", "Samples\WorldDomination.Web.Authentication.Test.Mvc.Fakes\WorldDomination.Web.Authentication.Samples.Mvc.Fakes.csproj", "{D2D252E1-B10E-4802-A2AF-895E02C478F2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.Samples.Mvc.Simple", "Samples\WorldDomination.Web.Authentication.Test.Mvc.Simple\WorldDomination.Web.Authentication.Samples.Mvc.Simple.csproj", "{EFF9B222-5F74-422C-8587-B9EF2FD6B794}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.Tests", "Code\WorldDomination.Web.Authentication.Tests\WorldDomination.Web.Authentication.Tests.csproj", "{14AC417B-A1F8-4DEC-8FF0-EB6788C1C1AA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.ExtraProviders", "Code\WorldDomination.Web.Authentication.ExtraProviders\WorldDomination.Web.Authentication.ExtraProviders.csproj", "{D75207D5-FA68-4DC6-939A-2AC3CAD4BEAD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldDomination.Web.Authentication.Mvc", "Code\WorldDomination.Web.Authentication.Mvc\WorldDomination.Web.Authentication.Mvc.csproj", "{02C40D4A-17F3-465B-88D6-64D238A32396}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MvcAutomatedSample", "Samples\MvcAutomatedSample\MvcAutomatedSample.csproj", "{F31BEB50-1976-438E-B781-D7B045F84877}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared Assembly Info", "Shared Assembly Info", "{FF22FCB1-00D1-4E4D-88C9-3AE3040F512B}"
 	ProjectSection(SolutionItems) = preProject
@@ -53,18 +45,6 @@ Global
 		{94B8D947-6CAD-42C3-B328-F369CE7BC6C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94B8D947-6CAD-42C3-B328-F369CE7BC6C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94B8D947-6CAD-42C3-B328-F369CE7BC6C0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6EDC5354-2B54-4AD7-B0AB-CF873C8ED6E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6EDC5354-2B54-4AD7-B0AB-CF873C8ED6E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6EDC5354-2B54-4AD7-B0AB-CF873C8ED6E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6EDC5354-2B54-4AD7-B0AB-CF873C8ED6E9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D2D252E1-B10E-4802-A2AF-895E02C478F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D2D252E1-B10E-4802-A2AF-895E02C478F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D2D252E1-B10E-4802-A2AF-895E02C478F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D2D252E1-B10E-4802-A2AF-895E02C478F2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EFF9B222-5F74-422C-8587-B9EF2FD6B794}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EFF9B222-5F74-422C-8587-B9EF2FD6B794}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EFF9B222-5F74-422C-8587-B9EF2FD6B794}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EFF9B222-5F74-422C-8587-B9EF2FD6B794}.Release|Any CPU.Build.0 = Release|Any CPU
 		{14AC417B-A1F8-4DEC-8FF0-EB6788C1C1AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{14AC417B-A1F8-4DEC-8FF0-EB6788C1C1AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14AC417B-A1F8-4DEC-8FF0-EB6788C1C1AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -77,10 +57,6 @@ Global
 		{02C40D4A-17F3-465B-88D6-64D238A32396}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02C40D4A-17F3-465B-88D6-64D238A32396}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02C40D4A-17F3-465B-88D6-64D238A32396}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F31BEB50-1976-438E-B781-D7B045F84877}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F31BEB50-1976-438E-B781-D7B045F84877}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F31BEB50-1976-438E-B781-D7B045F84877}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F31BEB50-1976-438E-B781-D7B045F84877}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F1AAC5AC-C356-460D-B5FF-097E84301622}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F1AAC5AC-C356-460D-B5FF-097E84301622}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1AAC5AC-C356-460D-B5FF-097E84301622}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -98,10 +74,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{6EDC5354-2B54-4AD7-B0AB-CF873C8ED6E9} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}
-		{D2D252E1-B10E-4802-A2AF-895E02C478F2} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}
-		{EFF9B222-5F74-422C-8587-B9EF2FD6B794} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}
-		{F31BEB50-1976-438E-B781-D7B045F84877} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}
 		{F1AAC5AC-C356-460D-B5FF-097E84301622} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}
 		{7A535E50-D0F8-41D6-8C9C-2E942FA7FD90} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}
 		{C344D22C-5DC0-44E6-8595-D2EF49BF255B} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}

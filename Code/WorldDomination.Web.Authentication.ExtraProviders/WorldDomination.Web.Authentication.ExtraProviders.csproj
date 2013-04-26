@@ -50,12 +50,12 @@
     <Compile Include="..\Shared Assembly Info\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="GitHub\GitHubProvider.cs" />
+    <Compile Include="GitHubProvider.cs" />
     <Compile Include="GitHub\AccessTokenResult.cs" />
     <Compile Include="GitHub\FakeGitHubProvider.cs" />
     <Compile Include="GitHub\GitHubAuthenticationServiceSettings.cs" />
     <Compile Include="GitHub\UserInfoResult.cs" />
-    <Compile Include="OpenId\OpenIdProvider.cs" />
+    <Compile Include="OpenIdProvider.cs" />
     <Compile Include="OpenId\OpenIdAuthenticationServiceSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

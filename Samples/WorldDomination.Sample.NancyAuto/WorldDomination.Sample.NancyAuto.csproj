@@ -82,7 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Modules\HomeModule.cs" />
-    <Compile Include="Helpers\IndexViewModel.cs" />
+    <Compile Include="Models\IndexViewModel.cs" />
     <Compile Include="Helpers\SampleAuthenticationCallbackProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
