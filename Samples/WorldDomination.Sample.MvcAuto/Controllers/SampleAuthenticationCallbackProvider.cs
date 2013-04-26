@@ -19,5 +19,17 @@ namespace WorldDomination.Sample.MvcAuto.Controllers
                 })
             };
         }
+
+        public ActionResult OnRedirectToAuthenticationProviderError(HttpContextBase context, string errorMessage)
+        {
+            return new ViewResult
+            {
+                ViewName = "AuthenticateCallback",
+                ViewData = new ViewDataDictionary(new IndexViewModel
+                {
+                    ErrorMessage = errorMessage
+                })
+            };
+        }
     }
 }

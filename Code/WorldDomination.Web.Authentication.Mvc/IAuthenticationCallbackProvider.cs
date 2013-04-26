@@ -24,5 +24,13 @@ namespace WorldDomination.Web.Authentication.Mvc
         ///// <param name="Model"></param>
         ///// <returns></returns>
         //ActionResult Process(HttpContextBase context, AuthenticateCallbackError model);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="errorMessage"></param>
+        /// <returns></returns>
+        ActionResult OnRedirectToAuthenticationProviderError(HttpContextBase context, string errorMessage);
     }
 }

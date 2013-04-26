@@ -6,7 +6,7 @@ namespace WorldDomination.Sample.MvcAuto.Controllers
     {
         public ActionResult Index()
         {
-            return View();
+            return View("Index", new IndexViewModel());
         }
     }
 }

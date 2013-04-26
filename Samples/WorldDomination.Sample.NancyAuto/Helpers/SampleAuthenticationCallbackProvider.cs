@@ -1,7 +1,8 @@
 ﻿using Nancy;
 using Nancy.Authentication.WorldDomination;
+using WorldDomination.Sample.NancyAuto.Modules;
 
-namespace WorldDomination.Sample.NancyAuto.Modules
+namespace WorldDomination.Sample.NancyAuto.Helpers
 {
     public class SampleAuthenticationCallbackProvider : IAuthenticationCallbackProvider
     {
