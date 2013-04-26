@@ -62,14 +62,7 @@ namespace WorldDomination.Web.Authentication.Config
                 throw new ArgumentNullException(sectionName);
             }
             
-            var providerConfig = ConfigurationManager.GetSection(sectionName) as ProviderConfiguration;
-
-            if (providerConfig == null)
-            {
-                throw new ApplicationException("Missing the config section [" + sectionName + "] from your .config file");
-            }
-
-            return providerConfig;
+            return ConfigurationManager.GetSection(sectionName) as ProviderConfiguration;
         }
 
         public static ProviderKey For(this ProviderConfiguration section, string providerKey)
@@ -83,7 +76,5 @@ namespace WorldDomination.Web.Authentication.Config
 
             return provider;
         }
-
-        //public static 
     }
 }

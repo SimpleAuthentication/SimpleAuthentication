@@ -193,10 +193,10 @@ namespace WorldDomination.Web.Authentication.Mvc
 
             // Create a cookie.
             var cookie = new HttpCookie(CsrfCookieName)
-                         {
-                             Value = token,
-                             HttpOnly = true
-                         };
+            {
+                Value = token,
+                HttpOnly = true
+            };
 
             if (expiryDate.HasValue)
             {

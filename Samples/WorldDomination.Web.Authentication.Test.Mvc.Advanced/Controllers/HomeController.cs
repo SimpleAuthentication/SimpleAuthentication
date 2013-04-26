@@ -3,7 +3,7 @@ using System.Web;
 using System.Web.Mvc;
 using CuttingEdge.Conditions;
 using WorldDomination.Web.Authentication.Csrf;
-using WorldDomination.Web.Authentication.Facebook;
+using WorldDomination.Web.Authentication.Providers.Facebook;
 using WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Models;
 
 namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.Controllers

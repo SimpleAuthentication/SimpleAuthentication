@@ -3,7 +3,8 @@ using System.Collections.Specialized;
 using System.Net;
 using Moq;
 using RestSharp;
-using WorldDomination.Web.Authentication.Facebook;
+using WorldDomination.Web.Authentication.Providers;
+using WorldDomination.Web.Authentication.Providers.Facebook;
 using Xunit;
 
 namespace WorldDomination.Web.Authentication.Tests.ProviderFacts

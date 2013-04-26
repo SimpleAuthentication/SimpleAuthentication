@@ -3,7 +3,8 @@ using System.Collections.Specialized;
 using System.Net;
 using Moq;
 using RestSharp;
-using WorldDomination.Web.Authentication.Twitter;
+using WorldDomination.Web.Authentication.Providers;
+using WorldDomination.Web.Authentication.Providers.Twitter;
 using Xunit;
 
 namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
