@@ -5,13 +5,11 @@ using System.Collections.Specialized;
 using System.Linq;
 using WorldDomination.Web.Authentication.Config;
 using WorldDomination.Web.Authentication.Exceptions;
-using WorldDomination.Web.Authentication.Providers;
 
 namespace WorldDomination.Web.Authentication
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly IRestClientFactory _restClientFactory;
         private static readonly ConcurrentDictionary<string, IAuthenticationProvider> ConfiguredProviders;
 
         static AuthenticationService()
@@ -19,31 +17,6 @@ namespace WorldDomination.Web.Authentication
             ConfiguredProviders = new ConcurrentDictionary<string, IAuthenticationProvider>();
 
             Initialize();
-        }
-
-        public AuthenticationService() : this(new RestClientFactory())
-        {
-        }
-
-        public AuthenticationService(IRestClientFactory restClientFactory)
-        {
-            _restClientFactory = restClientFactory;
-        }
-
-        public void AddProvider(IAuthenticationProvider provider, bool replaceExisting = true)
-        {
-            Add(provider, replaceExisting);
-        }
-
-        public void AddProviders(IEnumerable<IAuthenticationProvider> providers, bool replaceExisting = true)
-        {
-            Add(providers, replaceExisting);
-        }
-
-        public void RemoveProvider(string providerName)
-        {
-            IAuthenticationProvider provider;
-            ConfiguredProviders.TryRemove(providerName, out provider);
         }
 
         private static void Initialize()
@@ -75,11 +48,6 @@ namespace WorldDomination.Web.Authentication
             }
         }
 
-        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders
-        {
-            get { return ConfiguredProviders; }
-        }
-
         private static IAuthenticationProvider DiscoverProvider(IEnumerable<Type> discoveredProviders, ProviderKey providerKey)
         {
             var name = providerKey.Name.ToLowerInvariant();
@@ -100,23 +68,6 @@ namespace WorldDomination.Web.Authentication
             };
 
             return Activator.CreateInstance(provider, parameters) as IAuthenticationProvider;
-        }
-
-        private IAuthenticationProvider GetAuthenticationProvider(string providerKey)
-        {
-            IAuthenticationProvider authenticationProvider = null;
-
-            if (AuthenticationProviders != null)
-            {
-                AuthenticationProviders.TryGetValue(providerKey.ToLowerInvariant(), out authenticationProvider);
-            }
-
-            if (authenticationProvider == null)
-            {
-                throw new AuthenticationException(string.Format("No '{0}' provider details have been added/provided. Maybe you forgot to add the name/key/value data into your web.config? Eg. in your web.config configuration/authenticationProviders/providers section add the following (if you want to offer Google authentication): <add name=\"Google\" key=\"someNumber.apps.googleusercontent.com\" secret=\"someSecret\" />", providerKey));
-            }
-
-            return authenticationProvider;
         }
 
         private static Uri CreateCallBackUri(string providerKey, Uri requestUrl, string path)
@@ -152,6 +103,27 @@ namespace WorldDomination.Web.Authentication
         }
 
         #region Implementation of IAuthenticationService
+
+        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders
+        {
+            get { return ConfiguredProviders; }
+        }
+
+        public void AddProvider(IAuthenticationProvider provider, bool replaceExisting = true)
+        {
+            Add(provider, replaceExisting);
+        }
+
+        public void AddProviders(IEnumerable<IAuthenticationProvider> providers, bool replaceExisting = true)
+        {
+            Add(providers, replaceExisting);
+        }
+
+        public void RemoveProvider(string providerName)
+        {
+            IAuthenticationProvider provider;
+            ConfiguredProviders.TryRemove(providerName, out provider);
+        }
 
         public Uri RedirectToAuthenticationProvider(string providerKey, Uri callBackUri = null)
         {
@@ -263,6 +235,23 @@ namespace WorldDomination.Web.Authentication
             settings.CallBackUri = CreateCallBackUri(providerKey, requestUrl, path);
 
             return settings;
+        }
+
+        private IAuthenticationProvider GetAuthenticationProvider(string providerKey)
+        {
+            IAuthenticationProvider authenticationProvider = null;
+
+            if (AuthenticationProviders != null)
+            {
+                AuthenticationProviders.TryGetValue(providerKey.ToLowerInvariant(), out authenticationProvider);
+            }
+
+            if (authenticationProvider == null)
+            {
+                throw new AuthenticationException(string.Format("No '{0}' provider details have been added/provided. Maybe you forgot to add the name/key/value data into your web.config? Eg. in your web.config configuration/authenticationProviders/providers section add the following (if you want to offer Google authentication): <add name=\"Google\" key=\"someNumber.apps.googleusercontent.com\" secret=\"someSecret\" />", providerKey));
+            }
+
+            return authenticationProvider;
         }
 
         #endregion
