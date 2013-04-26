@@ -1,4 +1,4 @@
-﻿namespace WorldDomination.Web.Authentication.WindowsLive
+﻿namespace WorldDomination.Web.Authentication.Providers.WindowsLive
 {
     public class Emails
     {

@@ -5,6 +5,8 @@ using Moq;
 using RestSharp;
 using WorldDomination.Web.Authentication.ExtraProviders.GitHub;
 using Xunit;
+using AccessTokenResult = WorldDomination.Web.Authentication.Providers.Google.AccessTokenResult;
+using UserInfoResult = WorldDomination.Web.Authentication.Providers.Google.UserInfoResult;
 
 namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 {

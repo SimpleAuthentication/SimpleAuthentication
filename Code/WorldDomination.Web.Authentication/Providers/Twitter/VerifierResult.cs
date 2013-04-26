@@ -1,4 +1,4 @@
-﻿namespace WorldDomination.Web.Authentication.Twitter
+﻿namespace WorldDomination.Web.Authentication.Providers.Twitter
 {
     public class VerifierResult
     {

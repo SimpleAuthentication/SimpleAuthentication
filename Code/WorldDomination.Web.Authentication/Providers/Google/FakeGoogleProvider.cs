@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Specialized;
 
-namespace WorldDomination.Web.Authentication.Facebook
+namespace WorldDomination.Web.Authentication.Providers.Google
 {
-    public class FakeFacebookProvider : IFakeAuthenticationProvider
+    public class FakeGoogleProvider : IFakeAuthenticationProvider
     {
         private readonly Uri _redirectToAuthenticateUri;
 
-        public FakeFacebookProvider(Uri redirectToAuthenticateUri)
+        public FakeGoogleProvider(Uri redirectToAuthenticateUri)
         {
             if (redirectToAuthenticateUri == null)
             {
@@ -26,7 +26,7 @@ namespace WorldDomination.Web.Authentication.Facebook
 
         public string Name
         {
-            get { return "Facebook"; }
+            get { return "Google"; }
         }
 
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
@@ -41,7 +41,7 @@ namespace WorldDomination.Web.Authentication.Facebook
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
 
-            return _redirectToAuthenticateUri ?? new Uri("http://some.fake.uri/with/lots/of/pewpew");
+            return _redirectToAuthenticateUri ?? new Uri("http://bit.ly/RD3lQT");
         }
 
         public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
@@ -57,41 +57,34 @@ namespace WorldDomination.Web.Authentication.Facebook
                 throw new AuthenticationException(AuthenticateClientExceptionMessage);
             }
 
-            return new AuthenticatedClient("facebook")
+            return new AuthenticatedClient("google")
             {
-                AccessToken = "IAmALittleTeaPotShortAndStout",
+                AccessToken = "SomethingWonderfulHasHappened.AniImPregnant",
                 AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),
                 UserInformation = UserInformation ?? new UserInformation
                 {
                     Gender = GenderType.Female,
                     Id = "FakeId-" + Guid.NewGuid().ToString(),
                     Locale = "en-au",
-                    Name = "Leah Culver",
-                    Picture = "http://i.imgur.com/f4mIx.png",
-                    UserName = "Leah.Culver"
+                    Name = "Natalie Portman",
+                    Picture = "http://i.imgur.com/B9es0.jpg",
+                    UserName = "Natalie.Portman"
                 }
             };
         }
 
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
-            get
-            {
-                return new FacebookAuthenticationServiceSettings
-                {
-                    Display = DisplayType.Unknown,
-                    IsMobile = false
-                };
-            }
+            get { return new GoogleAuthenticationServiceSettings(); }
         }
 
         #endregion
 
         #region Implementation of IFakeAuthenticationProvider
 
-        public string RedirectToAuthenticateExceptionMessage { private get; set; }
-        public UserInformation UserInformation { private get; set; }
-        public string AuthenticateClientExceptionMessage { private get; set; }
+        public string RedirectToAuthenticateExceptionMessage { set; private get; }
+        public UserInformation UserInformation { set; private get; }
+        public string AuthenticateClientExceptionMessage { set; private get; }
 
         #endregion
     }

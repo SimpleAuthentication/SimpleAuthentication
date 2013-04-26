@@ -1,9 +1,23 @@
-﻿namespace WorldDomination.Web.Authentication
+﻿using System;
+
+namespace WorldDomination.Web.Authentication
 {
-    public class CustomProviderParams
+    public class ProviderParams
     {
         public string Key { get; set; }
         public string Secret { get; set; }
-        public IRestClientFactory RestClientFactory { get; set; }
+
+        public void Validate()
+        {
+            if (string.IsNullOrEmpty(Key))
+            {
+                throw new ArgumentException(Key);
+            }
+
+            if (string.IsNullOrEmpty(Secret))
+            {
+                throw new ArgumentException(Secret);
+            }
+        }
     }
 }

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Specialized;
 
-namespace WorldDomination.Web.Authentication.Google
+namespace WorldDomination.Web.Authentication.Providers.Twitter
 {
-    public class FakeGoogleProvider : IFakeAuthenticationProvider
+    public class FakeTwitterProvider : IFakeAuthenticationProvider
     {
         private readonly Uri _redirectToAuthenticateUri;
 
-        public FakeGoogleProvider(Uri redirectToAuthenticateUri)
+        public FakeTwitterProvider(Uri redirectToAuthenticateUri)
         {
             if (redirectToAuthenticateUri == null)
             {
@@ -26,7 +26,7 @@ namespace WorldDomination.Web.Authentication.Google
 
         public string Name
         {
-            get { return "Google"; }
+            get { return "Twitter"; }
         }
 
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
@@ -41,7 +41,7 @@ namespace WorldDomination.Web.Authentication.Google
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
 
-            return _redirectToAuthenticateUri ?? new Uri("http://bit.ly/RD3lQT");
+            return _redirectToAuthenticateUri ?? new Uri("bitly.com/Ttw62r");
         }
 
         public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
@@ -57,26 +57,23 @@ namespace WorldDomination.Web.Authentication.Google
                 throw new AuthenticationException(AuthenticateClientExceptionMessage);
             }
 
-            return new AuthenticatedClient("google")
+            return new AuthenticatedClient("facebook")
             {
-                AccessToken = "SomethingWonderfulHasHappened.AniImPregnant",
+                AccessToken = "EstSularusOthMithas-MyHonorIsMyLife",
                 AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),
                 UserInformation = UserInformation ?? new UserInformation
                 {
-                    Gender = GenderType.Female,
+                    Gender = GenderType.Male,
                     Id = "FakeId-" + Guid.NewGuid().ToString(),
                     Locale = "en-au",
-                    Name = "Natalie Portman",
-                    Picture = "http://i.imgur.com/B9es0.jpg",
-                    UserName = "Natalie.Portman"
+                    Name = "Sturm Brightblade",
+                    Picture = "http://i.imgur.com/jtoOF.jpg",
+                    UserName = "Sturm.Brightblade"
                 }
             };
         }
 
-        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
-        {
-            get { return new GoogleAuthenticationServiceSettings(); }
-        }
+        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings { get { return new TwitterAuthenticationServiceSettings(); } }
 
         #endregion
 

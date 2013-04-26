@@ -1,128 +1,90 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.ComponentModel.Composition.Hosting;
-using System.ComponentModel.Composition.Primitives;
-using System.ComponentModel.Composition.ReflectionModel;
 using System.Linq;
 using WorldDomination.Web.Authentication.Config;
-using WorldDomination.Web.Authentication.Facebook;
-using WorldDomination.Web.Authentication.Google;
-using WorldDomination.Web.Authentication.Twitter;
+using WorldDomination.Web.Authentication.Exceptions;
+using WorldDomination.Web.Authentication.Providers;
 
 namespace WorldDomination.Web.Authentication
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly Lazy<IEnumerable<Type>> _discoveredProviders =
-            new Lazy<IEnumerable<Type>>(GetExportedTypes<IAuthenticationProvider>);
+        private readonly IRestClientFactory _restClientFactory;
+        private static readonly ConcurrentDictionary<string, IAuthenticationProvider> ConfiguredProviders;
 
-        public AuthenticationService()
+        static AuthenticationService()
         {
+            ConfiguredProviders = new ConcurrentDictionary<string, IAuthenticationProvider>();
+
+            Initialize();
+        }
+
+        public AuthenticationService() : this(new RestClientFactory())
+        {
+        }
+
+        public AuthenticationService(IRestClientFactory restClientFactory)
+        {
+            _restClientFactory = restClientFactory;
+        }
+
+        public void AddProvider(IAuthenticationProvider provider, bool replaceExisting = true)
+        {
+            Add(provider, replaceExisting);
+        }
+
+        public void AddProviders(IEnumerable<IAuthenticationProvider> providers, bool replaceExisting = true)
+        {
+            Add(providers, replaceExisting);
+        }
+
+        public void RemoveProvider(string providerName)
+        {
+            IAuthenticationProvider provider;
+            ConfiguredProviders.TryRemove(providerName, out provider);
+        }
+
+        private static void Initialize()
+        {
+            var discoveredProviders = MefHelpers.GetExportedTypes<IAuthenticationProvider>();
+
+            //TODO: Try configure from appSettings
+
+            //Try configure from custom config section
             var providerConfig = ProviderConfigHelper.UseConfig();
             if (providerConfig != null)
             {
-                Initialize(providerConfig);
+                SetupCustomConfigProviders(discoveredProviders, providerConfig);
             }
         }
 
-        public AuthenticationService(IEnumerable<IAuthenticationProvider> providers)
+        private static void SetupCustomConfigProviders(IList<Type> discoveredProviders, ProviderConfiguration providerConfig)
         {
-            //Temp work around until we refactor the resolving of providers. 
-
-            if (providers == null || !providers.Any())
-            {
-                var providerConfig = ProviderConfigHelper.UseConfig();
-                if (providerConfig != null)
-                {
-                    Initialize(providerConfig);
-                }
-            }
-            else
-            {
-                // Skip the config-based initialization, we've got a list of providers directly.
-                foreach (var provider in providers)
-                {
-                    AddProvider(provider);
-                }
-            }
-        }
-
-        public AuthenticationService(ProviderConfiguration providerConfiguration,
-                                     IList<string> scope = null, IRestClientFactory restClientFactory = null)
-        {
-            Initialize(providerConfiguration, scope, restClientFactory);
-        }
-
-        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; private set; }
-
-        public void Initialize(ProviderConfiguration providerConfiguration, IList<string> scope = null,
-                               IRestClientFactory restClientFactory = null)
-        {
-            if (providerConfiguration == null)
-            {
-                throw new ArgumentNullException("providerConfiguration");
-            }
-
-            if (providerConfiguration.Providers == null)
+            if (providerConfig.Providers == null)
             {
                 throw new ArgumentException("providerConfiguration.Providers");
             }
 
-            foreach (ProviderKey provider in providerConfiguration.Providers)
+            foreach (ProviderKey provider in providerConfig.Providers)
             {
-                IAuthenticationProvider authenticationProvider;
+                var discoverProvider = DiscoverProvider(discoveredProviders, provider);
 
-                switch (provider.Name.ToLowerInvariant())
-                {
-                    case "facebook":
-                        authenticationProvider = new FacebookProvider(provider, scope, restClientFactory);
-                        break;
-                    case "google":
-                        authenticationProvider = new GoogleProvider(provider, scope, restClientFactory);
-                        break;
-                    case "twitter":
-                        authenticationProvider = new TwitterProvider(provider, restClientFactory);
-                        break;
-                    default:
-                        authenticationProvider = DiscoverProvider(provider, restClientFactory);
-                        break;
-                }
-
-                AddProvider(authenticationProvider);
+                Add(discoverProvider, false);
             }
         }
 
-        private static IEnumerable<Type> GetExportedTypes<T>()
+        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders
         {
-            var catalog = new AggregateCatalog(
-                new DirectoryCatalog(@".", "*"),
-                new DirectoryCatalog(@".\bin", "*")
-                );
-
-            return catalog.Parts
-                          .Select(part => ComposablePartExportType<T>(part))
-                          .Where(t => t != null)
-                          .ToList();
+            get { return ConfiguredProviders; }
         }
 
-        private static Type ComposablePartExportType<T>(ComposablePartDefinition part)
-        {
-            if (part.ExportDefinitions.Any(
-                def => def.Metadata.ContainsKey("ExportTypeIdentity") &&
-                       def.Metadata["ExportTypeIdentity"].Equals(typeof (T).FullName)))
-            {
-                return ReflectionModelServices.GetPartType(part).Value;
-            }
-
-            return null;
-        }
-
-        private IAuthenticationProvider DiscoverProvider(ProviderKey providerKey, IRestClientFactory restClientFactory)
+        private static IAuthenticationProvider DiscoverProvider(IEnumerable<Type> discoveredProviders, ProviderKey providerKey)
         {
             var name = providerKey.Name.ToLowerInvariant();
 
-            var provider = _discoveredProviders.Value.SingleOrDefault(x => x.Name.ToLowerInvariant().StartsWith(name));
+            var provider = discoveredProviders.SingleOrDefault(x => x.Name.ToLowerInvariant().StartsWith(name));
 
             if (provider == null)
             {
@@ -131,11 +93,10 @@ namespace WorldDomination.Web.Authentication
                                   name));
             }
 
-            var parameters = new CustomProviderParams
+            var parameters = new ProviderParams
             {
                 Key = providerKey.Key,
-                Secret = providerKey.Secret,
-                RestClientFactory = restClientFactory
+                Secret = providerKey.Secret
             };
 
             return Activator.CreateInstance(provider, parameters) as IAuthenticationProvider;
@@ -191,25 +152,6 @@ namespace WorldDomination.Web.Authentication
         }
 
         #region Implementation of IAuthenticationService
-
-        public void AddProvider(IAuthenticationProvider authenticationProvider)
-        {
-            if (AuthenticationProviders == null)
-            {
-                AuthenticationProviders = new Dictionary<string, IAuthenticationProvider>();
-            }
-
-            var providerName = authenticationProvider.Name.ToLowerInvariant();
-
-            // Does this provider already exist?
-            if (AuthenticationProviders.ContainsKey(providerName))
-            {
-                throw new AuthenticationException(string.Format(
-                    "Trying to add a {0} provider, but one already exists.", providerName));
-            }
-
-            AuthenticationProviders.Add(providerName, authenticationProvider);
-        }
 
         public Uri RedirectToAuthenticationProvider(string providerKey, Uri callBackUri = null)
         {
@@ -324,5 +266,27 @@ namespace WorldDomination.Web.Authentication
         }
 
         #endregion
+
+        private static void Add(IAuthenticationProvider provider, bool replaceExisting = true)
+        {
+            ConfiguredProviders.AddOrUpdate(provider.Name.ToLower(), provider, (key, authenticationProvider) =>
+            {
+                if (!replaceExisting)
+                {
+                    throw new WorldDominationConfigurationException(
+                        "The provider {0} already exists and cannot be overridden, either set `replaceExisting` to `true`, or remove the provider first.");
+                }
+
+                return provider;
+            });
+        }
+
+        private static void Add(IEnumerable<IAuthenticationProvider> providers, bool replaceExisting)
+        {
+            foreach (var authenticationProvider in providers)
+            {
+                Add(authenticationProvider, replaceExisting);
+            }
+        }
     }
 }

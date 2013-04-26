@@ -30,9 +30,9 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Advanced.App_Start
     {
         public static void Start()
         {
-            IContainer container = IoC.Initialize();
-            DependencyResolver.SetResolver(new StructureMapDependencyResolver(container));
-            GlobalConfiguration.Configuration.DependencyResolver = new StructureMapDependencyResolver(container);
+            //IContainer container = IoC.Initialize();
+            //DependencyResolver.SetResolver(new StructureMapDependencyResolver(container));
+            //GlobalConfiguration.Configuration.DependencyResolver = new StructureMapDependencyResolver(container);
         }
     }
 }

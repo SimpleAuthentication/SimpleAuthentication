@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Web;
 using System.Web.Mvc;
-using WorldDomination.Web.Authentication.Facebook;
-using WorldDomination.Web.Authentication.Google;
+using WorldDomination.Web.Authentication.Providers;
 using WorldDomination.Web.Authentication.Samples.Mvc.Simple.Models;
-using WorldDomination.Web.Authentication.Twitter;
 
 namespace WorldDomination.Web.Authentication.Samples.Mvc.Simple.Controllers
 {
@@ -26,9 +24,9 @@ namespace WorldDomination.Web.Authentication.Samples.Mvc.Simple.Controllers
             // but for the take of simplicity we added it it here. Please refer
             // to the Advanced sample for the DI version. Don't use a static constructor
             // like this in your project, please. :)
-            var facebookProvider = new FacebookProvider(FacebookAppId, FacebookAppSecret);
-            var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret);
-            var googleProvider = new GoogleProvider(GoogleConsumerKey, GoogleConsumerSecret);
+            var facebookProvider = new FacebookProvider(new ProviderParams { Key = FacebookAppId, Secret = FacebookAppSecret });
+            var twitterProvider = new TwitterProvider(new ProviderParams { Key = TwitterConsumerKey, Secret = TwitterConsumerSecret });
+            var googleProvider = new GoogleProvider(new ProviderParams { Key = GoogleConsumerKey, Secret = GoogleConsumerSecret });
 
             AuthenticationService = new AuthenticationService();
             AuthenticationService.AddProvider(facebookProvider);

@@ -2,9 +2,7 @@
 using System.Web.Mvc;
 using WorldDomination.Sample.MvcManual.Models;
 using WorldDomination.Web.Authentication;
-using WorldDomination.Web.Authentication.Facebook;
-using WorldDomination.Web.Authentication.Google;
-using WorldDomination.Web.Authentication.Twitter;
+using WorldDomination.Web.Authentication.Providers;
 
 namespace WorldDomination.Sample.MvcManual.Controllers
 {
@@ -26,14 +24,14 @@ namespace WorldDomination.Sample.MvcManual.Controllers
             // but for the take of simplicity we added it it here. Please refer
             // to the Advanced sample for the DI version. Don't use a static constructor
             // like this in your project, please. :)
-            var facebookProvider = new FacebookProvider(FacebookAppId, FacebookAppSecret);
-            var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret);
-            var googleProvider = new GoogleProvider(GoogleConsumerKey, GoogleConsumerSecret);
+            //var facebookProvider = new FacebookProvider(FacebookAppId, FacebookAppSecret);
+            //var twitterProvider = new TwitterProvider(TwitterConsumerKey, TwitterConsumerSecret);
+            //var googleProvider = new GoogleProvider(GoogleConsumerKey, GoogleConsumerSecret);
 
-            AuthenticationService = new AuthenticationService();
-            AuthenticationService.AddProvider(facebookProvider);
-            AuthenticationService.AddProvider(twitterProvider);
-            AuthenticationService.AddProvider(googleProvider);
+            //AuthenticationService = new AuthenticationService();
+            //AuthenticationService.AddProvider(facebookProvider);
+            //AuthenticationService.AddProvider(twitterProvider);
+            //AuthenticationService.AddProvider(googleProvider);
         }
 
         public ActionResult Index()

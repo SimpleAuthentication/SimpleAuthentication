@@ -1,4 +1,4 @@
-﻿namespace WorldDomination.Web.Authentication.Facebook
+﻿namespace WorldDomination.Web.Authentication.Providers.Facebook
 {
     public class MeResult
     {

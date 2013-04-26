@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Specialized;
 
-namespace WorldDomination.Web.Authentication.Twitter
+namespace WorldDomination.Web.Authentication.Providers.Facebook
 {
-    public class FakeTwitterProvider : IFakeAuthenticationProvider
+    public class FakeFacebookProvider : IFakeAuthenticationProvider
     {
         private readonly Uri _redirectToAuthenticateUri;
 
-        public FakeTwitterProvider(Uri redirectToAuthenticateUri)
+        public FakeFacebookProvider(Uri redirectToAuthenticateUri)
         {
             if (redirectToAuthenticateUri == null)
             {
@@ -26,7 +26,7 @@ namespace WorldDomination.Web.Authentication.Twitter
 
         public string Name
         {
-            get { return "Twitter"; }
+            get { return "Facebook"; }
         }
 
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
@@ -41,7 +41,7 @@ namespace WorldDomination.Web.Authentication.Twitter
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
 
-            return _redirectToAuthenticateUri ?? new Uri("bitly.com/Ttw62r");
+            return _redirectToAuthenticateUri ?? new Uri("http://some.fake.uri/with/lots/of/pewpew");
         }
 
         public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
@@ -59,29 +59,39 @@ namespace WorldDomination.Web.Authentication.Twitter
 
             return new AuthenticatedClient("facebook")
             {
-                AccessToken = "EstSularusOthMithas-MyHonorIsMyLife",
+                AccessToken = "IAmALittleTeaPotShortAndStout",
                 AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),
                 UserInformation = UserInformation ?? new UserInformation
                 {
-                    Gender = GenderType.Male,
+                    Gender = GenderType.Female,
                     Id = "FakeId-" + Guid.NewGuid().ToString(),
                     Locale = "en-au",
-                    Name = "Sturm Brightblade",
-                    Picture = "http://i.imgur.com/jtoOF.jpg",
-                    UserName = "Sturm.Brightblade"
+                    Name = "Leah Culver",
+                    Picture = "http://i.imgur.com/f4mIx.png",
+                    UserName = "Leah.Culver"
                 }
             };
         }
 
-        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings { get { return new TwitterAuthenticationServiceSettings(); } }
+        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
+        {
+            get
+            {
+                return new FacebookAuthenticationServiceSettings
+                {
+                    Display = DisplayType.Unknown,
+                    IsMobile = false
+                };
+            }
+        }
 
         #endregion
 
         #region Implementation of IFakeAuthenticationProvider
 
-        public string RedirectToAuthenticateExceptionMessage { set; private get; }
-        public UserInformation UserInformation { set; private get; }
-        public string AuthenticateClientExceptionMessage { set; private get; }
+        public string RedirectToAuthenticateExceptionMessage { private get; set; }
+        public UserInformation UserInformation { private get; set; }
+        public string AuthenticateClientExceptionMessage { private get; set; }
 
         #endregion
     }
