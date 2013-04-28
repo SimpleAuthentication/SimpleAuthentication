@@ -2,7 +2,7 @@
 {
     public class BaseProvider
     {
-        protected IRestClientFactory RestClientFactory;
+        public IRestClientFactory RestClientFactory;
 
         public BaseProvider()
         {
