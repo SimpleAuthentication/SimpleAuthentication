@@ -18,7 +18,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 var authenticationService = new AuthenticationService();
 
                 // Act.
-                authenticationService.AddProvider(new TwitterProvider("a", "b"));
+                authenticationService.AddProvider(new TwitterProvider(new ProviderParams { Key = "a", Secret = "b"}));
 
                 // Assert.
                 var providers = authenticationService.AuthenticationProviders;
@@ -32,7 +32,7 @@ namespace WorldDomination.Web.Authentication.Tests
             {
                 // Arrange.
                 var authenticationService = new AuthenticationService();
-                var facebookProvider = new FacebookProvider("a", "b");
+                var facebookProvider = new FacebookProvider(new ProviderParams { Key = "a", Secret = "b" });
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(

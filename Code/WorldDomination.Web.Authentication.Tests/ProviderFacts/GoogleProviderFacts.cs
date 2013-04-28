@@ -31,7 +31,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             public void GivenGoogleReturnedAnError_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var googleProvider = new GoogleProvider("aa", "bb");
+                var googleProvider = new GoogleProvider(new ProviderParams {Key = "aa", Secret = "bb"});
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -42,10 +42,10 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                     {"state", existingState}
                 };
                 var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
-                                                          {
-                                                              State = existingState,
-                                                              CallBackUri = new Uri("http://2p1s.com")
-                                                          };
+                {
+                    State = existingState,
+                    CallBackUri = new Uri("http://2p1s.com")
+                };
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
                     () => googleProvider.AuthenticateClient(googleAuthenticationServiceSettings, queryStringParameters));
@@ -61,7 +61,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             public void GivenNoCodeAndNoErrorWasReturned_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var googleProvider = new GoogleProvider("aa", "bb");
+                var googleProvider = new GoogleProvider(new ProviderParams { Key = "aa", Secret = "bb" });
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -69,10 +69,10 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                     {"state", existingState}
                 };
                 var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
-                                                          {
-                                                              State = existingState,
-                                                              CallBackUri = new Uri("http://2p1s.com")
-                                                          };
+                {
+                    State = existingState,
+                    CallBackUri = new Uri("http://2p1s.com")
+                };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -95,8 +95,11 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        new RestClientFactory(mockRestClient.Object));
+                var googleProvider = new GoogleProvider(new ProviderParams {Key = "aa", Secret = "bb"})
+                {
+                    RestClientFactory = new RestClientFactory(mockRestClient.Object)
+                };
+                                                        
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -104,10 +107,10 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                     {"state", existingState}
                 };
                 var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
-                                                          {
-                                                              State = existingState,
-                                                              CallBackUri = new Uri("http://2p1s.com")
-                                                          };
+                {
+                    State = existingState,
+                    CallBackUri = new Uri("http://2p1s.com")
+                };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -129,8 +132,10 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 var mockRestClient = MockRestClient;
                 mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                               .Throws(new InvalidOperationException(errorMessage));
-                var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        new RestClientFactory(mockRestClient.Object));
+                var googleProvider = new GoogleProvider(new ProviderParams {Key = "aa", Secret = "bb"})
+                {
+                    RestClientFactory = new RestClientFactory(mockRestClient.Object)
+                };
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -138,10 +143,10 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                     {"state", existingState}
                 };
                 var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
-                                                          {
-                                                              State = existingState,
-                                                              CallBackUri = new Uri("http://2p1s.com")
-                                                          };
+                {
+                    State = existingState,
+                    CallBackUri = new Uri("http://2p1s.com")
+                };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -165,8 +170,10 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        new RestClientFactory(mockRestClient.Object));
+                var googleProvider = new GoogleProvider(new ProviderParams {Key = "aa", Secret = "bb"})
+                {
+                    RestClientFactory = new RestClientFactory(mockRestClient.Object)
+                };
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -174,10 +181,10 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                     {"state", existingState}
                 };
                 var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
-                                                          {
-                                                              State = existingState,
-                                                              CallBackUri = new Uri("http://2p1s.com")
-                                                          };
+                {
+                    State = existingState,
+                    CallBackUri = new Uri("http://2p1s.com")
+                };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -202,8 +209,10 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        new RestClientFactory(mockRestClient.Object));
+                var googleProvider = new GoogleProvider(new ProviderParams {Key = "aa", Secret = "bb"})
+                {
+                    RestClientFactory = new RestClientFactory(mockRestClient.Object)
+                };
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -211,10 +220,10 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                     {"state", existingState}
                 };
                 var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
-                                                          {
-                                                              State = existingState,
-                                                              CallBackUri = new Uri("http://2p1s.com")
-                                                          };
+                {
+                    State = existingState,
+                    CallBackUri = new Uri("http://2p1s.com")
+                };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -254,8 +263,10 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
 
-                var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        new RestClientFactory(mockRestClient.Object));
+                var googleProvider = new GoogleProvider(new ProviderParams {Key = "aa", Secret = "bb"})
+                {
+                    RestClientFactory = new RestClientFactory(mockRestClient.Object)
+                };
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -263,10 +274,10 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                     {"state", existingState}
                 };
                 var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
-                                                          {
-                                                              State = existingState,
-                                                              CallBackUri = new Uri("http://2p1s.com")
-                                                          };
+                {
+                    State = existingState,
+                    CallBackUri = new Uri("http://2p1s.com")
+                };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -306,8 +317,10 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
 
-                var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        new RestClientFactory(mockRestClient.Object));
+                var googleProvider = new GoogleProvider(new ProviderParams {Key = "aa", Secret = "bb"})
+                {
+                    RestClientFactory = new RestClientFactory(mockRestClient.Object)
+                };
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -315,10 +328,10 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                     {"state", existingState}
                 };
                 var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
-                                                          {
-                                                              State = existingState,
-                                                              CallBackUri = new Uri("http://2p1s.com")
-                                                          };
+                {
+                    State = existingState,
+                    CallBackUri = new Uri("http://2p1s.com")
+                };
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
@@ -374,8 +387,10 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
 
-                var googleProvider = new GoogleProvider("aa", "bb", null,
-                                                        new RestClientFactory(mockRestClient.Object));
+                var googleProvider = new GoogleProvider(new ProviderParams {Key = "aa", Secret = "bb"})
+                {
+                    RestClientFactory = new RestClientFactory(mockRestClient.Object)
+                };
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
 
                 var queryStringParameters = new NameValueCollection
@@ -384,10 +399,10 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                     {"state", existingState}
                 };
                 var googleAuthenticationServiceSettings = new GoogleAuthenticationServiceSettings
-                                                          {
-                                                              State = existingState,
-                                                              CallBackUri = new Uri("http://2p1s.com")
-                                                          };
+                {
+                    State = existingState,
+                    CallBackUri = new Uri("http://2p1s.com")
+                };
 
                 // Act.
                 var result = googleProvider.AuthenticateClient(googleAuthenticationServiceSettings, queryStringParameters);
@@ -413,7 +428,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             public void GivenSomeState_RedirectToAuthenticate_ReturnsAUri()
             {
                 // Arrange.
-                var googleProvider = new GoogleProvider("aa", "bb");
+                var googleProvider = new GoogleProvider(new ProviderParams {Key = "aa", Secret = "bb"});
 
                 // Act.
                 var result =

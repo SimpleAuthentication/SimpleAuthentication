@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using Moq;
 using RestSharp;
+using WorldDomination.Web.Authentication.ExtraProviders;
 using WorldDomination.Web.Authentication.ExtraProviders.OpenId;
 using Xunit;
 
@@ -24,37 +25,37 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 var mockRestResponseRedirect = new Mock<IRestResponse>();
                 mockRestResponseRedirect.Setup(x => x.StatusCode).Returns(HttpStatusCode.Redirect);
                 mockRestResponseRedirect.Setup(x => x.Headers)
-                                .Returns(new List<Parameter>
-                                         {
-                                             new Parameter
-                                             {
-                                                 Name = "Location",
-                                                 Type = ParameterType.HttpHeader,
-                                                 Value = "https://myopenid.com/"
-                                             }
-                                         });
+                                        .Returns(new List<Parameter>
+                                        {
+                                            new Parameter
+                                            {
+                                                Name = "Location",
+                                                Type = ParameterType.HttpHeader,
+                                                Value = "https://myopenid.com/"
+                                            }
+                                        });
                 var mockRestClientRedirect = new Mock<IRestClient>();
                 mockRestClientRedirect.Setup(x => x.BaseUrl).Returns("http://myopenId.com/");
                 mockRestClientRedirect.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
-                    .Returns(mockRestResponseRedirect.Object);
+                                      .Returns(mockRestResponseRedirect.Object);
 
                 // 200 OK with the Xrds location.
                 var mockRestResponseOk = new Mock<IRestResponse>();
                 mockRestResponseOk.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponseOk.Setup(x => x.Headers)
-                                .Returns(new List<Parameter>
-                                         {
-                                             new Parameter
-                                             {
-                                                 Name = "X-XRDS-Location",
-                                                 Type = ParameterType.HttpHeader,
-                                                 Value = xrdsLocation
-                                             }
-                                         });
+                                  .Returns(new List<Parameter>
+                                  {
+                                      new Parameter
+                                      {
+                                          Name = "X-XRDS-Location",
+                                          Type = ParameterType.HttpHeader,
+                                          Value = xrdsLocation
+                                      }
+                                  });
                 var mockRestClientOk = new Mock<IRestClient>();
                 mockRestClientOk.Setup(x => x.BaseUrl).Returns("https://myopenId.com/");
                 mockRestClientOk.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
-                    .Returns(mockRestResponseOk.Object);
+                                .Returns(mockRestResponseOk.Object);
 
 
                 const string yahooXrdsXml =
@@ -75,12 +76,15 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                                           mockRestClientOk.Object,
                                           mockRestClientXrds.Object
                                       };
-                var openIdProvider = new OpenIdProvider(new RestClientFactory(mockRestClients));
+                var openIdProvider = new OpenIdProvider
+                {
+                    RestClientFactory = new RestClientFactory(mockRestClients)
+                };
                 var authenticationServiceSettings = new OpenIdAuthenticationServiceSettings
-                                                    {
-                                                        Identifier = new Uri("http://myopenId.com/"),
-                                                        CallBackUri = new Uri("http://whatever.com:9999")
-                                                    };
+                {
+                    Identifier = new Uri("http://myopenId.com/"),
+                    CallBackUri = new Uri("http://whatever.com:9999")
+                };
                 
                 
                 // Act.

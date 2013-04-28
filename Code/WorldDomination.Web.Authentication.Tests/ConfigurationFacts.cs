@@ -80,7 +80,7 @@ namespace WorldDomination.Web.Authentication.Tests
             var providerCount = providerConfiguration.Providers.Count;
 
             // Act.
-            var authenticationService = new AuthenticationService(providerConfiguration);
+            var authenticationService = new AuthenticationService();
 
             // Assert.
             Assert.NotNull(authenticationService);
