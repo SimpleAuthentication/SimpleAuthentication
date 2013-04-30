@@ -54,6 +54,7 @@
     <Compile Include="CsrfFacts.cs" />
     <Compile Include="MoqExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ProviderFacts\LinkedInProviderFacts.cs" />
     <Compile Include="ProviderFacts\FacebookProviderFacts.cs" />
     <Compile Include="ProviderFacts\GitHubProviderFacts.cs" />
     <Compile Include="ProviderFacts\GoogleProviderFacts.cs" />
