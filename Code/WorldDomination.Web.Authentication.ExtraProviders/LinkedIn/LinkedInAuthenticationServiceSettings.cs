@@ -1,4 +1,4 @@
-﻿namespace WorldDomination.Web.Authentication.Providers.LinkedIn
+﻿namespace WorldDomination.Web.Authentication.ExtraProviders.LinkedIn
 {
     public class LinkedInAuthenticationServiceSettings : BaseAuthenticationServiceSettings
     {

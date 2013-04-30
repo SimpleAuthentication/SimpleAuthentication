@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using RestSharp;
-using WorldDomination.Web.Authentication.Providers.LinkedIn;
+using WorldDomination.Web.Authentication.Providers;
+using WorldDomination.Web.Authentication.ExtraProviders.LinkedIn;
 
-namespace WorldDomination.Web.Authentication.Providers
+namespace WorldDomination.Web.Authentication.ExtraProviders
 {
     // REFERENCE: https://developers.LinkedIn.com/accounts/docs/OAuth2Login
 
