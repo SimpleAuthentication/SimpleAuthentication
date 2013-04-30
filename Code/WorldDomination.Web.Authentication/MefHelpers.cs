@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.ComponentModel.Composition.ReflectionModel;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace WorldDomination.Web.Authentication
 {
@@ -11,10 +13,8 @@ namespace WorldDomination.Web.Authentication
     {
         public static IList<Type> GetExportedTypes<T>()
         {
-            var catalog = new AggregateCatalog(
-                new DirectoryCatalog(@".", "*"),
-                new DirectoryCatalog(@".\bin", "*")
-                );
+            var path = AppDomain.CurrentDomain.BaseDirectory;
+            var catalog = new AggregateCatalog(new DirectoryCatalog(path, "*"));
 
             return catalog.Parts
                           .Select(part => ComposablePartExportType<T>(part))

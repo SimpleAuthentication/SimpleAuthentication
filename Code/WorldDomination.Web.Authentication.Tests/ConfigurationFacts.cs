@@ -62,14 +62,15 @@ namespace WorldDomination.Web.Authentication.Tests
         }
 
         [Fact]
-        public void GivenAMissingConfigFile_UseConfig_ThrowsAnApplicationException()
+        public void GivenAMissingConfigSection_UseConfig_ReturnsNull()
         {
             // Arrange.
-            const string fileName = "TestFile.config";
 
-            // Act & Assert.
-            Assert.Throws<ApplicationException>(
-                () => { ProviderConfigHelper.UseConfig(fileName).For("twitter"); });
+            // Act.
+            var result = ProviderConfigHelper.UseConfig("blarg");
+
+            // Assert.
+            Assert.Null(result);
         }
 
         [Fact]

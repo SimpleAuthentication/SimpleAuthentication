@@ -116,7 +116,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
                 const string errorMessage = "If God says he was not created by a creator, does that mean: god is an aetheist?";
-                mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
+                mockRestClient.Setup(x => x.Execute<ExtraProviders.GitHub.AccessTokenResult>(It.IsAny<IRestRequest>()))
                               .Throws(new InvalidOperationException(errorMessage));
                 var githubProvider = new GitHubProvider(new ProviderParams { Key = "aa", Secret = "bb" })
                 {
@@ -168,7 +168,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 };
                 var gitHubAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings
                 {
-                    CallBackUri = new Uri("http://2p1s.com"),
+                    CallBackUri = new Uri("http://2p1s.cBom"),
                     State = existingState
                 };
 

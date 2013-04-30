@@ -263,7 +263,7 @@ namespace WorldDomination.Web.Authentication
                 if (!replaceExisting)
                 {
                     throw new WorldDominationConfigurationException(
-                        "The provider {0} already exists and cannot be overridden, either set `replaceExisting` to `true`, or remove the provider first.");
+                        string.Format("The provider '{0}' already exists and cannot be overridden, either set `replaceExisting` to `true`, or remove the provider first.", provider.Name));
                 }
 
                 return provider;
