@@ -9,11 +9,10 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 {
     public class GitHubProvider : BaseProvider, IAuthenticationProvider
     {
-        private readonly string _clientId;
-        private readonly string _clientSecret;
-
         private const string AccessTokenKey = "access_token";
         private const string TokenTypeKey = "token_type";
+        private readonly string _clientId;
+        private readonly string _clientSecret;
 
         public GitHubProvider(ProviderParams providerParams)
         {
@@ -158,11 +157,14 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
         #region Implementation of IAuthenticationProvider
 
-        public string Name { get { return "GitHub"; } }
+        public string Name
+        {
+            get { return "GitHub"; }
+        }
 
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
-            get { return new GitHubAuthenticationServiceSettings(); } 
+            get { return new GitHubAuthenticationServiceSettings(); }
         }
 
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
@@ -207,17 +209,17 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             var userInfo = RetrieveUserInfo(oAuthAccessToken.AccessToken);
 
             return new AuthenticatedClient(Name.ToLowerInvariant())
-            {
-                AccessToken = oAuthAccessToken.AccessToken,
-                UserInformation = new UserInformation
-                {
-                    Id = userInfo.Id.ToString(),
-                    Name = userInfo.Name,
-                    Email = userInfo.Email??"",
-                    Picture = userInfo.AvatarUrl,
-                    UserName = userInfo.Login,
-                }
-            };
+                   {
+                       AccessToken = oAuthAccessToken.AccessToken,
+                       UserInformation = new UserInformation
+                                         {
+                                             Id = userInfo.Id.ToString(),
+                                             Name = userInfo.Name,
+                                             Email = userInfo.Email ?? "",
+                                             Picture = userInfo.AvatarUrl,
+                                             UserName = userInfo.Login,
+                                         }
+                   };
         }
 
         #endregion

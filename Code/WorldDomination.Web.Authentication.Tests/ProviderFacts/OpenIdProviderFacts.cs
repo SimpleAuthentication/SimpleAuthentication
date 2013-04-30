@@ -92,7 +92,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("https://www.myopenid.com/server?openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select&openid.identity=http://specs.openid.net/auth/2.0/identifier_select&openid.mode=checkid_setup&openid.ns=http://specs.openid.net/auth/2.0&openid.ns.sreg=http://openid.net/extensions/sreg/1.1&openid.sreg.required=nickname&openid.sreg.optional=email,fullname,gender,language&no_ssl=true&openid.return_to=http://whatever.com:9999/&openid.realm=http://whatever.com:9999/",
+                Assert.Equal("https://www.myopenid.com/server?openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select&openid.identity=http://specs.openid.net/auth/2.0/identifier_select&openid.mode=checkid_setup&openid.ns=http://specs.openid.net/auth/2.0&openid.ns.sreg=http://openid.net/extensions/sreg/1.1&openid.sreg.required=nickname&openid.sreg.optional=email,fullname,gender,language&no_ssl=true&openid.return_to=http%3A%2F%2Fwhatever.com%3A9999%2F%26state%3D&openid.realm=http%3A%2F%2Fwhatever.com%3A9999%2F%26state%3D",
                     result.AbsoluteUri);
             }
 

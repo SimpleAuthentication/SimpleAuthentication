@@ -62,15 +62,16 @@ namespace WorldDomination.Web.Authentication.Tests
         }
 
         [Fact]
-        public void GivenAMissingConfigSection_UseConfig_ReturnsNull()
+        public void GivenAMissingConfigFile_UseConfig_ReturnsNull()
         {
             // Arrange.
 
-            // Act.
-            var result = ProviderConfigHelper.UseConfig("blarg");
+            // Act & Assert.
+            var result = Assert.Throws<ApplicationException>( () => ProviderConfigHelper.UseConfig("app.config", "blarg"));
 
             // Assert.
-            Assert.Null(result);
+            Assert.NotNull(result);
+            Assert.Equal("Missing the config section [blarg] from your .config file", result.Message);
         }
 
         [Fact]
@@ -86,7 +87,7 @@ namespace WorldDomination.Web.Authentication.Tests
             // Assert.
             Assert.NotNull(authenticationService);
             Assert.Equal(providerCount, authenticationService.AuthenticationProviders.Count());
-            var firstProvider = authenticationService.AuthenticationProviders.First();
+            var firstProvider = authenticationService.AuthenticationProviders.SingleOrDefault(x => x.Key == "facebook");
             Assert.NotNull(firstProvider);
             Assert.Equal("Facebook", firstProvider.Value.Name);
         }

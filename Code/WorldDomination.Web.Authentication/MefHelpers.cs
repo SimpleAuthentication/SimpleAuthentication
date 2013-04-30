@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition.Hosting;
 using System.ComponentModel.Composition.Primitives;
 using System.ComponentModel.Composition.ReflectionModel;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 
 namespace WorldDomination.Web.Authentication
 {
@@ -24,14 +22,11 @@ namespace WorldDomination.Web.Authentication
 
         private static Type ComposablePartExportType<T>(ComposablePartDefinition part)
         {
-            if (part.ExportDefinitions.Any(
+            return part.ExportDefinitions.Any(
                 def => def.Metadata.ContainsKey("ExportTypeIdentity") &&
-                       def.Metadata["ExportTypeIdentity"].Equals(typeof(T).FullName)))
-            {
-                return ReflectionModelServices.GetPartType(part).Value;
-            }
-
-            return null;
+                       def.Metadata["ExportTypeIdentity"].Equals(typeof (T).FullName))
+                       ? ReflectionModelServices.GetPartType(part).Value
+                       : null;
         }
     }
 }

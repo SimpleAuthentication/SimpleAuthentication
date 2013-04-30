@@ -326,7 +326,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 };
                 var twitterAuthenticationServiceSettings = new TwitterAuthenticationServiceSettings
                 {
-                    CallBackUri = new Uri("http://www.pewpew.com")
+                    CallBackUri = new Uri("http://www.pewpew.com"),
+                    State = "I don't always test me code changes. But when I do, it's in production."
                 };
 
                 // Act.
@@ -338,8 +339,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             }
 
             [Fact]
-            public void
-                GivenAExceptionWhileTryingToRetrieveRequestToken_RedirectToAuthenticate_ThrowsAnAuthenticationException()
+            public void GivenAnExceptionWhileTryingToRetrieveRequestToken_RedirectToAuthenticate_ThrowsAnAuthenticationException()
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
@@ -352,7 +352,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 };
                 var twitterAuthenticationServiceSettings = new TwitterAuthenticationServiceSettings
                 {
-                    CallBackUri = new Uri("http://www.pewpew.com")
+                    CallBackUri = new Uri("http://www.pewpew.com"),
+                    State = "I don't always test me code changes. But when I do, it's in production."
                 };
                 // Act.
                 var result =
@@ -383,7 +384,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 };
                 var twitterAuthenticationServiceSettings = new TwitterAuthenticationServiceSettings
                 {
-                    CallBackUri = new Uri("http://www.pewpew.com")
+                    CallBackUri = new Uri("http://www.pewpew.com"),
+                    State = "I don't always test me code changes. But when I do, it's in production."
                 };
 
                 // Act.
@@ -417,7 +419,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 };
                 var twitterAuthenticationServiceSettings = new TwitterAuthenticationServiceSettings
                 {
-                    CallBackUri = new Uri("http://www.pewpew.com")
+                    CallBackUri = new Uri("http://www.pewpew.com"),
+                    State = "I don't always test me code changes. But when I do, it's in production."
                 };
 
                 // Act.
