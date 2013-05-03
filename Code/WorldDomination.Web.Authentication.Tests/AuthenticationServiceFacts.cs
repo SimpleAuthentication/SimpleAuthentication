@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using WorldDomination.Web.Authentication.Exceptions;
 using WorldDomination.Web.Authentication.Providers;
 using Xunit;
 
@@ -35,12 +36,12 @@ namespace WorldDomination.Web.Authentication.Tests
                 var facebookProvider = new FacebookProvider(new ProviderParams { Key = "a", Secret = "b" });
 
                 // Act.
-                var result = Assert.Throws<AuthenticationException>(
-                    () => authenticationService.AddProvider(facebookProvider));
+                var result = Assert.Throws<WorldDominationConfigurationException>(
+                    () => authenticationService.AddProvider(facebookProvider, false));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Trying to add a facebook provider, but one already exists.", result.Message);
+                Assert.Equal("The provider 'Facebook' already exists and cannot be overridden, either set `replaceExisting` to `true`, or remove the provider first.", result.Message);
             }
         }
 
@@ -92,7 +93,7 @@ namespace WorldDomination.Web.Authentication.Tests
                     () => authenticationService.RedirectToAuthenticationProvider(providerKey));
 
                 Assert.NotNull(result);
-                Assert.Equal("No 'aaa' provider has been added.", result.Message);
+                Assert.Equal("No 'aaa' provider details have been added/provided. Maybe you forgot to add the name/key/value data into your web.config? Eg. in your web.config configuration/authenticationProviders/providers section add the following (if you want to offer Google authentication): <add name=\"Google\" key=\"someNumber.apps.googleusercontent.com\" secret=\"someSecret\" />", result.Message);
             }
 
             [Fact]

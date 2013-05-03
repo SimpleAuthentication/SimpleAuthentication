@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>WorldDomination.Web.Authentication.Mvc</id>
+    <version>$version$</version>
+    <title>WorldDomination: Web Authentication MVC</title>
+    <authors>Pure Krome, Phillip Haydon</authors>
+    <owners>Pure Krome</owners>
+    <projectUrl>https://github.com/PureKrome/WorldDomination.Web.Authentication</projectUrl>
+    <iconUrl>http://i.imgur.com/bR4Yf.jpg</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Used with World Domination Web Authentication, provides automated configuration for ASP.NET MVC.</description>
+    <summary>A really simple way to Authenticate against Facebook,Twitter or Google.</summary>
+    <releaseNotes></releaseNotes>
+    <copyright>2012-2013</copyright>
+    <tags>authentication twitter google facebook oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination asp.net mvc</tags>
+    <dependencies>
+      <dependency id="WorldDomination.Web.Authentication" version="$version$" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="..\..\NuGet Package Specifications\readme.txt" target="" />
+  </files>
+</package>
