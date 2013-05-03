@@ -55,6 +55,10 @@
     <Compile Include="GitHub\FakeGitHubProvider.cs" />
     <Compile Include="GitHub\GitHubAuthenticationServiceSettings.cs" />
     <Compile Include="GitHub\UserInfoResult.cs" />
+    <Compile Include="LinkedInProvider.cs" />
+    <Compile Include="LinkedIn\AccessTokenResult.cs" />
+    <Compile Include="LinkedIn\LinkedInAuthenticationServiceSettings.cs" />
+    <Compile Include="LinkedIn\UserInfoResult.cs" />
     <Compile Include="OpenIdProvider.cs" />
     <Compile Include="OpenId\OpenIdAuthenticationServiceSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
