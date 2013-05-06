@@ -98,7 +98,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             }
             catch (Exception exception)
             {
-                throw new AuthenticationException("Failed to obtain an Access Token from LinkedIn.", exception);
+                throw new AuthenticationException("Failed to obtain an Access Token from LinkedIn. The connection to LinkedIn failed for some reason. Can you access LinkedIn manually via a browser?", exception);
             }
 
             if (response == null ||
@@ -116,8 +116,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
                 response.Data.ExpiresIn <= 0)
             {
                 throw new AuthenticationException(
-                    "Retrieved a LinkedIn Access Token but it doesn't contain one or more of either: " + AccessTokenKey +
-                    " or " + ExpiresInKey);
+                    string.Format("Retrieved a LinkedIn Access Token but it doesn't contain one or more of either: {0} or {1} or the {1} value [{2}] needs to be greater than 0.",
+                    AccessTokenKey, ExpiresInKey, response.Data.ExpiresIn));
             }
 
             return response.Data;

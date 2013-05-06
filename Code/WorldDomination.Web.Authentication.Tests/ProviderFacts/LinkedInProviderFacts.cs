@@ -6,8 +6,6 @@ using RestSharp;
 using WorldDomination.Web.Authentication.ExtraProviders;
 using WorldDomination.Web.Authentication.ExtraProviders.LinkedIn;
 using Xunit;
-using AccessTokenResult = WorldDomination.Web.Authentication.Providers.Google.AccessTokenResult;
-using UserInfoResult = WorldDomination.Web.Authentication.Providers.Google.UserInfoResult;
 
 namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 {
@@ -76,12 +74,12 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
-                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
+                var mockRestResponse = new Mock<IRestResponse<ExtraProviders.LinkedIn.AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.BadRequest);
                 mockRestResponse.Setup(x => x.StatusDescription).Returns("Bad Request");
                 mockRestResponse.Setup(x => x.Content).Returns("{\n  \"error\" : \"invalid_request\"\n}");
                 mockRestClient
-                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
+                    .Setup(x => x.Execute<ExtraProviders.LinkedIn.AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
                 var linkedinProvider = new LinkedInProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                 {
@@ -116,7 +114,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
                 const string errorMessage = "If God says he was not created by a creator, does that mean: god is an aetheist?";
-                mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
+                mockRestClient.Setup(x => x.Execute<ExtraProviders.LinkedIn.AccessTokenResult>(It.IsAny<IRestRequest>()))
                               .Throws(new InvalidOperationException(errorMessage));
                 var linkedinProvider = new LinkedInProvider(new ProviderParams { Key = "aa", Secret = "bb" })
                 {
@@ -140,7 +138,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Failed to obtain an Access Token from LinkedIn OR the the response was not an HTTP Status 200 OK. Response Status: -- null response --. Response Description: ", result.Message);
+                Assert.Equal("Failed to obtain an Access Token from LinkedIn. The connection to LinkedIn failed for some reason. Can you access LinkedIn manually via a browser?", result.Message);
                 Assert.NotNull(result.InnerException);
                 Assert.Equal(errorMessage, result.InnerException.Message);
             }
@@ -150,11 +148,11 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
-                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
+                var mockRestResponse = new Mock<IRestResponse<ExtraProviders.LinkedIn.AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
                 mockRestResponse.Setup(x => x.StatusDescription).Returns("Unauthorized");
                 mockRestClient
-                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
+                    .Setup(x => x.Execute<ExtraProviders.LinkedIn.AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
                 var linkedinProvider = new LinkedInProvider(new ProviderParams { Key = "aa", Secret = "bb" })
                 {
@@ -188,11 +186,11 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
-                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
+                var mockRestResponse = new Mock<IRestResponse<ExtraProviders.LinkedIn.AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult());
+                mockRestResponse.Setup(x => x.Data).Returns(new ExtraProviders.LinkedIn.AccessTokenResult());
                 mockRestClient
-                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
+                    .Setup(x => x.Execute<ExtraProviders.LinkedIn.AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
                 var linkedinProvider = new LinkedInProvider(new ProviderParams { Key = "aa", Secret = "bb" })
                 {
@@ -217,7 +215,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Retrieved a LinkedIn Access Token but it doesn't contain one or more of either: access_token or token_type",
+                    "Retrieved a LinkedIn Access Token but it doesn't contain one or more of either: oauth2_access_token or expires_in.",
                     result.Message);
             }
 
@@ -225,12 +223,11 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             public void GivenExecutingUserInfoThrowsAnException_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
+                var mockRestResponse = new Mock<IRestResponse<ExtraProviders.LinkedIn.AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
+                mockRestResponse.Setup(x => x.Data).Returns(new ExtraProviders.LinkedIn.AccessTokenResult
                 {
-                    AccessToken = "aaa",
-                    TokenType = "overly attached girlfriend"
+                    AccessToken = "aaa"
                 });
 
                 var mockRestResponseUserInfo = new Mock<IRestResponse<UserInfoResult>>();
@@ -239,7 +236,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
-                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
+                    .Setup(x => x.Execute<ExtraProviders.LinkedIn.AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
 
                 mockRestClient.
@@ -277,12 +274,11 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             public void GivenExecutingUserInfoWorksButIsMissingSomeRequiredData_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
+                var mockRestResponse = new Mock<IRestResponse<ExtraProviders.LinkedIn.AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
+                mockRestResponse.Setup(x => x.Data).Returns(new ExtraProviders.LinkedIn.AccessTokenResult
                 {
-                    AccessToken = "aaa",
-                    TokenType = "overly attached girlfriend"
+                    AccessToken = "aaa"
                 });
 
                 var mockRestResponseUserInfo = new Mock<IRestResponse<UserInfoResult>>();
@@ -291,7 +287,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
-                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
+                    .Setup(x => x.Execute<ExtraProviders.LinkedIn.AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
 
                 mockRestClient.
@@ -330,19 +326,20 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             {
                 // Arrange.
                 const string accessToken = "aaa";
-                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
+                var mockRestResponse = new Mock<IRestResponse<ExtraProviders.LinkedIn.AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
+                mockRestResponse.Setup(x => x.Data).Returns(new ExtraProviders.LinkedIn.AccessTokenResult
                 {
                     AccessToken = accessToken,
-                    TokenType = "overly attached girlfriend"
+                    ExpiresIn = 10
                 });
 
-                var userInfoResult = new UserInfoResult
+                var userInfoResult = new ExtraProviders.LinkedIn.UserInfoResult
                 {
-                    Email = "aaa",
+                    EmailAddress = "asdasdas",
                     Id = "1",
-                    Name = "eee"
+                    FirstName = "AAAA",
+                    LastName = "bbbbbb"
                 };
                 var mockRestResponseUserInfo = new Mock<IRestResponse<UserInfoResult>>();
                 mockRestResponseUserInfo.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
@@ -350,11 +347,11 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
-                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
+                    .Setup(x => x.Execute<ExtraProviders.LinkedIn.AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
 
                 mockRestClient.
-                    Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
+                    Setup(x => x.Execute<ExtraProviders.LinkedIn.UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
 
                 var linkedinProvider = new LinkedInProvider(new ProviderParams { Key = "aa", Secret = "bb" })
@@ -385,7 +382,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 Assert.NotNull(result.UserInformation);
                 Assert.Equal(GenderType.Unknown, result.UserInformation.Gender);
                 Assert.Equal(userInfoResult.Id, result.UserInformation.Id);
-                Assert.Equal(userInfoResult.Name, result.UserInformation.Name);
+                Assert.Equal(userInfoResult.FirstName + " " + userInfoResult.LastName, result.UserInformation.Name);
             }
         }
 
