@@ -35,7 +35,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 };
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters));
+                    () =>
+                    linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -48,7 +49,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             public void GivenNoCodeAndNoErrorWasReturned_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var linkedinProvider = new LinkedInProvider(new ProviderParams { Key = "aa", Secret = "bb" });
+                var linkedinProvider = new LinkedInProvider(new ProviderParams {Key = "aa", Secret = "bb"});
                 const string existingState = "Oops! - Tasselhoff Burrfoot";
                 var queryStringParameters = new NameValueCollection
                 {
@@ -62,7 +63,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters));
+                    () =>
+                    linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -74,12 +76,12 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
-                var mockRestResponse = new Mock<IRestResponse<ExtraProviders.LinkedIn.AccessTokenResult>>();
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.BadRequest);
                 mockRestResponse.Setup(x => x.StatusDescription).Returns("Bad Request");
                 mockRestResponse.Setup(x => x.Content).Returns("{\n  \"error\" : \"invalid_request\"\n}");
                 mockRestClient
-                    .Setup(x => x.Execute<ExtraProviders.LinkedIn.AccessTokenResult>(It.IsAny<IRestRequest>()))
+                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
                 var linkedinProvider = new LinkedInProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                 {
@@ -99,7 +101,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters));
+                    () =>
+                    linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -113,10 +116,11 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
-                const string errorMessage = "If God says he was not created by a creator, does that mean: god is an aetheist?";
-                mockRestClient.Setup(x => x.Execute<ExtraProviders.LinkedIn.AccessTokenResult>(It.IsAny<IRestRequest>()))
+                const string errorMessage =
+                    "If God says he was not created by a creator, does that mean: god is an aetheist?";
+                mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                               .Throws(new InvalidOperationException(errorMessage));
-                var linkedinProvider = new LinkedInProvider(new ProviderParams { Key = "aa", Secret = "bb" })
+                var linkedinProvider = new LinkedInProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                 {
                     RestClientFactory = new RestClientFactory(mockRestClient.Object)
                 };
@@ -134,11 +138,14 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters));
+                    () =>
+                    linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Failed to obtain an Access Token from LinkedIn. The connection to LinkedIn failed for some reason. Can you access LinkedIn manually via a browser?", result.Message);
+                Assert.Equal(
+                    "Failed to obtain an Access Token from LinkedIn. The connection to LinkedIn failed for some reason. Can you access LinkedIn manually via a browser?",
+                    result.Message);
                 Assert.NotNull(result.InnerException);
                 Assert.Equal(errorMessage, result.InnerException.Message);
             }
@@ -148,13 +155,13 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
-                var mockRestResponse = new Mock<IRestResponse<ExtraProviders.LinkedIn.AccessTokenResult>>();
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
                 mockRestResponse.Setup(x => x.StatusDescription).Returns("Unauthorized");
                 mockRestClient
-                    .Setup(x => x.Execute<ExtraProviders.LinkedIn.AccessTokenResult>(It.IsAny<IRestRequest>()))
+                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var linkedinProvider = new LinkedInProvider(new ProviderParams { Key = "aa", Secret = "bb" })
+                var linkedinProvider = new LinkedInProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                 {
                     RestClientFactory = new RestClientFactory(mockRestClient.Object)
                 };
@@ -172,7 +179,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters));
+                    () =>
+                    linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -186,13 +194,13 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
-                var mockRestResponse = new Mock<IRestResponse<ExtraProviders.LinkedIn.AccessTokenResult>>();
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponse.Setup(x => x.Data).Returns(new ExtraProviders.LinkedIn.AccessTokenResult());
+                mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult());
                 mockRestClient
-                    .Setup(x => x.Execute<ExtraProviders.LinkedIn.AccessTokenResult>(It.IsAny<IRestRequest>()))
+                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-                var linkedinProvider = new LinkedInProvider(new ProviderParams { Key = "aa", Secret = "bb" })
+                var linkedinProvider = new LinkedInProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                 {
                     RestClientFactory = new RestClientFactory(mockRestClient.Object)
                 };
@@ -210,12 +218,13 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters));
+                    () =>
+                    linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Retrieved a LinkedIn Access Token but it doesn't contain one or more of either: oauth2_access_token or expires_in.",
+                    "Retrieved a LinkedIn Access Token but it doesn't contain one or more of either: oauth2_access_token or expires_in or the expires_in value [0] needs to be greater than 0.",
                     result.Message);
             }
 
@@ -223,11 +232,12 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             public void GivenExecutingUserInfoThrowsAnException_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var mockRestResponse = new Mock<IRestResponse<ExtraProviders.LinkedIn.AccessTokenResult>>();
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponse.Setup(x => x.Data).Returns(new ExtraProviders.LinkedIn.AccessTokenResult
+                mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
                 {
-                    AccessToken = "aaa"
+                    AccessToken = "aaa",
+                    ExpiresIn = 10
                 });
 
                 var mockRestResponseUserInfo = new Mock<IRestResponse<UserInfoResult>>();
@@ -236,14 +246,14 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
-                    .Setup(x => x.Execute<ExtraProviders.LinkedIn.AccessTokenResult>(It.IsAny<IRestRequest>()))
+                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
 
                 mockRestClient.
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
 
-                var linkedinProvider = new LinkedInProvider(new ProviderParams { Key = "aa", Secret = "bb" })
+                var linkedinProvider = new LinkedInProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                 {
                     RestClientFactory = new RestClientFactory(mockRestClient.Object)
                 };
@@ -261,7 +271,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters));
+                    () =>
+                    linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
@@ -274,11 +285,12 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             public void GivenExecutingUserInfoWorksButIsMissingSomeRequiredData_AuthenticateClient_ThrowsAnException()
             {
                 // Arrange.
-                var mockRestResponse = new Mock<IRestResponse<ExtraProviders.LinkedIn.AccessTokenResult>>();
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponse.Setup(x => x.Data).Returns(new ExtraProviders.LinkedIn.AccessTokenResult
+                mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
                 {
-                    AccessToken = "aaa"
+                    AccessToken = "aaa",
+                    ExpiresIn = 10
                 });
 
                 var mockRestResponseUserInfo = new Mock<IRestResponse<UserInfoResult>>();
@@ -287,14 +299,14 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
-                    .Setup(x => x.Execute<ExtraProviders.LinkedIn.AccessTokenResult>(It.IsAny<IRestRequest>()))
+                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
 
                 mockRestClient.
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
 
-                var linkedinProvider = new LinkedInProvider(new ProviderParams { Key = "aa", Secret = "bb" })
+                var linkedinProvider = new LinkedInProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                 {
                     RestClientFactory = new RestClientFactory(mockRestClient.Object)
                 };
@@ -312,12 +324,13 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 // Act.
                 var result = Assert.Throws<AuthenticationException>(
-                    () => linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters));
+                    () =>
+                    linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters));
 
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Retrieve some user info from the LinkedIn Api, but we're missing one or more of either: Id, Login, and Name.",
+                    "We were unable to retrieve the User Id from LinkedIn API, the user may have denied the authorization.",
                     result.Message);
             }
 
@@ -326,15 +339,17 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             {
                 // Arrange.
                 const string accessToken = "aaa";
-                var mockRestResponse = new Mock<IRestResponse<ExtraProviders.LinkedIn.AccessTokenResult>>();
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponse.Setup(x => x.Data).Returns(new ExtraProviders.LinkedIn.AccessTokenResult
+                var accessTokenResult = new AccessTokenResult
                 {
                     AccessToken = accessToken,
                     ExpiresIn = 10
-                });
+                };
+                mockRestResponse.Setup(x => x.Data).Returns(accessTokenResult);
+                var expiresIn = DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn);
 
-                var userInfoResult = new ExtraProviders.LinkedIn.UserInfoResult
+                var userInfoResult = new UserInfoResult
                 {
                     EmailAddress = "asdasdas",
                     Id = "1",
@@ -347,14 +362,14 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient
-                    .Setup(x => x.Execute<ExtraProviders.LinkedIn.AccessTokenResult>(It.IsAny<IRestRequest>()))
+                    .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
 
                 mockRestClient.
-                    Setup(x => x.Execute<ExtraProviders.LinkedIn.UserInfoResult>(It.IsAny<IRestRequest>()))
+                    Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
 
-                var linkedinProvider = new LinkedInProvider(new ProviderParams { Key = "aa", Secret = "bb" })
+                var linkedinProvider = new LinkedInProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                 {
                     RestClientFactory = new RestClientFactory(mockRestClient.Object)
                 };
@@ -372,13 +387,14 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 };
 
                 // Act.
-                var result = linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings, queryStringParameters);
+                var result = linkedinProvider.AuthenticateClient(linkedInAuthenticationServiceSettings,
+                                                                 queryStringParameters);
 
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal("linkedin", result.ProviderName);
                 Assert.Equal(accessToken, result.AccessToken);
-                Assert.Equal(new DateTime(),result.AccessTokenExpiresOn);
+                Assert.True(result.AccessTokenExpiresOn <= DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn));
                 Assert.NotNull(result.UserInformation);
                 Assert.Equal(GenderType.Unknown, result.UserInformation.Gender);
                 Assert.Equal(userInfoResult.Id, result.UserInformation.Id);
@@ -406,7 +422,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "https://linkedin.com/login/oauth/authorize?client_id=aa&redirect_uri=http://wwww.pewpew.com/&response_type=code&state=bleh",
+                    "https://www.linkedin.com/uas/oauth2/authorization?response_type=code&client_id=aa&redirect_uri=http://wwww.pewpew.com/&state=bleh&scope=r_basicprofile%20r_emailaddress",
                     result.AbsoluteUri);
             }
         }

@@ -410,7 +410,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "https://github.com/login/oauth/authorize?client_id=aa&scope=email&redirect_uri=http://wwww.pewpew.com/&response_type=code&state=bleh",
+                    "https://github.com/login/oauth/authorize?client_id=aa&scope=user:email&redirect_uri=http://wwww.pewpew.com/&response_type=code&state=bleh",
                     result.AbsoluteUri);
             }
         }
