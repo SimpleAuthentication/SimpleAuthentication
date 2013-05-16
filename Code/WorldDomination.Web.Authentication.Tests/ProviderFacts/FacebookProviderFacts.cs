@@ -326,7 +326,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Failed to obtain some Me data from the Facebook api OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
+                    "Failed to obtain some 'Me' data from the Facebook api OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
                     result.Message);
             }
 

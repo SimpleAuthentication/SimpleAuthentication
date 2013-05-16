@@ -149,23 +149,31 @@ namespace WorldDomination.Web.Authentication.Providers
             }
 
             if (response == null ||
-                response.StatusCode != HttpStatusCode.OK)
+                response.StatusCode != HttpStatusCode.OK ||
+                response.Data == null)
             {
                 throw new AuthenticationException(
                     string.Format(
-                        "Failed to obtain some Me data from the Facebook api OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
+                        "Failed to obtain some 'Me' data from the Facebook api OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
                         response == null ? "-- null response --" : response.StatusCode.ToString(),
                         response == null ? string.Empty : response.StatusDescription));
             }
 
+            var id = response.Data.Id < 0 ? 0 : response.Data.Id;
+            var name = (string.IsNullOrEmpty(response.Data.FirstName)
+                            ? string.Empty
+                            : response.Data.FirstName) + " " +
+                       (string.IsNullOrEmpty(response.Data.LastName)
+                            ? string.Empty
+                            : response.Data.LastName).Trim();
             return new UserInformation
             {
-                Id = response.Data.Id.ToString(),
-                Name = (response.Data.FirstName + " " + response.Data.LastName).Trim(),
+                Id = id.ToString(),
+                Name = name,
                 Email = response.Data.Email,
                 Locale = response.Data.Locale,
                 UserName = response.Data.Username,
-                Picture = string.Format("https://graph.facebook.com/{0}/picture", response.Data.Id)
+                Picture = string.Format("https://graph.facebook.com/{0}/picture", id)
             };
         }
 
