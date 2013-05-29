@@ -66,6 +66,7 @@ fieldset {
     margin: 0 auto;
     text-align: center;
     width: 150px;
+    padding: 10px;
 }
 
 legend {
@@ -95,4 +96,9 @@ h1 {
 h2 {
     font-size: 1.1em;
     padding-bottom: 8px;
+}
+
+.login-logo img {
+    width: 32px;
+    height: 32px;
 }
