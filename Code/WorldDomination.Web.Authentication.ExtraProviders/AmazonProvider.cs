@@ -138,7 +138,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             }
 
             // Lets check to make sure we have some bare minimum data.
-            if (string.IsNullOrEmpty(response.Data.CustomerId))
+            if (string.IsNullOrEmpty(response.Data.Profile.CustomerId))
             {
                 throw new AuthenticationException(
                     "Retrieve some user info from the Amazon Api, but we're missing: CustomerId.");
@@ -207,9 +207,9 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
                 AccessToken = oAuthAccessToken.AccessToken,
                 UserInformation = new UserInformation
                 {
-                    Id = userInfo.CustomerId,
-                    Name = userInfo.Name,
-                    Email = userInfo.PrimaryEmail
+                    Id = userInfo.Profile.CustomerId,
+                    Name = userInfo.Profile.Name,
+                    Email = userInfo.Profile.PrimaryEmail
                 }
             };
         }
