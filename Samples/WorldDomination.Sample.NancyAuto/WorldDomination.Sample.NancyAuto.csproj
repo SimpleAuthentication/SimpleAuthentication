@@ -73,6 +73,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\amazon_32x32.png" />
     <Content Include="Content\facebook_32.png" />
     <Content Include="Content\google_32.png" />
     <Content Include="Content\linkedin_32.png" />
