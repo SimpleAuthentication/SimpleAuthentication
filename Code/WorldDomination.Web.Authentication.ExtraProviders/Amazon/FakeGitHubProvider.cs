@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.Diagnostics;
+using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication.ExtraProviders.Amazon
 {
@@ -63,6 +65,13 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.Amazon
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
             get { return new AmazonAuthenticationServiceSettings(); }
+        }
+
+        public ITraceManager TraceManager { set; private get; }
+
+        protected TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         #endregion

@@ -39,5 +39,23 @@
         /// Their gender.
         /// </summary>
         public GenderType Gender { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("Id: {0}. Name: {1}. UserName : {2}. Email: {3}.",
+                                 string.IsNullOrEmpty(Id) ? "-no Id-" : Id,
+                                 string.IsNullOrEmpty(Name) ? "-no name-" : Name,
+                                 string.IsNullOrEmpty(UserName) ? "-no user name-" : UserName,
+                                 string.IsNullOrEmpty(Email) ? "-no email-" : Email);
+        }
+
+        public string ToLongString()
+        {
+            return string.Format("{0} Locale: {1}. Picture: {2}. Gender {3}.",
+                                 ToString(),
+                                 string.IsNullOrEmpty(Locale) ? "-no locale-" : Locale,
+                                 string.IsNullOrEmpty(Picture) ? "-no picture-" : Picture,
+                                 Gender);
+        }
     }
 }

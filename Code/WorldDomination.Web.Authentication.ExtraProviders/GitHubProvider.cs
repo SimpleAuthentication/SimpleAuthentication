@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Net;
 using RestSharp;
 using WorldDomination.Web.Authentication.ExtraProviders.GitHub;
@@ -220,6 +221,11 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
                                              UserName = userInfo.Login,
                                          }
                    };
+        }
+
+        protected override TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         #endregion

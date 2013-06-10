@@ -2,15 +2,23 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using WorldDomination.Web.Authentication.Config;
 using WorldDomination.Web.Authentication.Exceptions;
+using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication
 {
     public class AuthenticationService : IAuthenticationService
     {
         private static readonly ConcurrentDictionary<string, IAuthenticationProvider> ConfiguredProviders;
+
+        public AuthenticationService()
+        {
+            TraceManager = new Lazy<TraceManager>(() => new TraceManager()).Value;
+        }
 
         static AuthenticationService()
         {
@@ -109,6 +117,8 @@ namespace WorldDomination.Web.Authentication
             get { return ConfiguredProviders; }
         }
 
+        public ITraceManager TraceManager { set; private get; }
+
         public void AddProvider(IAuthenticationProvider provider, bool replaceExisting = true)
         {
             Add(provider, replaceExisting);
@@ -183,10 +193,16 @@ namespace WorldDomination.Web.Authentication
                                                            dynamic requestParameters)
         {
             var querystringParameters = new NameValueCollection();
-
+            var keyValuesAsText = new StringBuilder();
             foreach (var item in requestParameters)
             {
                 querystringParameters.Add(item, requestParameters[item]);
+                keyValuesAsText.Append("Key: {0} / Value: {1}. ", item, requestParameters[item]);
+            }
+
+            if (keyValuesAsText.Length > 0)
+            {
+                TraceSource.TraceVerbose("Request Parameters: " + keyValuesAsText);
             }
 
             return GetAuthenticatedClient(authenticationServiceSettings, querystringParameters);
@@ -237,6 +253,10 @@ namespace WorldDomination.Web.Authentication
             return settings;
         }
 
+        #endregion
+
+        private TraceSource TraceSource { get { return TraceManager["WD.Web.Authentication.AuthenticationService"]; } }
+
         private IAuthenticationProvider GetAuthenticationProvider(string providerKey)
         {
             IAuthenticationProvider authenticationProvider = null;
@@ -248,13 +268,16 @@ namespace WorldDomination.Web.Authentication
 
             if (authenticationProvider == null)
             {
-                throw new AuthenticationException(string.Format("No '{0}' provider details have been added/provided. Maybe you forgot to add the name/key/value data into your web.config? Eg. in your web.config configuration/authenticationProviders/providers section add the following (if you want to offer Google authentication): <add name=\"Google\" key=\"someNumber.apps.googleusercontent.com\" secret=\"someSecret\" />", providerKey));
+                var errorMessage =
+                    string.Format(
+                        "No '{0}' provider details have been added/provided. Maybe you forgot to add the name/key/value data into your web.config? Eg. in your web.config configuration/authenticationProviders/providers section add the following (if you want to offer Google authentication): <add name=\"Google\" key=\"someNumber.apps.googleusercontent.com\" secret=\"someSecret\" />",
+                        providerKey);
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
             }
 
             return authenticationProvider;
         }
-
-        #endregion
 
         private static void Add(IAuthenticationProvider provider, bool replaceExisting = true)
         {

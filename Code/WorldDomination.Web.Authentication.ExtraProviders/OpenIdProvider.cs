@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Xml.Linq;
@@ -217,6 +218,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             return Uri.EscapeDataString(url).Replace("%20", "+");
 
         }
+
         #region Implementation of IAuthenticationProvider
 
         public string Name
@@ -330,6 +332,11 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             {
                 UserInformation = RetrieveMe(queryStringParameters)
             };
+        }
+
+        protected override TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         #endregion

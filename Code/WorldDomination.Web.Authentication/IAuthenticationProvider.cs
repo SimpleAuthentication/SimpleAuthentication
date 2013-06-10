@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.ComponentModel.Composition;
+using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication
 {
@@ -35,5 +36,10 @@ namespace WorldDomination.Web.Authentication
         /// <param name="restClientFactory"></param>
         /// <returns>An authenticatedClient with either user information or some error message(s).</returns>
         IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings, NameValueCollection queryStringParameters);
+
+        /// <summary>
+        /// (Optional) TraceManager for getting trace information.
+        /// </summary>
+        ITraceManager TraceManager { set; }
     }
 }

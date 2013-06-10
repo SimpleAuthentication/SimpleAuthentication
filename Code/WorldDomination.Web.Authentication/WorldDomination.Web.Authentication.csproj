@@ -88,6 +88,10 @@
     <Compile Include="Providers\TwitterProvider.cs" />
     <Compile Include="Providers\Twitter\VerifierResult.cs" />
     <Compile Include="Providers\Twitter\VerifyCredentialsResult.cs" />
+    <Compile Include="SystemHelpers.cs" />
+    <Compile Include="Tracing\ITraceManager.cs" />
+    <Compile Include="Tracing\TraceManager.cs" />
+    <Compile Include="Tracing\TraceSourceExtensions.cs" />
     <Compile Include="UserInformation.cs" />
     <Compile Include="Providers\WindowsLive\AuthenticatedToken.cs" />
     <Compile Include="Providers\WindowsLive\Emails.cs" />

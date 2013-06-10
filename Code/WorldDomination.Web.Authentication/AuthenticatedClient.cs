@@ -39,5 +39,14 @@ namespace WorldDomination.Web.Authentication
         public DateTime AccessTokenExpiresOn { get; set; }
 
         #endregion
+
+        public override string ToString()
+        {
+            return string.Format("Provider Name: {0}. Access Token: {1}. Access Token Expires on: {2}. User Info: {3}",
+                string.IsNullOrEmpty(ProviderName) ? "-no provider name-": ProviderName,
+                string.IsNullOrEmpty(AccessToken) ? "-no provider name-": AccessToken,
+                (string.Format("{0} {1}", AccessTokenExpiresOn.ToLongDateString(), AccessTokenExpiresOn.ToLongTimeString())),
+                UserInformation == null ? "-no user information-" : UserInformation.ToLongString());
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication
 {
@@ -13,6 +14,11 @@ namespace WorldDomination.Web.Authentication
         ///     Returns a list of Unique Providers that are currently configured
         /// </summary>
         IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; }
+
+        /// <summary>
+        /// (Optional) TraceManager for getting trace information.
+        /// </summary>
+        ITraceManager TraceManager { set; }
 
         /// <summary>
         ///     Registering a provider with this service.

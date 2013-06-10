@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Net;
 using RestSharp;
 using WorldDomination.Web.Authentication.ExtraProviders.Amazon;
@@ -212,6 +213,11 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
                     Email = userInfo.Profile.PrimaryEmail
                 }
             };
+        }
+
+        protected override TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         #endregion

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Net;
 using RestSharp;
 using RestSharp.Contrib;
 using WorldDomination.Web.Authentication.Providers.Facebook;
+using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication.Providers
 {
@@ -103,10 +105,11 @@ namespace WorldDomination.Web.Authentication.Providers
 
                 throw new AuthenticationException(
                     string.Format(
-                        "Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Content: {2}",
+                        "Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Content: {2}. Error Message: {3}",
                         response == null ? "-- null response --" : response.StatusCode.ToString(),
                         response == null ? string.Empty : response.StatusDescription,
-                        response == null ? string.Empty : response.Content));
+                        response == null ? string.Empty : response.Content,
+                        response.ErrorException.RecursiveErrorMessages()));
             }
 
             var querystringParameters = HttpUtility.ParseQueryString(response.Content);
@@ -234,12 +237,15 @@ namespace WorldDomination.Web.Authentication.Providers
 
             var userInformation = RetrieveMe(accessToken);
 
-            return new AuthenticatedClient(Name.ToLowerInvariant())
+            var authenticatedClient = new AuthenticatedClient(Name.ToLowerInvariant())
             {
                 AccessToken = accessToken,
                 AccessTokenExpiresOn = DateTime.UtcNow,
                 UserInformation = userInformation
             };
+
+            TraceSource.TraceVerbose(authenticatedClient.ToString());
+            return authenticatedClient;
         }
 
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
@@ -252,6 +258,11 @@ namespace WorldDomination.Web.Authentication.Providers
                     IsMobile = false
                 };
             }
+        }
+
+        protected override TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         #endregion

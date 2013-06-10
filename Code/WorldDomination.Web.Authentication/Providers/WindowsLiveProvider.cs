@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using RestSharp;
 using WorldDomination.Web.Authentication.Providers.WindowsLive;
 
@@ -126,6 +127,11 @@ namespace WorldDomination.Web.Authentication.Providers
                          };
 
             return result;
+        }
+
+        protected override TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         #endregion

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Net;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -289,6 +290,13 @@ namespace WorldDomination.Web.Authentication.Providers
             get { return new TwitterAuthenticationServiceSettings(); }
         }
 
+        protected override TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
+        }
+
         #endregion
+
+        
     }
 }

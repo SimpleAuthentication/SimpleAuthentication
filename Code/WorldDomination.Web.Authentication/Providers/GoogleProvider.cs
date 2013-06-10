@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Net;
 using RestSharp;
 using WorldDomination.Web.Authentication.Providers.Google;
@@ -243,6 +244,11 @@ namespace WorldDomination.Web.Authentication.Providers
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
             get { return new GoogleAuthenticationServiceSettings(); }
+        }
+
+        protected override TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         #endregion

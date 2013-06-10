@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Net;
 using RestSharp;
 using WorldDomination.Web.Authentication.Providers;
@@ -235,6 +236,11 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
             get { return new LinkedInAuthenticationServiceSettings(); }
+        }
+
+        protected override TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         #endregion

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication.Providers.Facebook
 {
@@ -20,6 +21,8 @@ namespace WorldDomination.Web.Authentication.Providers.Facebook
             }
 
             _redirectToAuthenticateUri = redirectToAuthenticateUri;
+
+            TraceManager = new Lazy<TraceManager>(() => new TraceManager()).Value;
         }
 
         #region Implementation of IAuthenticationProvider
@@ -72,6 +75,8 @@ namespace WorldDomination.Web.Authentication.Providers.Facebook
                 }
             };
         }
+
+        public ITraceManager TraceManager { set; private get; }
 
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
