@@ -9,7 +9,7 @@ using WorldDomination.Web.Authentication.Providers.Twitter;
 
 namespace WorldDomination.Web.Authentication.Providers
 {
-    public class TwitterProvider : BaseProvider, IAuthenticationProvider
+    public class TwitterProvider : BaseRestFactoryProvider, IAuthenticationProvider
     {
         private const string BaseUrl = "https://api.twitter.com";
         private const string DeniedKey = "denied";

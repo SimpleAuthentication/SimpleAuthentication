@@ -2,7 +2,8 @@
 {
     public class WindowsLiveAuthenticationServiceSettings : BaseAuthenticationServiceSettings
     {
-        public WindowsLiveAuthenticationServiceSettings() : base("WindowsLive")
+        public WindowsLiveAuthenticationServiceSettings(bool isFakeProvider = false)
+            : base(isFakeProvider ? "FakeWindowsLive" : "WindowsLive")
         {
         }
     }

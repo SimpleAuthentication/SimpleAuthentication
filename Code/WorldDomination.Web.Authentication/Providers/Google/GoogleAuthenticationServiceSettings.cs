@@ -2,7 +2,8 @@
 {
     public class GoogleAuthenticationServiceSettings : BaseAuthenticationServiceSettings
     {
-        public GoogleAuthenticationServiceSettings() : base("Google")
+        public GoogleAuthenticationServiceSettings(bool isFakeProvider = false)
+            : base(isFakeProvider ? "FakeGoogle" : "Google")
         {
         }
     }

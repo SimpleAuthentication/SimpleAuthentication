@@ -11,7 +11,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 {
     // REFERENCE: https://developers.LinkedIn.com/accounts/docs/OAuth2Login
 
-    public class LinkedInProvider : BaseProvider, IAuthenticationProvider
+    public class LinkedInProvider : BaseRestFactoryProvider, IAuthenticationProvider
     {
         private const string ScopeKey = "&scope={0}";
         private const string AccessTokenKey = "oauth2_access_token";

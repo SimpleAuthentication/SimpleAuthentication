@@ -15,7 +15,7 @@ namespace WorldDomination.Web.Authentication.Tracing
 
         public TraceSource this[string name]
         {
-            get { return _sources.GetOrAdd(name, key => new TraceSource(key, SourceLevels.Verbose)); }
+            get { return _sources.GetOrAdd(name, key => new TraceSource(key)); }
         }
     }
 }

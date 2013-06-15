@@ -8,7 +8,7 @@ using WorldDomination.Web.Authentication.Providers;
 
 namespace WorldDomination.Web.Authentication.ExtraProviders
 {
-    public class GitHubProvider : BaseProvider, IAuthenticationProvider
+    public class GitHubProvider : BaseRestFactoryProvider, IAuthenticationProvider
     {
         private const string AccessTokenKey = "access_token";
         private const string TokenTypeKey = "token_type";

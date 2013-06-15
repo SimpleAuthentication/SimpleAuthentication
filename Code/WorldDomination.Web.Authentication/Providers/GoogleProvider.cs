@@ -10,7 +10,7 @@ namespace WorldDomination.Web.Authentication.Providers
 {
     // REFERENCE: https://developers.google.com/accounts/docs/OAuth2Login
 
-    public class GoogleProvider : BaseProvider, IAuthenticationProvider
+    public class GoogleProvider : BaseRestFactoryProvider, IAuthenticationProvider
     {
         private const string ScopeKey = "&scope={0}";
         private const string AccessTokenKey = "access_token";

@@ -7,114 +7,31 @@ using System.Linq;
 using System.Text;
 using WorldDomination.Web.Authentication.Config;
 using WorldDomination.Web.Authentication.Exceptions;
+using WorldDomination.Web.Authentication.Providers.Facebook;
+using WorldDomination.Web.Authentication.Providers.Google;
+using WorldDomination.Web.Authentication.Providers.Twitter;
 using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private static readonly ConcurrentDictionary<string, IAuthenticationProvider> ConfiguredProviders;
+        private static ConcurrentDictionary<string, IAuthenticationProvider> _configuredProviders;
 
         public AuthenticationService()
         {
-            TraceManager = new Lazy<TraceManager>(() => new TraceManager()).Value;
-        }
+            TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
+            _configuredProviders = new ConcurrentDictionary<string, IAuthenticationProvider>();
 
-        static AuthenticationService()
-        {
-            ConfiguredProviders = new ConcurrentDictionary<string, IAuthenticationProvider>();
-
+            
             Initialize();
-        }
-
-        private static void Initialize()
-        {
-            var discoveredProviders = MefHelpers.GetExportedTypes<IAuthenticationProvider>();
-
-            //TODO: Try configure from appSettings
-
-            //Try configure from custom config section
-            var providerConfig = ProviderConfigHelper.UseConfig();
-            if (providerConfig != null)
-            {
-                SetupCustomConfigProviders(discoveredProviders, providerConfig);
-            }
-        }
-
-        private static void SetupCustomConfigProviders(IList<Type> discoveredProviders, ProviderConfiguration providerConfig)
-        {
-            if (providerConfig.Providers == null)
-            {
-                throw new ArgumentException("providerConfiguration.Providers");
-            }
-
-            foreach (ProviderKey provider in providerConfig.Providers)
-            {
-                var discoverProvider = DiscoverProvider(discoveredProviders, provider);
-
-                Add(discoverProvider, false);
-            }
-        }
-
-        private static IAuthenticationProvider DiscoverProvider(IEnumerable<Type> discoveredProviders, ProviderKey providerKey)
-        {
-            var name = providerKey.Name.ToLowerInvariant();
-
-            var provider = discoveredProviders.SingleOrDefault(x => x.Name.ToLowerInvariant().StartsWith(name));
-
-            if (provider == null)
-            {
-                throw new ApplicationException(
-                    string.Format("Unable to find the provider [{0}]. Is there a provider dll available? Is there a typo in the provider name? Solution suggestions: Check to make sure the correct dll's are in the 'bin' directory and/or check the name to make sure there's no typo's in there. Example: If you're trying include the GitHub provider, make sure the name is 'github' (any case) and that the ExtraProviders dll exists in the 'bin' directory.",
-                                  name));
-            }
-
-            var parameters = new ProviderParams
-            {
-                Key = providerKey.Key,
-                Secret = providerKey.Secret
-            };
-
-            return Activator.CreateInstance(provider, parameters) as IAuthenticationProvider;
-        }
-
-        private static Uri CreateCallBackUri(string providerKey, Uri requestUrl, string path)
-        {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentNullException("path");
-            }
-
-            if (string.IsNullOrEmpty(providerKey))
-            {
-                throw new ArgumentNullException("providerKey");
-            }
-
-            if (requestUrl == null)
-            {
-                throw new ArgumentNullException("requestUrl");
-            }
-
-            var builder = new UriBuilder(requestUrl)
-            {
-                Path = path,
-                Query = "providerkey=" + providerKey.ToLowerInvariant()
-            };
-
-            // Don't include port 80/443 in the Uri.
-            if (builder.Uri.IsDefaultPort)
-            {
-                builder.Port = -1;
-            }
-
-            return builder.Uri;
         }
 
         #region Implementation of IAuthenticationService
 
         public IDictionary<string, IAuthenticationProvider> AuthenticationProviders
         {
-            get { return ConfiguredProviders; }
+            get { return _configuredProviders; }
         }
 
         public ITraceManager TraceManager { set; private get; }
@@ -132,7 +49,7 @@ namespace WorldDomination.Web.Authentication
         public void RemoveProvider(string providerName)
         {
             IAuthenticationProvider provider;
-            ConfiguredProviders.TryRemove(providerName, out provider);
+            _configuredProviders.TryRemove(providerName, out provider);
         }
 
         public Uri RedirectToAuthenticationProvider(string providerKey, Uri callBackUri = null)
@@ -229,7 +146,28 @@ namespace WorldDomination.Web.Authentication
             // Grab the Authentication Client.
             var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderName);
 
-            return authenticationProvider.AuthenticateClient(authenticationServiceSettings, queryStringParameters);
+            if (authenticationProvider == null)
+            {
+                var errorMessage = "Failed to find a registered provider, for the input name parameter: " +
+                                   authenticationServiceSettings.ProviderName;
+                TraceSource.TraceError(errorMessage);
+                throw new InvalidOperationException(errorMessage);
+            }
+
+            TraceSource.TraceInformation("Retrieved provider: {0}.", authenticationProvider.Name);
+            var authenticatedClient = authenticationProvider.AuthenticateClient(authenticationServiceSettings, queryStringParameters);
+
+            if (authenticatedClient == null)
+            {
+                TraceSource.TraceWarning("Failed to retrieve an authenticated client instance. Er.. WTF?");
+            }
+            else
+            {
+                TraceSource.TraceInformation("Retrieved Authenticated Client data: {0}",
+                                             authenticatedClient.UserInformation.ToLongString());
+            }
+
+            return authenticatedClient;
         }
 
         public IAuthenticationServiceSettings GetAuthenticateServiceSettings(string providerKey, Uri requestUrl,
@@ -254,6 +192,133 @@ namespace WorldDomination.Web.Authentication
         }
 
         #endregion
+
+        public static ICollection<IAuthenticationProvider> RegisteredAuthenticatedProviders
+        {
+            get
+            {
+                return _configuredProviders == null
+                           ? null
+                           : _configuredProviders.Values;
+            }
+        }
+
+        private void Initialize()
+        {
+            var discoveredProviders = MefHelpers.GetExportedTypes<IAuthenticationProvider>();
+
+            //TODO: Try configure from appSettings
+
+            //Try configure from custom config section.
+            var providerConfig = ProviderConfigHelper.UseConfig();
+            if (providerConfig != null)
+            {
+                SetupCustomConfigProviders(discoveredProviders, providerConfig);
+            }
+        }
+
+        private void SetupCustomConfigProviders(IList<Type> discoveredProviders, ProviderConfiguration providerConfig)
+        {
+            if (providerConfig.Providers == null)
+            {
+                throw new ArgumentException("providerConfiguration.Providers");
+            }
+
+            foreach (ProviderKey provider in providerConfig.Providers)
+            {
+                var discoverProvider = DiscoverProvider(discoveredProviders, provider);
+
+                Add(discoverProvider, false);
+            }
+
+            // Do we also need to add some Fake Providers?
+            if (providerConfig.IncludeFakeProviders)
+            {
+                Add(new List<IAuthenticationProvider>
+                {
+                    new FakeFacebookProvider(),
+                    new FakeGoogleProvider(),
+                    new FakeTwitterProvider()
+                }, true);
+            }
+        }
+
+        private IAuthenticationProvider DiscoverProvider(IEnumerable<Type> discoveredProviders, ProviderKey providerKey)
+        {
+            var name = providerKey.Name.ToLowerInvariant();
+
+            var provider = discoveredProviders.SingleOrDefault(x => x.Name.ToLowerInvariant().StartsWith(name));
+
+            if (provider == null)
+            {
+                var errorMessage =
+                    string.Format(
+                        "Unable to find the provider [{0}]. Is there a provider dll available? Is there a typo in the provider name? Solution suggestions: Check to make sure the correct dll's are in the 'bin' directory and/or check the name to make sure there's no typo's in there. Example: If you're trying include the GitHub provider, make sure the name is 'github' (any case) and that the ExtraProviders dll exists in the 'bin' directory.",
+                        name);
+                TraceSource.TraceError(errorMessage);
+                throw new ApplicationException(errorMessage);
+            }
+
+            IAuthenticationProvider authenticationProvider = null;
+
+            // Make sure we have a provider with the correct constructor parameters.
+            // How? If a person creates their own provider and doesn't offer a constructor
+            // that has a sigle ProviderParams, then we're stuffed. So we need to help them.
+            if (provider.GetConstructor(new[] { typeof(ProviderParams) }) != null)
+            {
+                var parameters = new ProviderParams
+                {
+                    Key = providerKey.Key,
+                    Secret = providerKey.Secret
+                };
+                authenticationProvider = Activator.CreateInstance(provider, parameters) as IAuthenticationProvider;
+            }
+
+            if (authenticationProvider == null)
+            {
+                // We didn't find a proper constructor for the provider class we wish to instantiate.
+                var errorMessage =
+                    string.Format(
+                        "The type {0} doesn't have the proper constructor. It requires a constructor that only accepts 1 argument of type ProviderParams. Eg. public MyProvider(ProviderParams providerParams){{ .. }}.",
+                        provider.FullName);
+                TraceSource.TraceError(errorMessage);
+                throw new ApplicationException(errorMessage);
+            }
+
+            return authenticationProvider;
+        }
+
+        private static Uri CreateCallBackUri(string providerKey, Uri requestUrl, string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException("path");
+            }
+
+            if (string.IsNullOrEmpty(providerKey))
+            {
+                throw new ArgumentNullException("providerKey");
+            }
+
+            if (requestUrl == null)
+            {
+                throw new ArgumentNullException("requestUrl");
+            }
+
+            var builder = new UriBuilder(requestUrl)
+            {
+                Path = path,
+                Query = "providerkey=" + providerKey.ToLowerInvariant()
+            };
+
+            // Don't include port 80/443 in the Uri.
+            if (builder.Uri.IsDefaultPort)
+            {
+                builder.Port = -1;
+            }
+
+            return builder.Uri;
+        }
 
         private TraceSource TraceSource { get { return TraceManager["WD.Web.Authentication.AuthenticationService"]; } }
 
@@ -281,7 +346,7 @@ namespace WorldDomination.Web.Authentication
 
         private static void Add(IAuthenticationProvider provider, bool replaceExisting = true)
         {
-            ConfiguredProviders.AddOrUpdate(provider.Name.ToLower(), provider, (key, authenticationProvider) =>
+            _configuredProviders.AddOrUpdate(provider.Name.ToLower(), provider, (key, authenticationProvider) =>
             {
                 if (!replaceExisting)
                 {

@@ -6,7 +6,7 @@ using WorldDomination.Web.Authentication.Providers.WindowsLive;
 
 namespace WorldDomination.Web.Authentication.Providers
 {
-    public class WindowsLiveProvider : BaseProvider, IAuthenticationProvider
+    public class WindowsLiveProvider : BaseRestFactoryProvider, IAuthenticationProvider
     {
         // *********************************************************************
         // REFERENCE: http://msdn.microsoft.com/en-us/library/live/hh243647.aspx

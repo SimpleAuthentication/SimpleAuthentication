@@ -33,7 +33,6 @@ namespace WorldDomination.Web.Authentication
         /// </summary>
         /// <param name="queryStringParameters">QueryString parameters from the callback.</param>
         /// <param name="authenticationServiceSettings">Specific authentication service settings to be passed along to the Authentication Provider.</param>
-        /// <param name="restClientFactory"></param>
         /// <returns>An authenticatedClient with either user information or some error message(s).</returns>
         IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings, NameValueCollection queryStringParameters);
 

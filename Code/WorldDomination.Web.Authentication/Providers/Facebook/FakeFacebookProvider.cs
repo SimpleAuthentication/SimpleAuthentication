@@ -1,35 +1,17 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication.Providers.Facebook
 {
-    public class FakeFacebookProvider : IFakeAuthenticationProvider
+    public class FakeFacebookProvider : BaseProvider, IFakeAuthenticationProvider
     {
-        private readonly Uri _redirectToAuthenticateUri;
-
-        public FakeFacebookProvider(Uri redirectToAuthenticateUri)
-        {
-            if (redirectToAuthenticateUri == null)
-            {
-                throw new ArgumentNullException("redirectToAuthenticateUri");
-            }
-
-            if (string.IsNullOrEmpty(redirectToAuthenticateUri.AbsoluteUri))
-            {
-                throw new ArgumentException("redirectToAuthenticateUri.AbsoluteUri");
-            }
-
-            _redirectToAuthenticateUri = redirectToAuthenticateUri;
-
-            TraceManager = new Lazy<TraceManager>(() => new TraceManager()).Value;
-        }
-
         #region Implementation of IAuthenticationProvider
 
         public string Name
         {
-            get { return "Facebook"; }
+            get { return "FakeFacebook"; }
         }
 
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
@@ -44,7 +26,9 @@ namespace WorldDomination.Web.Authentication.Providers.Facebook
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
 
-            return _redirectToAuthenticateUri ?? new Uri("http://some.fake.uri/with/lots/of/pewpew");
+            var redirectUrl = string.Format("{0}&state={1}", authenticationServiceSettings.CallBackUri.AbsoluteUri,
+                authenticationServiceSettings.State);
+            return new Uri(redirectUrl);
         }
 
         public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
@@ -76,13 +60,16 @@ namespace WorldDomination.Web.Authentication.Providers.Facebook
             };
         }
 
-        public ITraceManager TraceManager { set; private get; }
+        protected override TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
+        }
 
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
             get
             {
-                return new FacebookAuthenticationServiceSettings
+                return new FacebookAuthenticationServiceSettings(true)
                 {
                     Display = DisplayType.Unknown,
                     IsMobile = false

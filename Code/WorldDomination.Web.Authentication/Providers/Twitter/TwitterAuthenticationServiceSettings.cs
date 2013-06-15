@@ -2,7 +2,8 @@
 {
     public class TwitterAuthenticationServiceSettings : BaseAuthenticationServiceSettings
     {
-        public TwitterAuthenticationServiceSettings() : base("Twitter")
+        public TwitterAuthenticationServiceSettings(bool isFakeProvider = false) 
+            : base(isFakeProvider ? "FakeTwitter" : "Twitter")
         {
         }
     }

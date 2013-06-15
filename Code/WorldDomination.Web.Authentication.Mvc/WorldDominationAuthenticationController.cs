@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Web;
 using System.Web.Mvc;
 using WorldDomination.Web.Authentication.Csrf;
+using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication.Mvc
 {
@@ -29,6 +31,9 @@ namespace WorldDomination.Web.Authentication.Mvc
 
             // If no anti forgery class is provided, then we'll just use the default.
             _antiForgery = antiForgery ?? new AspNetAntiForgery();
+
+            // Lazyily setup our TraceManager.
+            TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
         }
 
         protected IAuthenticationService AuthenticationService { get; private set; }
@@ -41,6 +46,8 @@ namespace WorldDomination.Web.Authentication.Mvc
             get { return _cookieName ?? (_cookieName = _antiForgery.DefaultCookieName); }
             set { _cookieName = value; }
         }
+
+        public ITraceManager TraceManager { set; private get; }
 
         public RedirectResult RedirectToProvider(RedirectToProviderInputModel inputModel)
         {
@@ -110,25 +117,40 @@ namespace WorldDomination.Web.Authentication.Mvc
         {
             if (string.IsNullOrEmpty(providerkey))
             {
-                throw new ArgumentException("No provider key was supplied on the callback.");
+                var errorMessage = "No provider key was supplied on the callback.";
+                TraceSource.TraceError(errorMessage);
+                throw new ArgumentException(errorMessage);
             }
 
             // Determine which settings we need, based on the Provider.
+            TraceSource.TraceVerbose("Trying to determine what provider we just came from, based upon some url parameters.");
             var settings = AuthenticationService.GetAuthenticateServiceSettings(providerkey, Request.Url,
                                                                                 Url.CallbackFromOAuthProvider());
+            TraceSource.TraceVerbose("Found - Provider: {0}. CallBackUri: {1}. State: {2}",
+                                     string.IsNullOrEmpty(settings.ProviderName)
+                                         ? "-no provider name-"
+                                         : settings.ProviderName,
+                                     settings.CallBackUri == null
+                                         ? "-no callback uri-"
+                                         : settings.CallBackUri.AbsoluteUri,
+                                     string.IsNullOrEmpty(settings.State) ? "-no state-" : settings.State);
 
             // Pull the "ToKeep" token from the cookie and the "ToSend" token from the query string
             var keptToken = DeserializeToken(Request);
-            var recievedToken = Request.QueryString["state"];
-            if (string.IsNullOrEmpty(recievedToken))
+            var receivedToken = Request.QueryString["state"];
+            if (string.IsNullOrEmpty(receivedToken))
             {
-                throw new InvalidOperationException(
-                    "No state/recievedToken was retrieved from the provider. Are you sure you passed any state/token data to provider .. and .. that the provider can send it back to us? We need this to prevent any Cross site request forgery.");
+                const string errorMessage = "No state/recievedToken was retrieved from the provider. Are you sure you passed any state/token data to provider .. and .. that the provider can send it back to us? We need this to prevent any Cross site request forgery.";;
+                TraceSource.TraceError(errorMessage);
+                throw new InvalidOperationException(errorMessage);
             }
 
             // Validate the token against the recieved one and grab extra data
-            string extraData = _antiForgery.ValidateToken(keptToken, recievedToken);
-
+            string extraData = _antiForgery.ValidateToken(keptToken, receivedToken);
+            TraceSource.TraceVerbose("Retrieved token data: KeptToken: {0} + ReceivedToken: {1} => ExtraData: {2}",
+                                     string.IsNullOrEmpty(keptToken) ? "-no kept token-" : keptToken,
+                                     string.IsNullOrEmpty(receivedToken) ? "-no received token-" : receivedToken,
+                                     string.IsNullOrEmpty(extraData) ? "-no extra data-" : extraData);
             var model = new AuthenticateCallbackData();
 
             try
@@ -138,6 +160,7 @@ namespace WorldDomination.Web.Authentication.Mvc
             }
             catch (Exception exception)
             {
+                TraceSource.TraceError(exception.Message);
                 model.Exception = exception;
             }
 
@@ -150,6 +173,11 @@ namespace WorldDomination.Web.Authentication.Mvc
 
             // Finally! We can hand over the logic to the consumer to do whatever they want.
             return CallbackProvider.Process(HttpContext, model);
+        }
+
+        private TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Mvc.WorldDominationAuthenticationController"]; }
         }
 
         private void SerializeToken(HttpResponseBase response, string token)

@@ -12,7 +12,7 @@ namespace WorldDomination.Web.Authentication.Providers
 {
     // REFERENCE: http://developers.facebook.com/docs/authentication/server-side/
 
-    public class FacebookProvider : BaseProvider, IAuthenticationProvider
+    public class FacebookProvider : BaseRestFactoryProvider, IAuthenticationProvider
     {
         private const string BaseUrl = "https://graph.facebook.com";
         private readonly string _clientId;
@@ -30,7 +30,7 @@ namespace WorldDomination.Web.Authentication.Providers
             _scope = new List<string> {"email"};
         }
 
-        private static string RetrieveAuthorizationCode(NameValueCollection queryStringParameters, string existingState = null)
+        private string RetrieveAuthorizationCode(NameValueCollection queryStringParameters, string existingState = null)
         {
             if (queryStringParameters == null)
             {
@@ -53,10 +53,14 @@ namespace WorldDomination.Web.Authentication.Providers
                 !string.IsNullOrEmpty(error) &&
                 !string.IsNullOrEmpty(errorDescription))
             {
-                throw new AuthenticationException(string.Format("Reason: {0}. Error: {1}. Description: {2}.",
-                                                                errorReason,
-                                                                error,
-                                                                errorDescription));
+                var errorMessage = string.Format("Reason: {0}. Error: {1}. Description: {2}.",
+                                                 string.IsNullOrEmpty(errorReason) ? "-no error reason-" : errorReason,
+                                                 string.IsNullOrEmpty(error) ? "-no error-" : error,
+                                                 string.IsNullOrEmpty(errorDescription)
+                                                                          ? "-no error description-"
+                                                                          : errorDescription);
+                TraceSource.TraceVerbose(errorMessage);
+                throw new AuthenticationException(errorMessage);
             }
 
             if (string.IsNullOrEmpty(code))
@@ -91,11 +95,17 @@ namespace WorldDomination.Web.Authentication.Providers
                 restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
 
                 var restClient = RestClientFactory.CreateRestClient(BaseUrl);
+
+                TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
+                    restClient.BuildUri(restRequest).AbsoluteUri);
+
                 response = restClient.Execute(restRequest);
             }
             catch (Exception exception)
             {
-                throw new AuthenticationException("Failed to retrieve an oauth access token from Facebook.", exception);
+                const string errorMessage = "Failed to retrieve an oauth access token from Facebook.";
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage, exception);
             }
 
             if (response == null ||
@@ -103,13 +113,15 @@ namespace WorldDomination.Web.Authentication.Providers
             {
                 // {"error":{"message":"Error validating verification code. Please make sure your redirect_uri is identical to the one you used in the OAuth dialog request","type":"OAuthException","code":100}}
 
-                throw new AuthenticationException(
-                    string.Format(
-                        "Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Content: {2}. Error Message: {3}",
-                        response == null ? "-- null response --" : response.StatusCode.ToString(),
-                        response == null ? string.Empty : response.StatusDescription,
-                        response == null ? string.Empty : response.Content,
-                        response.ErrorException.RecursiveErrorMessages()));
+                var errorMessage = string.Format(
+                    "Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Content: {2}. Error Message: {3}",
+                    response == null ? "-- null response --" : response.StatusCode.ToString(),
+                    response == null ? string.Empty : response.StatusDescription,
+                    response == null ? string.Empty : response.Content,
+                    response == null ? string.Empty : response.ErrorException.RecursiveErrorMessages());
+
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
             }
 
             var querystringParameters = HttpUtility.ParseQueryString(response.Content);
@@ -122,8 +134,12 @@ namespace WorldDomination.Web.Authentication.Providers
             if (string.IsNullOrEmpty(accessToken) ||
                 expiresOn <= DateTime.UtcNow)
             {
-                throw new AuthenticationException(
-                    "Retrieved a Facebook Access Token but it doesn't contain both the access_token and expires_on parameters.");
+                var errorMessage =
+                    "Retrieved a Facebook Access Token but it doesn't contain both the access_token and expires_on parameters. Response.Content: " 
+                    + (string.IsNullOrEmpty(response.Content) ? "-no response content-" : response.Content);
+                
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
             }
 
             return accessToken;
@@ -144,6 +160,8 @@ namespace WorldDomination.Web.Authentication.Providers
                 restRequest.AddParameter("access_token", accessToken);
 
                 var restClient = RestClientFactory.CreateRestClient(BaseUrl);
+
+                //TODO: TraceSource.Verbose( endpoint uri);
                 response = restClient.Execute<MeResult>(restRequest);
             }
             catch (Exception exception)
@@ -155,11 +173,14 @@ namespace WorldDomination.Web.Authentication.Providers
                 response.StatusCode != HttpStatusCode.OK ||
                 response.Data == null)
             {
-                throw new AuthenticationException(
-                    string.Format(
-                        "Failed to obtain some 'Me' data from the Facebook api OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
-                        response == null ? "-- null response --" : response.StatusCode.ToString(),
-                        response == null ? string.Empty : response.StatusDescription));
+                var errorMessage = string.Format(
+                    "Failed to obtain some 'Me' data from the Facebook api OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Message: {2}",
+                    response == null ? "-- null response --" : response.StatusCode.ToString(),
+                    response == null ? string.Empty : response.StatusDescription,
+                    response == null ? string.Empty : response.ErrorException.RecursiveErrorMessages());
+
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
             }
 
             var id = response.Data.Id < 0 ? 0 : response.Data.Id;
@@ -220,6 +241,8 @@ namespace WorldDomination.Web.Authentication.Providers
                                                baseUri, _clientId, state, scope, display, 
                                                authenticationServiceSettings.CallBackUri.AbsoluteUri);
 
+            TraceSource.TraceInformation("Facebook redirection uri: {0}", oauthDialogUri);
+
             return new Uri(oauthDialogUri);
         }
 
@@ -231,11 +254,23 @@ namespace WorldDomination.Web.Authentication.Providers
                 throw new ArgumentNullException("authenticationServiceSettings");
             }
 
+            TraceSource.TraceVerbose("Retrieving the Authorization Code.");
             var authorizationCode = RetrieveAuthorizationCode(queryStringParameters, authenticationServiceSettings.State);
+            TraceSource.TraceVerbose("Authorization Code retrieved.");
 
+            TraceSource.TraceVerbose("Retrieving the Access Token.");
             var accessToken = RetrieveAccessToken(authorizationCode, authenticationServiceSettings.CallBackUri);
+            TraceSource.TraceVerbose("Access Token retrieved.");
 
+            TraceSource.TraceInformation("Authorization Code: {0}. Access Token: {1}.",
+                                         string.IsNullOrEmpty(authorizationCode)
+                                             ? "-no authorization code-"
+                                             : authorizationCode,
+                                         string.IsNullOrEmpty(accessToken) ? "-no access token-" : accessToken);
+
+            TraceSource.TraceVerbose("Retrieving user information.");
             var userInformation = RetrieveMe(accessToken);
+            TraceSource.TraceVerbose("User information retrieved.");
 
             var authenticatedClient = new AuthenticatedClient(Name.ToLowerInvariant())
             {
@@ -244,7 +279,8 @@ namespace WorldDomination.Web.Authentication.Providers
                 UserInformation = userInformation
             };
 
-            TraceSource.TraceVerbose(authenticatedClient.ToString());
+            TraceSource.TraceInformation(authenticatedClient.ToString());
+
             return authenticatedClient;
         }
 
