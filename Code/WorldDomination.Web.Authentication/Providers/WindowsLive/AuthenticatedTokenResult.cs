@@ -1,6 +1,6 @@
 ﻿namespace WorldDomination.Web.Authentication.Providers.WindowsLive
 {
-    public class AuthenticatedToken
+    public class AuthenticatedTokenResult
     {
         public string TokenType { get; set; }
         public string ExpiresIn { get; set; }

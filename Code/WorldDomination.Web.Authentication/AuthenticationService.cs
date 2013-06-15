@@ -22,7 +22,6 @@ namespace WorldDomination.Web.Authentication
         {
             TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
             _configuredProviders = new ConcurrentDictionary<string, IAuthenticationProvider>();
-
             
             Initialize();
         }

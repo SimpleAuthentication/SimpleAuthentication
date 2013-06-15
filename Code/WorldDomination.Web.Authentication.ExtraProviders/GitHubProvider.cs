@@ -211,7 +211,10 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
             return new AuthenticatedClient(Name.ToLowerInvariant())
                    {
-                       AccessToken = oAuthAccessToken.AccessToken,
+                       AccessToken = new AccessToken
+                       {
+                           PublicToken = oAuthAccessToken.AccessToken
+                       },
                        UserInformation = new UserInformation
                                          {
                                              Id = userInfo.Id.ToString(),

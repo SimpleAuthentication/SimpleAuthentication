@@ -46,8 +46,11 @@ namespace WorldDomination.Web.Authentication.Providers.Facebook
 
             return new AuthenticatedClient("facebook")
             {
-                AccessToken = "IAmALittleTeaPotShortAndStout",
-                AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),
+                AccessToken = new AccessToken
+                              {
+                                  PublicToken = "IAmALittleTeaPotShortAndStout",
+                                  ExpiresOn = DateTime.UtcNow.AddDays(30),
+                              },
                 UserInformation = UserInformation ?? new UserInformation
                 {
                     Gender = GenderType.Female,

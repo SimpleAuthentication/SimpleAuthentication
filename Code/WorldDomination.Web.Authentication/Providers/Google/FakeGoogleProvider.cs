@@ -48,8 +48,11 @@ namespace WorldDomination.Web.Authentication.Providers.Google
 
             return new AuthenticatedClient("google")
             {
-                AccessToken = "SomethingWonderfulHasHappened.AniImPregnant",
-                AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),
+                AccessToken = new AccessToken
+                {
+                    PublicToken = "SomethingWonderfulHasHappened.AniSkywalkerIAmPregnant",
+                    ExpiresOn = DateTime.UtcNow.AddDays(30),
+                },
                 UserInformation = UserInformation ?? new UserInformation
                 {
                     Gender = GenderType.Female,

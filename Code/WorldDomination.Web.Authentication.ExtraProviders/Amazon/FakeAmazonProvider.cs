@@ -51,8 +51,11 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.Amazon
         {
             return new AuthenticatedClient("amazon")
             {
-                AccessToken = "EstSularusOthMithas-MyHonorIsMyLife",
-                AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),
+                AccessToken = new AccessToken
+                {
+                    PublicToken = "EstSularusOthMithas-MyHonorIsMyLife",
+                    ExpiresOn = DateTime.UtcNow.AddDays(30)
+                },
                 UserInformation = UserInformation ?? new UserInformation
                 {
                     Id = "FakeId-" + Guid.NewGuid().ToString(),

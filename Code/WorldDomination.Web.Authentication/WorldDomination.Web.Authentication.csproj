@@ -46,6 +46,7 @@
     <Compile Include="..\Shared Assembly Info\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="AccessToken.cs" />
     <Compile Include="Csrf\AntiForgery.cs" />
     <Compile Include="AuthenticatedClient.cs" />
     <Compile Include="AuthenticationException.cs" />
@@ -95,9 +96,9 @@
     <Compile Include="Tracing\TraceManager.cs" />
     <Compile Include="Tracing\TraceSourceExtensions.cs" />
     <Compile Include="UserInformation.cs" />
-    <Compile Include="Providers\WindowsLive\AuthenticatedToken.cs" />
+    <Compile Include="Providers\WindowsLive\AuthenticatedTokenResult.cs" />
     <Compile Include="Providers\WindowsLive\Emails.cs" />
-    <Compile Include="Providers\WindowsLive\UserInfo.cs" />
+    <Compile Include="Providers\WindowsLive\UserInfoResult.cs" />
     <Compile Include="Providers\WindowsLive\WindowsLiveAuthenticationServiceSettings.cs" />
     <Compile Include="Providers\WindowsLiveProvider.cs" />
   </ItemGroup>

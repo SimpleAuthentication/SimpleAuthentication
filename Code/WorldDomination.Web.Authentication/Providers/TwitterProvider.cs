@@ -281,7 +281,10 @@ namespace WorldDomination.Web.Authentication.Providers
                     UserName = verifyCredentialsResult.ScreenName,
                     Picture = verifyCredentialsResult.ProfileImageUrl
                 },
-                AccessToken = oAuthAccessToken.AccessToken
+                AccessToken = new AccessToken
+                              {
+                                  PublicToken = oAuthAccessToken.AccessToken
+                              }
             };
         }
 

@@ -381,8 +381,9 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal("github", result.ProviderName);
-                Assert.Equal(accessToken, result.AccessToken);
-                Assert.Equal(new DateTime(), result.AccessTokenExpiresOn);
+                Assert.NotNull(result.AccessToken);
+                Assert.Equal(accessToken, result.AccessToken.PublicToken);
+                Assert.Equal(new DateTime(), result.AccessToken.ExpiresOn);
                 Assert.NotNull(result.UserInformation);
                 Assert.Equal(GenderType.Unknown, result.UserInformation.Gender);
                 Assert.Equal(userInfoResult.Id.ToString(), result.UserInformation.Id);

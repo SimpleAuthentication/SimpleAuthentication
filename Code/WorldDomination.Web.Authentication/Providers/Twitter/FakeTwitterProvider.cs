@@ -15,7 +15,7 @@ namespace WorldDomination.Web.Authentication.Providers.Twitter
 
         public string Name
         {
-            get { return "Twitter"; }
+            get { return "FakeTwitter"; }
         }
 
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
@@ -47,19 +47,22 @@ namespace WorldDomination.Web.Authentication.Providers.Twitter
             }
 
             return new AuthenticatedClient("facebook")
-            {
-                AccessToken = "EstSularusOthMithas-MyHonorIsMyLife",
-                AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),
-                UserInformation = UserInformation ?? new UserInformation
-                {
-                    Gender = GenderType.Male,
-                    Id = "FakeId-" + Guid.NewGuid().ToString(),
-                    Locale = "en-au",
-                    Name = "Sturm Brightblade",
-                    Picture = "http://i.imgur.com/jtoOF.jpg",
-                    UserName = "Sturm.Brightblade"
-                }
-            };
+                   {
+                       AccessToken = new AccessToken
+                                     {
+                                         PublicToken = "EstSularusOthMithas",
+                                         ExpiresOn = DateTime.UtcNow.AddDays(30),
+                                     },
+                       UserInformation = UserInformation ?? new UserInformation
+                                                            {
+                                                                Gender = GenderType.Male,
+                                                                Id = "FakeId-" + Guid.NewGuid().ToString(),
+                                                                Locale = "en-au",
+                                                                Name = "Sturm Brightblade",
+                                                                Picture = "http://i.imgur.com/jtoOF.jpg",
+                                                                UserName = "Sturm.Brightblade"
+                                                            }
+                   };
         }
 
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings

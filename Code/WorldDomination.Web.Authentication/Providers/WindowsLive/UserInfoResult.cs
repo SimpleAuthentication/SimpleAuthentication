@@ -1,6 +1,6 @@
 ﻿namespace WorldDomination.Web.Authentication.Providers.WindowsLive
 {
-    public class UserInfo
+    public class UserInfoResult
     {
         public string id { get; set; }
         public string name { get; set; }

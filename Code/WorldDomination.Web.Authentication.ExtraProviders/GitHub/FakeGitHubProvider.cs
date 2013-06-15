@@ -51,8 +51,11 @@ namespace WorldDomination.Web.Authentication.ExtraProviders.GitHub
         {
             return new AuthenticatedClient("github")
             {
-                AccessToken = "EstSularusOthMithas-MyHonorIsMyLife",
-                AccessTokenExpiresOn = DateTime.UtcNow.AddDays(30),
+                AccessToken = new AccessToken
+                {
+                    PublicToken = "EstSularusOthMithas-MyHonorIsMyLife",
+                    ExpiresOn = DateTime.UtcNow.AddDays(30)
+                },
                 UserInformation = UserInformation ?? new UserInformation
                 {
                     Gender = GenderType.Male,

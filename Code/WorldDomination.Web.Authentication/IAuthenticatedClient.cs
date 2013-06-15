@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace WorldDomination.Web.Authentication
+﻿namespace WorldDomination.Web.Authentication
 {
     /// <summary>
     /// Defines the contract that authenticated clients from Authenticated providers must impliment.
@@ -18,13 +16,8 @@ namespace WorldDomination.Web.Authentication
         UserInformation UserInformation { get; set; }
 
         /// <summary>
-        /// An access token.
+        /// The access token.
         /// </summary>
-        string AccessToken { get; set; }
-
-        /// <summary>
-        /// When the access token expires. Always in UTC.
-        /// </summary>
-        DateTime AccessTokenExpiresOn { get; set; }
+        AccessToken AccessToken { get; set; }
     }
 }

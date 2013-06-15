@@ -32,11 +32,18 @@ namespace WorldDomination.Web.Authentication.Providers
             var accessToken = RetrieveAccessToken(authorizationCode, authenticationServiceSettings.CallBackUri);
             TraceSource.TraceVerbose("Access Token retrieved.");
 
-            TraceSource.TraceInformation("Authorization Code: {0}. Access Token: {1}.",
+            if (accessToken == null)
+            {
+                const string errorMessage = "No access token retrieved from provider. Unable to continue.";
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            TraceSource.TraceInformation("Authorization Code: {0}. {1}",
                                          string.IsNullOrEmpty(authorizationCode)
                                              ? "-no authorization code-"
                                              : authorizationCode,
-                                         string.IsNullOrEmpty(accessToken) ? "-no access token-" : accessToken);
+                                         accessToken.ToString());
 
             TraceSource.TraceVerbose("Retrieving user information.");
             var userInformation = RetrieveUserInformation(accessToken);
@@ -45,7 +52,6 @@ namespace WorldDomination.Web.Authentication.Providers
             var authenticatedClient = new AuthenticatedClient(Name.ToLowerInvariant())
             {
                 AccessToken = accessToken,
-                AccessTokenExpiresOn = DateTime.UtcNow,
                 UserInformation = userInformation
             };
 
@@ -64,8 +70,8 @@ namespace WorldDomination.Web.Authentication.Providers
         protected abstract string RetrieveAuthorizationCode(NameValueCollection queryStringParameters,
                                                             string existingState = null);
 
-        protected abstract string RetrieveAccessToken(string code, Uri redirectUri);
+        protected abstract AccessToken RetrieveAccessToken(string code, Uri redirectUri);
 
-        protected abstract UserInformation RetrieveUserInformation(string accessToken);
+        protected abstract UserInformation RetrieveUserInformation(AccessToken accessToken);
     }
 }

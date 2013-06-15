@@ -24,7 +24,7 @@ namespace WorldDomination.Web.Authentication.Tests
                 // Assert.
                 var providers = authenticationService.AuthenticationProviders;
                 Assert.NotNull(providers);
-                Assert.Equal(3, providers.Count);
+                Assert.Equal(6, providers.Count);
                 Assert.NotNull(providers["twitter"]);
             }
 

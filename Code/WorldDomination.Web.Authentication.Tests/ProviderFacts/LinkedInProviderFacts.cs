@@ -393,8 +393,9 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal("linkedin", result.ProviderName);
-                Assert.Equal(accessToken, result.AccessToken);
-                Assert.True(result.AccessTokenExpiresOn <= DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn));
+                Assert.NotNull(result.AccessToken);
+                Assert.Equal(accessToken, result.AccessToken.PublicToken);
+                Assert.Equal(new DateTime(), result.AccessToken.ExpiresOn);
                 Assert.NotNull(result.UserInformation);
                 Assert.Equal(GenderType.Unknown, result.UserInformation.Gender);
                 Assert.Equal(userInfoResult.Id, result.UserInformation.Id);

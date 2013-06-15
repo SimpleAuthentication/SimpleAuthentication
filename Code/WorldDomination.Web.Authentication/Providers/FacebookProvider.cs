@@ -29,6 +29,66 @@ namespace WorldDomination.Web.Authentication.Providers
             _scope = new List<string> {"email"};
         }
 
+        #region Implementation of IAuthenticationProvider
+
+        public override string Name
+        {
+            get { return "Facebook"; }
+        }
+
+        public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
+        {
+            get
+            {
+                return new FacebookAuthenticationServiceSettings
+                       {
+                           Display = DisplayType.Unknown,
+                           IsMobile = false
+                       };
+            }
+        }
+
+        public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
+        {
+            if (authenticationServiceSettings == null)
+            {
+                throw new ArgumentNullException("authenticationServiceSettings");
+            }
+
+            var facebookAuthenticationSettings = authenticationServiceSettings as FacebookAuthenticationServiceSettings;
+            if (facebookAuthenticationSettings == null)
+            {
+                throw new InvalidOperationException(
+                    "AuthenticationServiceSettings instance is not of type FacebookAuthenticationServiceSettings.");
+            }
+
+            var baseUri = facebookAuthenticationSettings.IsMobile
+                              ? "https://m.facebook.com"
+                              : "https://www.facebook.com";
+            var scope = (_scope != null && _scope.Count > 0)
+                            ? "&scope=" + string.Join(",", _scope)
+                            : string.Empty;
+            var state = !string.IsNullOrEmpty(facebookAuthenticationSettings.State)
+                            ? "&state=" + facebookAuthenticationSettings.State
+                            : string.Empty;
+            var display = facebookAuthenticationSettings.Display == DisplayType.Unknown
+                              ? string.Empty
+                              : "&display=" + facebookAuthenticationSettings.Display.ToString().ToLowerInvariant();
+
+            // REFERENCE: https://developers.facebook.com/docs/reference/dialogs/oauth/
+            // NOTE: Facebook is case-sensitive anal retentive with regards to their uri + querystring params.
+            //       So ... we'll lowercase the entire biatch. Thanks, Facebook :(
+            var oauthDialogUri = string.Format("{0}/dialog/oauth?client_id={1}{2}{3}{4}&redirect_uri={5}",
+                                               baseUri, _clientId, state, scope, display,
+                                               authenticationServiceSettings.CallBackUri.AbsoluteUri);
+
+            TraceSource.TraceInformation("Facebook redirection uri: {0}", oauthDialogUri);
+
+            return new Uri(oauthDialogUri);
+        }
+
+        #endregion
+
         #region BaseOAuth20Provider Members
 
         protected override string RetrieveAuthorizationCode(NameValueCollection queryStringParameters,
@@ -75,7 +135,7 @@ namespace WorldDomination.Web.Authentication.Providers
             return code;
         }
 
-        protected override string RetrieveAccessToken(string code, Uri redirectUri)
+        protected override AccessToken RetrieveAccessToken(string code, Uri redirectUri)
         {
             if (string.IsNullOrEmpty(code))
             {
@@ -106,8 +166,9 @@ namespace WorldDomination.Web.Authentication.Providers
             }
             catch (Exception exception)
             {
-                var errorMessage = string.Format("Failed to retrieve an oauth access token from Facebook. Error Messages: {0}",
-                    exception.RecursiveErrorMessages());
+                var errorMessage =
+                    string.Format("Failed to retrieve an oauth access token from Facebook. Error Messages: {0}",
+                                  exception.RecursiveErrorMessages());
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage, exception);
             }
@@ -118,11 +179,15 @@ namespace WorldDomination.Web.Authentication.Providers
                 // {"error":{"message":"Error validating verification code. Please make sure your redirect_uri is identical to the one you used in the OAuth dialog request","type":"OAuthException","code":100}}
 
                 var errorMessage = string.Format(
-                    "Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Content: {2}. Error Message: {3}",
+                    "Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Content: {2}. Error Message: {3}.",
                     response == null ? "-- null response --" : response.StatusCode.ToString(),
                     response == null ? string.Empty : response.StatusDescription,
                     response == null ? string.Empty : response.Content,
-                    response == null ? string.Empty : response.ErrorException.RecursiveErrorMessages());
+                    response == null
+                        ? string.Empty
+                        : response.ErrorException == null
+                              ? "--no error exception--"
+                              : response.ErrorException.RecursiveErrorMessages());
 
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
@@ -146,14 +211,23 @@ namespace WorldDomination.Web.Authentication.Providers
                 throw new AuthenticationException(errorMessage);
             }
 
-            return accessToken;
+            return new AccessToken
+                   {
+                       PublicToken = accessToken,
+                       ExpiresOn = expiresOn
+                   };
         }
 
-        protected override UserInformation RetrieveUserInformation(string accessToken)
+        protected override UserInformation RetrieveUserInformation(AccessToken accessToken)
         {
-            if (string.IsNullOrEmpty(accessToken))
+            if (accessToken == null)
             {
                 throw new ArgumentNullException("accessToken");
+            }
+
+            if (string.IsNullOrEmpty(accessToken.PublicToken))
+            {
+                throw new ArgumentException("accessToken.PublicToken");
             }
 
             IRestResponse<MeResult> response;
@@ -161,12 +235,12 @@ namespace WorldDomination.Web.Authentication.Providers
             try
             {
                 var restRequest = new RestRequest("me");
-                restRequest.AddParameter("access_token", accessToken);
+                restRequest.AddParameter("access_token", accessToken.PublicToken);
 
                 var restClient = RestClientFactory.CreateRestClient(BaseUrl);
 
                 TraceSource.TraceVerbose("Retrieving user information. Facebook Endpoint: {0}",
-                    restClient.BuildUri(restRequest).AbsoluteUri);
+                                         restClient.BuildUri(restRequest).AbsoluteUri);
 
                 response = restClient.Execute<MeResult>(restRequest);
             }
@@ -184,10 +258,14 @@ namespace WorldDomination.Web.Authentication.Providers
                 response.Data == null)
             {
                 var errorMessage = string.Format(
-                    "Failed to obtain some 'Me' data from the Facebook api OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Message: {2}",
+                    "Failed to obtain some 'Me' data from the Facebook api OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Message: {2}.",
                     response == null ? "-- null response --" : response.StatusCode.ToString(),
                     response == null ? string.Empty : response.StatusDescription,
-                    response == null ? string.Empty : response.ErrorException.RecursiveErrorMessages());
+                    response == null
+                        ? string.Empty
+                        : response.ErrorException == null
+                              ? "--no error exception--"
+                              : response.ErrorException.RecursiveErrorMessages());
 
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
@@ -200,76 +278,16 @@ namespace WorldDomination.Web.Authentication.Providers
                        (string.IsNullOrEmpty(response.Data.LastName)
                             ? string.Empty
                             : response.Data.LastName).Trim();
-            
+
             return new UserInformation
-            {
-                Id = id.ToString(),
-                Name = name,
-                Email = response.Data.Email,
-                Locale = response.Data.Locale,
-                UserName = response.Data.Username,
-                Picture = string.Format("https://graph.facebook.com/{0}/picture", id)
-            };
-        }
-
-        #endregion
-
-        #region Implementation of IAuthenticationProvider
-
-        public override string Name
-        {
-            get { return "Facebook"; }
-        }
-
-        public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
-        {
-            get
-            {
-                return new FacebookAuthenticationServiceSettings
-                {
-                    Display = DisplayType.Unknown,
-                    IsMobile = false
-                };
-            }
-        }
-
-        public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
-        {
-            if (authenticationServiceSettings == null)
-            {
-                throw new ArgumentNullException("authenticationServiceSettings");
-            }
-
-            var facebookAuthenticationSettings = authenticationServiceSettings as FacebookAuthenticationServiceSettings;
-            if (facebookAuthenticationSettings == null)
-            {
-                throw new InvalidOperationException(
-                    "AuthenticationServiceSettings instance is not of type FacebookAuthenticationServiceSettings.");
-            }
-
-            var baseUri = facebookAuthenticationSettings.IsMobile
-                              ? "https://m.facebook.com"
-                              : "https://www.facebook.com";
-            var scope = (_scope != null && _scope.Count > 0)
-                            ? "&scope=" + string.Join(",", _scope)
-                            : string.Empty;
-            var state = !string.IsNullOrEmpty(facebookAuthenticationSettings.State)
-                            ? "&state=" + facebookAuthenticationSettings.State
-                            : string.Empty;
-            var display = facebookAuthenticationSettings.Display == DisplayType.Unknown
-                              ? string.Empty
-                              : "&display=" + facebookAuthenticationSettings.Display.ToString().ToLowerInvariant();
-
-            // REFERENCE: https://developers.facebook.com/docs/reference/dialogs/oauth/
-            // NOTE: Facebook is case-sensitive anal retentive with regards to their uri + querystring params.
-            //       So ... we'll lowercase the entire biatch. Thanks, Facebook :(
-            var oauthDialogUri = string.Format("{0}/dialog/oauth?client_id={1}{2}{3}{4}&redirect_uri={5}",
-                                               baseUri, _clientId, state, scope, display,
-                                               authenticationServiceSettings.CallBackUri.AbsoluteUri);
-
-            TraceSource.TraceInformation("Facebook redirection uri: {0}", oauthDialogUri);
-
-            return new Uri(oauthDialogUri);
+                   {
+                       Id = id.ToString(),
+                       Name = name,
+                       Email = response.Data.Email,
+                       Locale = response.Data.Locale,
+                       UserName = response.Data.Username,
+                       Picture = string.Format("https://graph.facebook.com/{0}/picture", id)
+                   };
         }
 
         #endregion

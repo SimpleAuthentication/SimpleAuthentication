@@ -410,8 +410,9 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal("google", result.ProviderName);
-                Assert.Equal(accessToken, result.AccessToken);
-                Assert.True(DateTime.UtcNow < result.AccessTokenExpiresOn);
+                Assert.NotNull(result.AccessToken);
+                Assert.Equal(accessToken, result.AccessToken.PublicToken);
+                Assert.True(DateTime.UtcNow.AddSeconds(expiresIn) >= result.AccessToken.ExpiresOn);
                 Assert.NotNull(result.UserInformation);
                 Assert.Equal(GenderType.Male, result.UserInformation.Gender);
                 Assert.Equal(userInfoResult.Id, result.UserInformation.Id);
