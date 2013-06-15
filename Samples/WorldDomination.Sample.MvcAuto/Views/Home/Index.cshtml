@@ -3,24 +3,47 @@
 }
 
 <div id="container">
-  <fieldset title="Login">
-    <legend>Login:</legend>
-    <a href="/authentication/redirect/twitter"><img src="/Content/twitter_32.png"/></a>
-    <a href="/authentication/redirect/facebook"><img src="/Content/facebook_32.png" /></a>
-  </fieldset>
+    <fieldset title="Primary Logins">
+        <legend>Primary Logins:</legend>
+        <a href="/authentication/redirect/twitter"><img src="/Content/twitter_32.png" alt="Login with your Twitter account."/></a>
+        <a href="/authentication/redirect/facebook"><img src="/Content/facebook_32.png" alt="Login with your Facebook account."/></a>
+        <a href="/authentication/redirect/google"><img src="/Content/google_32.png" alt="Login with your Google account."/></a>
+        <a href="/authentication/redirect/WindowsLive"><img src="/Content/windowslive_32.png" alt="Login with your Windows Live account."/></a>
+    </fieldset>
     
-  <fieldset title="OpenId">
-      <legend>Open Id:</legend>
-      <form action="/authentication/redirect/openid" method="POST">
-          <img src="/Content/myopenid_32.png" alt="Login with your OpenId account." height="32" width="32"/> 
-          Identifier: <input type="text" id="identifier" name="identifier" value="http://myopenid.com"/>
-          <input type="submit" value="k go!"/>
-      </form>
-          
-      @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-      {
-          <h2>Error Information</h2>
-          <p>Message: @Model.ErrorMessage</p>
-      }
-  </fieldset>
+    <hr/>
+    
+    <fieldset title="Fake Logins (these do not require the internet - great for localhost testing)">
+        <legend>Fake Logins (these do not require the internet - great for localhost testing):</legend>
+        <a href="/authentication/redirect/faketwitter"><img src="/Content/twitter_32.png" alt="Login with your Twitter account."/></a>
+        <a href="/authentication/redirect/fakefacebook"><img src="/Content/facebook_32.png" alt="Login with your Facebook account."/></a>
+        <a href="/authentication/redirect/fakegoogle"><img src="/Content/google_32.png" alt="Login with your Google account."/></a>
+        <a href="/authentication/redirect/fakeWindowsLive"><img src="/Content/windowslive_32.png" alt="Login with your Windows Live account."/></a>
+    </fieldset>
+    
+    <hr/>
+
+    <fieldset title="Extra Login">
+        <legend>Extra Logins:</legend>
+        <a href="/authentication/redirect/github"><img src="/Content/github_32.png" alt="Login with your GitHub account."/></a>
+        <img src="/Content/bitbucket_32-NotAvailable.png" alt="Login with your BitBucket account."/>
+    </fieldset>
+    
+    <hr/>
+    
+    <fieldset title="OpenId">
+        <legend>Open Id:</legend>
+        <form action="/authentication/redirect/openid" method="POST">
+            <img src="/Content/myopenid_32.png" alt="Login with your OpenId account." height="32" width="32"/> 
+            Identifier: <input type="text" id="identifier" name="identifier" value="http://myopenid.com"/>
+            <input type="submit" value="k go!"/>
+        </form>
+       @*     
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <h2>Error Information</h2>
+            <p>Message: @Model.ErrorMessage</p>
+        }*@
+    </fieldset>
+
 </div>
