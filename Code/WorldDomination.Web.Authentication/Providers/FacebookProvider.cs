@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Net;
 using RestSharp;
 using RestSharp.Contrib;
@@ -12,7 +11,7 @@ namespace WorldDomination.Web.Authentication.Providers
 {
     // REFERENCE: http://developers.facebook.com/docs/authentication/server-side/
 
-    public class FacebookProvider : BaseRestFactoryProvider, IAuthenticationProvider
+    public class FacebookProvider : BaseOAuth20Provider
     {
         private const string BaseUrl = "https://graph.facebook.com";
         private readonly string _clientId;
@@ -30,7 +29,10 @@ namespace WorldDomination.Web.Authentication.Providers
             _scope = new List<string> {"email"};
         }
 
-        private string RetrieveAuthorizationCode(NameValueCollection queryStringParameters, string existingState = null)
+        #region BaseOAuth20Provider Members
+
+        protected override string RetrieveAuthorizationCode(NameValueCollection queryStringParameters,
+                                                            string existingState = null)
         {
             if (queryStringParameters == null)
             {
@@ -57,22 +59,23 @@ namespace WorldDomination.Web.Authentication.Providers
                                                  string.IsNullOrEmpty(errorReason) ? "-no error reason-" : errorReason,
                                                  string.IsNullOrEmpty(error) ? "-no error-" : error,
                                                  string.IsNullOrEmpty(errorDescription)
-                                                                          ? "-no error description-"
-                                                                          : errorDescription);
+                                                     ? "-no error description-"
+                                                     : errorDescription);
                 TraceSource.TraceVerbose(errorMessage);
                 throw new AuthenticationException(errorMessage);
             }
 
             if (string.IsNullOrEmpty(code))
             {
-                throw new AuthenticationException(
-                    "No code parameter provided in the response query string from Facebook.");
+                const string errorMessage = "No code parameter provided in the response query string from Facebook.";
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
             }
 
             return code;
         }
 
-        private string RetrieveAccessToken(string code, Uri redirectUri)
+        protected override string RetrieveAccessToken(string code, Uri redirectUri)
         {
             if (string.IsNullOrEmpty(code))
             {
@@ -97,13 +100,14 @@ namespace WorldDomination.Web.Authentication.Providers
                 var restClient = RestClientFactory.CreateRestClient(BaseUrl);
 
                 TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
-                    restClient.BuildUri(restRequest).AbsoluteUri);
+                                         restClient.BuildUri(restRequest).AbsoluteUri);
 
                 response = restClient.Execute(restRequest);
             }
             catch (Exception exception)
             {
-                const string errorMessage = "Failed to retrieve an oauth access token from Facebook.";
+                var errorMessage = string.Format("Failed to retrieve an oauth access token from Facebook. Error Messages: {0}",
+                    exception.RecursiveErrorMessages());
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage, exception);
             }
@@ -135,9 +139,9 @@ namespace WorldDomination.Web.Authentication.Providers
                 expiresOn <= DateTime.UtcNow)
             {
                 var errorMessage =
-                    "Retrieved a Facebook Access Token but it doesn't contain both the access_token and expires_on parameters. Response.Content: " 
+                    "Retrieved a Facebook Access Token but it doesn't contain both the access_token and expires_on parameters. Response.Content: "
                     + (string.IsNullOrEmpty(response.Content) ? "-no response content-" : response.Content);
-                
+
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
             }
@@ -145,7 +149,7 @@ namespace WorldDomination.Web.Authentication.Providers
             return accessToken;
         }
 
-        private UserInformation RetrieveMe(string accessToken)
+        protected override UserInformation RetrieveUserInformation(string accessToken)
         {
             if (string.IsNullOrEmpty(accessToken))
             {
@@ -161,12 +165,18 @@ namespace WorldDomination.Web.Authentication.Providers
 
                 var restClient = RestClientFactory.CreateRestClient(BaseUrl);
 
-                //TODO: TraceSource.Verbose( endpoint uri);
+                TraceSource.TraceVerbose("Retrieving user information. Facebook Endpoint: {0}",
+                    restClient.BuildUri(restRequest).AbsoluteUri);
+
                 response = restClient.Execute<MeResult>(restRequest);
             }
             catch (Exception exception)
             {
-                throw new AuthenticationException("Failed to retrieve any Me data from the Facebook Api.", exception);
+                var errorMessage =
+                    string.Format("Failed to retrieve any Me data from the Facebook Api. Error Messages: {0}",
+                                  exception.RecursiveErrorMessages());
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage, exception);
             }
 
             if (response == null ||
@@ -190,6 +200,7 @@ namespace WorldDomination.Web.Authentication.Providers
                        (string.IsNullOrEmpty(response.Data.LastName)
                             ? string.Empty
                             : response.Data.LastName).Trim();
+            
             return new UserInformation
             {
                 Id = id.ToString(),
@@ -201,14 +212,28 @@ namespace WorldDomination.Web.Authentication.Providers
             };
         }
 
+        #endregion
+
         #region Implementation of IAuthenticationProvider
 
-        public string Name
+        public override string Name
         {
             get { return "Facebook"; }
         }
 
-        public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
+        public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
+        {
+            get
+            {
+                return new FacebookAuthenticationServiceSettings
+                {
+                    Display = DisplayType.Unknown,
+                    IsMobile = false
+                };
+            }
+        }
+
+        public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
             if (authenticationServiceSettings == null)
             {
@@ -218,7 +243,8 @@ namespace WorldDomination.Web.Authentication.Providers
             var facebookAuthenticationSettings = authenticationServiceSettings as FacebookAuthenticationServiceSettings;
             if (facebookAuthenticationSettings == null)
             {
-                throw new InvalidOperationException("AuthenticationServiceSettings instance is not of type FacebookAuthenticationServiceSettings.");
+                throw new InvalidOperationException(
+                    "AuthenticationServiceSettings instance is not of type FacebookAuthenticationServiceSettings.");
             }
 
             var baseUri = facebookAuthenticationSettings.IsMobile
@@ -238,67 +264,12 @@ namespace WorldDomination.Web.Authentication.Providers
             // NOTE: Facebook is case-sensitive anal retentive with regards to their uri + querystring params.
             //       So ... we'll lowercase the entire biatch. Thanks, Facebook :(
             var oauthDialogUri = string.Format("{0}/dialog/oauth?client_id={1}{2}{3}{4}&redirect_uri={5}",
-                                               baseUri, _clientId, state, scope, display, 
+                                               baseUri, _clientId, state, scope, display,
                                                authenticationServiceSettings.CallBackUri.AbsoluteUri);
 
             TraceSource.TraceInformation("Facebook redirection uri: {0}", oauthDialogUri);
 
             return new Uri(oauthDialogUri);
-        }
-
-        public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
-                                                       NameValueCollection queryStringParameters)
-        {
-            if (authenticationServiceSettings == null)
-            {
-                throw new ArgumentNullException("authenticationServiceSettings");
-            }
-
-            TraceSource.TraceVerbose("Retrieving the Authorization Code.");
-            var authorizationCode = RetrieveAuthorizationCode(queryStringParameters, authenticationServiceSettings.State);
-            TraceSource.TraceVerbose("Authorization Code retrieved.");
-
-            TraceSource.TraceVerbose("Retrieving the Access Token.");
-            var accessToken = RetrieveAccessToken(authorizationCode, authenticationServiceSettings.CallBackUri);
-            TraceSource.TraceVerbose("Access Token retrieved.");
-
-            TraceSource.TraceInformation("Authorization Code: {0}. Access Token: {1}.",
-                                         string.IsNullOrEmpty(authorizationCode)
-                                             ? "-no authorization code-"
-                                             : authorizationCode,
-                                         string.IsNullOrEmpty(accessToken) ? "-no access token-" : accessToken);
-
-            TraceSource.TraceVerbose("Retrieving user information.");
-            var userInformation = RetrieveMe(accessToken);
-            TraceSource.TraceVerbose("User information retrieved.");
-
-            var authenticatedClient = new AuthenticatedClient(Name.ToLowerInvariant())
-            {
-                AccessToken = accessToken,
-                AccessTokenExpiresOn = DateTime.UtcNow,
-                UserInformation = userInformation
-            };
-
-            TraceSource.TraceInformation(authenticatedClient.ToString());
-
-            return authenticatedClient;
-        }
-
-        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
-        {
-            get
-            {
-                return new FacebookAuthenticationServiceSettings
-                {
-                    Display = DisplayType.Unknown,
-                    IsMobile = false
-                };
-            }
-        }
-
-        protected override TraceSource TraceSource
-        {
-            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         #endregion

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Net;
 using RestSharp;
 using WorldDomination.Web.Authentication.Providers.Google;
+using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication.Providers
 {
@@ -213,6 +214,7 @@ namespace WorldDomination.Web.Authentication.Providers
             }
 
             // First up - an authorization token.
+            TraceSource.TraceVerbose("Retrieving the Authorization Code."); 
             var authorizationCode = RetrieveAuthorizationCode(queryStringParameters, authenticationServiceSettings.State);
 
             // Get an Access Token.
