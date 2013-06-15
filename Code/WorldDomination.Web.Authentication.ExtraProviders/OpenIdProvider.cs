@@ -11,7 +11,7 @@ using WorldDomination.Web.Authentication.Providers;
 
 namespace WorldDomination.Web.Authentication.ExtraProviders
 {
-    public class OpenIdProvider : BaseProvider, IAuthenticationProvider
+    public class OpenIdProvider : BaseRestFactoryProvider, IAuthenticationProvider
     {
         private const string XrdsHeaderKey = "X-XRDS-Location";
         private static readonly IDictionary<string, Uri> YadisXrdsEndPointUris = new Dictionary<string, Uri>();

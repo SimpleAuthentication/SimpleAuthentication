@@ -10,7 +10,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 {
     //https://images-na.ssl-images-amazon.com/images/G/01/lwa/dev/docs/website-developer-guide._TTH_.pdf
     //http://login.amazon.com
-    public class AmazonProvider : BaseProvider, IAuthenticationProvider
+    public class AmazonProvider : BaseRestFactoryProvider, IAuthenticationProvider
     {
         private const string AccessTokenKey = "access_token";
         private readonly string _clientId;

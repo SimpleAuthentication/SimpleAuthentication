@@ -8,11 +8,9 @@ namespace WorldDomination.Web.Authentication.Providers
     {
         protected BaseProvider()
         {
-            RestClientFactory = new RestClientFactory();
-            TraceManager = new Lazy<TraceManager>(() => new TraceManager()).Value;
+            TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
         }
 
-        public IRestClientFactory RestClientFactory { get; set; }
         public ITraceManager TraceManager { set; protected get; }
         protected abstract TraceSource TraceSource { get; }
     }

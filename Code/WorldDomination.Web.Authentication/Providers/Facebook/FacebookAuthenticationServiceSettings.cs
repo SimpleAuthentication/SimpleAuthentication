@@ -2,7 +2,8 @@
 {
     public class FacebookAuthenticationServiceSettings : BaseAuthenticationServiceSettings
     {
-        public FacebookAuthenticationServiceSettings() : base("Facebook")
+        public FacebookAuthenticationServiceSettings(bool isFakeProvider = false) 
+            : base(isFakeProvider ? "FakeFacebook" : "Facebook")
         {
         }
 

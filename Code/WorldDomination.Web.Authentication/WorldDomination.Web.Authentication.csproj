@@ -59,6 +59,7 @@
     <Compile Include="Exceptions\WorldDominationConfigurationException.cs" />
     <Compile Include="MefHelpers.cs" />
     <Compile Include="Providers\BaseProvider.cs" />
+    <Compile Include="Providers\BaseRestFactoryProvider.cs" />
     <Compile Include="Providers\Facebook\DisplayType.cs" />
     <Compile Include="Providers\Facebook\FacebookAuthenticationServiceSettings.cs" />
     <Compile Include="Providers\Facebook\FakeFacebookProvider.cs" />

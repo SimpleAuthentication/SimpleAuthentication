@@ -1,31 +1,17 @@
 ﻿using System;
 using System.Collections.Specialized;
-using WorldDomination.Web.Authentication.Tracing;
+using System.Diagnostics;
 
 namespace WorldDomination.Web.Authentication.Providers.Twitter
 {
-    public class FakeTwitterProvider : IFakeAuthenticationProvider
+    public class FakeTwitterProvider : BaseProvider, IFakeAuthenticationProvider
     {
-        private readonly Uri _redirectToAuthenticateUri;
-
-        public FakeTwitterProvider(Uri redirectToAuthenticateUri)
-        {
-            if (redirectToAuthenticateUri == null)
-            {
-                throw new ArgumentNullException("redirectToAuthenticateUri");
-            }
-
-            if (string.IsNullOrEmpty(redirectToAuthenticateUri.AbsoluteUri))
-            {
-                throw new ArgumentException("redirectToAuthenticateUri.AbsoluteUri");
-            }
-
-            _redirectToAuthenticateUri = redirectToAuthenticateUri;
-
-            TraceManager = new Lazy<TraceManager>(() => new TraceManager()).Value;
-        }
-
         #region Implementation of IAuthenticationProvider
+
+        protected override TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
+        }
 
         public string Name
         {
@@ -44,7 +30,7 @@ namespace WorldDomination.Web.Authentication.Providers.Twitter
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
 
-            return _redirectToAuthenticateUri ?? new Uri("bitly.com/Ttw62r");
+            return authenticationServiceSettings.CallBackUri;
         }
 
         public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
@@ -76,9 +62,10 @@ namespace WorldDomination.Web.Authentication.Providers.Twitter
             };
         }
 
-        public ITraceManager TraceManager { set; private get; }
-
-        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings { get { return new TwitterAuthenticationServiceSettings(); } }
+        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
+        {
+            get { return new TwitterAuthenticationServiceSettings(true); }
+        }
 
         #endregion
 
