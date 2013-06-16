@@ -158,7 +158,6 @@ namespace WorldDomination.Web.Authentication.Providers
                 restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
 
                 var restClient = RestClientFactory.CreateRestClient(BaseUrl);
-
                 TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
                                          restClient.BuildUri(restRequest).AbsoluteUri);
 

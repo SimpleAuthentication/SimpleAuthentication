@@ -137,6 +137,13 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Web.config" />
+    <Content Include="system.diagnostics.config" />
+    <None Include="system.diagnostics.Debug.config">
+      <DependentUpon>system.diagnostics.config</DependentUpon>
+    </None>
+    <None Include="system.diagnostics.Release.config">
+      <DependentUpon>system.diagnostics.config</DependentUpon>
+    </None>
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

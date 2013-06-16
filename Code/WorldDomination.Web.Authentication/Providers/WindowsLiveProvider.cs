@@ -5,6 +5,7 @@ using System.Net;
 using RestSharp;
 using WorldDomination.Web.Authentication.Providers.Google;
 using WorldDomination.Web.Authentication.Providers.WindowsLive;
+using WorldDomination.Web.Authentication.Tracing;
 using UserInfoResult = WorldDomination.Web.Authentication.Providers.WindowsLive.UserInfoResult;
 
 namespace WorldDomination.Web.Authentication.Providers
@@ -78,24 +79,23 @@ namespace WorldDomination.Web.Authentication.Providers
                 throw new ArgumentOutOfRangeException("queryStringParameters");
             }
 
-            /* Documentation:
-               Google returns an authorization code to your application if the user grants your application the permissions it requested. 
-               The authorization code is returned to your application in the query string parameter code. If the state parameter was included in the request,
-               then it is also included in the response. */
             var code = queryStringParameters["code"];
             var error = queryStringParameters["error"];
 
             // First check for any errors.
             if (!string.IsNullOrEmpty(error))
             {
-                throw new AuthenticationException(
-                    "Failed to retrieve an authorization code from Google. The error provided is: " + error);
+                var errorMessage = "Failed to retrieve an authorization code from Microsoft Live. The error provided is: " + error;
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
             }
 
             // Otherwise, we need a code.
             if (string.IsNullOrEmpty(code))
             {
-                throw new AuthenticationException("No code parameter provided in the response query string from Google.");
+                const string errorMessage = "No code parameter provided in the response query string from Microsoft Live.";
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
             }
 
             return code;
@@ -118,43 +118,50 @@ namespace WorldDomination.Web.Authentication.Providers
 
             try
             {
-                var request = new RestRequest("/oauth20_token.srf");
-                request.AddParameter("client_id", _clientId);
-                request.AddParameter("redirect_uri", redirectUri);
-                request.AddParameter("client_secret", _clientSecret);
-                request.AddParameter("code", authorizationCode);
-                request.AddParameter("grant_type", "authorization_code");
+                var restRequest = new RestRequest("/oauth20_token.srf");
+                restRequest.AddParameter("client_id", _clientId);
+                restRequest.AddParameter("redirect_uri", redirectUri);
+                restRequest.AddParameter("client_secret", _clientSecret);
+                restRequest.AddParameter("code", authorizationCode);
+                restRequest.AddParameter("grant_type", "authorization_code");
+                
                 var restClient = RestClientFactory.CreateRestClient("https://login.live.com/oauth20_token.srf");
-                response = restClient.Execute<AuthenticatedTokenResult>(request);
+                TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
+                                         restClient.BuildUri(restRequest).AbsoluteUri);
+
+                response = restClient.Execute<AuthenticatedTokenResult>(restRequest);
             }
             catch (Exception exception)
             {
-                throw new AuthenticationException("Failed to obtain an Access Token from Windows Live.", exception);
+                var errorMessage =
+                    string.Format("Failed to retrieve an oauth access token from Microsoft Live. Error Messages: {0}",
+                                  exception.RecursiveErrorMessages());
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage, exception);
             }
 
             if (response == null ||
                 response.StatusCode != HttpStatusCode.OK)
             {
-                throw new AuthenticationException(
-                    string.Format(
-                        "Failed to obtain an Access Token from Google OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
-                        response == null ? "-- null response --" : response.StatusCode.ToString(),
-                        response == null ? string.Empty : response.StatusDescription));
-            }
+                var errorMessage = string.Format(
+                    "Failed to obtain an Access Token from Microsoft Live OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Content: {2}. Error Message: {3}.",
+                    response == null ? "-- null response --" : response.StatusCode.ToString(),
+                    response == null ? string.Empty : response.StatusDescription,
+                    response == null ? string.Empty : response.Content,
+                    response == null
+                        ? string.Empty
+                        : response.ErrorException == null
+                              ? "--no error exception--"
+                              : response.ErrorException.RecursiveErrorMessages());
 
-            // Grab the params which should have the request token info.
-            //if (string.IsNullOrEmpty(response.Data.AccessToken) ||
-            //    response.Data.ExpiresIn <= 0 ||
-            //    string.IsNullOrEmpty(response.Data.TokenType))
-            //{
-            //    throw new AuthenticationException(
-            //        "Retrieved a Google Access Token but it doesn't contain one or more of either: " + AccessTokenKey +
-            //        ", " + ExpiresInKey + " or " + TokenTypeKey);
-            //}
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
+            }
 
             return new AccessToken
                    {
                        PublicToken = response.Data.AccessToken,
+                       // TODO: Wire up the ExpiresIn .. but right now it's a string.. what should it -really- be?
                        //ExpiresOn = DateTime.UtcNow.AddSeconds(response.Data.ExpiresIn)
                    };
         }
@@ -175,32 +182,47 @@ namespace WorldDomination.Web.Authentication.Providers
 
             try
             {
-                var request = new RestRequest("/v5.0/me");
-                request.AddParameter(AccessTokenKey, accessToken.PublicToken);
+                var restRequest = new RestRequest("/v5.0/me");
+                restRequest.AddParameter(AccessTokenKey, accessToken.PublicToken);
 
                 var restClient = RestClientFactory.CreateRestClient("https://apis.live.net");
-                response = restClient.Execute<UserInfoResult>(request);
+                TraceSource.TraceVerbose("Retrieving user information. Microsoft Live Endpoint: {0}",
+                                         restClient.BuildUri(restRequest).AbsoluteUri);
+
+                response = restClient.Execute<UserInfoResult>(restRequest);
             }
             catch (Exception exception)
             {
-                throw new AuthenticationException("Failed to obtain User Info from Google.", exception);
+                var errorMessage =
+                    string.Format("Failed to retrieve any Me data from the Microsoft Live api. Error Messages: {0}",
+                                  exception.RecursiveErrorMessages());
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage, exception);
             }
 
             if (response == null ||
                 response.StatusCode != HttpStatusCode.OK)
             {
-                throw new AuthenticationException(
-                    string.Format(
-                        "Failed to obtain User Info from Windows Live OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
-                        response == null ? "-- null response --" : response.StatusCode.ToString(),
-                        response == null ? string.Empty : response.StatusDescription));
+                var errorMessage = string.Format(
+                    "Failed to obtain some 'Me' data from the Microsoft Live api OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Message: {2}.",
+                    response == null ? "-- null response --" : response.StatusCode.ToString(),
+                    response == null ? string.Empty : response.StatusDescription,
+                    response == null
+                        ? string.Empty
+                        : response.ErrorException == null
+                              ? "--no error exception--"
+                              : response.ErrorException.RecursiveErrorMessages());
+
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
             }
 
             // Lets check to make sure we have some bare minimum data.
             if (string.IsNullOrEmpty(response.Data.id))
             {
-                throw new AuthenticationException(
-                    "We were unable to retrieve the User Id from Windows Live Api, the user may have denied the authorization.");
+                const string errorMessage = "We were unable to retrieve the User Id from Windows Live Api, the user may have denied the authorization.";
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
             }
 
             return new UserInformation

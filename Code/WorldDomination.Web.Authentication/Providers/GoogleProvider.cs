@@ -110,14 +110,17 @@ namespace WorldDomination.Web.Authentication.Providers
             // First check for any errors.
             if (!string.IsNullOrEmpty(error))
             {
-                throw new AuthenticationException(
-                    "Failed to retrieve an authorization code from Google. The error provided is: " + error);
+                var errorMessage = "Failed to retrieve an authorization code from Google. The error provided is: " + error;
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
             }
 
             // Otherwise, we need a code.
             if (string.IsNullOrEmpty(code))
             {
-                throw new AuthenticationException("No code parameter provided in the response query string from Google.");
+                const string errorMessage = "No code parameter provided in the response query string from Google.";
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
             }
 
             return code;
@@ -140,28 +143,44 @@ namespace WorldDomination.Web.Authentication.Providers
 
             try
             {
-                var request = new RestRequest("/o/oauth2/token", Method.POST);
-                request.AddParameter("client_id", _clientId);
-                request.AddParameter("client_secret", _clientSecret);
-                request.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
-                request.AddParameter("code", authorizationCode);
-                request.AddParameter("grant_type", "authorization_code");
+                var restRequest = new RestRequest("/o/oauth2/token", Method.POST);
+                restRequest.AddParameter("client_id", _clientId);
+                restRequest.AddParameter("client_secret", _clientSecret);
+                restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
+                restRequest.AddParameter("code", authorizationCode);
+                restRequest.AddParameter("grant_type", "authorization_code");
+                
                 var restClient = RestClientFactory.CreateRestClient("https://accounts.google.com");
-                response = restClient.Execute<AccessTokenResult>(request);
+                TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
+                                         restClient.BuildUri(restRequest).AbsoluteUri);
+
+                response = restClient.Execute<AccessTokenResult>(restRequest);
             }
             catch (Exception exception)
             {
-                throw new AuthenticationException("Failed to obtain an Access Token from Google.", exception);
+                var errorMessage =
+                    string.Format("Failed to retrieve an oauth access token from Google. Error Messages: {0}",
+                                  exception.RecursiveErrorMessages());
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage, exception);
             }
 
             if (response == null ||
                 response.StatusCode != HttpStatusCode.OK)
             {
-                throw new AuthenticationException(
-                    string.Format(
-                        "Failed to obtain an Access Token from Google OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
-                        response == null ? "-- null response --" : response.StatusCode.ToString(),
-                        response == null ? string.Empty : response.StatusDescription));
+                var errorMessage = string.Format(
+                    "Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Content: {2}. Error Message: {3}.",
+                    response == null ? "-- null response --" : response.StatusCode.ToString(),
+                    response == null ? string.Empty : response.StatusDescription,
+                    response == null ? string.Empty : response.Content,
+                    response == null
+                        ? string.Empty
+                        : response.ErrorException == null
+                              ? "--no error exception--"
+                              : response.ErrorException.RecursiveErrorMessages());
+
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
             }
 
             // Grab the params which should have the request token info.
@@ -169,9 +188,11 @@ namespace WorldDomination.Web.Authentication.Providers
                 response.Data.ExpiresIn <= 0 ||
                 string.IsNullOrEmpty(response.Data.TokenType))
             {
-                throw new AuthenticationException(
-                    "Retrieved a Google Access Token but it doesn't contain one or more of either: " + AccessTokenKey +
-                    ", " + ExpiresInKey + " or " + TokenTypeKey);
+                var errorMessage = string.Format( "Retrieved a Google Access Token but it doesn't contain one or more of either: {0}, {1} or {2}.",
+                                   AccessTokenKey, ExpiresInKey, TokenTypeKey);
+                TraceSource.TraceError(errorMessage);
+                ;
+                throw new AuthenticationException(errorMessage);
             }
 
             return new AccessToken
@@ -197,32 +218,48 @@ namespace WorldDomination.Web.Authentication.Providers
 
             try
             {
-                var request = new RestRequest("/oauth2/v2/userinfo", Method.GET);
-                request.AddParameter(AccessTokenKey, accessToken.PublicToken);
+                var restRequest = new RestRequest("/oauth2/v2/userinfo", Method.GET);
+                restRequest.AddParameter(AccessTokenKey, accessToken.PublicToken);
 
                 var restClient = RestClientFactory.CreateRestClient("https://www.googleapis.com");
-                response = restClient.Execute<UserInfoResult>(request);
+
+                TraceSource.TraceVerbose("Retrieving user information. Google Endpoint: {0}",
+                                         restClient.BuildUri(restRequest).AbsoluteUri);
+
+                response = restClient.Execute<UserInfoResult>(restRequest);
             }
             catch (Exception exception)
             {
-                throw new AuthenticationException("Failed to obtain User Info from Google.", exception);
+                var errorMessage = string.Format("Failed to retrieve any UserInfo data from the Google Api. Error Messages: {0}",
+                                  exception.RecursiveErrorMessages());
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage, exception);
             }
 
             if (response == null ||
                 response.StatusCode != HttpStatusCode.OK)
             {
-                throw new AuthenticationException(
-                    string.Format(
-                        "Failed to obtain User Info from Google OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
-                        response == null ? "-- null response --" : response.StatusCode.ToString(),
-                        response == null ? string.Empty : response.StatusDescription));
+                var errorMessage = string.Format(
+                    "Failed to obtain some UserInfo data from the Google Api OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Message: {2}.",
+                    response == null ? "-- null response --" : response.StatusCode.ToString(),
+                    response == null ? string.Empty : response.StatusDescription,
+                    response == null
+                        ? string.Empty
+                        : response.ErrorException == null
+                              ? "--no error exception--"
+                              : response.ErrorException.RecursiveErrorMessages());
+
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
             }
 
             // Lets check to make sure we have some bare minimum data.
             if (string.IsNullOrEmpty(response.Data.Id))
             {
-                throw new AuthenticationException(
-                    "We were unable to retrieve the User Id from Google API, the user may have denied the authorization.");
+                const string errorMessage =
+                    "We were unable to retrieve the User Id from Google API, the user may have denied the authorization.";
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
             }
 
             return new UserInformation
