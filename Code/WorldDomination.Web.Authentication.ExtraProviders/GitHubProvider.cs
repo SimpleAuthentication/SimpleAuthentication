@@ -185,7 +185,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
             var oauthDialogUri =
                 string.Format(
-                    "https://github.com/login/oauth/authorize?client_id={0}&scope=user:email&redirect_uri={1}&response_type=code{2}",
+                    "https://github.com/login/oauth/authorize?client_id={0}&scope=" + ((GitHubAuthenticationServiceSettings)DefaultAuthenticationServiceSettings).Scope + "&redirect_uri={1}&response_type=code{2}",
                     _clientId, authenticationServiceSettings.CallBackUri.AbsoluteUri, state);
 
             return new Uri(oauthDialogUri);
