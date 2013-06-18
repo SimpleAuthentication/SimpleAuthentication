@@ -2,17 +2,11 @@
 {
     public class GitHubAuthenticationServiceSettings : BaseAuthenticationServiceSettings
     {
-        private string scope = "user:email";
-
         public GitHubAuthenticationServiceSettings() : base("github")
         {
+            Scope = "user:email";
         }
 
-        public string Scope
-        {
-            get { return scope; }
-            set { scope = value; } 
-        }
-        
+        public string Scope { get; set; }
     }
 }
