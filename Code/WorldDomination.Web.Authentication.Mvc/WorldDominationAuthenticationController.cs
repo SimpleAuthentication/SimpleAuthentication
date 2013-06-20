@@ -117,7 +117,7 @@ namespace WorldDomination.Web.Authentication.Mvc
         {
             if (string.IsNullOrEmpty(providerkey))
             {
-                var errorMessage = "No provider key was supplied on the callback.";
+                const string errorMessage = "No provider key was supplied on the callback.";
                 TraceSource.TraceError(errorMessage);
                 throw new ArgumentException(errorMessage);
             }
@@ -172,6 +172,7 @@ namespace WorldDomination.Web.Authentication.Mvc
             }
 
             // Finally! We can hand over the logic to the consumer to do whatever they want.
+            TraceSource.TraceVerbose("About to execute your custom callback provider logic.");
             return CallbackProvider.Process(HttpContext, model);
         }
 

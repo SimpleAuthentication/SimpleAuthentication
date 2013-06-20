@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using WorldDomination.Web.Authentication;
+using WorldDomination.Web.Authentication.Tracing;
 
 namespace Nancy.Authentication.WorldDomination
 {
@@ -12,6 +14,8 @@ namespace Nancy.Authentication.WorldDomination
 
         protected Uri RedirectUrl { get; set; }
 
+        public ITraceManager TraceManager { set; private get; }
+
         public WorldDominationAuthenticationModule(IAuthenticationService authenticationService)
             : this(authenticationService, null)
         {
@@ -22,6 +26,9 @@ namespace Nancy.Authentication.WorldDomination
         public WorldDominationAuthenticationModule(IAuthenticationService authenticationService,
                                                    IAuthenticationCallbackProvider authenticationCallbackProvider)
         {
+            // Lazyily setup our TraceManager.
+            TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
+
             Get[RedirectRoute] = _ =>
             {
                 var providerKey = (string)_.providerkey;
@@ -58,16 +65,29 @@ namespace Nancy.Authentication.WorldDomination
 
             Get[CallbackRoute] = _ =>
             {
-                var providerKey = Request != null && Request.Query != null
-                                    ? (string)Request.Query.providerkey
-                                    : null;
+                var providerKey = Request != null &&
+                                  Request.Query != null
+                                      ? (string) Request.Query.providerkey
+                                      : null;
 
                 if (string.IsNullOrEmpty(providerKey))
                 {
-                    throw new ArgumentException("No provider key was supplied on the callback.");
+                    const string errorMessage = "No provider key was supplied on the callback.";
+                    TraceSource.TraceError(errorMessage);
+                    throw new ArgumentException(errorMessage);
                 }
 
+                // Determine which settings we need, based on the Provider.
+                TraceSource.TraceVerbose("Trying to determine what provider we just came from, based upon some url parameters.");
                 var settings = authenticationService.GetAuthenticateServiceSettings(providerKey, Request.Url);
+                TraceSource.TraceVerbose("Found - Provider: {0}. CallBackUri: {1}. State: {2}",
+                                     string.IsNullOrEmpty(settings.ProviderName)
+                                         ? "-no provider name-"
+                                         : settings.ProviderName,
+                                     settings.CallBackUri == null
+                                         ? "-no callback uri-"
+                                         : settings.CallBackUri.AbsoluteUri,
+                                     string.IsNullOrEmpty(settings.State) ? "-no state-" : settings.State);
 
                 settings.State = (Session[StateKey] as string) ?? string.Empty;
 
@@ -75,20 +95,25 @@ namespace Nancy.Authentication.WorldDomination
 
                 try
                 {
+                    // Grab the authenticated client information.
                     model.AuthenticatedClient = authenticationService.GetAuthenticatedClient(settings, Request.Query);
                     Session.Delete(StateKey); // Clean up :)
                 }
                 catch (Exception exception)
                 {
+                    TraceSource.TraceError(exception.RecursiveErrorMessages());
                     model.Exception = exception;
                 }
 
+                // If we have a redirect Url, lets grab this :)
                 var redirectUrl = Session[RedirectUrlKey] as string;
                 if (!string.IsNullOrEmpty(redirectUrl))
                 {
                     model.RedirectUrl = new Uri(redirectUrl);
                 }
 
+                // Finally! We can hand over the logic to the consumer to do whatever they want.
+                TraceSource.TraceVerbose("About to execute your custom callback provider logic.");
                 return authenticationCallbackProvider.Process(this, model);
             };
         }
@@ -151,6 +176,11 @@ namespace Nancy.Authentication.WorldDomination
 
             // Kthxgo!
             return Response.AsRedirect(uri.AbsoluteUri);
+        }
+
+        private TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Mvc.WorldDominationAuthenticationController"]; }
         }
     }
 }
