@@ -62,6 +62,7 @@
     <Compile Include="Providers\BaseOAuth20Provider.cs" />
     <Compile Include="Providers\BaseProvider.cs" />
     <Compile Include="Providers\BaseRestFactoryProvider.cs" />
+    <Compile Include="Providers\Facebook\AccessTokenResult.cs" />
     <Compile Include="Providers\Facebook\DisplayType.cs" />
     <Compile Include="Providers\Facebook\FacebookAuthenticationServiceSettings.cs" />
     <Compile Include="Providers\Facebook\FakeFacebookProvider.cs" />
@@ -96,7 +97,7 @@
     <Compile Include="Tracing\TraceManager.cs" />
     <Compile Include="Tracing\TraceSourceExtensions.cs" />
     <Compile Include="UserInformation.cs" />
-    <Compile Include="Providers\WindowsLive\AuthenticatedTokenResult.cs" />
+    <Compile Include="Providers\WindowsLive\AccessTokenResult.cs" />
     <Compile Include="Providers\WindowsLive\Emails.cs" />
     <Compile Include="Providers\WindowsLive\UserInfoResult.cs" />
     <Compile Include="Providers\WindowsLive\WindowsLiveAuthenticationServiceSettings.cs" />

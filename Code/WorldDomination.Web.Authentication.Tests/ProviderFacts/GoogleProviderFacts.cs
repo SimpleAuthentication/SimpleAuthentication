@@ -18,8 +18,11 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             get
             {
                 var mockRestClient = new Mock<IRestClient>();
-                mockRestClient.Setup(x => x.BaseUrl).Returns("http://www.whatever.com/");
-                mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>())).Returns(It.IsAny<IRestResponse>);
+                //mockRestClient.Setup(x => x.BaseUrl).Returns("http://www.whatever.com/");
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://www.whatever.pew.pew"));
+                mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
+                    .Returns(It.IsAny<IRestResponse<AccessTokenResult>>);
 
                 return mockRestClient;
             }
@@ -91,7 +94,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.BadRequest);
                 mockRestResponse.Setup(x => x.StatusDescription).Returns("Bad Request");
                 mockRestResponse.Setup(x => x.Content).Returns("{\n  \"error\" : \"invalid_request\"\n}");
-                var mockRestClient = new Mock<IRestClient>();
+                var mockRestClient = MockRestClient;
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
@@ -119,7 +122,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Failed to obtain an Access Token from Google OR the the response was not an HTTP Status 200 OK. Response Status: BadRequest. Response Description: Bad Request",
+                    "Failed to obtain an Access Token from Google OR the the response was not an HTTP Status 200 OK. Response Status: BadRequest. Response Description: Bad Request. Error Content: {\n  \"error\" : \"invalid_request\"\n}. Error Message: --no error exception--.",
                     result.Message);
             }
 
@@ -154,9 +157,9 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Failed to obtain an Access Token from Google.", result.Message);
+                Assert.Equal("Failed to retrieve an Access Token from Google.", result.Message);
                 Assert.NotNull(result.InnerException);
-                Assert.Equal(errorMessage, result.InnerException.Message);
+                Assert.Equal(errorMessage, result.InnerException.RecursiveErrorMessages());
             }
 
             [Fact]
@@ -166,7 +169,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
                 mockRestResponse.Setup(x => x.StatusDescription).Returns("Unauthorized");
-                var mockRestClient = new Mock<IRestClient>();
+                var mockRestClient = MockRestClient;
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
@@ -192,9 +195,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal(
-                    "Failed to obtain an Access Token from Google OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
-                    result.Message);
+                Assert.Equal("Failed to obtain an Access Token from Google OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized. Error Content: . Error Message: --no error exception--.", result.Message);
+                Assert.Null(result.InnerException);
             }
 
             [Fact]
@@ -232,7 +234,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Retrieved a Google Access Token but it doesn't contain one or more of either: access_token, expires_in or token_type",
+                    "Retrieved a Google Access Token but it doesn't contain one or more of either: access_token, expires_in or token_type.",
                     result.Message);
             }
 
@@ -286,7 +288,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Failed to obtain User Info from Google OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
+                    "Failed to obtain some UserInfo data from the Google Api OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized. Error Message: --no error exception--.",
                     result.Message);
             }
 

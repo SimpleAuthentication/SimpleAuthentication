@@ -88,7 +88,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
                               .Returns(new Uri("http://www.whatever.pew.pew"));
-                mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                               .Throws(new Exception(exceptionMessage));
                 var facebookProvider = new FacebookProvider(new ProviderParams { Key = "a", Secret = "b" })
                 {
@@ -113,7 +113,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Failed to retrieve an oauth access token from Facebook. Error Messages: 1st World Problems: Too many rooms in my house. Can't decide where to sleep.", result.Message);
+                Assert.Equal("Failed to retrieve an Access Token from Facebook. 1st World Problems: Too many rooms in my house. Can't decide where to sleep.", result.RecursiveErrorMessages());
                 Assert.NotNull(result.InnerException);
                 Assert.Equal(exceptionMessage, result.InnerException.Message);
             }
@@ -122,7 +122,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             public void GivenSomeInvalidRequestToken_AuthenticateClient_ThrowsAnAuthenticationException()
             {
                 // Arrange.
-                var mockRestResponse = new Mock<IRestResponse>();
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
                 mockRestResponse.Setup(x => x.StatusDescription).Returns("Unauthorised");
                 mockRestResponse.Setup(x => x.Content).Returns("{error:hi there asshat}");
@@ -130,7 +130,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
                               .Returns(new Uri("http://www.whatever.pew.pew"));
-                mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponse.Object);
 
                 var facebookProvider = new FacebookProvider(new ProviderParams { Key = "a", Secret = "b" })
@@ -165,7 +165,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             public void GivenAMissingCallBackUriParam_AuthenticateClient_ThrowsAnAuthenticationException()
             {
                 // Arrange.
-                var mockRestResponse = new Mock<IRestResponse>();
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.BadRequest);
                 mockRestResponse.Setup(x => x.StatusDescription).Returns("Bad Request");
                 mockRestResponse.Setup(x => x.Content)
@@ -175,7 +175,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
                               .Returns(new Uri("http://www.whatever.pew.pew"));
-                mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponse.Object);
 
                 var facebookProvider = new FacebookProvider(new ProviderParams { Key = "a", Secret = "b" })
@@ -210,14 +210,14 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             public void GivenAMissingExpiresParam_AuthenticateClient_ThrowsAnAuthenticationException()
             {
                 // Arrange.
-                var mockRestResponse = new Mock<IRestResponse>();
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponse.Setup(x => x.Content).Returns("access_token=foo&omg=pewpew");
+                mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult {AccessToken = "foo"});
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
                               .Returns(new Uri("http://www.fatchicksinpartyhats.com"));
-                mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()) )
                               .Returns(mockRestResponse.Object);
 
                 var facebookProvider = new FacebookProvider(new ProviderParams { Key = "a", Secret = "b" })
@@ -244,7 +244,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Retrieved a Facebook Access Token but it doesn't contain both the access_token and expires_on parameters. Response.Content: access_token=foo&omg=pewpew",
+                    "Retrieved a Facebook Access Token but there's an error with either the access_token and/or expires_on parameters. Access Token: foo. Expires In: 0.",
                     result.Message);
             }
 
@@ -255,14 +255,18 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Arrange.
                 const string exceptionMessage =
                     "1st World Problems: The Pizza guy arrived. Before I finished downloading the movie.";
-                var mockRestResponse = new Mock<IRestResponse>();
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponse.Setup(x => x.Content).Returns("access_token=foo&expires=1000");
+                mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
+                {
+                    AccessToken = "foo",
+                    ExpiresIn = 1000
+                });
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
                               .Returns(new Uri("http://imgur.com/gallery/787lCwb"));
-                mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponse.Object);
                 mockRestClient.Setup(x => x.Execute<MeResult>(It.IsAny<IRestRequest>()))
                               .Throws(new Exception(exceptionMessage));
@@ -290,16 +294,20 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Failed to retrieve any Me data from the Facebook Api. Error Messages: 1st World Problems: The Pizza guy arrived. Before I finished downloading the movie.", result.Message);
+                Assert.Equal("Failed to retrieve any Me data from the Facebook Api. 1st World Problems: The Pizza guy arrived. Before I finished downloading the movie.", result.Message);
             }
 
             [Fact]
             public void GivenAnInvalidMeResultThrowsAnException_AuthenticateClient_ThrowsAnAuthenticationException()
             {
                 // Arrange.
-                var mockRestResponse = new Mock<IRestResponse>();
+                var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponse.Setup(x => x.Content).Returns("access_token=foo&expires=1000");
+                mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
+                {
+                    AccessToken = "foo",
+                    ExpiresIn = 1000
+                });
 
                 var mockRestResponseApiMe = new Mock<IRestResponse<MeResult>>();
                 mockRestResponseApiMe.Setup(x => x.StatusCode).Returns(HttpStatusCode.Unauthorized);
@@ -308,7 +316,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
                               .Returns(new Uri("http://imgur.com/gallery/787lCwb"));
-                mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponse.Object);
                 mockRestClient.Setup(x => x.Execute<MeResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseApiMe.Object);
@@ -345,9 +353,14 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             public void GivenValidCredentials_AuthenticateClient_ReturnsAnAuthenticatedClientWithUserInformation()
             {
                 // Arrange.
-                var mockRestResponseAccessToken = new Mock<IRestResponse>();
+                var mockRestResponseAccessToken = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponseAccessToken.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponseAccessToken.Setup(x => x.Content).Returns("access_token=foo&expires=1000");
+                mockRestResponseAccessToken.Setup(x => x.Data).Returns(
+                    new AccessTokenResult
+                {
+                    AccessToken = "foo",
+                    ExpiresIn = 1000
+                });
 
                 var meResult = new MeResult
                 {
@@ -369,7 +382,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
                               .Returns(new Uri("http://imgur.com/gallery/787lCwb"));
-                mockRestClient.Setup(x => x.Execute(It.IsAny<IRestRequest>()))
+                mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseAccessToken.Object);
                 mockRestClient.Setup(x => x.Execute<MeResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseApiMe.Object);

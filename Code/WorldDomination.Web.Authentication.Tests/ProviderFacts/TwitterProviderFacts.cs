@@ -68,6 +68,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://i.dont.care.about.this.uri"));
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Throws(new Exception("one does not simply 'get a job'."));
@@ -87,7 +89,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Failed to convert Request Token to an Access Token, from Twitter.", result.Message);
+                Assert.Equal("Failed to retrieve an oauth access token from Twitter. Error Messages: one does not simply 'get a job'.", result.Message);
                 Assert.NotNull(result.InnerException);
                 Assert.Equal("one does not simply 'get a job'.", result.InnerException.Message);
             }
@@ -104,6 +106,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://i.dont.care.about.this.uri"));
                 var twitterProvider = new TwitterProvider(new ProviderParams { Key = "a", Secret = "b" })
                 {
                     RestClientFactory = new RestClientFactory(mockRestClient.Object)
@@ -121,7 +125,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Failed to obtain an Access Token from Twitter OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
+                    "Failed to obtain an Access Token from Twitter OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized. Error Content: . Error Message: --no error exception--.",
                     result.Message);
             }
 
@@ -163,6 +167,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Arrange.
                 const string exceptionMessage = "some mock exception.";
                 var mockRestClient = new Mock<IRestClient>();
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://i.dont.care.about.this.uri"));
 
                 var mockRestResponseRetrieveRequestToken = new Mock<IRestResponse>();
                 mockRestResponseRetrieveRequestToken.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
@@ -202,7 +208,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Failed to retrieve VerifyCredentials json data from the Twitter Api.", result.Message);
+                Assert.Equal("Failed to retrieve VerifyCredentials json data from the Twitter Api. Error Messages: some mock exception.", result.Message);
             }
 
             [Fact]
@@ -222,6 +228,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponseRetrieveRequestToken.Object);
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://i.dont.care.about.this.uri"));
                 mockRestClient
                     .Setup(x => x.Execute<VerifyCredentialsResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponseVerifyCredentials.Object);
@@ -243,7 +251,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Failed to retrieve VerifyCredentials json data OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
+                    "Failed to obtain some VerifyCredentials json data from the Facebook api OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized. Error Message: --no error exception--.",
                     result.Message);
             }
 
@@ -268,6 +276,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestResponseVerifyCredentials.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
 
                 var mockRestClient = new Mock<IRestClient>();
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://i.dont.care.about.this.uri"));
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponseRetrieveRequestToken.Object);
@@ -346,6 +356,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Throws(new Exception("some mock exception"));
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://i.dont.care.about.this.uri"));
                 var twitterProvider = new TwitterProvider(new ProviderParams { Key = "a", Secret = "b" })
                 {
                     RestClientFactory = new RestClientFactory(mockRestClient.Object)
@@ -378,6 +390,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://i.dont.care.about.this.uri"));
                 var twitterProvider = new TwitterProvider(new ProviderParams { Key = "a", Secret = "b" })
                 {
                     RestClientFactory = new RestClientFactory(mockRestClient.Object)
@@ -397,7 +411,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 Assert.NotNull(result);
                 Assert.Null(result.InnerException);
                 Assert.Equal(
-                    "Failed to obtain a Request Token from Twitter OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
+                    "Failed to obtain a request token from the Twitter api OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized. Error Message: --no error exception--.",
                     result.Message);
             }
 
@@ -413,6 +427,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://i.dont.care.about.this.uri"));
                 var twitterProvider = new TwitterProvider(new ProviderParams { Key = "a", Secret = "b" })
                 {
                     RestClientFactory = new RestClientFactory(mockRestClient.Object)

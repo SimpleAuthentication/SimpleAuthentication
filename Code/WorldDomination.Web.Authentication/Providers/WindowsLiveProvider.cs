@@ -6,11 +6,12 @@ using RestSharp;
 using WorldDomination.Web.Authentication.Providers.Google;
 using WorldDomination.Web.Authentication.Providers.WindowsLive;
 using WorldDomination.Web.Authentication.Tracing;
+using AccessTokenResult = WorldDomination.Web.Authentication.Providers.WindowsLive.AccessTokenResult;
 using UserInfoResult = WorldDomination.Web.Authentication.Providers.WindowsLive.UserInfoResult;
 
 namespace WorldDomination.Web.Authentication.Providers
 {
-    public class WindowsLiveProvider : BaseOAuth20Provider
+    public class WindowsLiveProvider : BaseOAuth20Provider<AccessTokenResult>
     {
         // *********************************************************************
         // REFERENCE: http://msdn.microsoft.com/en-us/library/live/hh243647.aspx
@@ -101,7 +102,7 @@ namespace WorldDomination.Web.Authentication.Providers
             return code;
         }
 
-        protected override AccessToken RetrieveAccessToken(string authorizationCode, Uri redirectUri)
+        protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode, Uri redirectUri)
         {
             if (string.IsNullOrEmpty(authorizationCode))
             {
@@ -114,56 +115,46 @@ namespace WorldDomination.Web.Authentication.Providers
                 throw new ArgumentNullException("redirectUri");
             }
 
-            IRestResponse<AuthenticatedTokenResult> response;
+            var restRequest = new RestRequest("/oauth20_token.srf");
+            restRequest.AddParameter("client_id", _clientId);
+            restRequest.AddParameter("redirect_uri", redirectUri);
+            restRequest.AddParameter("client_secret", _clientSecret);
+            restRequest.AddParameter("code", authorizationCode);
+            restRequest.AddParameter("grant_type", "authorization_code");
 
-            try
+            var restClient = RestClientFactory.CreateRestClient("https://login.live.com/oauth20_token.srf");
+            TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
+                                     restClient.BuildUri(restRequest).AbsoluteUri);
+
+            return restClient.Execute<AccessTokenResult>(restRequest);
+        }
+
+        protected override AccessToken MapAccessTokenResultToAccessToken(AccessTokenResult accessTokenResult)
+        {
+            if (accessTokenResult == null)
             {
-                var restRequest = new RestRequest("/oauth20_token.srf");
-                restRequest.AddParameter("client_id", _clientId);
-                restRequest.AddParameter("redirect_uri", redirectUri);
-                restRequest.AddParameter("client_secret", _clientSecret);
-                restRequest.AddParameter("code", authorizationCode);
-                restRequest.AddParameter("grant_type", "authorization_code");
-                
-                var restClient = RestClientFactory.CreateRestClient("https://login.live.com/oauth20_token.srf");
-                TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
-                                         restClient.BuildUri(restRequest).AbsoluteUri);
-
-                response = restClient.Execute<AuthenticatedTokenResult>(restRequest);
+                throw new ArgumentNullException("accessTokenResult");
             }
-            catch (Exception exception)
+
+            if (string.IsNullOrEmpty(accessTokenResult.AccessToken))
             {
                 var errorMessage =
-                    string.Format("Failed to retrieve an oauth access token from Microsoft Live. Error Messages: {0}",
-                                  exception.RecursiveErrorMessages());
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage, exception);
-            }
-
-            if (response == null ||
-                response.StatusCode != HttpStatusCode.OK)
-            {
-                var errorMessage = string.Format(
-                    "Failed to obtain an Access Token from Microsoft Live OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Content: {2}. Error Message: {3}.",
-                    response == null ? "-- null response --" : response.StatusCode.ToString(),
-                    response == null ? string.Empty : response.StatusDescription,
-                    response == null ? string.Empty : response.Content,
-                    response == null
-                        ? string.Empty
-                        : response.ErrorException == null
-                              ? "--no error exception--"
-                              : response.ErrorException.RecursiveErrorMessages());
+                    string.Format(
+                        "Retrieved a Windows Live Access Token but it there's an error with either the access_token parameters. Access Token: {0}.",
+                        string.IsNullOrEmpty(accessTokenResult.AccessToken)
+                            ? "-no access token-"
+                            : accessTokenResult.AccessToken);
 
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
             }
 
             return new AccessToken
-                   {
-                       PublicToken = response.Data.AccessToken,
-                       // TODO: Wire up the ExpiresIn .. but right now it's a string.. what should it -really- be?
-                       //ExpiresOn = DateTime.UtcNow.AddSeconds(response.Data.ExpiresIn)
-                   };
+            {
+                PublicToken = accessTokenResult.AccessToken,
+                // TODO: Wire up the ExpiresIn .. but right now it's a string.. what should it -really- be?
+                //ExpiresOn = DateTime.UtcNow.AddSeconds(response.Data.ExpiresIn)
+            };
         }
 
         protected override UserInformation RetrieveUserInformation(AccessToken accessToken)

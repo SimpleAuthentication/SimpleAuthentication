@@ -11,7 +11,7 @@ namespace WorldDomination.Web.Authentication.Providers
 {
     // REFERENCE: http://developers.facebook.com/docs/authentication/server-side/
 
-    public class FacebookProvider : BaseOAuth20Provider
+    public class FacebookProvider : BaseOAuth20Provider<AccessTokenResult>
     {
         private const string BaseUrl = "https://graph.facebook.com";
         private readonly string _clientId;
@@ -135,11 +135,11 @@ namespace WorldDomination.Web.Authentication.Providers
             return code;
         }
 
-        protected override AccessToken RetrieveAccessToken(string code, Uri redirectUri)
+        protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode, Uri redirectUri)
         {
-            if (string.IsNullOrEmpty(code))
+            if (string.IsNullOrEmpty(authorizationCode))
             {
-                throw new ArgumentNullException("code");
+                throw new ArgumentNullException("authorizationCode");
             }
 
             if (redirectUri == null ||
@@ -148,73 +148,46 @@ namespace WorldDomination.Web.Authentication.Providers
                 throw new ArgumentNullException("redirectUri");
             }
 
-            IRestResponse response;
-            try
+            var restRequest = new RestRequest("oauth/access_token");
+            restRequest.AddParameter("client_id", _clientId);
+            restRequest.AddParameter("client_secret", _clientSecret);
+            restRequest.AddParameter("code", authorizationCode);
+            restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
+
+            var restClient = RestClientFactory.CreateRestClient(BaseUrl);
+            TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
+                                     restClient.BuildUri(restRequest).AbsoluteUri);
+
+            return restClient.Execute<AccessTokenResult>(restRequest);
+        }
+
+        protected override AccessToken MapAccessTokenResultToAccessToken(AccessTokenResult accessTokenResult)
+        {
+            if (accessTokenResult == null)
             {
-                var restRequest = new RestRequest("oauth/access_token");
-                restRequest.AddParameter("client_id", _clientId);
-                restRequest.AddParameter("client_secret", _clientSecret);
-                restRequest.AddParameter("code", code);
-                restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
-
-                var restClient = RestClientFactory.CreateRestClient(BaseUrl);
-                TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
-                                         restClient.BuildUri(restRequest).AbsoluteUri);
-
-                response = restClient.Execute(restRequest);
+                throw new ArgumentNullException("accessTokenResult");
             }
-            catch (Exception exception)
+
+            if (string.IsNullOrEmpty(accessTokenResult.AccessToken) ||
+                accessTokenResult.ExpiresIn <= 0)
             {
                 var errorMessage =
-                    string.Format("Failed to retrieve an oauth access token from Facebook. Error Messages: {0}",
-                                  exception.RecursiveErrorMessages());
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage, exception);
-            }
-
-            if (response == null ||
-                response.StatusCode != HttpStatusCode.OK)
-            {
-                // {"error":{"message":"Error validating verification code. Please make sure your redirect_uri is identical to the one you used in the OAuth dialog request","type":"OAuthException","code":100}}
-
-                var errorMessage = string.Format(
-                    "Failed to obtain an Access Token from Facebook OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Content: {2}. Error Message: {3}.",
-                    response == null ? "-- null response --" : response.StatusCode.ToString(),
-                    response == null ? string.Empty : response.StatusDescription,
-                    response == null ? string.Empty : response.Content,
-                    response == null
-                        ? string.Empty
-                        : response.ErrorException == null
-                              ? "--no error exception--"
-                              : response.ErrorException.RecursiveErrorMessages());
-
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            var querystringParameters = HttpUtility.ParseQueryString(response.Content);
-            var accessToken = querystringParameters["access_token"];
-            int expires;
-            var expiresOn = int.TryParse(querystringParameters["expires"], out expires)
-                                ? DateTime.UtcNow.AddSeconds(expires)
-                                : DateTime.MinValue;
-
-            if (string.IsNullOrEmpty(accessToken) ||
-                expiresOn <= DateTime.UtcNow)
-            {
-                var errorMessage =
-                    "Retrieved a Facebook Access Token but it doesn't contain both the access_token and expires_on parameters. Response.Content: "
-                    + (string.IsNullOrEmpty(response.Content) ? "-no response content-" : response.Content);
+                    string.Format(
+                        "Retrieved a Facebook Access Token but there's an error with either the access_token and/or expires_on parameters. Access Token: {0}. Expires In: {1}.",
+                        string.IsNullOrEmpty(accessTokenResult.AccessToken)
+                            ? "-no access token-"
+                            : accessTokenResult.AccessToken,
+                        accessTokenResult.ExpiresIn.ToString());
 
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
             }
 
             return new AccessToken
-                   {
-                       PublicToken = accessToken,
-                       ExpiresOn = expiresOn
-                   };
+            {
+                PublicToken = accessTokenResult.AccessToken,
+                ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn)
+            };
         }
 
         protected override UserInformation RetrieveUserInformation(AccessToken accessToken)
@@ -245,9 +218,9 @@ namespace WorldDomination.Web.Authentication.Providers
             }
             catch (Exception exception)
             {
-                var errorMessage =
-                    string.Format("Failed to retrieve any Me data from the Facebook Api. Error Messages: {0}",
-                                  exception.RecursiveErrorMessages());
+                var authenticationException =
+                    new AuthenticationException("Failed to retrieve any Me data from the Facebook Api.", exception);
+                var errorMessage = authenticationException.RecursiveErrorMessages();
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage, exception);
             }

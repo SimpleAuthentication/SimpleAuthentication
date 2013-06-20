@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Text;
+using RestSharp;
 using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication.Providers
 {
-    public abstract class BaseOAuth20Provider : BaseRestFactoryProvider, IAuthenticationProvider
+    public abstract class BaseOAuth20Provider<TAccessTokenResult> 
+        : BaseRestFactoryProvider, IAuthenticationProvider where TAccessTokenResult : class, new()
     {
         #region IAuthenticationProvider Members
 
@@ -70,7 +73,60 @@ namespace WorldDomination.Web.Authentication.Providers
         protected abstract string RetrieveAuthorizationCode(NameValueCollection queryStringParameters,
                                                             string existingState = null);
 
-        protected abstract AccessToken RetrieveAccessToken(string code, Uri redirectUri);
+        protected abstract IRestResponse<TAccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode, Uri redirectUri);
+       
+        protected abstract AccessToken MapAccessTokenResultToAccessToken(TAccessTokenResult accessTokenResult);
+
+        protected AccessToken RetrieveAccessToken(string authorizationCode, Uri redirectUri)
+        {
+            if (string.IsNullOrEmpty(authorizationCode))
+            {
+                throw new ArgumentNullException("authorizationCode");
+            }
+
+            if (redirectUri == null ||
+                string.IsNullOrEmpty(redirectUri.AbsoluteUri))
+            {
+                throw new ArgumentNullException("redirectUri");
+            }
+
+            IRestResponse<TAccessTokenResult> response;
+
+            try
+            {
+                response = ExecuteRetrieveAccessToken(authorizationCode, redirectUri);
+            }
+            catch (Exception exception)
+            {
+                var authentictionException =
+                    new AuthenticationException(string.Format("Failed to retrieve an Access Token from {0}.",
+                                                              Name), exception);
+                var errorMessage = string.Format("{0}", authentictionException.RecursiveErrorMessages());
+                TraceSource.TraceError(errorMessage);
+                throw authentictionException;
+            }
+           
+            if (response == null ||
+                response.StatusCode != HttpStatusCode.OK)
+            {
+                var errorMessage = string.Format(
+                    "Failed to obtain an Access Token from {0} OR the the response was not an HTTP Status 200 OK. Response Status: {1}. Response Description: {2}. Error Content: {3}. Error Message: {4}.",
+                    string.IsNullOrEmpty(Name) ? "--no name--" : Name,
+                    response == null ? "-- null response --" : response.StatusCode.ToString(),
+                    response == null ? string.Empty : response.StatusDescription,
+                    response == null ? string.Empty : response.Content,
+                    response == null
+                        ? string.Empty
+                        : response.ErrorException == null
+                              ? "--no error exception--"
+                              : response.ErrorException.RecursiveErrorMessages());
+
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            return MapAccessTokenResultToAccessToken(response.Data);
+        }
 
         protected abstract UserInformation RetrieveUserInformation(AccessToken accessToken);
     }

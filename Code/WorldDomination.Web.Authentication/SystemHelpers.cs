@@ -18,8 +18,12 @@ namespace WorldDomination.Web.Authentication
             Exception nextException = exception;
             while (nextException != null)
             {
+                if (errorMessages.Length > 0)
+                {
+                    errorMessages.Append(" ");
+                }
                 // Append this error message.
-                errorMessages.Append(nextException.Message);
+                errorMessages.AppendFormat(nextException.Message);
 
                 // Grab the next error message.
                 nextException = nextException.InnerException;
