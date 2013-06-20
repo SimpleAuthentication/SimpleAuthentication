@@ -14,6 +14,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
         private const string TokenTypeKey = "token_type";
         private readonly string _clientId;
         private readonly string _clientSecret;
+        private IAuthenticationServiceSettings _defaultAuthenticationServiceSettings;
 
         public GitHubProvider(ProviderParams providerParams)
         {
@@ -165,7 +166,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
         public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
-            get { return new GitHubAuthenticationServiceSettings(); }
+            get { return _defaultAuthenticationServiceSettings ??
+                (_defaultAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings()); }
         }
 
         public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
@@ -186,8 +188,10 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
             var oauthDialogUri =
                 string.Format(
-                    "https://github.com/login/oauth/authorize?client_id={0}&scope=user:email&redirect_uri={1}&response_type=code{2}",
-                    _clientId, authenticationServiceSettings.CallBackUri.AbsoluteUri, state);
+                    "https://github.com/login/oauth/authorize?client_id={0}&scope={1}&redirect_uri={2}&response_type=code{3}",
+                    _clientId, 
+                    ((GitHubAuthenticationServiceSettings)DefaultAuthenticationServiceSettings).Scope,
+                    authenticationServiceSettings.CallBackUri.AbsoluteUri, state);
 
             return new Uri(oauthDialogUri);
         }
