@@ -18,23 +18,18 @@ namespace WorldDomination.Web.Authentication.Providers
         private const string ExpiresInKey = "expires_in";
         private const string TokenTypeKey = "token_type";
 
-        private readonly string _clientId;
-        private readonly string _clientSecret;
-        private readonly IList<string> _scope;
-
-        public GoogleProvider(ProviderParams providerParams)
+        protected override string DefaultScope
         {
-            providerParams.Validate();
-
-            _clientId = providerParams.Key;
-            _clientSecret = providerParams.Secret;
-
-            // Optionals.
-            _scope = new List<string>
+            get
             {
-                "https://www.googleapis.com/auth/userinfo.profile",
-                "https://www.googleapis.com/auth/userinfo.email"
-            };
+                return "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email";
+            }
+        }
+
+        protected override string ScopeSeparator { get { return " "; } }
+
+        public GoogleProvider(ProviderParams providerParams) : base(providerParams)
+        {
         }
 
         #region Implementation of IAuthenticationProvider
@@ -66,11 +61,7 @@ namespace WorldDomination.Web.Authentication.Providers
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
 
-            // Do we have any scope options?
-            // NOTE: Google uses a space-delimeted string for their scope key.
-            var scope = (_scope != null && _scope.Count > 0)
-                            ? string.Format(ScopeKey, string.Join(" ", _scope))
-                            : string.Empty;
+            var scope = GetScope();
 
             var state = string.IsNullOrEmpty(authenticationServiceSettings.State)
                             ? string.Empty
@@ -79,7 +70,7 @@ namespace WorldDomination.Web.Authentication.Providers
             var redirectUri =
                 string.Format(
                     "https://accounts.google.com/o/oauth2/auth?client_id={0}&redirect_uri={1}&response_type=code{2}{3}",
-                    _clientId, authenticationServiceSettings.CallBackUri.AbsoluteUri, state, scope);
+                    ClientKey, authenticationServiceSettings.CallBackUri.AbsoluteUri, state, scope);
 
             TraceSource.TraceInformation("Google redirection uri: {0}.", redirectUri);
             return new Uri(redirectUri);
@@ -144,8 +135,8 @@ namespace WorldDomination.Web.Authentication.Providers
             }
 
             var restRequest = new RestRequest("/o/oauth2/token", Method.POST);
-            restRequest.AddParameter("client_id", _clientId);
-            restRequest.AddParameter("client_secret", _clientSecret);
+            restRequest.AddParameter("client_id", ClientKey);
+            restRequest.AddParameter("client_secret", ClientSecret);
             restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
             restRequest.AddParameter("code", authorizationCode);
             restRequest.AddParameter("grant_type", "authorization_code");
