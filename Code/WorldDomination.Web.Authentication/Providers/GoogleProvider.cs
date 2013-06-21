@@ -13,11 +13,13 @@ namespace WorldDomination.Web.Authentication.Providers
 
     public class GoogleProvider : BaseOAuth20Provider<AccessTokenResult>
     {
-        private const string ScopeKey = "&scope={0}";
         private const string AccessTokenKey = "access_token";
         private const string ExpiresInKey = "expires_in";
         private const string TokenTypeKey = "token_type";
+        
+        protected override string ScopeKey { get { return "&scope={0}"; } }
 
+        //No idea why Google has such a long shit scope...
         protected override string DefaultScope
         {
             get
