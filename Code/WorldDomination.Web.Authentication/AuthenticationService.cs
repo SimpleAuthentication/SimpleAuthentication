@@ -268,7 +268,8 @@ namespace WorldDomination.Web.Authentication
                 var parameters = new ProviderParams
                 {
                     Key = providerKey.Key,
-                    Secret = providerKey.Secret
+                    Secret = providerKey.Secret,
+                    Scope = providerKey.Scope
                 };
                 authenticationProvider = Activator.CreateInstance(provider, parameters) as IAuthenticationProvider;
             }
