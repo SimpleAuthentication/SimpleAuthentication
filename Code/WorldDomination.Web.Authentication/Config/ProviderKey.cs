@@ -21,5 +21,11 @@ namespace WorldDomination.Web.Authentication.Config
         {
             get { return this["secret"] as string; }
         }
+
+        [ConfigurationProperty("scope", IsRequired = false)]
+        public string Scope
+        {
+            get { return this ["scope"] as string; }
+        }
     }
 }
