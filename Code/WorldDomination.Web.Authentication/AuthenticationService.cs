@@ -110,10 +110,10 @@ namespace WorldDomination.Web.Authentication
         {
             var querystringParameters = new NameValueCollection();
             var keyValuesAsText = new StringBuilder();
-            foreach (var item in requestParameters)
+            foreach (string item in requestParameters)
             {
                 querystringParameters.Add(item, requestParameters[item]);
-                keyValuesAsText.Append("Key: {0} / Value: {1}. ", item, requestParameters[item]);
+                keyValuesAsText.AppendFormat("Key: {0} / Value: {1}. ", item, requestParameters[item]);
             }
 
             if (keyValuesAsText.Length > 0)

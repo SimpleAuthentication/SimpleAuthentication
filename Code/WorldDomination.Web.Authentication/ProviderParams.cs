@@ -17,7 +17,7 @@ namespace WorldDomination.Web.Authentication
         {
             if (string.IsNullOrWhiteSpace (Scope)) 
             {
-                return null;
+                return new string[]{};
             }
 
             return Scope.Split (',');
