@@ -17,7 +17,7 @@ namespace WorldDomination.Web.Authentication.Providers
         private const string ExpiresInKey = "expires_in";
         private const string TokenTypeKey = "token_type";
         
-        protected override string ScopeKey { get { return "&scope={0}"; } }
+        protected override string ScopeKey { get { return "&scope="; } }
 
         //No idea why Google has such a long shit scope...
         protected override string DefaultScope
