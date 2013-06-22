@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
-using System.Text;
 using RestSharp;
 using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication.Providers
 {
-    public abstract class BaseOAuth20Provider<TAccessTokenResult> 
+    public abstract class BaseOAuth20Provider<TAccessTokenResult>
         : BaseRestFactoryProvider, IAuthenticationProvider where TAccessTokenResult : class, new()
     {
         #region IAuthenticationProvider Members
@@ -22,12 +19,12 @@ namespace WorldDomination.Web.Authentication.Providers
         protected abstract string DefaultScope { get; }
         protected abstract string ScopeSeparator { get; }
         protected abstract string ScopeKey { get; }
-        
+
         protected string Scope { get; set; }
         protected string ClientKey { get; set; }
         protected string ClientSecret { get; set; }
 
-        public BaseOAuth20Provider(ProviderParams providerParams)
+        protected BaseOAuth20Provider(ProviderParams providerParams)
         {
             providerParams.Validate();
 
@@ -87,7 +84,7 @@ namespace WorldDomination.Web.Authentication.Providers
 
             return authenticatedClient;
         }
-        
+
         #endregion
 
         protected override TraceSource TraceSource
@@ -98,8 +95,9 @@ namespace WorldDomination.Web.Authentication.Providers
         protected abstract string RetrieveAuthorizationCode(NameValueCollection queryStringParameters,
                                                             string existingState = null);
 
-        protected abstract IRestResponse<TAccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode, Uri redirectUri);
-       
+        protected abstract IRestResponse<TAccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
+                                                                                        Uri redirectUri);
+
         protected abstract AccessToken MapAccessTokenResultToAccessToken(TAccessTokenResult accessTokenResult);
 
         protected AccessToken RetrieveAccessToken(string authorizationCode, Uri redirectUri)
@@ -130,7 +128,7 @@ namespace WorldDomination.Web.Authentication.Providers
                 TraceSource.TraceError(errorMessage);
                 throw authentictionException;
             }
-           
+
             if (response == null ||
                 response.StatusCode != HttpStatusCode.OK)
             {
@@ -155,9 +153,9 @@ namespace WorldDomination.Web.Authentication.Providers
 
         protected abstract UserInformation RetrieveUserInformation(AccessToken accessToken);
 
-        public string GetScope() 
+        public string GetScope()
         {
-            if (string.IsNullOrWhiteSpace (Scope))
+            if (string.IsNullOrWhiteSpace(Scope))
             {
                 return string.Empty;
             }
