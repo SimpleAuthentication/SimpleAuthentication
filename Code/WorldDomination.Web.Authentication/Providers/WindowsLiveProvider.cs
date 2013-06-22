@@ -3,7 +3,6 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Net;
 using RestSharp;
-using WorldDomination.Web.Authentication.Providers.Google;
 using WorldDomination.Web.Authentication.Providers.WindowsLive;
 using WorldDomination.Web.Authentication.Tracing;
 using AccessTokenResult = WorldDomination.Web.Authentication.Providers.WindowsLive.AccessTokenResult;

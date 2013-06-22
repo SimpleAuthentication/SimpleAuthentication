@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using RestSharp;
-using RestSharp.Contrib;
 using WorldDomination.Web.Authentication.Providers.Facebook;
 using WorldDomination.Web.Authentication.Tracing;
 
