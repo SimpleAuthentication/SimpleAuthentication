@@ -110,10 +110,10 @@ namespace WorldDomination.Web.Authentication
         {
             var querystringParameters = new NameValueCollection();
             var keyValuesAsText = new StringBuilder();
-            foreach (var item in requestParameters)
+            foreach (string item in requestParameters)
             {
                 querystringParameters.Add(item, requestParameters[item]);
-                keyValuesAsText.Append("Key: {0} / Value: {1}. ", item, requestParameters[item]);
+                keyValuesAsText.AppendFormat("Key: {0} / Value: {1}. ", item, requestParameters[item]);
             }
 
             if (keyValuesAsText.Length > 0)
@@ -268,7 +268,8 @@ namespace WorldDomination.Web.Authentication
                 var parameters = new ProviderParams
                 {
                     Key = providerKey.Key,
-                    Secret = providerKey.Secret
+                    Secret = providerKey.Secret,
+                    Scope = providerKey.Scope
                 };
                 authenticationProvider = Activator.CreateInstance(provider, parameters) as IAuthenticationProvider;
             }
