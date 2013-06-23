@@ -3,7 +3,6 @@ using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Net;
 using RestSharp;
-using WorldDomination.Web.Authentication.Providers.Google;
 using WorldDomination.Web.Authentication.Providers.WindowsLive;
 using WorldDomination.Web.Authentication.Tracing;
 using AccessTokenResult = WorldDomination.Web.Authentication.Providers.WindowsLive.AccessTokenResult;
@@ -18,20 +17,16 @@ namespace WorldDomination.Web.Authentication.Providers
         // *********************************************************************
 
         private const string RedirectUrl =
-            "https://login.live.com/oauth20_authorize.srf?client_id={0}&scope={2}&response_type=code&redirect_uri={1}";
+            "https://login.live.com/oauth20_authorize.srf?client_id={0}{2}&response_type=code&redirect_uri={1}";
 
         private const string AccessTokenKey = "access_token";
+        
+        protected override string ScopeKey { get { return "&scope="; }}
+        protected override string DefaultScope { get { return "wl.signin wl.basic wl.emails"; } }
+        protected override string ScopeSeparator { get { return " "; }}
 
-        private readonly string _clientId;
-        private readonly string _clientSecret;
-        private readonly string _scope = string.Join(" ", new[] {"wl.signin", "wl.basic", "wl.emails"});
-
-        public WindowsLiveProvider(ProviderParams providerParams)
+        public WindowsLiveProvider(ProviderParams providerParams) : base(providerParams)
         {
-            providerParams.Validate();
-
-            _clientId = providerParams.Key;
-            _clientSecret = providerParams.Secret;
         }
 
         #region Implementation of IAuthenticationProvider
@@ -53,8 +48,8 @@ namespace WorldDomination.Web.Authentication.Providers
 
         public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            var oauthDialogUri = string.Format(RedirectUrl, _clientId,
-                                               authenticationServiceSettings.CallBackUri.AbsoluteUri, _scope);
+            var oauthDialogUri = string.Format(RedirectUrl, ClientKey,
+                                               authenticationServiceSettings.CallBackUri.AbsoluteUri, GetScope());
 
             oauthDialogUri += string.IsNullOrEmpty(authenticationServiceSettings.State)
                                   ? string.Empty
@@ -116,9 +111,9 @@ namespace WorldDomination.Web.Authentication.Providers
             }
 
             var restRequest = new RestRequest("/oauth20_token.srf");
-            restRequest.AddParameter("client_id", _clientId);
+            restRequest.AddParameter("client_id", ClientKey);
             restRequest.AddParameter("redirect_uri", redirectUri);
-            restRequest.AddParameter("client_secret", _clientSecret);
+            restRequest.AddParameter("client_secret", ClientSecret);
             restRequest.AddParameter("code", authorizationCode);
             restRequest.AddParameter("grant_type", "authorization_code");
 
@@ -217,20 +212,20 @@ namespace WorldDomination.Web.Authentication.Providers
             }
 
             return new UserInformation
-                   {
-                       Name = string.Format("{0} {1}",
-                                            string.IsNullOrEmpty(response.Data.first_name)
-                                                ? string.Empty
-                                                : response.Data.first_name,
-                                            string.IsNullOrEmpty(response.Data.last_name)
-                                                ? string.Empty
-                                                : response.Data.last_name).Trim(),
-                       Locale = response.Data.locale,
-                       UserName = response.Data.name,
-                       Id = response.Data.id,
-                       Email = response.Data.emails.Preferred,
-                       Gender = (GenderType) Enum.Parse(typeof (GenderType), response.Data.gender ?? "Unknown", true)
-                   };
+            {
+                Name = string.Format("{0} {1}",
+                                    string.IsNullOrEmpty(response.Data.first_name)
+                                        ? string.Empty
+                                        : response.Data.first_name,
+                                    string.IsNullOrEmpty(response.Data.last_name)
+                                        ? string.Empty
+                                        : response.Data.last_name).Trim(),
+                Locale = response.Data.locale,
+                UserName = response.Data.name,
+                Id = response.Data.id,
+                Email = response.Data.emails.Preferred,
+                Gender = (GenderType) Enum.Parse(typeof (GenderType), response.Data.gender ?? "Unknown", true)
+            };
         }
 
         #endregion

@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
-using System.Text;
 using RestSharp;
 using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication.Providers
 {
-    public abstract class BaseOAuth20Provider<TAccessTokenResult> 
+    public abstract class BaseOAuth20Provider<TAccessTokenResult>
         : BaseRestFactoryProvider, IAuthenticationProvider where TAccessTokenResult : class, new()
     {
         #region IAuthenticationProvider Members
@@ -18,6 +15,31 @@ namespace WorldDomination.Web.Authentication.Providers
         public abstract string Name { get; }
         public abstract IAuthenticationServiceSettings DefaultAuthenticationServiceSettings { get; }
         public abstract Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings);
+
+        protected abstract string DefaultScope { get; }
+        protected abstract string ScopeSeparator { get; }
+        protected abstract string ScopeKey { get; }
+
+        protected string Scope { get; set; }
+        protected string ClientKey { get; set; }
+        protected string ClientSecret { get; set; }
+
+        protected BaseOAuth20Provider(ProviderParams providerParams)
+        {
+            providerParams.Validate();
+
+            ClientKey = providerParams.Key;
+            ClientSecret = providerParams.Secret;
+
+            //Set the scope to default to avoid an else statement
+            Scope = DefaultScope;
+
+            //If a scope was defined, get the scopes and join them based on the provider specific separator. 
+            if (providerParams.GetScopes().Length > 0)
+            {
+                Scope = string.Join(ScopeSeparator, providerParams.GetScopes());
+            }
+        }
 
         public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
                                                        NameValueCollection queryStringParameters)
@@ -62,7 +84,7 @@ namespace WorldDomination.Web.Authentication.Providers
 
             return authenticatedClient;
         }
-        
+
         #endregion
 
         protected override TraceSource TraceSource
@@ -73,8 +95,9 @@ namespace WorldDomination.Web.Authentication.Providers
         protected abstract string RetrieveAuthorizationCode(NameValueCollection queryStringParameters,
                                                             string existingState = null);
 
-        protected abstract IRestResponse<TAccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode, Uri redirectUri);
-       
+        protected abstract IRestResponse<TAccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
+                                                                                        Uri redirectUri);
+
         protected abstract AccessToken MapAccessTokenResultToAccessToken(TAccessTokenResult accessTokenResult);
 
         protected AccessToken RetrieveAccessToken(string authorizationCode, Uri redirectUri)
@@ -105,7 +128,7 @@ namespace WorldDomination.Web.Authentication.Providers
                 TraceSource.TraceError(errorMessage);
                 throw authentictionException;
             }
-           
+
             if (response == null ||
                 response.StatusCode != HttpStatusCode.OK)
             {
@@ -129,5 +152,15 @@ namespace WorldDomination.Web.Authentication.Providers
         }
 
         protected abstract UserInformation RetrieveUserInformation(AccessToken accessToken);
+
+        public string GetScope()
+        {
+            if (string.IsNullOrWhiteSpace(Scope))
+            {
+                return string.Empty;
+            }
+
+            return ScopeKey + Scope;
+        }
     }
 }

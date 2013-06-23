@@ -102,7 +102,9 @@
     <Content Include="Content\myopenid_64.png" />
     <Content Include="Content\twitter_32.png" />
     <Content Include="Global.asax" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\FilterConfig.cs" />

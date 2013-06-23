@@ -15,20 +15,13 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
     public class AmazonProvider : BaseOAuth20Provider<AccessTokenResult>
     {
         private const string AccessTokenKey = "access_token";
-        private readonly string _clientId;
-        private readonly string _clientSecret;
+        
+        protected override string ScopeKey { get { return "&scope="; }}
+        protected override string DefaultScope { get { return "profile"; } }
+        protected override string ScopeSeparator { get { return " "; }}
 
-        public AmazonProvider(ProviderParams providerParams)
+        public AmazonProvider(ProviderParams providerParams) : base(providerParams)
         {
-            if (providerParams == null)
-            {
-                throw new ArgumentNullException("providerParams");
-            }
-
-            providerParams.Validate();
-
-            _clientId = providerParams.Key;
-            _clientSecret = providerParams.Secret;
         }
 
         #region Implementation of IAuthenticationProvider
@@ -66,8 +59,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
             var redirectUri =
                 string.Format(
-                    "https://www.amazon.com/ap/oa?client_id={0}&scope=profile&redirect_uri={1}&response_type=code{2}",
-                    _clientId, uriEncoded, state);
+                    "https://www.amazon.com/ap/oa?client_id={0}{3}&redirect_uri={1}&response_type=code{2}",
+                    ClientKey, uriEncoded, state, GetScope());
 
             TraceSource.TraceInformation("Amazon redirection uri: {0}.", redirectUri);
 
@@ -134,8 +127,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
             var restRequest = new RestRequest("/auth/o2/token", Method.POST);
 
-            restRequest.AddParameter("client_id", _clientId);
-            restRequest.AddParameter("client_secret", _clientSecret);
+            restRequest.AddParameter("client_id", ClientKey);
+            restRequest.AddParameter("client_secret", ClientSecret);
             restRequest.AddParameter("code", authorizationCode);
             restRequest.AddParameter("grant_type", "authorization_code");
             restRequest.AddParameter("redirect_uri", redirectUri);

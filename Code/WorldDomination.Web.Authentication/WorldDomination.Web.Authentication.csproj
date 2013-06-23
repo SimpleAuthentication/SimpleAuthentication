@@ -56,9 +56,9 @@
     <Compile Include="Config\ProviderKey.cs" />
     <Compile Include="Config\ProviderKeyCollection.cs" />
     <Compile Include="Csrf\TokenData.cs" />
-    <Compile Include="CustomProviderParams.cs" />
     <Compile Include="Exceptions\WorldDominationConfigurationException.cs" />
     <Compile Include="MefHelpers.cs" />
+    <Compile Include="ProviderParams.cs" />
     <Compile Include="Providers\BaseOAuth20Provider.cs" />
     <Compile Include="Providers\BaseProvider.cs" />
     <Compile Include="Providers\BaseRestFactoryProvider.cs" />
