@@ -15,10 +15,6 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
     public class AmazonProvider : BaseOAuth20Provider<AccessTokenResult>
     {
         private const string AccessTokenKey = "access_token";
-        
-        protected override string ScopeKey { get { return "&scope="; }}
-        protected override string DefaultScope { get { return "profile"; } }
-        protected override string ScopeSeparator { get { return " "; }}
 
         public AmazonProvider(ProviderParams providerParams) : base(providerParams)
         {
@@ -26,17 +22,19 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
         #region Implementation of IAuthenticationProvider
 
-        public override string Name 
-            {
-                get
-                {
-                    return "Amazon";
-                }
-            }
+        public override string Name
+        {
+            get { return "Amazon"; }
+        }
 
         public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
             get { return new AmazonAuthenticationServiceSettings(); }
+        }
+
+        protected override TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
@@ -67,16 +65,12 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             return new Uri(redirectUri);
         }
 
-        protected override TraceSource TraceSource
-        {
-            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
-        }
-
         #endregion
 
-        #region BaseOAuth20Provider Members
+        #region Implemetation of BaseOAuth20Provider
 
-        protected override string RetrieveAuthorizationCode(NameValueCollection queryStringParameters, string existingState = null)
+        protected override string RetrieveAuthorizationCode(NameValueCollection queryStringParameters,
+                                                            string existingState = null)
         {
             if (queryStringParameters == null)
             {
@@ -112,7 +106,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             return code;
         }
 
-        protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode, Uri redirectUri)
+        protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
+                                                                                       Uri redirectUri)
         {
             if (string.IsNullOrEmpty(authorizationCode))
             {
@@ -229,11 +224,21 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             return new UserInformation
             {
                 Id = response.Data.Profile.CustomerId,
-                    Name = response.Data.Profile.Name,
-                    Email = response.Data.Profile.PrimaryEmail
+                Name = response.Data.Profile.Name,
+                Email = response.Data.Profile.PrimaryEmail
             };
         }
 
         #endregion
+
+        protected override string DefaultScope
+        {
+            get { return "profile"; }
+        }
+
+        protected override string ScopeSeparator
+        {
+            get { return " "; }
+        }
     }
 }

@@ -81,6 +81,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://www.starwars.com"));
                 var githubProvider = new GitHubProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                                      {
                                          RestClientFactory = new RestClientFactory(mockRestClient.Object)
@@ -104,7 +106,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Failed to obtain an Access Token from GitHub OR the the response was not an HTTP Status 200 OK. Response Status: BadRequest. Response Description: Bad Request",
+                    "Failed to obtain an Access Token from GitHub OR the the response was not an HTTP Status 200 OK. Response Status: BadRequest. Response Description: Bad Request. Error Content: {\n  \"error\" : \"invalid_request\"\n}. Error Message: --no error exception--.",
                     result.Message);
             }
 
@@ -117,6 +119,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                     "If God says he was not created by a creator, does that mean: god is an aetheist?";
                 mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                               .Throws(new InvalidOperationException(errorMessage));
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://www.starwars.com"));
                 var githubProvider = new GitHubProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                                      {
                                          RestClientFactory = new RestClientFactory(mockRestClient.Object)
@@ -139,7 +143,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("Failed to obtain an Access Token from GitHub.", result.Message);
+                Assert.Equal("Failed to retrieve an Access Token from GitHub.", result.Message);
                 Assert.NotNull(result.InnerException);
                 Assert.Equal(errorMessage, result.InnerException.Message);
             }
@@ -178,7 +182,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Failed to obtain an Access Token from GitHub OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
+                    "Failed to retrieve an Access Token from GitHub.",
                     result.Message);
             }
 
@@ -187,6 +191,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
             {
                 // Arrange.
                 var mockRestClient = new Mock<IRestClient>();
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://www.starwars.com"));
                 var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult());
@@ -216,7 +222,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Retrieved a GitHub Access Token but it doesn't contain one or more of either: access_token or token_type",
+                    "Retrieved a GitHub Access Token but it doesn't contain one or more of either: access_token or token_type.",
                     result.Message);
             }
 
@@ -240,10 +246,11 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-
                 mockRestClient.
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://www.starwars.com"));
 
                 var githubProvider = new GitHubProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                                      {
@@ -292,10 +299,11 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-
                 mockRestClient.
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://www.starwars.com"));
 
                 var githubProvider = new GitHubProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                                      {
@@ -352,10 +360,11 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-
                 mockRestClient.
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://www.starwars.com"));
 
                 var githubProvider = new GitHubProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                                      {

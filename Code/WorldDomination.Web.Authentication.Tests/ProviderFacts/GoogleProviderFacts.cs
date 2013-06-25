@@ -444,7 +444,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "https://accounts.google.com/o/oauth2/auth?client_id=aa&redirect_uri=http://2p1s.com/&response_type=code&state=bleh&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email",
+                    "https://accounts.google.com/o/oauth2/auth?client_id=aa&redirect_uri=http://2p1s.com/&response_type=code&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email&state=bleh",
                     result.AbsoluteUri);
             }
         }

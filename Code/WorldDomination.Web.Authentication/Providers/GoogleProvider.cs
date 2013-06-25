@@ -14,16 +14,7 @@ namespace WorldDomination.Web.Authentication.Providers
     {
         private const string AccessTokenKey = "access_token";
         private const string ExpiresInKey = "expires_in";
-        private const string TokenTypeKey = "token_type";
-        
-        //No idea why Google has such a long shit scope...
-        protected override string DefaultScope
-        {
-            get
-            {
-                return "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email";
-            }
-        }
+       private const string TokenTypeKey = "token_type";
 
         public GoogleProvider(ProviderParams providerParams) : base(providerParams)
         {
@@ -58,8 +49,6 @@ namespace WorldDomination.Web.Authentication.Providers
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
 
-            var scope = GetScope();
-
             var state = string.IsNullOrEmpty(authenticationServiceSettings.State)
                             ? string.Empty
                             : "&state=" + authenticationServiceSettings.State;
@@ -67,7 +56,7 @@ namespace WorldDomination.Web.Authentication.Providers
             var redirectUri =
                 string.Format(
                     "https://accounts.google.com/o/oauth2/auth?client_id={0}&redirect_uri={1}&response_type=code{2}{3}",
-                    ClientKey, authenticationServiceSettings.CallBackUri.AbsoluteUri, state, scope);
+                    ClientKey, authenticationServiceSettings.CallBackUri.AbsoluteUri, GetScope(), state);
 
             TraceSource.TraceInformation("Google redirection uri: {0}.", redirectUri);
             return new Uri(redirectUri);
@@ -75,7 +64,7 @@ namespace WorldDomination.Web.Authentication.Providers
 
         #endregion
 
-        #region BaseOAuth20Provider Members
+        #region Implementation of BaseOAuth20Provider
 
         protected override string RetrieveAuthorizationCode(NameValueCollection queryStringParameters,
                                                             string existingState = null)
@@ -247,5 +236,10 @@ namespace WorldDomination.Web.Authentication.Providers
         }
 
         #endregion
+
+        protected override string DefaultScope
+        {
+            get { return "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"; }
+        }
     }
 }

@@ -5,26 +5,73 @@ using System.Net;
 using RestSharp;
 using WorldDomination.Web.Authentication.ExtraProviders.GitHub;
 using WorldDomination.Web.Authentication.Providers;
+using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication.ExtraProviders
 {
-    public class GitHubProvider : BaseRestFactoryProvider, IAuthenticationProvider
+    public class GitHubProvider : BaseOAuth20Provider<AccessTokenResult>
     {
         private const string AccessTokenKey = "access_token";
         private const string TokenTypeKey = "token_type";
-        private readonly string _clientId;
-        private readonly string _clientSecret;
-        private IAuthenticationServiceSettings _defaultAuthenticationServiceSettings;
 
-        public GitHubProvider(ProviderParams providerParams)
+        public GitHubProvider(ProviderParams providerParams) : base(providerParams)
         {
-            providerParams.Validate();
-
-            _clientId = providerParams.Key;
-            _clientSecret = providerParams.Secret;
         }
 
-        private static string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState = null)
+        #region Implementation of IAuthenticationProvider
+
+        public override string Name
+        {
+            get { return "GitHub"; }
+        }
+
+        public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
+        {
+            get { return new GitHubAuthenticationServiceSettings(); }
+        }
+
+        protected override TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
+        }
+
+        public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
+        {
+            if (authenticationServiceSettings == null)
+            {
+                throw new ArgumentNullException("authenticationServiceSettings");
+            }
+
+            if (authenticationServiceSettings.CallBackUri == null)
+            {
+                throw new ArgumentException("authenticationServiceSettings.CallBackUri");
+            }
+
+            var state = string.IsNullOrEmpty(authenticationServiceSettings.State)
+                            ? string.Empty
+                            : "&state=" + authenticationServiceSettings.State;
+
+            var oauthDialogUri =
+                string.Format(
+                    "https://github.com/login/oauth/authorize?client_id={0}{1}&redirect_uri={2}&response_type=code{3}",
+                    ClientKey, GetScope(), authenticationServiceSettings.CallBackUri.AbsoluteUri, state);
+
+            var redirectUri = new Uri(oauthDialogUri);
+            TraceSource.TraceInformation("GitHub redirection uri: {0}.", redirectUri);
+
+            return redirectUri;
+        }
+
+        #endregion
+
+        #region Implementation of BaseOAuth20Provider
+
+        protected override string DefaultScope
+        {
+            get { return "user:email"; }
+        }
+
+        protected override string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState = null)
         {
             if (parameters == null)
             {
@@ -59,7 +106,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             return code;
         }
 
-        private AccessTokenResult RetrieveAccessToken(string authorizationCode, Uri redirectUri)
+        protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
+                                                                                       Uri redirectUri)
         {
             if (string.IsNullOrEmpty(authorizationCode))
             {
@@ -72,52 +120,55 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
                 throw new ArgumentNullException("redirectUri");
             }
 
-            IRestResponse<AccessTokenResult> response;
+            var restRequest = new RestRequest("/login/oauth/access_token", Method.POST);
+            restRequest.AddParameter("client_id", ClientKey);
+            restRequest.AddParameter("client_secret", ClientSecret);
+            restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
+            restRequest.AddParameter("code", authorizationCode);
+            restRequest.AddParameter("grant_type", "authorization_code");
 
-            try
-            {
-                var request = new RestRequest("/login/oauth/access_token", Method.POST);
-                request.AddParameter("client_id", _clientId);
-                request.AddParameter("client_secret", _clientSecret);
-                request.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
-                request.AddParameter("code", authorizationCode);
-                request.AddParameter("grant_type", "authorization_code");
-                var restClient = RestClientFactory.CreateRestClient("https://github.com");
-                response = restClient.Execute<AccessTokenResult>(request);
-            }
-            catch (Exception exception)
-            {
-                throw new AuthenticationException("Failed to obtain an Access Token from GitHub.", exception);
-            }
+            var restClient = RestClientFactory.CreateRestClient("https://github.com");
+            TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
+                                     restClient.BuildUri(restRequest).AbsoluteUri);
 
-            if (response == null ||
-                response.StatusCode != HttpStatusCode.OK)
-            {
-                throw new AuthenticationException(
-                    string.Format(
-                        "Failed to obtain an Access Token from GitHub OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
-                        response == null ? "-- null response --" : response.StatusCode.ToString(),
-                        response == null ? string.Empty : response.StatusDescription));
-            }
-
-            // Grab the params which should have the request token info.
-            if (string.IsNullOrEmpty(response.Data.AccessToken) ||
-                string.IsNullOrEmpty(response.Data.TokenType))
-            {
-                throw new AuthenticationException(
-                    string.Format(
-                        "Retrieved a GitHub Access Token but it doesn't contain one or more of either: {0} or {1}",
-                        AccessTokenKey, TokenTypeKey));
-            }
-
-            return response.Data;
+            return restClient.Execute<AccessTokenResult>(restRequest);
         }
 
-        private UserInfoResult RetrieveUserInfo(string accessToken)
+        protected override AccessToken MapAccessTokenResultToAccessToken(AccessTokenResult accessTokenResult)
         {
-            if (string.IsNullOrEmpty(accessToken))
+            if (accessTokenResult == null)
+            {
+                throw new ArgumentNullException("accessTokenResult");
+            }
+
+            if (string.IsNullOrEmpty(accessTokenResult.AccessToken) ||
+                string.IsNullOrEmpty(accessTokenResult.TokenType))
+            {
+                var errorMessage =
+                    string.Format(
+                        "Retrieved a GitHub Access Token but it doesn't contain one or more of either: {0} or {1}.",
+                        AccessTokenKey, TokenTypeKey);
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            return new AccessToken
+            {
+                PublicToken = accessTokenResult.AccessToken
+                //ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn)
+            };
+        }
+
+        protected override UserInformation RetrieveUserInformation(AccessToken accessToken)
+        {
+            if (accessToken == null)
             {
                 throw new ArgumentNullException("accessToken");
+            }
+
+            if (string.IsNullOrEmpty(accessToken.PublicToken))
+            {
+                throw new ArgumentException("accessToken.PublicToken");
             }
 
             IRestResponse<UserInfoResult> response;
@@ -125,7 +176,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             try
             {
                 var request = new RestRequest("/user", Method.GET);
-                request.AddParameter(AccessTokenKey, accessToken);
+                request.AddParameter(AccessTokenKey, accessToken.PublicToken);
 
                 var restClient = RestClientFactory.CreateRestClient("https://api.github.com");
                 response = restClient.Execute<UserInfoResult>(request);
@@ -154,85 +205,14 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
                     "Retrieve some user info from the GitHub Api, but we're missing one or more of either: Id, Login, and Name.");
             }
 
-            return response.Data;
-        }
-
-        #region Implementation of IAuthenticationProvider
-
-        public string Name
-        {
-            get { return "GitHub"; }
-        }
-
-        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
-        {
-            get { return _defaultAuthenticationServiceSettings ??
-                (_defaultAuthenticationServiceSettings = new GitHubAuthenticationServiceSettings()); }
-        }
-
-        public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
-        {
-            if (authenticationServiceSettings == null)
+            return new UserInformation
             {
-                throw new ArgumentNullException("authenticationServiceSettings");
-            }
-
-            if (authenticationServiceSettings.CallBackUri == null)
-            {
-                throw new ArgumentException("authenticationServiceSettings.CallBackUri");
-            }
-
-            var state = string.IsNullOrEmpty(authenticationServiceSettings.State)
-                            ? string.Empty
-                            : "&state=" + authenticationServiceSettings.State;
-
-            var oauthDialogUri =
-                string.Format(
-                    "https://github.com/login/oauth/authorize?client_id={0}&scope={1}&redirect_uri={2}&response_type=code{3}",
-                    _clientId, 
-                    ((GitHubAuthenticationServiceSettings)DefaultAuthenticationServiceSettings).Scope,
-                    authenticationServiceSettings.CallBackUri.AbsoluteUri, state);
-
-            return new Uri(oauthDialogUri);
-        }
-
-        public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
-                                                       NameValueCollection queryStringParameters)
-        {
-            if (authenticationServiceSettings == null)
-            {
-                throw new ArgumentNullException("authenticationServiceSettings");
-            }
-
-            // First up - an authorization token.
-            var authorizationCode = RetrieveAuthorizationCode(queryStringParameters, authenticationServiceSettings.State);
-
-            // Get an Access Token.
-            var oAuthAccessToken = RetrieveAccessToken(authorizationCode, authenticationServiceSettings.CallBackUri);
-
-            // Grab the user information.
-            var userInfo = RetrieveUserInfo(oAuthAccessToken.AccessToken);
-
-            return new AuthenticatedClient(Name.ToLowerInvariant())
-                   {
-                       AccessToken = new AccessToken
-                       {
-                           PublicToken = oAuthAccessToken.AccessToken
-                       },
-                       UserInformation = new UserInformation
-                                         {
-                                             Id = userInfo.Id.ToString(),
-                                             Name = userInfo.Name,
-                                             Email = userInfo.Email ?? "",
-                                             Picture = userInfo.AvatarUrl,
-                                             UserName = userInfo.Login,
-                                         }
-                   };
-        }
-
-        protected override TraceSource TraceSource
-        {
-            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
+                Id = response.Data.Id.ToString(),
+                Name = response.Data.Name,
+                Email = response.Data.Email ?? "",
+                Picture = response.Data.AvatarUrl,
+                UserName = response.Data.Login
+            };
         }
 
         #endregion
