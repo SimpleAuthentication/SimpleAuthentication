@@ -212,7 +212,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Arrange.
                 var mockRestResponse = new Mock<IRestResponse<AccessTokenResult>>();
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
-                mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult {AccessToken = "foo"});
+                mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult { access_token = "foo" });
 
                 var mockRestClient = new Mock<IRestClient>();
                 mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
@@ -259,8 +259,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
                 {
-                    AccessToken = "foo",
-                    ExpiresIn = 1000
+                    access_token = "foo",
+                    expires = 1000
                 });
 
                 var mockRestClient = new Mock<IRestClient>();
@@ -305,8 +305,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestResponse.Setup(x => x.StatusCode).Returns(HttpStatusCode.OK);
                 mockRestResponse.Setup(x => x.Data).Returns(new AccessTokenResult
                 {
-                    AccessToken = "foo",
-                    ExpiresIn = 1000
+                    access_token = "foo",
+                    expires = 1000
                 });
 
                 var mockRestResponseApiMe = new Mock<IRestResponse<MeResult>>();
@@ -358,8 +358,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestResponseAccessToken.Setup(x => x.Data).Returns(
                     new AccessTokenResult
                 {
-                    AccessToken = "foo",
-                    ExpiresIn = 1000
+                    access_token = "foo",
+                    expires = 1000
                 });
 
                 var meResult = new MeResult

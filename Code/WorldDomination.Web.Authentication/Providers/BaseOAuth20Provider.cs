@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using RestSharp;
 using WorldDomination.Web.Authentication.Tracing;
@@ -10,36 +12,41 @@ namespace WorldDomination.Web.Authentication.Providers
     public abstract class BaseOAuth20Provider<TAccessTokenResult>
         : BaseRestFactoryProvider, IAuthenticationProvider where TAccessTokenResult : class, new()
     {
-        #region IAuthenticationProvider Members
-
-        public abstract string Name { get; }
-        public abstract IAuthenticationServiceSettings DefaultAuthenticationServiceSettings { get; }
-        public abstract Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings);
-
-        protected abstract string DefaultScope { get; }
-        protected abstract string ScopeSeparator { get; }
-        protected abstract string ScopeKey { get; }
-
-        protected string Scope { get; set; }
-        protected string ClientKey { get; set; }
-        protected string ClientSecret { get; set; }
-
         protected BaseOAuth20Provider(ProviderParams providerParams)
         {
             providerParams.Validate();
 
             ClientKey = providerParams.Key;
             ClientSecret = providerParams.Secret;
-
-            //Set the scope to default to avoid an else statement
-            Scope = DefaultScope;
-
-            //If a scope was defined, get the scopes and join them based on the provider specific separator. 
-            if (providerParams.GetScopes().Length > 0)
-            {
-                Scope = string.Join(ScopeSeparator, providerParams.GetScopes());
-            }
+            Scope = providerParams.Scope;
         }
+
+        protected abstract string DefaultScope { get; }
+
+        protected virtual string ScopeSeparator
+        {
+            get { return " "; }
+        }
+
+        protected virtual string ScopeKey
+        {
+            get { return "scope"; }
+        }
+
+        protected ICollection<string> Scope { get; set; }
+        protected string ClientKey { get; set; }
+        protected string ClientSecret { get; set; }
+
+        #region IAuthenticationProvider Members
+
+        protected override TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
+        }
+
+        public abstract string Name { get; }
+        public abstract IAuthenticationServiceSettings DefaultAuthenticationServiceSettings { get; }
+        public abstract Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings);
 
         public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
                                                        NameValueCollection queryStringParameters)
@@ -87,11 +94,6 @@ namespace WorldDomination.Web.Authentication.Providers
 
         #endregion
 
-        protected override TraceSource TraceSource
-        {
-            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
-        }
-
         protected abstract string RetrieveAuthorizationCode(NameValueCollection queryStringParameters,
                                                             string existingState = null);
 
@@ -130,7 +132,8 @@ namespace WorldDomination.Web.Authentication.Providers
             }
 
             if (response == null ||
-                response.StatusCode != HttpStatusCode.OK)
+                response.StatusCode != HttpStatusCode.OK ||
+                response.ErrorException != null)
             {
                 var errorMessage = string.Format(
                     "Failed to obtain an Access Token from {0} OR the the response was not an HTTP Status 200 OK. Response Status: {1}. Response Description: {2}. Error Content: {3}. Error Message: {4}.",
@@ -153,14 +156,13 @@ namespace WorldDomination.Web.Authentication.Providers
 
         protected abstract UserInformation RetrieveUserInformation(AccessToken accessToken);
 
-        public string GetScope()
+        protected string GetScope()
         {
-            if (string.IsNullOrWhiteSpace(Scope))
-            {
-                return string.Empty;
-            }
-
-            return ScopeKey + Scope;
+            return string.Format("&{0}={1}",
+                                 ScopeKey,
+                                 Scope == null || !Scope.Any()
+                                     ? DefaultScope
+                                     : String.Join(ScopeSeparator, Scope));
         }
     }
 }

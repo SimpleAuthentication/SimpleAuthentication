@@ -269,7 +269,9 @@ namespace WorldDomination.Web.Authentication
                 {
                     Key = providerKey.Key,
                     Secret = providerKey.Secret,
-                    Scope = providerKey.Scope
+                    Scope = string.IsNullOrEmpty(providerKey.Scope)
+                                ? null
+                                : providerKey.Scope.Split(new [] {','}, StringSplitOptions.RemoveEmptyEntries)
                 };
                 authenticationProvider = Activator.CreateInstance(provider, parameters) as IAuthenticationProvider;
             }

@@ -5,6 +5,8 @@
         public FacebookAuthenticationServiceSettings(bool isFakeProvider = false) 
             : base(isFakeProvider ? "FakeFacebook" : "Facebook")
         {
+            Display = DisplayType.Unknown;
+            IsMobile = false;
         }
 
         public bool IsMobile { get; set; }

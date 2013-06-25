@@ -21,9 +21,7 @@ namespace WorldDomination.Web.Authentication.Providers
 
         private const string AccessTokenKey = "access_token";
         
-        protected override string ScopeKey { get { return "&scope="; }}
         protected override string DefaultScope { get { return "wl.signin wl.basic wl.emails"; } }
-        protected override string ScopeSeparator { get { return " "; }}
 
         public WindowsLiveProvider(ProviderParams providerParams) : base(providerParams)
         {

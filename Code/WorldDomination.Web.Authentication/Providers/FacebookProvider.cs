@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Net;
+using System.Text;
 using RestSharp;
+using RestSharp.Contrib;
+using RestSharp.Deserializers;
 using WorldDomination.Web.Authentication.Providers.Facebook;
 using WorldDomination.Web.Authentication.Tracing;
 
@@ -13,11 +16,7 @@ namespace WorldDomination.Web.Authentication.Providers
     {
         private const string BaseUrl = "https://graph.facebook.com";
 
-        protected override string ScopeKey { get { return "&scope="; }}
-        protected override string DefaultScope { get { return "email"; } }
-        protected override string ScopeSeparator { get { return ","; }}
-
-        public FacebookProvider(ProviderParams providerParams) : base (providerParams)
+        public FacebookProvider(ProviderParams providerParams) : base(providerParams)
         {
         }
 
@@ -30,14 +29,7 @@ namespace WorldDomination.Web.Authentication.Providers
 
         public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
-            get
-            {
-                return new FacebookAuthenticationServiceSettings
-                {
-                    Display = DisplayType.Unknown,
-                    IsMobile = false
-                };
-            }
+            get { return new FacebookAuthenticationServiceSettings(); }
         }
 
         public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
@@ -125,7 +117,8 @@ namespace WorldDomination.Web.Authentication.Providers
             return code;
         }
 
-        protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode, Uri redirectUri)
+        protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
+                                                                                       Uri redirectUri)
         {
             if (string.IsNullOrEmpty(authorizationCode))
             {
@@ -143,12 +136,42 @@ namespace WorldDomination.Web.Authentication.Providers
             restRequest.AddParameter("client_secret", ClientSecret);
             restRequest.AddParameter("code", authorizationCode);
             restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
+            restRequest.AddHeader("Content-Type", "application/json");
+            restRequest.AddParameter("format", "json");
 
             var restClient = RestClientFactory.CreateRestClient(BaseUrl);
             TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
                                      restClient.BuildUri(restRequest).AbsoluteUri);
+            
+            // Really really sad hack. Facebook send back all their data as Json except
+            // this f'ing endpoint. As such, we'll fuck with things here.
+            // We'll manually create the data - if possible.
+            // How - we will try and recreate the content result.
+            restRequest.OnBeforeDeserialization = response =>
+            {
+                // Grab the content and convert it into json.
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    // Something is wrong - so just leave. This is handled elsewhere.
+                    return;
+                }
+
+                // Lets do this!
+                var querystringData = HttpUtility.ParseQueryString(response.Content);
+                var json = new StringBuilder("{"); // Start.
+                foreach (var key in querystringData.AllKeys)
+                {
+                    json.AppendFormat("\"{0}\":\"{1}\"",
+                                      key, querystringData[key]);
+                }
+                json.Append("}"); // End.
+                response.Content = json.ToString();
+                response.ContentType = "text/json";
+                int i = 0;
+            };
 
             return restClient.Execute<AccessTokenResult>(restRequest);
+            
         }
 
         protected override AccessToken MapAccessTokenResultToAccessToken(AccessTokenResult accessTokenResult)
@@ -158,16 +181,16 @@ namespace WorldDomination.Web.Authentication.Providers
                 throw new ArgumentNullException("accessTokenResult");
             }
 
-            if (string.IsNullOrEmpty(accessTokenResult.AccessToken) ||
-                accessTokenResult.ExpiresIn <= 0)
+            if (string.IsNullOrEmpty(accessTokenResult.access_token) ||
+                accessTokenResult.expires <= 0)
             {
                 var errorMessage =
                     string.Format(
                         "Retrieved a Facebook Access Token but there's an error with either the access_token and/or expires_on parameters. Access Token: {0}. Expires In: {1}.",
-                        string.IsNullOrEmpty(accessTokenResult.AccessToken)
+                        string.IsNullOrEmpty(accessTokenResult.access_token)
                             ? "-no access token-"
-                            : accessTokenResult.AccessToken,
-                        accessTokenResult.ExpiresIn.ToString());
+                            : accessTokenResult.access_token,
+                        accessTokenResult.expires.ToString());
 
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
@@ -175,8 +198,8 @@ namespace WorldDomination.Web.Authentication.Providers
 
             return new AccessToken
             {
-                PublicToken = accessTokenResult.AccessToken,
-                ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn)
+                PublicToken = accessTokenResult.access_token,
+                ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.expires)
             };
         }
 
@@ -253,5 +276,15 @@ namespace WorldDomination.Web.Authentication.Providers
         }
 
         #endregion
+
+        protected override string DefaultScope
+        {
+            get { return "email"; }
+        }
+
+        protected override string ScopeSeparator
+        {
+            get { return " "; }
+        }
     }
 }

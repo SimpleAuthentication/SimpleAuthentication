@@ -16,8 +16,6 @@ namespace WorldDomination.Web.Authentication.Providers
         private const string ExpiresInKey = "expires_in";
         private const string TokenTypeKey = "token_type";
         
-        protected override string ScopeKey { get { return "&scope="; } }
-
         //No idea why Google has such a long shit scope...
         protected override string DefaultScope
         {
@@ -26,8 +24,6 @@ namespace WorldDomination.Web.Authentication.Providers
                 return "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email";
             }
         }
-
-        protected override string ScopeSeparator { get { return " "; } }
 
         public GoogleProvider(ProviderParams providerParams) : base(providerParams)
         {
