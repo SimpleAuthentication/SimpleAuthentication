@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Net;
@@ -231,9 +232,9 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
         #endregion
 
-        protected override string DefaultScope
+        protected override IEnumerable<string> DefaultScope
         {
-            get { return "profile"; }
+            get { return new [] {"profile"}; }
         }
 
         protected override string ScopeSeparator

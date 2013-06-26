@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Net;
@@ -237,9 +238,12 @@ namespace WorldDomination.Web.Authentication.Providers
 
         #endregion
 
-        protected override string DefaultScope
+        protected override IEnumerable<string> DefaultScope
         {
-            get { return "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"; }
+            get
+            {
+                return new[] {"https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"};
+            }
         }
     }
 }

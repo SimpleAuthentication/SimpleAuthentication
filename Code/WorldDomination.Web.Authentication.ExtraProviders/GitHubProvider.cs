@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Net;
@@ -66,11 +67,11 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
         #region Implementation of BaseOAuth20Provider
 
-        protected override string DefaultScope
+        protected override IEnumerable<string> DefaultScope
         {
-            get { return "user:email"; }
+            get { return new[] {"user:email"}; }
         }
-
+    
         protected override string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState = null)
         {
             if (parameters == null)

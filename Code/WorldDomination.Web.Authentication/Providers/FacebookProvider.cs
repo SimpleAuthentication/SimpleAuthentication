@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using System.Text;
@@ -167,7 +168,6 @@ namespace WorldDomination.Web.Authentication.Providers
                 json.Append("}"); // End.
                 response.Content = json.ToString();
                 response.ContentType = "text/json";
-                int i = 0;
             };
 
             return restClient.Execute<AccessTokenResult>(restRequest);
@@ -277,9 +277,9 @@ namespace WorldDomination.Web.Authentication.Providers
 
         #endregion
 
-        protected override string DefaultScope
+        protected override IEnumerable<string> DefaultScope
         {
-            get { return "email"; }
+            get { return new [] {"email"}; }
         }
 
         protected override string ScopeSeparator

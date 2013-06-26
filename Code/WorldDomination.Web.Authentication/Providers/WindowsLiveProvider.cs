@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Net;
@@ -20,8 +21,11 @@ namespace WorldDomination.Web.Authentication.Providers
             "https://login.live.com/oauth20_authorize.srf?client_id={0}{2}&response_type=code&redirect_uri={1}";
 
         private const string AccessTokenKey = "access_token";
-        
-        protected override string DefaultScope { get { return "wl.signin wl.basic wl.emails"; } }
+
+        protected override IEnumerable<string> DefaultScope
+        {
+            get { return new[] {"wl.signin", "wl.basic", "wl.emails"}; }
+        }
 
         public WindowsLiveProvider(ProviderParams providerParams) : base(providerParams)
         {

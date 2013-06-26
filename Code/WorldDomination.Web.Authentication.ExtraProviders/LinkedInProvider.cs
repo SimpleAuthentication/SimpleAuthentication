@@ -6,123 +6,19 @@ using System.Net;
 using RestSharp;
 using WorldDomination.Web.Authentication.Providers;
 using WorldDomination.Web.Authentication.ExtraProviders.LinkedIn;
+using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication.ExtraProviders
 {
     // REFERENCE: https://developers.LinkedIn.com/accounts/docs/OAuth2Login
 
-    public class LinkedInProvider : BaseRestFactoryProvider, IAuthenticationProvider
+    public class LinkedInProvider : BaseOAuth20Provider<AccessTokenResult>
     {
-        private const string ScopeKey = "&scope={0}";
         private const string AccessTokenKey = "oauth2_access_token";
         private const string ExpiresInKey = "expires_in";
-        private const string TokenTypeKey = "token_type";
 
-        private readonly string _clientId;
-        private readonly string _clientSecret;
-        private readonly IList<string> _scope;
-
-        public LinkedInProvider(ProviderParams providerParams)
-        {
-            providerParams.Validate();
-
-            _clientId = providerParams.Key;
-            _clientSecret = providerParams.Secret;
-
-            // Optionals.
-            _scope = new List<string>()
-            {
-                "r_basicprofile", "r_emailaddress"
-            };
-        }
-
-        private static string RetrieveAuthorizationCode(NameValueCollection queryStringParameters, string existingState = null)
-        {
-            if (queryStringParameters == null)
-            {
-                throw new ArgumentNullException("queryStringParameters");
-            }
-
-            if (queryStringParameters.Count <= 0)
-            {
-                throw new ArgumentOutOfRangeException("queryStringParameters");
-            }
-
-            /* Documentation:
-               LinkedIn returns an authorization code to your application if the user grants your application the permissions it requested. 
-               The authorization code is returned to your application in the query string parameter code. If the state parameter was included in the request,
-               then it is also included in the response. */
-            var code = queryStringParameters["code"];
-            var error = queryStringParameters["error"];
-
-            // First check for any errors.
-            if (!string.IsNullOrEmpty(error))
-            {
-                throw new AuthenticationException(
-                    "Failed to retrieve an authorization code from LinkedIn. The error provided is: " + error);
-            }
-
-            // Otherwise, we need a code.
-            if (string.IsNullOrEmpty(code))
-            {
-                throw new AuthenticationException("No code parameter provided in the response query string from LinkedIn.");
-            }
-
-            return code;
-        }
-
-        private AccessTokenResult RetrieveAccessToken(string authorizationCode, Uri redirectUri)
-        {
-            if (string.IsNullOrEmpty(authorizationCode))
-            {
-                throw new ArgumentNullException("authorizationCode");
-            }
-
-            if (redirectUri == null ||
-                string.IsNullOrEmpty(redirectUri.AbsoluteUri))
-            {
-                throw new ArgumentNullException("redirectUri");
-            }
-
-            IRestResponse<AccessTokenResult> response;
-
-            try
-            {
-                var request = new RestRequest("/uas/oauth2/accessToken", Method.POST);
-                request.AddParameter("client_id", _clientId);
-                request.AddParameter("client_secret", _clientSecret);
-                request.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
-                request.AddParameter("code", authorizationCode);
-                request.AddParameter("grant_type", "authorization_code");
-                var restClient = RestClientFactory.CreateRestClient("https://www.linkedin.com");
-                response = restClient.Execute<AccessTokenResult>(request);
-            }
-            catch (Exception exception)
-            {
-                throw new AuthenticationException("Failed to obtain an Access Token from LinkedIn. The connection to LinkedIn failed for some reason. Can you access LinkedIn manually via a browser?", exception);
-            }
-
-            if (response == null ||
-                response.StatusCode != HttpStatusCode.OK)
-            {
-                throw new AuthenticationException(
-                    string.Format(
-                        "Failed to obtain an Access Token from LinkedIn OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
-                        response == null ? "-- null response --" : response.StatusCode.ToString(),
-                        response == null ? string.Empty : response.StatusDescription));
-            }
-
-            // Grab the params which should have the request token info.
-            if (string.IsNullOrEmpty(response.Data.AccessToken) ||
-                response.Data.ExpiresIn <= 0)
-            {
-                throw new AuthenticationException(
-                    string.Format("Retrieved a LinkedIn Access Token but it doesn't contain one or more of either: {0} or {1} or the {1} value [{2}] needs to be greater than 0.",
-                    AccessTokenKey, ExpiresInKey, response.Data.ExpiresIn));
-            }
-
-            return response.Data;
-        }
+        public LinkedInProvider(ProviderParams providerParams) : base(providerParams)
+        {}
 
         private UserInfoResult RetrieveUserInfo(string accessToken)
         {
@@ -167,12 +63,22 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
         #region Implementation of IAuthenticationProvider
 
-        public string Name
+        public override string Name
         {
             get { return "LinkedIn"; }
         }
 
-        public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
+        public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
+        {
+            get { return new LinkedInAuthenticationServiceSettings(); }
+        }
+
+        protected override TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
+        }
+
+        public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
             if (authenticationServiceSettings == null)
             {
@@ -184,12 +90,6 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
 
-            // Do we have any scope options?
-            // NOTE: LinkedIn uses a space-delimeted string for their scope key.
-            var scope = (_scope != null && _scope.Count > 0)
-                            ? string.Format(ScopeKey, string.Join("%20", _scope))
-                            : string.Empty;
-
             var state = string.IsNullOrEmpty(authenticationServiceSettings.State)
                             ? string.Empty
                             : "&state=" + authenticationServiceSettings.State;
@@ -197,52 +97,186 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             var oauthDialogUri =
                 string.Format(
                     "https://www.linkedin.com/uas/oauth2/authorization?response_type=code&client_id={0}&redirect_uri={1}{2}{3}",
-                    _clientId, authenticationServiceSettings.CallBackUri.AbsoluteUri, state, scope);
+                    ClientKey, authenticationServiceSettings.CallBackUri.AbsoluteUri, GetScope(), state);
 
             return new Uri(oauthDialogUri);
         }
 
-        public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
-                                                       NameValueCollection queryStringParameters)
+        #endregion
+
+        #region Implementation of BaseOAuth20Provider
+
+        protected override IEnumerable<string> DefaultScope
         {
-            if (authenticationServiceSettings == null)
+            get { return new[] {"r_basicprofile", "r_emailaddress"}; }
+        }
+
+        protected override string RetrieveAuthorizationCode(NameValueCollection queryStringParameters,
+                                                            string existingState = null)
+        {
+            if (queryStringParameters == null)
             {
-                throw new ArgumentNullException("authenticationServiceSettings");
+                throw new ArgumentNullException("queryStringParameters");
             }
 
-            // First up - an authorization token.
-            var authorizationCode = RetrieveAuthorizationCode(queryStringParameters, authenticationServiceSettings.State);
-
-            // Get an Access Token.
-            var oAuthAccessToken = RetrieveAccessToken(authorizationCode, authenticationServiceSettings.CallBackUri);
-
-            // Grab the user information.
-            var userInfo = RetrieveUserInfo(oAuthAccessToken.AccessToken);
-
-            
-            return new AuthenticatedClient(Name.ToLowerInvariant())
+            if (queryStringParameters.Count <= 0)
             {
-                AccessToken = new AccessToken
-                {
-                    PublicToken = oAuthAccessToken.AccessToken
-                },
-                UserInformation = new UserInformation
-                {
-                    Id = userInfo.Id,
-                    Name = userInfo.FirstName + " " + userInfo.LastName,
-                    Email = userInfo.EmailAddress,
-                }
+                throw new ArgumentOutOfRangeException("queryStringParameters");
+            }
+
+            /* Documentation:
+               LinkedIn returns an authorization code to your application if the user grants your application the permissions it requested. 
+               The authorization code is returned to your application in the query string parameter code. If the state parameter was included in the request,
+               then it is also included in the response. */
+            var code = queryStringParameters["code"];
+            var error = queryStringParameters["error"];
+
+            // First check for any errors.
+            if (!string.IsNullOrEmpty(error))
+            {
+                var errorMessage = "Failed to retrieve an authorization code from LinkedIn. The error provided is: " +
+                                   error;
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            // Otherwise, we need a code.
+            if (string.IsNullOrEmpty(code))
+            {
+                const string errorMessage = "No code parameter provided in the response query string from LinkedIn.";
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            return code;
+        }
+
+        protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
+                                                                                       Uri redirectUri)
+        {
+            if (string.IsNullOrEmpty(authorizationCode))
+            {
+                throw new ArgumentNullException("authorizationCode");
+            }
+
+            if (redirectUri == null ||
+                string.IsNullOrEmpty(redirectUri.AbsoluteUri))
+            {
+                throw new ArgumentNullException("redirectUri");
+            }
+
+            var restRequest = new RestRequest("/uas/oauth2/accessToken", Method.POST);
+            restRequest.AddParameter("client_id", ClientKey);
+            restRequest.AddParameter("client_secret", ClientSecret);
+            restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
+            restRequest.AddParameter("code", authorizationCode);
+            restRequest.AddParameter("grant_type", "authorization_code");
+
+            var restClient = RestClientFactory.CreateRestClient("https://www.linkedin.com");
+
+            TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
+                                     restClient.BuildUri(restRequest).AbsoluteUri);
+
+            return restClient.Execute<AccessTokenResult>(restRequest);
+        }
+
+        protected override AccessToken MapAccessTokenResultToAccessToken(AccessTokenResult accessTokenResult)
+        {
+            if (accessTokenResult == null)
+            {
+                throw new ArgumentNullException("accessTokenResult");
+            }
+
+            if (string.IsNullOrEmpty(accessTokenResult.AccessToken) ||
+                accessTokenResult.ExpiresIn <= 0)
+            {
+                var errorMessage =
+                    string.Format(
+                        "Retrieved a LinkedIn Access Token but it doesn't contain one or more of either: {0} or {1}.",
+                        AccessTokenKey, ExpiresInKey);
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            return new AccessToken
+            {
+                PublicToken = accessTokenResult.AccessToken,
+                ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn)
             };
         }
 
-        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
+        protected override UserInformation RetrieveUserInformation(AccessToken accessToken)
         {
-            get { return new LinkedInAuthenticationServiceSettings(); }
-        }
+            if (accessToken == null)
+            {
+                throw new ArgumentNullException("accessToken");
+            }
 
-        protected override TraceSource TraceSource
-        {
-            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
+            if (string.IsNullOrEmpty(accessToken.PublicToken))
+            {
+                throw new ArgumentException("accessToken.PublicToken");
+            }
+
+            IRestResponse<UserInfoResult> response;
+
+            try
+            {
+                var restRequest = new RestRequest("/v1/people/~:(id,first-name,last-name,email-address)", Method.GET);
+                restRequest.AddParameter(AccessTokenKey, accessToken.PublicToken);
+                var restClient = RestClientFactory.CreateRestClient("https://api.linkedin.com/");
+
+                TraceSource.TraceVerbose("Retrieving user information. LinkedIn Endpoint: {0}",
+                                         restClient.BuildUri(restRequest).AbsoluteUri);
+
+                response = restClient.Execute<UserInfoResult>(restRequest);
+            }
+            catch (Exception exception)
+            {
+                var errorMessage =
+                    string.Format("Failed to retrieve any UserInfo data from the LinkedIn Api. Error Messages: {0}",
+                                  exception.RecursiveErrorMessages());
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage, exception);
+            }
+
+            if (response == null ||
+                response.StatusCode != HttpStatusCode.OK)
+            {
+                var errorMessage = string.Format(
+                    "Failed to obtain some UserInfo data from the LinkedIn Api OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Message: {2}.",
+                    response == null ? "-- null response --" : response.StatusCode.ToString(),
+                    response == null ? string.Empty : response.StatusDescription,
+                    response == null
+                        ? string.Empty
+                        : response.ErrorException == null
+                              ? "--no error exception--"
+                              : response.ErrorException.RecursiveErrorMessages());
+
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            // Lets check to make sure we have some bare minimum data.
+            if (string.IsNullOrEmpty(response.Data.Id))
+            {
+                const string errorMessage =
+                    "We were unable to retrieve the User Id from LinkedIn API, the user may have denied the authorization.";
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            return new UserInformation
+            {
+                Id = response.Data.Id,
+                Name = string.Format("{0}{1}",
+                                     string.IsNullOrEmpty(response.Data.FirstName)
+                                         ? string.Empty
+                                         : response.Data.FirstName + " ",
+                                     string.IsNullOrEmpty(response.Data.LastName)
+                                         ? string.Empty
+                                         : response.Data.LastName).Trim(),
+                Email = response.Data.EmailAddress
+            };
         }
 
         #endregion

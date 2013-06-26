@@ -83,6 +83,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://www.windowsazure.com"));
                 var linkedinProvider = new LinkedInProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                 {
                     RestClientFactory = new RestClientFactory(mockRestClient.Object)
@@ -107,7 +109,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Failed to obtain an Access Token from LinkedIn OR the the response was not an HTTP Status 200 OK. Response Status: BadRequest. Response Description: Bad Request",
+                    "Failed to obtain an Access Token from LinkedIn OR the the response was not an HTTP Status 200 OK. Response Status: BadRequest. Response Description: Bad Request. Error Content: {\n  \"error\" : \"invalid_request\"\n}. Error Message: --no error exception--.",
                     result.Message);
             }
 
@@ -120,6 +122,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                     "If God says he was not created by a creator, does that mean: god is an aetheist?";
                 mockRestClient.Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                               .Throws(new InvalidOperationException(errorMessage));
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://www.windowsazure.com"));
                 var linkedinProvider = new LinkedInProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                 {
                     RestClientFactory = new RestClientFactory(mockRestClient.Object)
@@ -144,7 +148,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Failed to obtain an Access Token from LinkedIn. The connection to LinkedIn failed for some reason. Can you access LinkedIn manually via a browser?",
+                    "Failed to retrieve an Access Token from LinkedIn.",
                     result.Message);
                 Assert.NotNull(result.InnerException);
                 Assert.Equal(errorMessage, result.InnerException.Message);
@@ -161,6 +165,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://www.windowsazure.com"));
                 var linkedinProvider = new LinkedInProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                 {
                     RestClientFactory = new RestClientFactory(mockRestClient.Object)
@@ -185,7 +191,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Failed to obtain an Access Token from LinkedIn OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
+                    "Failed to obtain an Access Token from LinkedIn OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized. Error Content: . Error Message: --no error exception--.",
                     result.Message);
             }
 
@@ -200,6 +206,8 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://www.windowsazure.com"));
                 var linkedinProvider = new LinkedInProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                 {
                     RestClientFactory = new RestClientFactory(mockRestClient.Object)
@@ -224,7 +232,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Retrieved a LinkedIn Access Token but it doesn't contain one or more of either: oauth2_access_token or expires_in or the expires_in value [0] needs to be greater than 0.",
+                    "Retrieved a LinkedIn Access Token but it doesn't contain one or more of either: oauth2_access_token or expires_in.",
                     result.Message);
             }
 
@@ -248,10 +256,11 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-
                 mockRestClient.
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://www.windowsazure.com"));
 
                 var linkedinProvider = new LinkedInProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                 {
@@ -277,7 +286,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "Failed to obtain User Info from LinkedIn OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized",
+                    "Failed to obtain some UserInfo data from the LinkedIn Api OR the the response was not an HTTP Status 200 OK. Response Status: Unauthorized. Response Description: Unauthorized. Error Message: --no error exception--.",
                     result.Message);
             }
 
@@ -301,10 +310,11 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-
                 mockRestClient.
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://www.windowsazure.com"));
 
                 var linkedinProvider = new LinkedInProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                 {
@@ -347,7 +357,6 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                     ExpiresIn = 10
                 };
                 mockRestResponse.Setup(x => x.Data).Returns(accessTokenResult);
-                var expiresIn = DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn);
 
                 var userInfoResult = new UserInfoResult
                 {
@@ -364,10 +373,11 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 mockRestClient
                     .Setup(x => x.Execute<AccessTokenResult>(It.IsAny<IRestRequest>()))
                     .Returns(mockRestResponse.Object);
-
                 mockRestClient.
                     Setup(x => x.Execute<UserInfoResult>(It.IsAny<IRestRequest>()))
                               .Returns(mockRestResponseUserInfo.Object);
+                mockRestClient.Setup(x => x.BuildUri(It.IsAny<IRestRequest>()))
+                              .Returns(new Uri("http://www.windowsazure.com"));
 
                 var linkedinProvider = new LinkedInProvider(new ProviderParams {Key = "aa", Secret = "bb"})
                 {
@@ -395,7 +405,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 Assert.Equal("linkedin", result.ProviderName);
                 Assert.NotNull(result.AccessToken);
                 Assert.Equal(accessToken, result.AccessToken.PublicToken);
-                Assert.Equal(new DateTime(), result.AccessToken.ExpiresOn);
+                Assert.True(DateTime.UtcNow <= result.AccessToken.ExpiresOn);
                 Assert.NotNull(result.UserInformation);
                 Assert.Equal(GenderType.Unknown, result.UserInformation.Gender);
                 Assert.Equal(userInfoResult.Id, result.UserInformation.Id);
@@ -423,7 +433,7 @@ namespace WorldDomination.Web.Authentication.Tests.ProviderFacts
                 // Assert.
                 Assert.NotNull(result);
                 Assert.Equal(
-                    "https://www.linkedin.com/uas/oauth2/authorization?response_type=code&client_id=aa&redirect_uri=http://wwww.pewpew.com/&state=bleh&scope=r_basicprofile%20r_emailaddress",
+                    "https://www.linkedin.com/uas/oauth2/authorization?response_type=code&client_id=aa&redirect_uri=http://wwww.pewpew.com/&scope=r_basicprofile%20r_emailaddress&state=bleh",
                     result.AbsoluteUri);
             }
         }

@@ -21,7 +21,7 @@ namespace WorldDomination.Web.Authentication.Providers
             Scope = providerParams.Scope;
         }
 
-        protected abstract string DefaultScope { get; }
+        protected abstract IEnumerable<string> DefaultScope { get; }
 
         protected virtual string ScopeSeparator
         {
@@ -33,7 +33,7 @@ namespace WorldDomination.Web.Authentication.Providers
             get { return "scope"; }
         }
 
-        protected ICollection<string> Scope { get; set; }
+        protected IEnumerable<string> Scope { get; set; }
         protected string ClientKey { get; set; }
         protected string ClientSecret { get; set; }
 
@@ -160,9 +160,10 @@ namespace WorldDomination.Web.Authentication.Providers
         {
             return string.Format("&{0}={1}",
                                  ScopeKey,
-                                 Scope == null || !Scope.Any()
-                                     ? DefaultScope
-                                     : String.Join(ScopeSeparator, Scope));
+                                 String.Join(ScopeSeparator, Scope == null ||
+                                                             !Scope.Any()
+                                                                 ? DefaultScope
+                                                                 : Scope));
         }
     }
 }
