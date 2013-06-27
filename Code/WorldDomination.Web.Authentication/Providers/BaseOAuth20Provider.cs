@@ -10,32 +10,32 @@ using WorldDomination.Web.Authentication.Tracing;
 namespace WorldDomination.Web.Authentication.Providers
 {
     public abstract class BaseOAuth20Provider<TAccessTokenResult>
-        : BaseRestFactoryProvider, IAuthenticationProvider where TAccessTokenResult : class, new()
+        : BaseRestFactoryProvider, IAuthenticationProvider, IPublicPrivateKeyProvider, IScopedProvider where TAccessTokenResult : class, new()
     {
         protected BaseOAuth20Provider(ProviderParams providerParams)
         {
             providerParams.Validate();
 
-            ClientKey = providerParams.Key;
-            ClientSecret = providerParams.Secret;
-            Scope = providerParams.Scope;
+            Key = providerParams.Key;
+            Secret = providerParams.Secret;
+            Scopes = providerParams.Scopes;
         }
 
-        protected abstract IEnumerable<string> DefaultScope { get; }
+        public abstract IEnumerable<string> DefaultScopes { get; }
 
-        protected virtual string ScopeSeparator
+        public virtual string ScopeSeparator
         {
             get { return " "; }
         }
 
-        protected virtual string ScopeKey
+        public virtual string ScopeKey
         {
             get { return "scope"; }
         }
 
-        protected IEnumerable<string> Scope { get; set; }
-        protected string ClientKey { get; set; }
-        protected string ClientSecret { get; set; }
+        public IEnumerable<string> Scopes { get; set; }
+        public string Key { get; protected set; }
+        public string Secret { get; protected set; }
 
         #region IAuthenticationProvider Members
 
@@ -160,10 +160,10 @@ namespace WorldDomination.Web.Authentication.Providers
         {
             return string.Format("&{0}={1}",
                                  ScopeKey,
-                                 String.Join(ScopeSeparator, Scope == null ||
-                                                             !Scope.Any()
-                                                                 ? DefaultScope
-                                                                 : Scope));
+                                 String.Join(ScopeSeparator, Scopes == null ||
+                                                             !Scopes.Any()
+                                                                 ? DefaultScopes
+                                                                 : Scopes));
         }
     }
 }

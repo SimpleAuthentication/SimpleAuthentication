@@ -59,7 +59,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             var redirectUri =
                 string.Format(
                     "https://www.amazon.com/ap/oa?client_id={0}{3}&redirect_uri={1}&response_type=code{2}",
-                    ClientKey, uriEncoded, state, GetScope());
+                    Key, uriEncoded, state, GetScope());
 
             TraceSource.TraceInformation("Amazon redirection uri: {0}.", redirectUri);
 
@@ -123,8 +123,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
             var restRequest = new RestRequest("/auth/o2/token", Method.POST);
 
-            restRequest.AddParameter("client_id", ClientKey);
-            restRequest.AddParameter("client_secret", ClientSecret);
+            restRequest.AddParameter("client_id", Key);
+            restRequest.AddParameter("client_secret", Secret);
             restRequest.AddParameter("code", authorizationCode);
             restRequest.AddParameter("grant_type", "authorization_code");
             restRequest.AddParameter("redirect_uri", redirectUri);
@@ -232,12 +232,12 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
         #endregion
 
-        protected override IEnumerable<string> DefaultScope
+        public override IEnumerable<string> DefaultScopes
         {
             get { return new [] {"profile"}; }
         }
 
-        protected override string ScopeSeparator
+        public override string ScopeSeparator
         {
             get { return " "; }
         }

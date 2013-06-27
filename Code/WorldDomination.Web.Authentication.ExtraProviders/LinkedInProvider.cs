@@ -97,7 +97,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             var oauthDialogUri =
                 string.Format(
                     "https://www.linkedin.com/uas/oauth2/authorization?response_type=code&client_id={0}&redirect_uri={1}{2}{3}",
-                    ClientKey, authenticationServiceSettings.CallBackUri.AbsoluteUri, GetScope(), state);
+                    Key, authenticationServiceSettings.CallBackUri.AbsoluteUri, GetScope(), state);
 
             return new Uri(oauthDialogUri);
         }
@@ -106,7 +106,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
         #region Implementation of BaseOAuth20Provider
 
-        protected override IEnumerable<string> DefaultScope
+        public override IEnumerable<string> DefaultScopes
         {
             get { return new[] {"r_basicprofile", "r_emailaddress"}; }
         }
@@ -166,8 +166,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             }
 
             var restRequest = new RestRequest("/uas/oauth2/accessToken", Method.POST);
-            restRequest.AddParameter("client_id", ClientKey);
-            restRequest.AddParameter("client_secret", ClientSecret);
+            restRequest.AddParameter("client_id", Key);
+            restRequest.AddParameter("client_secret", Secret);
             restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
             restRequest.AddParameter("code", authorizationCode);
             restRequest.AddParameter("grant_type", "authorization_code");

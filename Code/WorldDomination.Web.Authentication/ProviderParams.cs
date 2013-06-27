@@ -20,7 +20,7 @@ namespace WorldDomination.Web.Authentication
         /// </summary>
         /// <remarks>This would be set if you wish to provide your own scope, instead of relying on the detault scope settings.</remarks>
         /// <value>The provider scope value.</value>
-        public ICollection<string> Scope { get; set; }
+        public ICollection<string> Scopes { get; set; }
 
         public void Validate ()
         {

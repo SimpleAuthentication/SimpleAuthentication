@@ -57,7 +57,7 @@ namespace WorldDomination.Web.Authentication.Providers
             var redirectUri =
                 string.Format(
                     "https://accounts.google.com/o/oauth2/auth?client_id={0}&redirect_uri={1}&response_type=code{2}{3}",
-                    ClientKey, authenticationServiceSettings.CallBackUri.AbsoluteUri, GetScope(), state);
+                    Key, authenticationServiceSettings.CallBackUri.AbsoluteUri, GetScope(), state);
 
             TraceSource.TraceInformation("Google redirection uri: {0}.", redirectUri);
             return new Uri(redirectUri);
@@ -122,8 +122,8 @@ namespace WorldDomination.Web.Authentication.Providers
             }
 
             var restRequest = new RestRequest("/o/oauth2/token", Method.POST);
-            restRequest.AddParameter("client_id", ClientKey);
-            restRequest.AddParameter("client_secret", ClientSecret);
+            restRequest.AddParameter("client_id", Key);
+            restRequest.AddParameter("client_secret", Secret);
             restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
             restRequest.AddParameter("code", authorizationCode);
             restRequest.AddParameter("grant_type", "authorization_code");
@@ -238,7 +238,7 @@ namespace WorldDomination.Web.Authentication.Providers
 
         #endregion
 
-        protected override IEnumerable<string> DefaultScope
+        public override IEnumerable<string> DefaultScopes
         {
             get
             {

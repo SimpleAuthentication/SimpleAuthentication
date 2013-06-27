@@ -269,7 +269,7 @@ namespace WorldDomination.Web.Authentication
                 {
                     Key = providerKey.Key,
                     Secret = providerKey.Secret,
-                    Scope = string.IsNullOrEmpty(providerKey.Scope)
+                    Scopes = string.IsNullOrEmpty(providerKey.Scope)
                                 ? null
                                 : providerKey.Scope.Split(new [] {','}, StringSplitOptions.RemoveEmptyEntries)
                 };

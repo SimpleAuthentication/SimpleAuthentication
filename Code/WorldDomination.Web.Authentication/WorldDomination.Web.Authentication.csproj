@@ -84,6 +84,8 @@
     <Compile Include="IOpenIdAuthenticationServiceSettings.cs" />
     <Compile Include="IRestClientFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Providers\IPublicPrivateKeyProvider.cs" />
+    <Compile Include="Providers\IScopedProvider.cs" />
     <Compile Include="RestClientFactory.cs" />
     <Compile Include="Providers\Twitter\AccessTokenResult.cs" />
     <Compile Include="Providers\Twitter\FakeTwitterProvider.cs" />

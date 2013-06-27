@@ -62,7 +62,7 @@ namespace WorldDomination.Web.Authentication.Providers
             // NOTE: Facebook is case-sensitive anal retentive with regards to their uri + querystring params.
             //       So ... we'll lowercase the entire biatch. Thanks, Facebook :(
             var oauthDialogUri = string.Format("{0}/dialog/oauth?client_id={1}{2}{3}{4}&redirect_uri={5}",
-                                               baseUri, ClientKey, state, scope, display,
+                                               baseUri, Key, state, scope, display,
                                                authenticationServiceSettings.CallBackUri.AbsoluteUri);
 
             TraceSource.TraceInformation("Facebook redirection uri: {0}", oauthDialogUri);
@@ -133,8 +133,8 @@ namespace WorldDomination.Web.Authentication.Providers
             }
 
             var restRequest = new RestRequest("oauth/access_token");
-            restRequest.AddParameter("client_id", ClientKey);
-            restRequest.AddParameter("client_secret", ClientSecret);
+            restRequest.AddParameter("client_id", Key);
+            restRequest.AddParameter("client_secret", Secret);
             restRequest.AddParameter("code", authorizationCode);
             restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
             restRequest.AddHeader("Content-Type", "application/json");
@@ -277,12 +277,12 @@ namespace WorldDomination.Web.Authentication.Providers
 
         #endregion
 
-        protected override IEnumerable<string> DefaultScope
+        public override IEnumerable<string> DefaultScopes
         {
             get { return new [] {"email"}; }
         }
 
-        protected override string ScopeSeparator
+        public override string ScopeSeparator
         {
             get { return " "; }
         }

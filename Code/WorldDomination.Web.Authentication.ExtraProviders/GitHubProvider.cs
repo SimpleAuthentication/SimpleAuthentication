@@ -55,7 +55,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             var oauthDialogUri =
                 string.Format(
                     "https://github.com/login/oauth/authorize?client_id={0}{1}&redirect_uri={2}&response_type=code{3}",
-                    ClientKey, GetScope(), authenticationServiceSettings.CallBackUri.AbsoluteUri, state);
+                    Key, GetScope(), authenticationServiceSettings.CallBackUri.AbsoluteUri, state);
 
             var redirectUri = new Uri(oauthDialogUri);
             TraceSource.TraceInformation("GitHub redirection uri: {0}.", redirectUri);
@@ -67,7 +67,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
         #region Implementation of BaseOAuth20Provider
 
-        protected override IEnumerable<string> DefaultScope
+        public override IEnumerable<string> DefaultScopes
         {
             get { return new[] {"user:email"}; }
         }
@@ -122,8 +122,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             }
 
             var restRequest = new RestRequest("/login/oauth/access_token", Method.POST);
-            restRequest.AddParameter("client_id", ClientKey);
-            restRequest.AddParameter("client_secret", ClientSecret);
+            restRequest.AddParameter("client_id", Key);
+            restRequest.AddParameter("client_secret", Secret);
             restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
             restRequest.AddParameter("code", authorizationCode);
             restRequest.AddParameter("grant_type", "authorization_code");

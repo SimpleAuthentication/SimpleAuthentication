@@ -22,7 +22,7 @@ namespace WorldDomination.Web.Authentication.Providers
 
         private const string AccessTokenKey = "access_token";
 
-        protected override IEnumerable<string> DefaultScope
+        public override IEnumerable<string> DefaultScopes
         {
             get { return new[] {"wl.signin", "wl.basic", "wl.emails"}; }
         }
@@ -50,7 +50,7 @@ namespace WorldDomination.Web.Authentication.Providers
 
         public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
-            var oauthDialogUri = string.Format(RedirectUrl, ClientKey,
+            var oauthDialogUri = string.Format(RedirectUrl, Key,
                                                authenticationServiceSettings.CallBackUri.AbsoluteUri, GetScope());
 
             oauthDialogUri += string.IsNullOrEmpty(authenticationServiceSettings.State)
@@ -113,9 +113,9 @@ namespace WorldDomination.Web.Authentication.Providers
             }
 
             var restRequest = new RestRequest("/oauth20_token.srf");
-            restRequest.AddParameter("client_id", ClientKey);
+            restRequest.AddParameter("client_id", Key);
             restRequest.AddParameter("redirect_uri", redirectUri);
-            restRequest.AddParameter("client_secret", ClientSecret);
+            restRequest.AddParameter("client_secret", Secret);
             restRequest.AddParameter("code", authorizationCode);
             restRequest.AddParameter("grant_type", "authorization_code");
 
