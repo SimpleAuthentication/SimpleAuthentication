@@ -30,7 +30,9 @@ namespace WorldDomination.Web.Authentication.Providers.Twitter
                 throw new ArgumentException("authenticationServiceSettings.CallBackUri");
             }
 
-            return authenticationServiceSettings.CallBackUri;
+            var redirectUrl = string.Format("{0}&state={1}", authenticationServiceSettings.CallBackUri.AbsoluteUri,
+                authenticationServiceSettings.State);
+            return new Uri(redirectUrl);
         }
 
         public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
