@@ -17,16 +17,11 @@ namespace WorldDomination.Web.Authentication.Providers
     {
         private const string BaseUrl = "https://graph.facebook.com";
 
-        public FacebookProvider(ProviderParams providerParams) : base(providerParams)
+        public FacebookProvider(ProviderParams providerParams) : base("Facebook", providerParams)
         {
         }
 
         #region Implementation of IAuthenticationProvider
-
-        public override string Name
-        {
-            get { return "Facebook"; }
-        }
 
         public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {

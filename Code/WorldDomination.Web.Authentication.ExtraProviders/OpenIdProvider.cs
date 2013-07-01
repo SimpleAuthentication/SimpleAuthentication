@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Xml.Linq;
@@ -11,19 +10,21 @@ using WorldDomination.Web.Authentication.Providers;
 
 namespace WorldDomination.Web.Authentication.ExtraProviders
 {
-    public class OpenIdProvider : BaseRestFactoryProvider, IAuthenticationProvider
+    public class OpenIdProvider : BaseProvider
     {
         private const string XrdsHeaderKey = "X-XRDS-Location";
         private static readonly IDictionary<string, Uri> YadisXrdsEndPointUris = new Dictionary<string, Uri>();
         private static readonly IDictionary<string, Uri> YadisOpenIdEndPointUris = new Dictionary<string, Uri>();
 
-        public OpenIdProvider(ProviderParams providerParams)
+        public OpenIdProvider(ProviderParams providerParams) : base("OpenId")
         {
         }
 
-        public OpenIdProvider()
+        public OpenIdProvider() : base("OpenId")
         {
         }
+
+        public IRestClientFactory RestClientFactory { get; set; }
 
         protected virtual Uri Identifier(IOpenIdAuthenticationServiceSettings settings)
         {
@@ -56,13 +57,15 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             catch (Exception exception)
             {
                 throw new AuthenticationException(
-                    "Error occured while trying to determine Xrds endpoint for identity [" + identifier.AbsoluteUri + "].", exception);
+                    "Error occured while trying to determine Xrds endpoint for identity [" + identifier.AbsoluteUri +
+                    "].", exception);
             }
 
             if (restResponse == null)
             {
                 throw new AuthenticationException(
-                    "No response was created while trying to determine the Xrds endpoint for identity [" + identifier.AbsoluteUri + "].");
+                    "No response was created while trying to determine the Xrds endpoint for identity [" +
+                    identifier.AbsoluteUri + "].");
             }
 
             // If we have a 301 or 302, lets recurse.
@@ -82,7 +85,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             var endPointUri = endpoint == null
                                   ? null
                                   : new Uri((string) endpoint.Value);
-            
+
             // Cache this result :)
             YadisXrdsEndPointUris.Add(identifier.AbsoluteUri, endPointUri);
 
@@ -115,7 +118,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             catch (Exception exception)
             {
                 throw new AuthenticationException(
-                    "Error occured while trying to determine OpenId endpoint for identity [" + xrdsUri.AbsoluteUri + "].", exception);
+                    "Error occured while trying to determine OpenId endpoint for identity [" + xrdsUri.AbsoluteUri +
+                    "].", exception);
             }
 
             if (restResponse == null)
@@ -216,28 +220,24 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
         private static string UrlEncode(string url)
         {
             return Uri.EscapeDataString(url).Replace("%20", "+");
-
         }
 
         #region Implementation of IAuthenticationProvider
 
-        public string Name
-        {
-            get { return "OpenId"; }
-        }
-
-        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
+        public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
             get { return new OpenIdAuthenticationServiceSettings(); }
         }
 
-        public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
+        public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
             var settings = authenticationServiceSettings as IOpenIdAuthenticationServiceSettings;
 
             if (settings == null)
             {
-                throw new ArgumentException("authenticationServiceSettings is null or not of type IOpenIdAuthenticationServiceSettings", "authenticationServiceSettings");
+                throw new ArgumentException(
+                    "authenticationServiceSettings is null or not of type IOpenIdAuthenticationServiceSettings",
+                    "authenticationServiceSettings");
             }
 
             // First we need to do a YADIS Discover, so we can get the real endpoint.
@@ -279,8 +279,9 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             return new Uri(url);
         }
 
-        public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
-                                                       NameValueCollection queryStringParameters)
+        public override IAuthenticatedClient AuthenticateClient(
+            IAuthenticationServiceSettings authenticationServiceSettings,
+            NameValueCollection queryStringParameters)
         {
             if (authenticationServiceSettings == null)
             {
@@ -313,7 +314,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
                 openid.sreg.gender:F
                 openid.sreg.language:EN
              */
-            if (queryStringParameters == null || 
+            if (queryStringParameters == null ||
                 !queryStringParameters.AllKeys.Any(x => x.StartsWith("openid.")))
             {
                 throw new ArgumentException("No openid.XXX Query String paramters found.");
@@ -332,11 +333,6 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             {
                 UserInformation = RetrieveMe(queryStringParameters)
             };
-        }
-
-        protected override TraceSource TraceSource
-        {
-            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         #endregion

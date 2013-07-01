@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Net;
 using RestSharp;
 using WorldDomination.Web.Authentication.ExtraProviders.Amazon;
@@ -17,25 +16,15 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
     {
         private const string AccessTokenKey = "access_token";
 
-        public AmazonProvider(ProviderParams providerParams) : base(providerParams)
+        public AmazonProvider(ProviderParams providerParams) : base("Amazon", providerParams)
         {
         }
 
         #region Implementation of IAuthenticationProvider
 
-        public override string Name
-        {
-            get { return "Amazon"; }
-        }
-
         public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
             get { return new AmazonAuthenticationServiceSettings(); }
-        }
-
-        protected override TraceSource TraceSource
-        {
-            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
@@ -234,7 +223,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
         public override IEnumerable<string> DefaultScopes
         {
-            get { return new [] {"profile"}; }
+            get { return new[] {"profile"}; }
         }
 
         public override string ScopeSeparator

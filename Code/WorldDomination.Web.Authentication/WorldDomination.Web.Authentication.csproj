@@ -47,6 +47,8 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AccessToken.cs" />
+    <Compile Include="Providers\FakeAuthencationServiceSettings.cs" />
+    <Compile Include="Providers\FakeProvider.cs" />
     <Compile Include="Csrf\AntiForgery.cs" />
     <Compile Include="AuthenticatedClient.cs" />
     <Compile Include="AuthenticationException.cs" />
@@ -65,11 +67,9 @@
     <Compile Include="Providers\Facebook\AccessTokenResult.cs" />
     <Compile Include="Providers\Facebook\DisplayType.cs" />
     <Compile Include="Providers\Facebook\FacebookAuthenticationServiceSettings.cs" />
-    <Compile Include="Providers\Facebook\FakeFacebookProvider.cs" />
     <Compile Include="Providers\Facebook\MeResult.cs" />
     <Compile Include="GenderType.cs" />
     <Compile Include="Providers\Google\AccessTokenResult.cs" />
-    <Compile Include="Providers\Google\FakeGoogleProvider.cs" />
     <Compile Include="Providers\Google\GoogleAuthenticationServiceSettings.cs" />
     <Compile Include="Providers\GoogleProvider.cs" />
     <Compile Include="Providers\Google\UserInfoResult.cs" />
@@ -88,7 +88,6 @@
     <Compile Include="Providers\IScopedProvider.cs" />
     <Compile Include="RestClientFactory.cs" />
     <Compile Include="Providers\Twitter\AccessTokenResult.cs" />
-    <Compile Include="Providers\Twitter\FakeTwitterProvider.cs" />
     <Compile Include="Providers\Twitter\RequestTokenResult.cs" />
     <Compile Include="Providers\Twitter\TwitterAuthenticationServiceSettings.cs" />
     <Compile Include="Providers\TwitterProvider.cs" />

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Net;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -10,7 +9,7 @@ using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication.Providers
 {
-    public class TwitterProvider : BaseRestFactoryProvider, IAuthenticationProvider
+    public class TwitterProvider : BaseProvider
     {
         private const string BaseUrl = "https://api.twitter.com";
         private const string DeniedKey = "denied";
@@ -21,13 +20,17 @@ namespace WorldDomination.Web.Authentication.Providers
         private readonly string _consumerKey;
         private readonly string _consumerSecret;
 
-        public TwitterProvider(ProviderParams providerParams)
+        public TwitterProvider(ProviderParams providerParams) : base("Twitter")
         {
             providerParams.Validate();
 
             _consumerKey = providerParams.Key;
             _consumerSecret = providerParams.Secret;
+
+            RestClientFactory = new RestClientFactory();
         }
+
+        public IRestClientFactory RestClientFactory { get; set; }
 
         private RequestTokenResult RetrieveRequestToken(IAuthenticationServiceSettings authenticationServiceSettings)
         {
@@ -56,11 +59,12 @@ namespace WorldDomination.Web.Authentication.Providers
             try
             {
                 var restClient = RestClientFactory.CreateRestClient(BaseUrl);
-                restClient.Authenticator = OAuth1Authenticator.ForRequestToken(_consumerKey, _consumerSecret, callBackUri);
+                restClient.Authenticator = OAuth1Authenticator.ForRequestToken(_consumerKey, _consumerSecret,
+                                                                               callBackUri);
                 var restRequest = new RestRequest("oauth/request_token", Method.POST);
 
                 TraceSource.TraceVerbose("Retrieving user information. Twitter Endpoint: {0}",
-                                        restClient.BuildUri(restRequest).AbsoluteUri);
+                                         restClient.BuildUri(restRequest).AbsoluteUri);
 
                 response = restClient.Execute(restRequest);
             }
@@ -181,8 +185,8 @@ namespace WorldDomination.Web.Authentication.Providers
                                          restClient.BuildUri(restRequest).AbsoluteUri);
 
                 restClient.Authenticator = OAuth1Authenticator.ForAccessToken(_consumerKey, _consumerSecret,
-                                                                               verifierResult.OAuthToken,
-                                                                               null, verifierResult.OAuthVerifier);
+                                                                              verifierResult.OAuthToken,
+                                                                              null, verifierResult.OAuthVerifier);
                 response = restClient.Execute(restRequest);
             }
             catch (Exception exception)
@@ -194,7 +198,7 @@ namespace WorldDomination.Web.Authentication.Providers
                 throw new AuthenticationException(errorMessage, exception);
             }
 
-            if (response == null || 
+            if (response == null ||
                 response.StatusCode != HttpStatusCode.OK)
             {
                 var errorMessage = string.Format(
@@ -251,12 +255,12 @@ namespace WorldDomination.Web.Authentication.Providers
             {
                 var restClient = RestClientFactory.CreateRestClient(BaseUrl);
                 restClient.Authenticator = OAuth1Authenticator.ForProtectedResource(_consumerKey, _consumerSecret,
-                                                                                     accessTokenResult.AccessToken,
-                                                                                     accessTokenResult.AccessTokenSecret);
+                                                                                    accessTokenResult.AccessToken,
+                                                                                    accessTokenResult.AccessTokenSecret);
                 var restRequest = new RestRequest("1.1/account/verify_credentials.json");
 
                 TraceSource.TraceVerbose("Retrieving user information. Twitter Endpoint: {0}",
-                                        restClient.BuildUri(restRequest).AbsoluteUri);
+                                         restClient.BuildUri(restRequest).AbsoluteUri);
 
                 response = restClient.Execute<VerifyCredentialsResult>(restRequest);
             }
@@ -291,12 +295,7 @@ namespace WorldDomination.Web.Authentication.Providers
 
         #region Implementation of IAuthenticationProvider
 
-        public string Name
-        {
-            get { return "Twitter"; }
-        }
-
-        public Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
+        public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
         {
             if (authenticationServiceSettings == null)
             {
@@ -319,10 +318,12 @@ namespace WorldDomination.Web.Authentication.Providers
             return restClient.BuildUri(request);
         }
 
-        public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
-                                                       NameValueCollection queryStringParameters)
+        public override IAuthenticatedClient AuthenticateClient(
+            IAuthenticationServiceSettings authenticationServiceSettings,
+            NameValueCollection queryStringParameters)
         {
-            TraceSource.TraceVerbose("Trying to get the authenticated client details. NOTE: This is using OAuth 1.0a. ~~Le sigh~~.");
+            TraceSource.TraceVerbose(
+                "Trying to get the authenticated client details. NOTE: This is using OAuth 1.0a. ~~Le sigh~~.");
 
             if (authenticationServiceSettings == null)
             {
@@ -349,20 +350,15 @@ namespace WorldDomination.Web.Authentication.Providers
                     Picture = verifyCredentialsResult.ProfileImageUrl
                 },
                 AccessToken = new AccessToken
-                              {
-                                  PublicToken = oAuthAccessToken.AccessToken
-                              }
+                {
+                    PublicToken = oAuthAccessToken.AccessToken
+                }
             };
         }
 
-        public IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
+        public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
             get { return new TwitterAuthenticationServiceSettings(); }
-        }
-
-        protected override TraceSource TraceSource
-        {
-            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         #endregion

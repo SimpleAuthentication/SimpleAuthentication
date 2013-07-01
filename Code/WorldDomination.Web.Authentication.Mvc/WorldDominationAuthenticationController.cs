@@ -140,7 +140,7 @@ namespace WorldDomination.Web.Authentication.Mvc
             var receivedToken = Request.QueryString["state"];
             if (string.IsNullOrEmpty(receivedToken))
             {
-                const string errorMessage = "No state/recievedToken was retrieved from the provider. Are you sure you passed any state/token data to provider .. and .. that the provider can send it back to us? We need this to prevent any Cross site request forgery.";;
+                const string errorMessage = "No state/recievedToken was retrieved from the provider. Are you sure you passed any state/token data to provider .. and .. that the provider can send it back to us? We need this to prevent any Cross site request forgery. Check to see that the callback url has a key/value pair: state/your-previous-state-value";
                 TraceSource.TraceError(errorMessage);
                 throw new InvalidOperationException(errorMessage);
             }

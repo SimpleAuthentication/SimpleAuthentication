@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Net;
 using RestSharp;
 using WorldDomination.Web.Authentication.ExtraProviders.GitHub;
@@ -15,25 +14,15 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
         private const string AccessTokenKey = "access_token";
         private const string TokenTypeKey = "token_type";
 
-        public GitHubProvider(ProviderParams providerParams) : base(providerParams)
+        public GitHubProvider(ProviderParams providerParams) : base("GitHub", providerParams)
         {
         }
 
         #region Implementation of IAuthenticationProvider
 
-        public override string Name
-        {
-            get { return "GitHub"; }
-        }
-
         public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
             get { return new GitHubAuthenticationServiceSettings(); }
-        }
-
-        protected override TraceSource TraceSource
-        {
-            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
@@ -71,7 +60,7 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
         {
             get { return new[] {"user:email"}; }
         }
-    
+
         protected override string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState = null)
         {
             if (parameters == null)

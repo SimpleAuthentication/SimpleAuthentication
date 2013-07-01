@@ -43,14 +43,6 @@ namespace WorldDomination.Web.Authentication
         /// <summary>
         ///     Determine the uri which is used to redirect to a given Provider.
         /// </summary>
-        /// <param name="providerKey">A Provider keyname.</param>
-        /// <param name="callBackUri">The uri to call back to, after the Authentication Provider has completed it's authentication process.</param>
-        /// <returns>The uri to redirect to.</returns>
-        Uri RedirectToAuthenticationProvider(string providerKey, Uri callBackUri = null);
-
-        /// <summary>
-        ///     Determine the uri which is used to redirect to a given Provider.
-        /// </summary>
         /// <param name="authenticationServiceSettings">Specific authentication service settings to be passed along to the Authentication Provider.</param>
         /// <returns>The uri to redirect to.</returns>
         Uri RedirectToAuthenticationProvider(IAuthenticationServiceSettings authenticationServiceSettings);
@@ -77,9 +69,9 @@ namespace WorldDomination.Web.Authentication
         ///     Retrieves the settings for an authentication service.
         /// </summary>
         /// <param name="providerKey">A Provider keyname.</param>
-        /// <param name="requestUrl"></param>
-        /// /// <param name="path"></param>
-        /// <returns>The authentication service settings.</returns>
+        /// <param name="requestUrl">Url of the current request.</param>
+        /// /// <param name="path">Route path for the (return) callback.</param>
+        /// <returns>Settings about the authentication service provider.</returns>
         IAuthenticationServiceSettings GetAuthenticateServiceSettings(string providerKey,
                                                                       Uri requestUrl,
                                                                       string path = "/authentication/authenticatecallback");

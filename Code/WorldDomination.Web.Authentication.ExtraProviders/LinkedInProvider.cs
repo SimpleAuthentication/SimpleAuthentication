@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Net;
 using RestSharp;
-using WorldDomination.Web.Authentication.Providers;
 using WorldDomination.Web.Authentication.ExtraProviders.LinkedIn;
+using WorldDomination.Web.Authentication.Providers;
 using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication.ExtraProviders
@@ -17,65 +16,15 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
         private const string AccessTokenKey = "oauth2_access_token";
         private const string ExpiresInKey = "expires_in";
 
-        public LinkedInProvider(ProviderParams providerParams) : base(providerParams)
-        {}
-
-        private UserInfoResult RetrieveUserInfo(string accessToken)
+        public LinkedInProvider(ProviderParams providerParams) : base("LinkedIn", providerParams)
         {
-            if (string.IsNullOrEmpty(accessToken))
-            {
-                throw new ArgumentNullException("accessToken");
-            }
-
-            IRestResponse<UserInfoResult> response;
-
-            try
-            {
-                var request = new RestRequest("/v1/people/~:(id,first-name,last-name,email-address)", Method.GET);
-                request.AddParameter(AccessTokenKey, accessToken);
-                var restClient = RestClientFactory.CreateRestClient("https://api.linkedin.com/");
-                response = restClient.Execute<UserInfoResult>(request);
-            }
-            catch (Exception exception)
-            {
-                throw new AuthenticationException("Failed to obtain User Info from LinkedIn.", exception);
-            }
-
-            if (response == null ||
-                response.StatusCode != HttpStatusCode.OK)
-            {
-                throw new AuthenticationException(
-                    string.Format(
-                        "Failed to obtain User Info from LinkedIn OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}",
-                        response == null ? "-- null response --" : response.StatusCode.ToString(),
-                        response == null ? string.Empty : response.StatusDescription));
-            }
-
-            // Lets check to make sure we have some bare minimum data.
-            if (string.IsNullOrEmpty(response.Data.Id))
-            {
-                throw new AuthenticationException(
-                    "We were unable to retrieve the User Id from LinkedIn API, the user may have denied the authorization.");
-            }
-
-            return response.Data;
         }
 
         #region Implementation of IAuthenticationProvider
 
-        public override string Name
-        {
-            get { return "LinkedIn"; }
-        }
-
         public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
             get { return new LinkedInAuthenticationServiceSettings(); }
-        }
-
-        protected override TraceSource TraceSource
-        {
-            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)

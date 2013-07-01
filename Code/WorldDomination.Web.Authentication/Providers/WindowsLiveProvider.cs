@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Net;
 using RestSharp;
 using WorldDomination.Web.Authentication.Providers.WindowsLive;
 using WorldDomination.Web.Authentication.Tracing;
-using AccessTokenResult = WorldDomination.Web.Authentication.Providers.WindowsLive.AccessTokenResult;
-using UserInfoResult = WorldDomination.Web.Authentication.Providers.WindowsLive.UserInfoResult;
 
 namespace WorldDomination.Web.Authentication.Providers
 {
@@ -22,30 +19,15 @@ namespace WorldDomination.Web.Authentication.Providers
 
         private const string AccessTokenKey = "access_token";
 
-        public override IEnumerable<string> DefaultScopes
-        {
-            get { return new[] {"wl.signin", "wl.basic", "wl.emails"}; }
-        }
-
-        public WindowsLiveProvider(ProviderParams providerParams) : base(providerParams)
+        public WindowsLiveProvider(ProviderParams providerParams) : base("WindowsLive", providerParams)
         {
         }
 
         #region Implementation of IAuthenticationProvider
 
-        public override  string Name
-        {
-            get { return "WindowsLive"; }
-        }
-
         public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
             get { return new WindowsLiveAuthenticationServiceSettings(); }
-        }
-
-        protected override TraceSource TraceSource
-        {
-            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
@@ -83,7 +65,8 @@ namespace WorldDomination.Web.Authentication.Providers
             // First check for any errors.
             if (!string.IsNullOrEmpty(error))
             {
-                var errorMessage = "Failed to retrieve an authorization code from Microsoft Live. The error provided is: " + error;
+                var errorMessage =
+                    "Failed to retrieve an authorization code from Microsoft Live. The error provided is: " + error;
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
             }
@@ -91,7 +74,8 @@ namespace WorldDomination.Web.Authentication.Providers
             // Otherwise, we need a code.
             if (string.IsNullOrEmpty(code))
             {
-                const string errorMessage = "No code parameter provided in the response query string from Microsoft Live.";
+                const string errorMessage =
+                    "No code parameter provided in the response query string from Microsoft Live.";
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
             }
@@ -99,7 +83,8 @@ namespace WorldDomination.Web.Authentication.Providers
             return code;
         }
 
-        protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode, Uri redirectUri)
+        protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
+                                                                                       Uri redirectUri)
         {
             if (string.IsNullOrEmpty(authorizationCode))
             {
@@ -208,7 +193,8 @@ namespace WorldDomination.Web.Authentication.Providers
             // Lets check to make sure we have some bare minimum data.
             if (string.IsNullOrEmpty(response.Data.id))
             {
-                const string errorMessage = "We were unable to retrieve the User Id from Windows Live Api, the user may have denied the authorization.";
+                const string errorMessage =
+                    "We were unable to retrieve the User Id from Windows Live Api, the user may have denied the authorization.";
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
             }
@@ -216,12 +202,12 @@ namespace WorldDomination.Web.Authentication.Providers
             return new UserInformation
             {
                 Name = string.Format("{0} {1}",
-                                    string.IsNullOrEmpty(response.Data.first_name)
-                                        ? string.Empty
-                                        : response.Data.first_name,
-                                    string.IsNullOrEmpty(response.Data.last_name)
-                                        ? string.Empty
-                                        : response.Data.last_name).Trim(),
+                                     string.IsNullOrEmpty(response.Data.first_name)
+                                         ? string.Empty
+                                         : response.Data.first_name,
+                                     string.IsNullOrEmpty(response.Data.last_name)
+                                         ? string.Empty
+                                         : response.Data.last_name).Trim(),
                 Locale = response.Data.locale,
                 UserName = response.Data.name,
                 Id = response.Data.id,
@@ -231,5 +217,10 @@ namespace WorldDomination.Web.Authentication.Providers
         }
 
         #endregion
+
+        public override IEnumerable<string> DefaultScopes
+        {
+            get { return new[] {"wl.signin", "wl.basic", "wl.emails"}; }
+        }
     }
 }

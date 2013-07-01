@@ -52,12 +52,10 @@
     </Compile>
     <Compile Include="AmazonProvider.cs" />
     <Compile Include="Amazon\AccessTokenResult.cs" />
-    <Compile Include="Amazon\FakeAmazonProvider.cs" />
     <Compile Include="Amazon\AmazonAuthenticationServiceSettings.cs" />
     <Compile Include="Amazon\UserInfoResult.cs" />
     <Compile Include="GitHubProvider.cs" />
     <Compile Include="GitHub\AccessTokenResult.cs" />
-    <Compile Include="GitHub\FakeGitHubProvider.cs" />
     <Compile Include="GitHub\GitHubAuthenticationServiceSettings.cs" />
     <Compile Include="GitHub\UserInfoResult.cs" />
     <Compile Include="LinkedInProvider.cs" />

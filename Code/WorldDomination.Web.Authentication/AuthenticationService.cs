@@ -6,10 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using WorldDomination.Web.Authentication.Config;
-using WorldDomination.Web.Authentication.Exceptions;
-using WorldDomination.Web.Authentication.Providers.Facebook;
-using WorldDomination.Web.Authentication.Providers.Google;
-using WorldDomination.Web.Authentication.Providers.Twitter;
+using WorldDomination.Web.Authentication.Providers;
 using WorldDomination.Web.Authentication.Tracing;
 
 namespace WorldDomination.Web.Authentication
@@ -21,8 +18,7 @@ namespace WorldDomination.Web.Authentication
         public AuthenticationService()
         {
             TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
-            _configuredProviders = new ConcurrentDictionary<string, IAuthenticationProvider>();
-            
+
             Initialize();
         }
 
@@ -30,51 +26,25 @@ namespace WorldDomination.Web.Authentication
 
         public IDictionary<string, IAuthenticationProvider> AuthenticationProviders
         {
-            get { return _configuredProviders; }
+            get { return ConfiguredProviders; }
         }
 
         public ITraceManager TraceManager { set; private get; }
 
         public void AddProvider(IAuthenticationProvider provider, bool replaceExisting = true)
         {
-            Add(provider, replaceExisting);
+            AddAProvider(provider, replaceExisting);
         }
 
         public void AddProviders(IEnumerable<IAuthenticationProvider> providers, bool replaceExisting = true)
         {
-            Add(providers, replaceExisting);
+            AddSomeProviders(providers, replaceExisting);
         }
 
         public void RemoveProvider(string providerName)
         {
             IAuthenticationProvider provider;
-            _configuredProviders.TryRemove(providerName, out provider);
-        }
-
-        public Uri RedirectToAuthenticationProvider(string providerKey, Uri callBackUri = null)
-        {
-            if (string.IsNullOrEmpty(providerKey))
-            {
-                throw new ArgumentNullException("providerKey");
-            }
-
-            // Determine the provider.
-            var authenticationProvider = GetAuthenticationProvider(providerKey);
-            if (authenticationProvider == null)
-            {
-                throw new InvalidOperationException("No provider was found for the key: " + providerKey);
-            }
-
-            // Retrieve the default settings for this provider.
-            var authenticationServiceSettings = authenticationProvider.DefaultAuthenticationServiceSettings;
-
-            // Have we provided an specific callBack uri?
-            if (callBackUri != null)
-            {
-                authenticationServiceSettings.CallBackUri = callBackUri;
-            }
-
-            return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
+            ConfiguredProviders.TryRemove(providerName, out provider);
         }
 
         public Uri RedirectToAuthenticationProvider(IAuthenticationServiceSettings authenticationServiceSettings)
@@ -86,13 +56,24 @@ namespace WorldDomination.Web.Authentication
 
             if (string.IsNullOrEmpty(authenticationServiceSettings.ProviderName))
             {
-                throw new ArgumentException("authenticationServiceSettings.providerName");
+                throw new ArgumentException("Authentication services require the 'Name' of the service. eg. Google.",
+                                            "authenticationServiceSettings.providerName");
             }
 
             if (authenticationServiceSettings.CallBackUri == null ||
                 string.IsNullOrEmpty(authenticationServiceSettings.CallBackUri.AbsoluteUri))
             {
-                throw new ArgumentException("authenticationServiceSettings.CallBackUri");
+                throw new ArgumentException(
+                    "Authentication services require a 'CallBackUri'. This is so we know where to return to. Sometimes, the authentication provider might ignore this value OR might use this as a settings validation check. eg. authenticationProvider.CallBackUri = new Uri(\"http://localhost:1234/authentication/authenticatecallback\"",
+                    "authenticationServiceSettings.CallBackUri");
+            }
+
+            // State check. State is always required.
+            if (string.IsNullOrEmpty(authenticationServiceSettings.State))
+            {
+                throw new ArgumentException(
+                    "Authentication services require that a 'State' value be set. Please provide a value for the 'State' property. eg. authenticationService.State = Guid.NewGuid();",
+                    "authenticationServiceSettings.State");
             }
 
             var authenticationProvider = GetAuthenticationProvider(authenticationServiceSettings.ProviderName);
@@ -154,7 +135,8 @@ namespace WorldDomination.Web.Authentication
             }
 
             TraceSource.TraceInformation("Retrieved provider: {0}.", authenticationProvider.Name);
-            var authenticatedClient = authenticationProvider.AuthenticateClient(authenticationServiceSettings, queryStringParameters);
+            var authenticatedClient = authenticationProvider.AuthenticateClient(authenticationServiceSettings,
+                                                                                queryStringParameters);
 
             if (authenticatedClient == null)
             {
@@ -169,7 +151,15 @@ namespace WorldDomination.Web.Authentication
             return authenticatedClient;
         }
 
-        public IAuthenticationServiceSettings GetAuthenticateServiceSettings(string providerKey, Uri requestUrl,
+        /// <summary>
+        ///     Retrieves the settings for an authentication service.
+        /// </summary>
+        /// <param name="providerKey">A Provider keyname.</param>
+        /// <param name="requestUrl">Url of the current request.</param>
+        /// /// <param name="path">Route path for the (return) callback.</param>
+        /// <returns>Settings about the authentication service provider.</returns>
+        public IAuthenticationServiceSettings GetAuthenticateServiceSettings(string providerKey,
+                                                                             Uri requestUrl,
                                                                              string path =
                                                                                  "/authentication/authenticatecallback")
         {
@@ -182,23 +172,87 @@ namespace WorldDomination.Web.Authentication
 
             var authenticationProvider = GetAuthenticationProvider(name);
             var settings = authenticationProvider.DefaultAuthenticationServiceSettings;
-            
+
             // Setup up some defaults.
-            settings.State = Guid.NewGuid().ToString();
+            settings.State = ExtractStateFromUri("state", requestUrl);
             settings.CallBackUri = CreateCallBackUri(providerKey, requestUrl, path);
 
             return settings;
+        }
+
+        public Uri RedirectToAuthenticationProvider(string providerKey, Uri callBackUri = null)
+        {
+            if (string.IsNullOrEmpty(providerKey))
+            {
+                throw new ArgumentNullException("providerKey");
+            }
+
+            // Determine the provider.
+            var authenticationProvider = GetAuthenticationProvider(providerKey);
+            if (authenticationProvider == null)
+            {
+                throw new InvalidOperationException("No provider was found for the key: " + providerKey);
+            }
+
+            // Retrieve the default settings for this provider.
+            var authenticationServiceSettings = authenticationProvider.DefaultAuthenticationServiceSettings;
+
+            // Have we provided an specific callBack uri?
+            if (callBackUri != null)
+            {
+                authenticationServiceSettings.CallBackUri = callBackUri;
+            }
+
+            return authenticationProvider.RedirectToAuthenticate(authenticationServiceSettings);
         }
 
         #endregion
 
         public static ICollection<IAuthenticationProvider> RegisteredAuthenticatedProviders
         {
+            get { return ConfiguredProviders.Values; }
+        }
+
+        private static ConcurrentDictionary<string, IAuthenticationProvider> ConfiguredProviders
+        {
             get
             {
-                return _configuredProviders == null
-                           ? null
-                           : _configuredProviders.Values;
+                return _configuredProviders ??
+                       (_configuredProviders = new ConcurrentDictionary<string, IAuthenticationProvider>());
+            }
+        }
+
+        private TraceSource TraceSource
+        {
+            get { return TraceManager["WD.Web.Authentication.AuthenticationService"]; }
+        }
+
+        public static void AddAProvider(IAuthenticationProvider provider, bool replaceExisting = true)
+        {
+            if (provider == null)
+            {
+                throw new ArgumentNullException("provider");
+            }
+
+            ConfiguredProviders.AddOrUpdate(provider.Name.ToLower(), provider, (key, authenticationProvider) =>
+            {
+                if (!replaceExisting)
+                {
+                    throw new InvalidOperationException(
+                        string.Format(
+                            "The provider '{0}' already exists and cannot be overridden, either set `replaceExisting` to `true`, or remove the provider first.",
+                            provider.Name));
+                }
+
+                return provider;
+            });
+        }
+
+        public static void AddSomeProviders(IEnumerable<IAuthenticationProvider> providers, bool replaceExisting = true)
+        {
+            foreach (var authenticationProvider in providers)
+            {
+                AddAProvider(authenticationProvider, replaceExisting);
             }
         }
 
@@ -218,6 +272,11 @@ namespace WorldDomination.Web.Authentication
 
         private void SetupCustomConfigProviders(IList<Type> discoveredProviders, ProviderConfiguration providerConfig)
         {
+            if (providerConfig == null)
+            {
+                throw new ArgumentNullException("providerConfig");
+            }
+
             if (providerConfig.Providers == null)
             {
                 throw new ArgumentException("providerConfiguration.Providers");
@@ -225,25 +284,35 @@ namespace WorldDomination.Web.Authentication
 
             foreach (ProviderKey provider in providerConfig.Providers)
             {
-                var discoverProvider = DiscoverProvider(discoveredProviders, provider);
+                var discoveredProvider = DiscoverProvider(discoveredProviders, provider);
 
-                Add(discoverProvider, false);
+                AddProvider(discoveredProvider, false);
             }
 
-            // Do we also need to add some Fake Providers?
-            if (providerConfig.IncludeFakeProviders)
-            {
-                Add(new List<IAuthenticationProvider>
-                {
-                    new FakeFacebookProvider(),
-                    new FakeGoogleProvider(),
-                    new FakeTwitterProvider()
-                }, true);
-            }
+            //// Do we also need to add some Fake Providers?
+            //if (providerConfig.IncludeFakeProviders)
+            //{
+            //    Add(new List<IAuthenticationProvider>
+            //    {
+            //        new FakeFacebookProvider(),
+            //        new FakeGoogleProvider(),
+            //        new FakeTwitterProvider()
+            //    }, true);
+            //}
         }
 
         private IAuthenticationProvider DiscoverProvider(IEnumerable<Type> discoveredProviders, ProviderKey providerKey)
         {
+            if (discoveredProviders == null)
+            {
+                throw new ArgumentNullException("discoveredProviders");
+            }
+
+            if (providerKey == null)
+            {
+                throw new ArgumentNullException("providerKey");
+            }
+
             var name = providerKey.Name.ToLowerInvariant();
 
             var provider = discoveredProviders.SingleOrDefault(x => x.Name.ToLowerInvariant().StartsWith(name));
@@ -263,15 +332,15 @@ namespace WorldDomination.Web.Authentication
             // Make sure we have a provider with the correct constructor parameters.
             // How? If a person creates their own provider and doesn't offer a constructor
             // that has a sigle ProviderParams, then we're stuffed. So we need to help them.
-            if (provider.GetConstructor(new[] { typeof(ProviderParams) }) != null)
+            if (provider.GetConstructor(new[] {typeof (ProviderParams)}) != null)
             {
                 var parameters = new ProviderParams
                 {
                     Key = providerKey.Key,
                     Secret = providerKey.Secret,
                     Scopes = string.IsNullOrEmpty(providerKey.Scope)
-                                ? null
-                                : providerKey.Scope.Split(new [] {','}, StringSplitOptions.RemoveEmptyEntries)
+                                 ? null
+                                 : providerKey.Scope.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries)
                 };
                 authenticationProvider = Activator.CreateInstance(provider, parameters) as IAuthenticationProvider;
             }
@@ -290,7 +359,32 @@ namespace WorldDomination.Web.Authentication
             return authenticationProvider;
         }
 
-        private static Uri CreateCallBackUri(string providerKey, Uri requestUrl, string path)
+        private static string ExtractStateFromUri(string stateKey, Uri requestUri)
+        {
+            if (string.IsNullOrEmpty(stateKey))
+            {
+                throw new ArgumentNullException(stateKey);
+            }
+
+            if (requestUri == null)
+            {
+                throw new ArgumentNullException("requestUri");
+            }
+
+            if (string.IsNullOrEmpty(requestUri.Query))
+            {
+                // No query in this request.
+                return null;
+            }
+
+            var queryParameters = requestUri.Query.Split(new[] {'&'}, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+            var value = queryParameters.FirstOrDefault(x => x == stateKey);
+
+            return value == null ? null : value.Substring(value.IndexOf("=", StringComparison.Ordinal) + 1);
+        }
+
+        private static Uri CreateCallBackUri(string providerKey, Uri requestUri, string path)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -302,12 +396,12 @@ namespace WorldDomination.Web.Authentication
                 throw new ArgumentNullException("providerKey");
             }
 
-            if (requestUrl == null)
+            if (requestUri == null)
             {
-                throw new ArgumentNullException("requestUrl");
+                throw new ArgumentNullException("requestUri");
             }
 
-            var builder = new UriBuilder(requestUrl)
+            var builder = new UriBuilder(requestUri)
             {
                 Path = path,
                 Query = "providerkey=" + providerKey.ToLowerInvariant()
@@ -322,10 +416,19 @@ namespace WorldDomination.Web.Authentication
             return builder.Uri;
         }
 
-        private TraceSource TraceSource { get { return TraceManager["WD.Web.Authentication.AuthenticationService"]; } }
-
+        /// <summary>
+        /// Retrieves the authentication service provider. NOTE: Also checks for a fake provider. 
+        /// </summary>
+        /// <remarks>NOTE: Convention: If you want to return a fake provider, then just prepend the word 'Fake' to the provider. eg. FakeGoogle.</remarks>
+        /// <param name="providerKey">Name of the provider. Eg. Google or FakeGoogle</param>
+        /// <returns>The authentication provider.</returns>
         private IAuthenticationProvider GetAuthenticationProvider(string providerKey)
         {
+            if (string.IsNullOrEmpty(providerKey))
+            {
+                throw new ArgumentNullException("providerKey");
+            }
+
             IAuthenticationProvider authenticationProvider = null;
 
             if (AuthenticationProviders != null)
@@ -335,37 +438,24 @@ namespace WorldDomination.Web.Authentication
 
             if (authenticationProvider == null)
             {
-                var errorMessage =
-                    string.Format(
-                        "No '{0}' provider details have been added/provided. Maybe you forgot to add the name/key/value data into your web.config? Eg. in your web.config configuration/authenticationProviders/providers section add the following (if you want to offer Google authentication): <add name=\"Google\" key=\"someNumber.apps.googleusercontent.com\" secret=\"someSecret\" />",
-                        providerKey);
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
+                // Convention: Check to see if the the provider key requested is prepended with the word 'Fake'.
+                //             If so, then return a common Fake provider.
+                if (providerKey.StartsWith("Fake", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    authenticationProvider = new FakeProvider(providerKey);
+                }
+                else
+                {
+                    var errorMessage =
+                        string.Format(
+                            "No '{0}' provider details have been added/provided. Maybe you forgot to add the name/key/value data into your web.config? Eg. in your web.config configuration/authenticationProviders/providers section add the following (if you want to offer Google authentication): <add name=\"Google\" key=\"someNumber.apps.googleusercontent.com\" secret=\"someSecret\" />",
+                            providerKey);
+                    TraceSource.TraceError(errorMessage);
+                    throw new AuthenticationException(errorMessage);
+                }
             }
 
             return authenticationProvider;
-        }
-
-        private static void Add(IAuthenticationProvider provider, bool replaceExisting = true)
-        {
-            _configuredProviders.AddOrUpdate(provider.Name.ToLower(), provider, (key, authenticationProvider) =>
-            {
-                if (!replaceExisting)
-                {
-                    throw new WorldDominationConfigurationException(
-                        string.Format("The provider '{0}' already exists and cannot be overridden, either set `replaceExisting` to `true`, or remove the provider first.", provider.Name));
-                }
-
-                return provider;
-            });
-        }
-
-        private static void Add(IEnumerable<IAuthenticationProvider> providers, bool replaceExisting)
-        {
-            foreach (var authenticationProvider in providers)
-            {
-                Add(authenticationProvider, replaceExisting);
-            }
         }
     }
 }

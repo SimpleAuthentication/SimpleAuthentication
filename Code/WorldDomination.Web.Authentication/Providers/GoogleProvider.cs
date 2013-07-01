@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Net;
 using RestSharp;
 using WorldDomination.Web.Authentication.Providers.Google;
@@ -15,27 +14,17 @@ namespace WorldDomination.Web.Authentication.Providers
     {
         private const string AccessTokenKey = "access_token";
         private const string ExpiresInKey = "expires_in";
-       private const string TokenTypeKey = "token_type";
+        private const string TokenTypeKey = "token_type";
 
-        public GoogleProvider(ProviderParams providerParams) : base(providerParams)
+        public GoogleProvider(ProviderParams providerParams) : base("Google", providerParams)
         {
         }
 
         #region Implementation of IAuthenticationProvider
 
-        public override string Name
-        {
-            get { return "Google"; }
-        }
-
         public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
         {
             get { return new GoogleAuthenticationServiceSettings(); }
-        }
-
-        protected override TraceSource TraceSource
-        {
-            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
         }
 
         public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
@@ -242,7 +231,8 @@ namespace WorldDomination.Web.Authentication.Providers
         {
             get
             {
-                return new[] {"https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"};
+                return new[]
+                {"https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"};
             }
         }
     }

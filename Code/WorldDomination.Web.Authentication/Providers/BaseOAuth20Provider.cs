@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using RestSharp;
@@ -10,16 +9,24 @@ using WorldDomination.Web.Authentication.Tracing;
 namespace WorldDomination.Web.Authentication.Providers
 {
     public abstract class BaseOAuth20Provider<TAccessTokenResult>
-        : BaseRestFactoryProvider, IAuthenticationProvider, IPublicPrivateKeyProvider, IScopedProvider where TAccessTokenResult : class, new()
+        : BaseProvider, IPublicPrivateKeyProvider, IScopedProvider
+        where TAccessTokenResult : class, new()
     {
-        protected BaseOAuth20Provider(ProviderParams providerParams)
+        protected BaseOAuth20Provider(string name, ProviderParams providerParams) : base(name)
         {
             providerParams.Validate();
 
             Key = providerParams.Key;
             Secret = providerParams.Secret;
             Scopes = providerParams.Scopes;
+
+            RestClientFactory = new RestClientFactory();
         }
+
+        public IRestClientFactory RestClientFactory { get; set; }
+
+        public string Key { get; protected set; }
+        public string Secret { get; protected set; }
 
         public abstract IEnumerable<string> DefaultScopes { get; }
 
@@ -34,22 +41,12 @@ namespace WorldDomination.Web.Authentication.Providers
         }
 
         public IEnumerable<string> Scopes { get; set; }
-        public string Key { get; protected set; }
-        public string Secret { get; protected set; }
 
         #region IAuthenticationProvider Members
 
-        protected override TraceSource TraceSource
-        {
-            get { return TraceManager["WD.Web.Authentication.Providers." + Name]; }
-        }
-
-        public abstract string Name { get; }
-        public abstract IAuthenticationServiceSettings DefaultAuthenticationServiceSettings { get; }
-        public abstract Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings);
-
-        public IAuthenticatedClient AuthenticateClient(IAuthenticationServiceSettings authenticationServiceSettings,
-                                                       NameValueCollection queryStringParameters)
+        public override IAuthenticatedClient AuthenticateClient(
+            IAuthenticationServiceSettings authenticationServiceSettings,
+            NameValueCollection queryStringParameters)
         {
             if (authenticationServiceSettings == null)
             {
