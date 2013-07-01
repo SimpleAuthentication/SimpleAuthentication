@@ -28,13 +28,6 @@ namespace WorldDomination.Web.Authentication
         void AddProvider(IAuthenticationProvider provider, bool replaceExisting = true);
 
         /// <summary>
-        ///     Registering a multiple providers with this service.
-        /// </summary>
-        /// <param name="providers">An collection of Authentication Providers.</param>
-        /// <param name="replaceExisting">true by default, specifies if it should replace existing configured provider</param>
-        void AddProviders(IEnumerable<IAuthenticationProvider> providers, bool replaceExisting = true);
-
-        /// <summary>
         ///     Remove a configured provider from this service.
         /// </summary>
         /// <param name="providerName">the provider name (case insensitive)</param>

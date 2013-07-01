@@ -161,11 +161,11 @@ namespace WorldDomination.Web.Authentication.Tests
                 // Act.
                 var result = authenticationService.RedirectToAuthenticationProvider("FakeBlahBlah",
                                                                                     new Uri(
-                                                                                        "http://www.pleasecomehome.com"));
+                                                                                        "http://www.pleasecomehome.com?provider=foo"));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("http://www.pleasecomehome.com/?state=This%20is%20some%20fake%20state", result.AbsoluteUri);
+                Assert.Equal("http://www.pleasecomehome.com/?provider=foo&state=This%20is%20some%20fake%20state", result.AbsoluteUri);
             }
 
             [Fact]
@@ -190,18 +190,17 @@ namespace WorldDomination.Web.Authentication.Tests
                     }
                 };
 
-                AuthenticationService.AddAProvider(fakeProvider);
-
                 var authenticationService = new AuthenticationService();
-                
+                authenticationService.AddProvider(fakeProvider);
+
                 // Act.
                 var result = authenticationService.RedirectToAuthenticationProvider(name,
                                                                        new Uri(
-                                                                           "http://i.want.to.go.home.com/click/feet/together"));
+                                                                           "http://i.want.to.go.home.com/click/feet/together?provider=google"));
 
                 // Assert.
                 Assert.NotNull(result);
-                Assert.Equal("http://i.want.to.go.home.com/click/feet/together?state=This%20is%20some%20fake%20state", result.AbsoluteUri);
+                Assert.Equal("http://i.want.to.go.home.com/click/feet/together?provider=google&state=This%20is%20some%20fake%20state", result.AbsoluteUri);
             }
         }
     }

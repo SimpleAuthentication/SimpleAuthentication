@@ -16,10 +16,10 @@ namespace Glimpse.WorldDomination.Web.Authentication
             var tabSection = Plugin.Create("", "Name", "Public Key", "Private Key", "Scopes");
 
             // Grab the registered authentication providers.
-            var registeredProviders = AuthenticationService.RegisteredAuthenticatedProviders;
+            var authenticationService = new AuthenticationService();
+            var registeredProviders = authenticationService.AuthenticationProviders.Values;
 
-            if (registeredProviders != null &&
-                registeredProviders.Any())
+            if (registeredProviders.Any())
             {
                 int count = 1;
                 foreach (var registeredProvider in registeredProviders)
@@ -56,7 +56,7 @@ namespace Glimpse.WorldDomination.Web.Authentication
 
         public string Name
         {
-            get { return "Registered Providers"; }
+            get { return "Authentication Providers"; }
         }
 
         public RuntimeEvent ExecuteOn

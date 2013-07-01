@@ -21,7 +21,6 @@ namespace WorldDomination.Web.Authentication.Tests
             var facebookProvider = authenticationProviders.Providers["facebook"];
 
             // Assert.
-            Assert.True(authenticationProviders.IncludeFakeProviders);
             Assert.Equal("testKey", facebookProvider.Key);
             Assert.Equal("testSecret", facebookProvider.Secret);
         }

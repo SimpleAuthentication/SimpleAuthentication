@@ -13,38 +13,47 @@ namespace WorldDomination.Web.Authentication
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private static ConcurrentDictionary<string, IAuthenticationProvider> _configuredProviders;
-
         public AuthenticationService()
         {
             TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
+
+            AuthenticationProviders =
+                new Lazy<IDictionary<string, IAuthenticationProvider>>(
+                    () => new Dictionary<string, IAuthenticationProvider>()).Value;
 
             Initialize();
         }
 
         #region Implementation of IAuthenticationService
 
-        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders
-        {
-            get { return ConfiguredProviders; }
-        }
+        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; private set; }
 
         public ITraceManager TraceManager { set; private get; }
 
         public void AddProvider(IAuthenticationProvider provider, bool replaceExisting = true)
         {
-            AddAProvider(provider, replaceExisting);
-        }
+            if (provider == null)
+            {
+                throw new ArgumentNullException("provider");
+            }
 
-        public void AddProviders(IEnumerable<IAuthenticationProvider> providers, bool replaceExisting = true)
-        {
-            AddSomeProviders(providers, replaceExisting);
+            var key = provider.Name.ToLower();
+
+            if (AuthenticationProviders.ContainsKey(key) &&
+                !replaceExisting)
+            {
+                throw new InvalidOperationException(
+                        string.Format(
+                            "The provider '{0}' already exists and cannot be overridden, either set `replaceExisting` to `true`, or remove the provider first.",
+                            provider.Name));
+            }
+
+            AuthenticationProviders[key] = provider;
         }
 
         public void RemoveProvider(string providerName)
         {
-            IAuthenticationProvider provider;
-            ConfiguredProviders.TryRemove(providerName, out provider);
+            AuthenticationProviders.Remove(providerName);
         }
 
         public Uri RedirectToAuthenticationProvider(IAuthenticationServiceSettings authenticationServiceSettings)
@@ -208,52 +217,9 @@ namespace WorldDomination.Web.Authentication
 
         #endregion
 
-        public static ICollection<IAuthenticationProvider> RegisteredAuthenticatedProviders
-        {
-            get { return ConfiguredProviders.Values; }
-        }
-
-        private static ConcurrentDictionary<string, IAuthenticationProvider> ConfiguredProviders
-        {
-            get
-            {
-                return _configuredProviders ??
-                       (_configuredProviders = new ConcurrentDictionary<string, IAuthenticationProvider>());
-            }
-        }
-
         private TraceSource TraceSource
         {
             get { return TraceManager["WD.Web.Authentication.AuthenticationService"]; }
-        }
-
-        public static void AddAProvider(IAuthenticationProvider provider, bool replaceExisting = true)
-        {
-            if (provider == null)
-            {
-                throw new ArgumentNullException("provider");
-            }
-
-            ConfiguredProviders.AddOrUpdate(provider.Name.ToLower(), provider, (key, authenticationProvider) =>
-            {
-                if (!replaceExisting)
-                {
-                    throw new InvalidOperationException(
-                        string.Format(
-                            "The provider '{0}' already exists and cannot be overridden, either set `replaceExisting` to `true`, or remove the provider first.",
-                            provider.Name));
-                }
-
-                return provider;
-            });
-        }
-
-        public static void AddSomeProviders(IEnumerable<IAuthenticationProvider> providers, bool replaceExisting = true)
-        {
-            foreach (var authenticationProvider in providers)
-            {
-                AddAProvider(authenticationProvider, replaceExisting);
-            }
         }
 
         private void Initialize()
