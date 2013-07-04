@@ -1,1 +1,0 @@
-﻿<%@ Application Codebehind="Global.asax.cs" Inherits="WorldDomination.Sample.MvcAuto.MvcApplication" Language="C#" %>

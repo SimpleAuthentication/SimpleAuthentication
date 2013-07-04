@@ -1,0 +1,1 @@
+﻿<%@ Application Codebehind="Global.asax.cs" Inherits="SimpleAuthentication.Sample.MvcAuto.MvcApplication" Language="C#" %>
