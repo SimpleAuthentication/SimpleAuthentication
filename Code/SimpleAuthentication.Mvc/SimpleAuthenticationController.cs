@@ -177,10 +177,13 @@ namespace SimpleAuthentication.Mvc
 
             IAuthenticationProvider provider = null;
 
-            if (_authenticationProviderFactory.AuthenticationProviders.ContainsKey(providerKey))
+            // Dictionary keys are case sensitive.
+            var key = providerKey.ToLowerInvariant();
+
+            if (_authenticationProviderFactory.AuthenticationProviders.ContainsKey(key))
             {
-                TraceSource.TraceVerbose("Found registered provider: " + providerKey);
-                provider = _authenticationProviderFactory.AuthenticationProviders[providerKey];
+                TraceSource.TraceVerbose("Found registered provider: " + key);
+                provider = _authenticationProviderFactory.AuthenticationProviders[key];
             }
             else if (providerKey.StartsWith("fake", StringComparison.InvariantCultureIgnoreCase))
             {
