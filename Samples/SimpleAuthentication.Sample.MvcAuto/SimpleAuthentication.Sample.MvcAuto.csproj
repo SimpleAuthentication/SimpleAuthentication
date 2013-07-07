@@ -108,12 +108,14 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\37signals_32.png" />
     <Content Include="Content\bitbucket_32-NotAvailable.png" />
     <Content Include="Content\bitbucket_32.png" />
     <Content Include="Content\facebook_32.png" />
     <Content Include="Content\facebook_mobile_32.png" />
     <Content Include="Content\github_32.png" />
     <Content Include="Content\google_32.png" />
+    <Content Include="Content\linkedin_32.png" />
     <Content Include="Content\main.css" />
     <Content Include="Content\myopenid_32.png" />
     <Content Include="Content\twitter_32.png" />
