@@ -8,10 +8,10 @@ namespace SimpleAuthentication.Mvc
 {
     public class SimpleAuthenticationController : Controller
     {
-        private const string SessionKeyAccessToken = "SimpleAuth.Session.AccessToken";
-        private const string SessionKeyState = "SimpleAuth.Session.StateToken";
-        private const string SessionKeyRedirectToUrl = "SimpleAuth.Session.RedirectToUrl";
-        private const string SessionKeyRedirectToProviderUrl = "SimpleAuth.Session.";
+        private const string SessionKeyAccessToken = "SimpleAuthentication.Session.AccessToken";
+        private const string SessionKeyState = "SimpleAuthentication.Session.StateToken";
+        private const string SessionKeyRedirectToUrl = "SimpleAuthentication.Session.RedirectToUrl";
+        private const string SessionKeyRedirectToProviderUrl = "SimpleAuthentication.Session.";
 
         private readonly AuthenticationProviderFactory _authenticationProviderFactory;
 
