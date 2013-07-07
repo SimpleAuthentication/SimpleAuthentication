@@ -25,7 +25,7 @@ namespace SimpleAuthentication.ExtraProviders
             get { return new[] {"user:email"}; }
         }
 
-        public override string ScopeKey
+        public override string ScopeSeparator
         {
             get { return ","; }
         }
@@ -99,11 +99,14 @@ namespace SimpleAuthentication.ExtraProviders
 
             try
             {
-                var request = new RestRequest("/user", Method.GET);
-                request.AddParameter(AccessTokenKey, accessToken.PublicToken);
+                var restRequest = new RestRequest("/user", Method.GET);
+                restRequest.AddParameter(AccessTokenKey, accessToken.PublicToken);
 
                 var restClient = RestClientFactory.CreateRestClient("https://api.github.com");
-                response = restClient.Execute<UserInfoResult>(request);
+                TraceSource.TraceVerbose("Retrieving user information. GitHub Endpoint: {0}",
+                                         restClient.BuildUri(restRequest).AbsoluteUri);
+
+                response = restClient.Execute<UserInfoResult>(restRequest);
             }
             catch (Exception exception)
             {
