@@ -1,0 +1,27 @@
+﻿@model HandleErrorInfo
+
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Error has occured. Oh Noes!";
+}
+
+<div id="container">
+    <h2>It's a Trap!</h2>
+    
+    <br/>
+
+    <img src="/Content/AdmiralAckbarError.png"/>
+    
+    <br/>
+
+    <p>Oh well - another error has occurred.</p>
+    
+    @if (Model != null)
+    {
+        <hr />
+        <p><code>@Model.Exception.GetType().Name</code> thrown in <code>@Model.ControllerName @Model.ActionName</code></p>
+        <p>Error Details:</p>
+        <p>@Model.Exception.Message</p>
+    }
+
+</div>

@@ -109,6 +109,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\37signals_32.png" />
+    <Content Include="Content\AdmiralAckbarError.png" />
     <Content Include="Content\bitbucket_32-NotAvailable.png" />
     <Content Include="Content\bitbucket_32.png" />
     <Content Include="Content\facebook_32.png" />
@@ -152,6 +153,7 @@
     <None Include="system.diagnostics.Release.config">
       <DependentUpon>system.diagnostics.config</DependentUpon>
     </None>
+    <Content Include="Views\Shared\Error.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
