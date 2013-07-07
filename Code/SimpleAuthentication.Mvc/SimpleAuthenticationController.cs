@@ -11,6 +11,7 @@ namespace SimpleAuthentication.Mvc
         private const string SessionKeyAccessToken = "SimpleAuth.Session.AccessToken";
         private const string SessionKeyState = "SimpleAuth.Session.StateToken";
         private const string SessionKeyRedirectToUrl = "SimpleAuth.Session.RedirectToUrl";
+        private const string SessionKeyRedirectToProviderUrl = "SimpleAuth.Session.";
 
         private readonly AuthenticationProviderFactory _authenticationProviderFactory;
 
@@ -38,7 +39,7 @@ namespace SimpleAuthentication.Mvc
 
         private TraceSource TraceSource
         {
-            get { return TraceManager["WD.Web.Authentication.Mvc.WorldDominationAuthenticationController"]; }
+            get { return TraceManager["SimpleAuthentication.Mvc.SimpleAuthenticationController"]; }
         }
 
         public RedirectResult RedirectToProvider(RedirectToProviderInputModel inputModel)
@@ -88,7 +89,8 @@ namespace SimpleAuthentication.Mvc
 
             // Remember any important information for after we've come back.
             Session[SessionKeyState] = redirectToAuthenticateSettings.State;
-            Session[SessionKeyRedirectToUrl] = Request.UrlReferrer; 
+            Session[SessionKeyRedirectToUrl] = Request.UrlReferrer;
+            Session[SessionKeyRedirectToProviderUrl] = redirectToAuthenticateSettings.RedirectUri.AbsoluteUri;
 
             // Now redirect :)
             return Redirect(redirectToAuthenticateSettings.RedirectUri.AbsoluteUri);
@@ -112,11 +114,16 @@ namespace SimpleAuthentication.Mvc
 
             #endregion
 
+            var previousRedirectUrl = string.IsNullOrEmpty((string) Session[SessionKeyRedirectToProviderUrl])
+                                          ? "N.A."
+                                          : (string) Session[SessionKeyRedirectToProviderUrl];
+            TraceSource.TraceInformation("Previous Redirect Url: " + previousRedirectUrl);
+
             #region Deserialize Tokens, etc.
 
             // Retrieve any (previously) serialized access token stuff. (eg. public/private keys and state).
             // TODO: Check if this is an access token or an auth token thingy-thing.
-            TraceSource.TraceVerbose("Retrieving AccessToken, StateToken and redirectToUrl.");
+            TraceSource.TraceVerbose("Retrieving (local serializaed) AccessToken, State and RedirectToUrl.");
             var accessToken = Session[SessionKeyAccessToken] as AccessToken;
             var state = Session[SessionKeyState] as string;
             var redirectToUrl = Session[SessionKeyRedirectToUrl] as Uri;
@@ -137,7 +144,7 @@ namespace SimpleAuthentication.Mvc
                 var callbackUri = GenerateCallbackUri(provider.Name);
 
                 // Grab the user information.
-                model.AuthenticatedClient = provider.AuthenticateClient(Request.Params, state, callbackUri);
+                model.AuthenticatedClient = provider.AuthenticateClient(Request.QueryString, state, callbackUri);
             }
             catch (Exception exception)
             {

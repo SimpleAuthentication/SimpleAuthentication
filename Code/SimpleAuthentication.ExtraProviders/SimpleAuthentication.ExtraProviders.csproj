@@ -7,8 +7,8 @@
     <ProjectGuid>{D75207D5-FA68-4DC6-939A-2AC3CAD4BEAD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WorldDomination.Web.Authentication.ExtraProviders</RootNamespace>
-    <AssemblyName>WorldDomination.Web.Authentication.ExtraProviders</AssemblyName>
+    <RootNamespace>SimpleAuthentication.ExtraProviders</RootNamespace>
+    <AssemblyName>SimpleAuthentication.ExtraProviders</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -52,22 +52,38 @@
     </Compile>
     <Compile Include="AmazonProvider.cs" />
     <Compile Include="Amazon\AccessTokenResult.cs" />
-    <Compile Include="Amazon\AmazonAuthenticationServiceSettings.cs" />
     <Compile Include="Amazon\UserInfoResult.cs" />
-    <Compile Include="GitHubProvider.cs" />
-    <Compile Include="GitHub\AccessTokenResult.cs" />
-    <Compile Include="GitHub\GitHubAuthenticationServiceSettings.cs" />
-    <Compile Include="GitHub\UserInfoResult.cs" />
-    <Compile Include="LinkedInProvider.cs" />
-    <Compile Include="LinkedIn\AccessTokenResult.cs" />
-    <Compile Include="LinkedIn\LinkedInAuthenticationServiceSettings.cs" />
-    <Compile Include="LinkedIn\UserInfoResult.cs" />
-    <Compile Include="OpenIdProvider.cs" />
-    <Compile Include="OpenId\OpenIdAuthenticationServiceSettings.cs" />
+    <Compile Include="ThirtySevenSignalsProvider.cs" />
+    <Compile Include="GitHubProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GitHub\AccessTokenResult.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GitHub\UserInfoResult.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="LinkedInProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="LinkedIn\AccessTokenResult.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="LinkedIn\UserInfoResult.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="OpenIdProvider.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ThirtySevenSignals\AccessTokenResult.cs" />
+    <Compile Include="ThirtySevenSignals\Account.cs" />
+    <Compile Include="ThirtySevenSignals\Identity.cs" />
+    <Compile Include="ThirtySevenSignals\PersonResult.cs" />
+    <Compile Include="ThirtySevenSignals\UserInfoResult.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WorldDomination.Web.Authentication\WorldDomination.Web.Authentication.csproj">
+    <ProjectReference Include="..\SimpleAuthentication\SimpleAuthentication.csproj">
       <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
       <Name>WorldDomination.Web.Authentication</Name>
     </ProjectReference>

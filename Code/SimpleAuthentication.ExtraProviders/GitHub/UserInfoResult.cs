@@ -1,4 +1,4 @@
-﻿namespace WorldDomination.Web.Authentication.ExtraProviders.GitHub
+﻿namespace SimpleAuthentication.ExtraProviders.GitHub
 {
     public class UserInfoResult
     {

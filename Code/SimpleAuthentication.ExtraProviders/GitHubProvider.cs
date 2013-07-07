@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Net;
 using RestSharp;
-using WorldDomination.Web.Authentication.ExtraProviders.GitHub;
-using WorldDomination.Web.Authentication.Providers;
-using WorldDomination.Web.Authentication.Tracing;
+using SimpleAuthentication.ExtraProviders.GitHub;
+using SimpleAuthentication.Providers;
+using SimpleAuthentication.Tracing;
 
-namespace WorldDomination.Web.Authentication.ExtraProviders
+namespace SimpleAuthentication.ExtraProviders
 {
     public class GitHubProvider : BaseOAuth20Provider<AccessTokenResult>
     {
@@ -16,84 +15,19 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
         public GitHubProvider(ProviderParams providerParams) : base("GitHub", providerParams)
         {
+            AuthenticateRedirectionUrl = new Uri("https://github.com/login/oauth/authorize");
         }
 
-        #region Implementation of IAuthenticationProvider
-
-        public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
-        {
-            get { return new GitHubAuthenticationServiceSettings(); }
-        }
-
-        public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
-        {
-            if (authenticationServiceSettings == null)
-            {
-                throw new ArgumentNullException("authenticationServiceSettings");
-            }
-
-            if (authenticationServiceSettings.CallBackUri == null)
-            {
-                throw new ArgumentException("authenticationServiceSettings.CallBackUri");
-            }
-
-            var state = string.IsNullOrEmpty(authenticationServiceSettings.State)
-                            ? string.Empty
-                            : "&state=" + authenticationServiceSettings.State;
-
-            var oauthDialogUri =
-                string.Format(
-                    "https://github.com/login/oauth/authorize?client_id={0}{1}&redirect_uri={2}&response_type=code{3}",
-                    Key, GetScope(), authenticationServiceSettings.CallBackUri.AbsoluteUri, state);
-
-            var redirectUri = new Uri(oauthDialogUri);
-            TraceSource.TraceInformation("GitHub redirection uri: {0}.", redirectUri);
-
-            return redirectUri;
-        }
-
-        #endregion
-
-        #region Implementation of BaseOAuth20Provider
+        #region BaseOAuth20Token<AccessTokenResult> Implementation
 
         public override IEnumerable<string> DefaultScopes
         {
             get { return new[] {"user:email"}; }
         }
 
-        protected override string RetrieveAuthorizationCode(NameValueCollection parameters, string existingState = null)
+        public override string ScopeKey
         {
-            if (parameters == null)
-            {
-                throw new ArgumentNullException("parameters");
-            }
-
-            if (parameters.Count <= 0)
-            {
-                throw new ArgumentOutOfRangeException("parameters");
-            }
-
-            /* Documentation:
-               Github returns an authorization code to your application if the user grants your application the permissions it requested. 
-               The authorization code is returned to your application in the query string parameter code. If the state parameter was included in the request,
-               then it is also included in the response. */
-            var code = parameters["code"];
-            var error = parameters["error"];
-
-            // First check for any errors.
-            if (!string.IsNullOrEmpty(error))
-            {
-                throw new AuthenticationException(
-                    "Failed to retrieve an authorization code from GitHub. The error provided is: " + error);
-            }
-
-            // Otherwise, we need a code.
-            if (string.IsNullOrEmpty(code))
-            {
-                throw new AuthenticationException("No code parameter provided in the response query string from GitHub.");
-            }
-
-            return code;
+            get { return ","; }
         }
 
         protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
@@ -111,8 +45,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             }
 
             var restRequest = new RestRequest("/login/oauth/access_token", Method.POST);
-            restRequest.AddParameter("client_id", Key);
-            restRequest.AddParameter("client_secret", Secret);
+            restRequest.AddParameter("client_id", PublicApiKey);
+            restRequest.AddParameter("client_secret", SecretApiKey);
             restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
             restRequest.AddParameter("code", authorizationCode);
             restRequest.AddParameter("grant_type", "authorization_code");

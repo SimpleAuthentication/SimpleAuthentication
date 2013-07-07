@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Net;
 using RestSharp;
-using WorldDomination.Web.Authentication.ExtraProviders.Amazon;
-using WorldDomination.Web.Authentication.Providers;
-using WorldDomination.Web.Authentication.Tracing;
+using SimpleAuthentication.ExtraProviders.Amazon;
+using SimpleAuthentication.Providers;
+using SimpleAuthentication.Tracing;
 
-namespace WorldDomination.Web.Authentication.ExtraProviders
+namespace SimpleAuthentication.ExtraProviders
 {
     //https://images-na.ssl-images-amazon.com/images/G/01/lwa/dev/docs/website-developer-guide._TTH_.pdf
     //http://login.amazon.com
@@ -18,83 +17,10 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
         public AmazonProvider(ProviderParams providerParams) : base("Amazon", providerParams)
         {
+            AuthenticateRedirectionUrl = new Uri("https://www.amazon.com/ap/oa");
         }
 
-        #region Implementation of IAuthenticationProvider
-
-        public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
-        {
-            get { return new AmazonAuthenticationServiceSettings(); }
-        }
-
-        public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
-        {
-            if (authenticationServiceSettings == null)
-            {
-                throw new ArgumentNullException("authenticationServiceSettings");
-            }
-
-            if (authenticationServiceSettings.CallBackUri == null)
-            {
-                throw new ArgumentException("authenticationServiceSettings.CallBackUri");
-            }
-
-            var state = string.IsNullOrEmpty(authenticationServiceSettings.State)
-                            ? string.Empty
-                            : "&state=" + authenticationServiceSettings.State;
-
-            var uriEncoded = Uri.EscapeUriString(authenticationServiceSettings.CallBackUri.AbsoluteUri);
-
-            var redirectUri =
-                string.Format(
-                    "https://www.amazon.com/ap/oa?client_id={0}{3}&redirect_uri={1}&response_type=code{2}",
-                    Key, uriEncoded, state, GetScope());
-
-            TraceSource.TraceInformation("Amazon redirection uri: {0}.", redirectUri);
-
-            return new Uri(redirectUri);
-        }
-
-        #endregion
-
-        #region Implemetation of BaseOAuth20Provider
-
-        protected override string RetrieveAuthorizationCode(NameValueCollection queryStringParameters,
-                                                            string existingState = null)
-        {
-            if (queryStringParameters == null)
-            {
-                throw new ArgumentNullException("queryStringParameters");
-            }
-
-            if (queryStringParameters.Count <= 0)
-            {
-                throw new ArgumentOutOfRangeException("queryStringParameters");
-            }
-
-            var code = queryStringParameters["code"];
-            var error = queryStringParameters["error"];
-
-            // First check for any errors.
-            if (!string.IsNullOrEmpty(error))
-            {
-                var errorMessage =
-                    string.Format("Failed to retrieve an authorization code from Amazon. The error provided is: {0}",
-                                  error);
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            // Otherwise, we need a code.
-            if (string.IsNullOrEmpty(code))
-            {
-                const string errorMessage = "No code parameter provided in the response query string from Amazon.";
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            return code;
-        }
+        #region BaseOAuth20Token<AccessTokenResult> Implementation
 
         protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
                                                                                        Uri redirectUri)
@@ -112,8 +38,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
 
             var restRequest = new RestRequest("/auth/o2/token", Method.POST);
 
-            restRequest.AddParameter("client_id", Key);
-            restRequest.AddParameter("client_secret", Secret);
+            restRequest.AddParameter("client_id", PublicApiKey);
+            restRequest.AddParameter("client_secret", SecretApiKey);
             restRequest.AddParameter("code", authorizationCode);
             restRequest.AddParameter("grant_type", "authorization_code");
             restRequest.AddParameter("redirect_uri", redirectUri);
@@ -224,11 +150,6 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
         public override IEnumerable<string> DefaultScopes
         {
             get { return new[] {"profile"}; }
-        }
-
-        public override string ScopeSeparator
-        {
-            get { return " "; }
         }
     }
 }

@@ -23,61 +23,6 @@ namespace SimpleAuthentication.Providers
 
         #region BaseOAuth20Token<AccessTokenResult> Implementation
 
-        protected override string CreateRedirectionQuerystringParameters(Uri callbackUri, string state)
-        {
-            if (callbackUri == null)
-            {
-                throw new ArgumentNullException("callbackUri");
-            }
-
-            if (string.IsNullOrEmpty(state))
-            {
-                throw new ArgumentNullException("state");
-            }
-
-            return string.Format("client_id={0}&redirect_uri={1}&response_type=code{2}{3}",
-                    PublicApiKey, callbackUri.AbsoluteUri, GetScope(), GetQuerystringState(state));
-        }
-
-        protected override string RetrieveAuthorizationCode(NameValueCollection queryStringParameters)
-        {
-            if (queryStringParameters == null)
-            {
-                throw new ArgumentNullException("queryStringParameters");
-            }
-
-            if (queryStringParameters.Count <= 0)
-            {
-                throw new ArgumentOutOfRangeException("queryStringParameters");
-            }
-
-            /* Documentation:
-               Google returns an authorization code to your application if the user grants your application the permissions it requested. 
-               The authorization code is returned to your application in the query string parameter code. If the state parameter was included in the request,
-               then it is also included in the response. */
-            var code = queryStringParameters["code"];
-            var error = queryStringParameters["error"];
-
-            // First check for any errors.
-            if (!string.IsNullOrEmpty(error))
-            {
-                var errorMessage = "Failed to retrieve an authorization code from Google. The error provided is: " +
-                                   error;
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            // Otherwise, we need a code.
-            if (string.IsNullOrEmpty(code))
-            {
-                const string errorMessage = "No code parameter provided in the response query string from Google.";
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            return code;
-        }
-
         protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
                                                                                        Uri redirectUri)
         {

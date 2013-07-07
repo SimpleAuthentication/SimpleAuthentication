@@ -9,14 +9,20 @@ namespace SimpleAuthentication.Providers
     {
         private string _stateKey;
 
-        protected BaseProvider(string name)
+        protected BaseProvider(string name, string authenticationType)
         {
             if (string.IsNullOrEmpty(name))
             {
                 throw new ArgumentNullException("name");
             }
 
+            if (string.IsNullOrEmpty(authenticationType))
+            {
+                throw new ArgumentNullException("authenticationType");
+            }
+
             Name = name;
+            AuthenticationType = authenticationType;
 
             TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
         }
@@ -30,6 +36,8 @@ namespace SimpleAuthentication.Providers
         }
 
         public string Name { get; private set; }
+
+        public string AuthenticationType { get; private set; }
 
         public Uri AuthenticateRedirectionUrl { get; set; }
 

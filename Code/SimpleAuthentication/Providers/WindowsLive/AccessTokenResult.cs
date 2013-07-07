@@ -1,4 +1,4 @@
-﻿namespace WorldDomination.Web.Authentication.Providers.WindowsLive
+﻿namespace SimpleAuthentication.Providers.WindowsLive
 {
     public class AccessTokenResult
     {

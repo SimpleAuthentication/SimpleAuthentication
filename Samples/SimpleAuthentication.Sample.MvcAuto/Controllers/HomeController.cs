@@ -9,7 +9,7 @@ namespace SimpleAuthentication.Sample.MvcAuto.Controllers
         public ActionResult Index()
         {
             var traceManager = new TraceManager();
-            var traceSource = traceManager["WD.Sample.MvcAuto.Controllers.HomeController"];
+            var traceSource = traceManager["SimpleAuthentication.Sample.MvcAuto.Controllers.HomeController"];
             traceSource.TraceVerbose("Hi There! Lets test this out :)");
 
             return View("Index", new IndexViewModel());

@@ -1,4 +1,4 @@
-﻿namespace WorldDomination.Web.Authentication.ExtraProviders.LinkedIn
+﻿namespace SimpleAuthentication.ExtraProviders.LinkedIn
 {
     public class UserInfoResult
     {

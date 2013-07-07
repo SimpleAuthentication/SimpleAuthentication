@@ -5,7 +5,7 @@ namespace SimpleAuthentication.Providers
 {
     public class FakeProvider : BaseProvider, IFakeAuthenticationProvider
     {
-        public FakeProvider(string name) : base(name)
+        public FakeProvider(string name) : base(name, "Fake/Custom")
         {
             // Defaults.
             AccessToken = new AccessToken

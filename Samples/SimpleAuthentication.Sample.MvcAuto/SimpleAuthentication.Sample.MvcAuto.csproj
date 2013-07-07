@@ -49,13 +49,13 @@
     <Reference Include="Autofac.Integration.Mvc">
       <HintPath>..\..\packages\Autofac.Mvc4.3.0.0\lib\net40\Autofac.Integration.Mvc.dll</HintPath>
     </Reference>
-    <Reference Include="Glimpse.AspNet, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Glimpse.AspNet, Version=1.3.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Glimpse.AspNet.1.3.0\lib\net40\Glimpse.AspNet.dll</HintPath>
+      <HintPath>..\..\packages\Glimpse.AspNet.1.3.1\lib\net40\Glimpse.AspNet.dll</HintPath>
     </Reference>
-    <Reference Include="Glimpse.Core, Version=1.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Glimpse.Core, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Glimpse.1.4.2\lib\net40\Glimpse.Core.dll</HintPath>
+      <HintPath>..\..\packages\Glimpse.1.5.0\lib\net40\Glimpse.Core.dll</HintPath>
     </Reference>
     <Reference Include="Glimpse.Mvc4, Version=1.3.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -127,6 +127,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="GlimpseSecurityPolicy.cs" />
     <Compile Include="Models\IndexViewModel.cs" />
     <Compile Include="Controllers\SampleMvcAutoAuthenticationCallbackProvider.cs" />
     <Compile Include="Global.asax.cs">
@@ -159,6 +160,10 @@
     <ProjectReference Include="..\..\Code\Glimpse.SimpleAuthentication\Glimpse.SimpleAuthentication.csproj">
       <Project>{2bafafc7-635a-40a4-9b25-df789c5976b7}</Project>
       <Name>Glimpse.SimpleAuthentication</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Code\SimpleAuthentication.ExtraProviders\SimpleAuthentication.ExtraProviders.csproj">
+      <Project>{d75207d5-fa68-4dc6-939a-2ac3cad4bead}</Project>
+      <Name>SimpleAuthentication.ExtraProviders</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Code\SimpleAuthentication.Mvc\SimpleAuthentication.Mvc.csproj">
       <Project>{02c40d4a-17f3-465b-88d6-64d238a32396}</Project>

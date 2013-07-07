@@ -12,7 +12,7 @@ namespace SimpleAuthentication.Providers
         : BaseProvider, IPublicPrivateKeyProvider, IScopedProvider where TAccessTokenResult : class, new()
     {
         protected BaseOAuth20Provider(string name, ProviderParams providerParams)
-            : base(name)
+            : base(name, "OAuth 2.0")
         {
             providerParams.Validate();
 
@@ -71,7 +71,7 @@ namespace SimpleAuthentication.Providers
                 throw new AuthenticationException("PublicApiKey has no value. Please set this value.");
             }
 
-            // Generate the redirection uri.
+            // Generate some state which will be used in the redirection uri and used for CSRF checks.
             var state = Guid.NewGuid().ToString();
 
             // Now the redirection uri.
@@ -110,6 +110,9 @@ namespace SimpleAuthentication.Providers
             }
 
             #endregion
+
+            TraceSource.TraceInformation("Callback parameters: " +
+                string.Join("&", queryStringParameters.AllKeys.Select(key => key + "=" + queryStringParameters[key]).ToArray()));
 
             #region Cross Site Request Forgery checks -> state == state?
 
@@ -167,9 +170,62 @@ namespace SimpleAuthentication.Providers
         /// <summary>
         /// Create the provider authentication parameters which make up the end part of the redirection url. eg. state=aaa&foo=bar, etc.
         /// </summary>
-        protected abstract string CreateRedirectionQuerystringParameters(Uri callbackUri, string state);
+        protected virtual string CreateRedirectionQuerystringParameters(Uri callbackUri, string state)
+        {
+            if (callbackUri == null)
+            {
+                throw new ArgumentNullException("callbackUri");
+            }
 
-        protected abstract string RetrieveAuthorizationCode(NameValueCollection queryStringParameters);
+            if (string.IsNullOrEmpty(state))
+            {
+                throw new ArgumentNullException("state");
+            }
+
+            return string.Format("client_id={0}&redirect_uri={1}&response_type=code{2}{3}",
+                    PublicApiKey, callbackUri.AbsoluteUri, GetScope(), GetQuerystringState(state));
+        }
+
+        protected virtual string RetrieveAuthorizationCode(NameValueCollection queryStringParameters)
+        {
+            if (queryStringParameters == null)
+            {
+                throw new ArgumentNullException("queryStringParameters");
+            }
+
+            if (queryStringParameters.Count <= 0)
+            {
+                throw new ArgumentOutOfRangeException("queryStringParameters");
+            }
+
+            /* Documentation:
+               Google returns an authorization code to your application if the user grants your application the permissions it requested. 
+               The authorization code is returned to your application in the query string parameter code. If the state parameter was included in the request,
+               then it is also included in the response. */
+            var code = queryStringParameters["code"];
+            var error = queryStringParameters["error"];
+
+            // First check for any errors.
+            if (!string.IsNullOrEmpty(error))
+            {
+                var errorMessage =
+                    string.Format("Failed to retrieve an authorization code from {0}. The error provided is: {1}" +
+                                  Name, error);
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            // Otherwise, we need a code.
+            if (string.IsNullOrEmpty(code))
+            {
+                string errorMessage = string.Format(
+                    "No code parameter provided in the response query string from {0}.", Name);
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            return code;
+        }
 
         protected abstract IRestResponse<TAccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
                                                                                         Uri redirectUri);

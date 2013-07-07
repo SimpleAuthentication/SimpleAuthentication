@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using RestSharp;
-using WorldDomination.Web.Authentication.Providers.WindowsLive;
-using WorldDomination.Web.Authentication.Tracing;
+using SimpleAuthentication.Providers.WindowsLive;
+using SimpleAuthentication.Tracing;
 
-namespace WorldDomination.Web.Authentication.Providers
+namespace SimpleAuthentication.Providers
 {
     public class WindowsLiveProvider : BaseOAuth20Provider<AccessTokenResult>
     {
@@ -14,74 +14,66 @@ namespace WorldDomination.Web.Authentication.Providers
         // REFERENCE: http://msdn.microsoft.com/en-us/library/live/hh243647.aspx
         // *********************************************************************
 
-        private const string RedirectUrl =
-            "https://login.live.com/oauth20_authorize.srf?client_id={0}{2}&response_type=code&redirect_uri={1}";
-
         private const string AccessTokenKey = "access_token";
 
         public WindowsLiveProvider(ProviderParams providerParams) : base("WindowsLive", providerParams)
         {
+            AuthenticateRedirectionUrl = new Uri("https://login.live.com/oauth20_authorize.srf");
         }
 
-        #region Implementation of IAuthenticationProvider
+        #region BaseOAuth20Token<AccessTokenResult> Implementation
 
-        public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
-        {
-            get { return new WindowsLiveAuthenticationServiceSettings(); }
-        }
+        //protected override string CreateRedirectionQuerystringParameters(Uri callbackUri, string state)
+        //{
+        //    if (callbackUri == null)
+        //    {
+        //        throw new ArgumentNullException("callbackUri");
+        //    }
 
-        public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
-        {
-            var oauthDialogUri = string.Format(RedirectUrl, Key,
-                                               authenticationServiceSettings.CallBackUri.AbsoluteUri, GetScope());
+        //    if (string.IsNullOrEmpty(state))
+        //    {
+        //        throw new ArgumentNullException("state");
+        //    }
 
-            oauthDialogUri += string.IsNullOrEmpty(authenticationServiceSettings.State)
-                                  ? string.Empty
-                                  : "&state=" + authenticationServiceSettings.State;
+        //    return string.Format("client_id={0}&redirect_uri={1}&response_type=code{2}{3}",
+        //                         PublicApiKey, callbackUri.AbsoluteUri, GetScope(), GetQuerystringState(state));
+        //}
 
-            return new Uri(oauthDialogUri);
-        }
+        //protected override string RetrieveAuthorizationCode(NameValueCollection queryStringParameters)
+        //{
+        //    if (queryStringParameters == null)
+        //    {
+        //        throw new ArgumentNullException("queryStringParameters");
+        //    }
 
-        #endregion
+        //    if (queryStringParameters.Count <= 0)
+        //    {
+        //        throw new ArgumentOutOfRangeException("queryStringParameters");
+        //    }
 
-        #region BaseOAuth20Provider Members
+        //    var code = queryStringParameters["code"];
+        //    var error = queryStringParameters["error"];
 
-        protected override string RetrieveAuthorizationCode(NameValueCollection queryStringParameters,
-                                                            string existingState = null)
-        {
-            if (queryStringParameters == null)
-            {
-                throw new ArgumentNullException("queryStringParameters");
-            }
+        //    // First check for any errors.
+        //    if (!string.IsNullOrEmpty(error))
+        //    {
+        //        var errorMessage =
+        //            "Failed to retrieve an authorization code from Microsoft Live. The error provided is: " + error;
+        //        TraceSource.TraceError(errorMessage);
+        //        throw new AuthenticationException(errorMessage);
+        //    }
 
-            if (queryStringParameters.Count <= 0)
-            {
-                throw new ArgumentOutOfRangeException("queryStringParameters");
-            }
+        //    // Otherwise, we need a code.
+        //    if (string.IsNullOrEmpty(code))
+        //    {
+        //        const string errorMessage =
+        //            "No code parameter provided in the response query string from Microsoft Live.";
+        //        TraceSource.TraceError(errorMessage);
+        //        throw new AuthenticationException(errorMessage);
+        //    }
 
-            var code = queryStringParameters["code"];
-            var error = queryStringParameters["error"];
-
-            // First check for any errors.
-            if (!string.IsNullOrEmpty(error))
-            {
-                var errorMessage =
-                    "Failed to retrieve an authorization code from Microsoft Live. The error provided is: " + error;
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            // Otherwise, we need a code.
-            if (string.IsNullOrEmpty(code))
-            {
-                const string errorMessage =
-                    "No code parameter provided in the response query string from Microsoft Live.";
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            return code;
-        }
+        //    return code;
+        //}
 
         protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
                                                                                        Uri redirectUri)
@@ -98,9 +90,9 @@ namespace WorldDomination.Web.Authentication.Providers
             }
 
             var restRequest = new RestRequest("/oauth20_token.srf");
-            restRequest.AddParameter("client_id", Key);
+            restRequest.AddParameter("client_id", PublicApiKey);
             restRequest.AddParameter("redirect_uri", redirectUri);
-            restRequest.AddParameter("client_secret", Secret);
+            restRequest.AddParameter("client_secret", SecretApiKey);
             restRequest.AddParameter("code", authorizationCode);
             restRequest.AddParameter("grant_type", "authorization_code");
 

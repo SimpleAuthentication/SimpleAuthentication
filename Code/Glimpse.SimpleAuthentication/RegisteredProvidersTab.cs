@@ -13,7 +13,7 @@ namespace Glimpse.SimpleAuthentication
 
         public object GetData(ITabContext context)
         {
-            var tabSection = Plugin.Create("", "Name", "Public Key", "Private Key", "Scopes");
+            var tabSection = Plugin.Create("", "Name", "Type", "Public Key", "Private Key", "Scopes");
 
             // Grab the registered authentication providers.
             var authenticationService = new AuthenticationProviderFactory();
@@ -24,7 +24,7 @@ namespace Glimpse.SimpleAuthentication
                 int count = 1;
                 foreach (var registeredProvider in registeredProviders)
                 {
-                    string key = "-", secret = "-", scopes = "-";
+                    string publicApiKey = "-", secretApiKey = "-", scopes = "-";
                     var scopedProvider = registeredProvider as IScopedProvider;
                     if (scopedProvider != null)
                     {
@@ -38,15 +38,16 @@ namespace Glimpse.SimpleAuthentication
                     var publicPrivateKeyProvider = registeredProvider as IPublicPrivateKeyProvider;
                     if (publicPrivateKeyProvider != null)
                     {
-                        key = publicPrivateKeyProvider.PublicApiKey;
-                        secret = publicPrivateKeyProvider.SecretApiKey;
+                        publicApiKey = publicPrivateKeyProvider.PublicApiKey;
+                        secretApiKey = publicPrivateKeyProvider.SecretApiKey;
                     }
 
                     tabSection.AddRow()
                               .Column(count++)
                               .Column(registeredProvider.Name)
-                              .Column(key)
-                              .Column(secret)
+                              .Column(registeredProvider.AuthenticationType)
+                              .Column(publicApiKey)
+                              .Column(secretApiKey)
                               .Column(scopes);
                 }
             }

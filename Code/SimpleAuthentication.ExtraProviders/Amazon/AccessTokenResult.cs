@@ -1,4 +1,4 @@
-﻿namespace WorldDomination.Web.Authentication.ExtraProviders.Amazon
+﻿namespace SimpleAuthentication.ExtraProviders.Amazon
 {
     public class AccessTokenResult
     {

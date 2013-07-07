@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Net;
 using RestSharp;
-using WorldDomination.Web.Authentication.ExtraProviders.LinkedIn;
-using WorldDomination.Web.Authentication.Providers;
-using WorldDomination.Web.Authentication.Tracing;
+using SimpleAuthentication.ExtraProviders.LinkedIn;
+using SimpleAuthentication.Providers;
+using SimpleAuthentication.Tracing;
 
-namespace WorldDomination.Web.Authentication.ExtraProviders
+namespace SimpleAuthentication.ExtraProviders
 {
     // REFERENCE: https://developers.LinkedIn.com/accounts/docs/OAuth2Login
 
@@ -20,84 +19,11 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
         {
         }
 
-        #region Implementation of IAuthenticationProvider
-
-        public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
-        {
-            get { return new LinkedInAuthenticationServiceSettings(); }
-        }
-
-        public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
-        {
-            if (authenticationServiceSettings == null)
-            {
-                throw new ArgumentNullException("authenticationServiceSettings");
-            }
-
-            if (authenticationServiceSettings.CallBackUri == null)
-            {
-                throw new ArgumentException("authenticationServiceSettings.CallBackUri");
-            }
-
-            var state = string.IsNullOrEmpty(authenticationServiceSettings.State)
-                            ? string.Empty
-                            : "&state=" + authenticationServiceSettings.State;
-
-            var oauthDialogUri =
-                string.Format(
-                    "https://www.linkedin.com/uas/oauth2/authorization?response_type=code&client_id={0}&redirect_uri={1}{2}{3}",
-                    Key, authenticationServiceSettings.CallBackUri.AbsoluteUri, GetScope(), state);
-
-            return new Uri(oauthDialogUri);
-        }
-
-        #endregion
-
-        #region Implementation of BaseOAuth20Provider
+        #region BaseOAuth20Token<AccessTokenResult> Implementation
 
         public override IEnumerable<string> DefaultScopes
         {
             get { return new[] {"r_basicprofile", "r_emailaddress"}; }
-        }
-
-        protected override string RetrieveAuthorizationCode(NameValueCollection queryStringParameters,
-                                                            string existingState = null)
-        {
-            if (queryStringParameters == null)
-            {
-                throw new ArgumentNullException("queryStringParameters");
-            }
-
-            if (queryStringParameters.Count <= 0)
-            {
-                throw new ArgumentOutOfRangeException("queryStringParameters");
-            }
-
-            /* Documentation:
-               LinkedIn returns an authorization code to your application if the user grants your application the permissions it requested. 
-               The authorization code is returned to your application in the query string parameter code. If the state parameter was included in the request,
-               then it is also included in the response. */
-            var code = queryStringParameters["code"];
-            var error = queryStringParameters["error"];
-
-            // First check for any errors.
-            if (!string.IsNullOrEmpty(error))
-            {
-                var errorMessage = "Failed to retrieve an authorization code from LinkedIn. The error provided is: " +
-                                   error;
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            // Otherwise, we need a code.
-            if (string.IsNullOrEmpty(code))
-            {
-                const string errorMessage = "No code parameter provided in the response query string from LinkedIn.";
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            return code;
         }
 
         protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
@@ -115,8 +41,8 @@ namespace WorldDomination.Web.Authentication.ExtraProviders
             }
 
             var restRequest = new RestRequest("/uas/oauth2/accessToken", Method.POST);
-            restRequest.AddParameter("client_id", Key);
-            restRequest.AddParameter("client_secret", Secret);
+            restRequest.AddParameter("client_id", PublicApiKey);
+            restRequest.AddParameter("client_secret", SecretApiKey);
             restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
             restRequest.AddParameter("code", authorizationCode);
             restRequest.AddParameter("grant_type", "authorization_code");

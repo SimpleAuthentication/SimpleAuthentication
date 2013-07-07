@@ -17,6 +17,11 @@ namespace SimpleAuthentication
         string Name { get; }
 
         /// <summary>
+        /// What type of authentication is this? OAuth? Custom? 
+        /// </summary>
+        string AuthenticationType { get; }
+
+        /// <summary>
         /// (Optional) Authentication resource/endpoint we should redirect to.
         /// </summary>
         Uri AuthenticateRedirectionUrl { get; set; }

@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using SimpleAuthentication.Config;
-using SimpleAuthentication.Providers;
 using SimpleAuthentication.Tracing;
 
 namespace SimpleAuthentication
@@ -42,9 +39,9 @@ namespace SimpleAuthentication
                 !replaceExisting)
             {
                 throw new InvalidOperationException(
-                        string.Format(
-                            "The provider '{0}' already exists and cannot be overridden, either set `replaceExisting` to `true`, or remove the provider first.",
-                            provider.Name));
+                    string.Format(
+                        "The provider '{0}' already exists and cannot be overridden, either set `replaceExisting` to `true`, or remove the provider first.",
+                        provider.Name));
             }
 
             AuthenticationProviders[key] = provider;
@@ -59,7 +56,7 @@ namespace SimpleAuthentication
 
         private TraceSource TraceSource
         {
-            get { return TraceManager["WD.Web.Authentication.AuthenticationProviderFactory"]; }
+            get { return TraceManager["SimpleAuthentication.AuthenticationProviderFactory"]; }
         }
 
         private void Initialize()
@@ -116,7 +113,7 @@ namespace SimpleAuthentication
             {
                 var errorMessage =
                     string.Format(
-                        "Unable to find the provider [{0}]. Is there a provider dll available? Is there a typo in the provider name? Solution suggestions: Check to make sure the correct dll's are in the 'bin' directory and/or check the name to make sure there's no typo's in there. Example: If you're trying include the GitHub provider, make sure the name is 'github' (any case) and that the ExtraProviders dll exists in the 'bin' directory.",
+                        "Unable to find the provider [{0}]. Is there a provider dll available? Is there a typo in the provider name? Solution suggestions: Check to make sure the correct dll's are in the 'bin' directory and/or check the name to make sure there's no typo's in there. Example: If you're trying include the GitHub provider, make sure the name is 'github' (any case) and that the ExtraProviders dll exists in the 'bin' directory or make sure you've downloaded the package via NuGet -> install-package SimpleAuthentication.ExtraProviders.",
                         name);
                 TraceSource.TraceError(errorMessage);
                 throw new ApplicationException(errorMessage);
