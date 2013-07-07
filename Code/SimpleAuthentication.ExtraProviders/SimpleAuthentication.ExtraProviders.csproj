@@ -85,7 +85,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SimpleAuthentication\SimpleAuthentication.csproj">
       <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
-      <Name>WorldDomination.Web.Authentication</Name>
+      <Name>SimpleAuthentication</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
