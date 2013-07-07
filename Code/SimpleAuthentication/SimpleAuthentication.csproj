@@ -76,6 +76,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\IPublicPrivateKeyProvider.cs" />
     <Compile Include="Providers\IScopedProvider.cs" />
+    <Compile Include="Providers\TwitterProvider.cs" />
+    <Compile Include="Providers\Twitter\AccessTokenResult.cs" />
+    <Compile Include="Providers\Twitter\RequestTokenResult.cs" />
+    <Compile Include="Providers\Twitter\VerifierResult.cs" />
+    <Compile Include="Providers\Twitter\VerifyCredentialsResult.cs" />
     <Compile Include="Providers\WindowsLiveProvider.cs" />
     <Compile Include="Providers\WindowsLive\AccessTokenResult.cs" />
     <Compile Include="Providers\WindowsLive\Emails.cs" />

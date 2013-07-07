@@ -4,12 +4,12 @@ using System.Net;
 using RestSharp;
 using RestSharp.Authenticators;
 using RestSharp.Contrib;
-using WorldDomination.Web.Authentication.Providers.Twitter;
-using WorldDomination.Web.Authentication.Tracing;
+using SimpleAuthentication.Providers.Twitter;
+using SimpleAuthentication.Tracing;
 
-namespace WorldDomination.Web.Authentication.Providers
+namespace SimpleAuthentication.Providers
 {
-    public class TwitterProvider : BaseProvider
+    public class TwitterProvider : BaseProvider, IPublicPrivateKeyProvider
     {
         private const string BaseUrl = "https://api.twitter.com";
         private const string DeniedKey = "denied";
@@ -17,50 +17,47 @@ namespace WorldDomination.Web.Authentication.Providers
         private const string OAuthTokenSecretKey = "oauth_token_secret";
         private const string OAuthVerifierKey = "oauth_verifier";
 
-        private readonly string _consumerKey;
-        private readonly string _consumerSecret;
-
-        public TwitterProvider(ProviderParams providerParams) : base("Twitter")
+        public TwitterProvider(ProviderParams providerParams) : base("Twitter", "OAuth 1.0a")
         {
             providerParams.Validate();
 
-            _consumerKey = providerParams.Key;
-            _consumerSecret = providerParams.Secret;
+            PublicApiKey = providerParams.PublicApiKey;
+            SecretApiKey = providerParams.SecretApiKey;
 
             RestClientFactory = new RestClientFactory();
         }
 
+        #region IPublicPrivateKeyProvider Implementation
+
+        public string PublicApiKey { get; protected set; }
+        public string SecretApiKey { get; protected set; }
+
+        #endregion
+
         public IRestClientFactory RestClientFactory { get; set; }
 
-        private RequestTokenResult RetrieveRequestToken(IAuthenticationServiceSettings authenticationServiceSettings)
+        private RequestTokenResult RetrieveRequestToken(Uri callbackUri, string state)
         {
             TraceSource.TraceVerbose("Retrieving the Request Token.");
 
-            if (authenticationServiceSettings == null)
+            if (callbackUri == null)
             {
-                throw new ArgumentNullException("authenticationServiceSettings");
+                throw new ArgumentNullException("callbackUri");
             }
 
-            if (authenticationServiceSettings.CallBackUri == null ||
-                string.IsNullOrEmpty(authenticationServiceSettings.CallBackUri.AbsoluteUri))
+            if (string.IsNullOrEmpty(state))
             {
-                throw new ArgumentException("AuthenticationServiceSettings.CallBackUri");
-            }
-
-            if (string.IsNullOrEmpty(authenticationServiceSettings.State))
-            {
-                throw new ArgumentException("AuthenticationServiceSettings.State");
+                throw new ArgumentNullException("state");
             }
 
             IRestResponse response;
-            var callBackUri = string.Format("{0}&state={1}", authenticationServiceSettings.CallBackUri,
-                                            authenticationServiceSettings.State);
+            var uri = string.Format("{0}{1}", callbackUri, GetQuerystringState(state));
 
             try
             {
                 var restClient = RestClientFactory.CreateRestClient(BaseUrl);
-                restClient.Authenticator = OAuth1Authenticator.ForRequestToken(_consumerKey, _consumerSecret,
-                                                                               callBackUri);
+                restClient.Authenticator = OAuth1Authenticator.ForRequestToken(PublicApiKey, SecretApiKey,
+                                                                               uri);
                 var restRequest = new RestRequest("oauth/request_token", Method.POST);
 
                 TraceSource.TraceVerbose("Retrieving user information. Twitter Endpoint: {0}",
@@ -184,7 +181,7 @@ namespace WorldDomination.Web.Authentication.Providers
                 TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
                                          restClient.BuildUri(restRequest).AbsoluteUri);
 
-                restClient.Authenticator = OAuth1Authenticator.ForAccessToken(_consumerKey, _consumerSecret,
+                restClient.Authenticator = OAuth1Authenticator.ForAccessToken(PublicApiKey, SecretApiKey,
                                                                               verifierResult.OAuthToken,
                                                                               null, verifierResult.OAuthVerifier);
                 response = restClient.Execute(restRequest);
@@ -254,7 +251,7 @@ namespace WorldDomination.Web.Authentication.Providers
             try
             {
                 var restClient = RestClientFactory.CreateRestClient(BaseUrl);
-                restClient.Authenticator = OAuth1Authenticator.ForProtectedResource(_consumerKey, _consumerSecret,
+                restClient.Authenticator = OAuth1Authenticator.ForProtectedResource(PublicApiKey, SecretApiKey,
                                                                                     accessTokenResult.AccessToken,
                                                                                     accessTokenResult.AccessTokenSecret);
                 var restRequest = new RestRequest("1.1/account/verify_credentials.json");
@@ -293,42 +290,59 @@ namespace WorldDomination.Web.Authentication.Providers
             return response.Data;
         }
 
-        #region Implementation of IAuthenticationProvider
+        #region IAuthenticationProvider Implementation
 
-        public override Uri RedirectToAuthenticate(IAuthenticationServiceSettings authenticationServiceSettings)
+        public override RedirectToAuthenticateSettings RedirectToAuthenticate(Uri callbackUri)
         {
-            if (authenticationServiceSettings == null)
+            if (callbackUri == null)
             {
-                throw new ArgumentNullException("authenticationServiceSettings");
+                throw new ArgumentNullException("callbackUri");
             }
 
-            if (authenticationServiceSettings.CallBackUri == null)
-            {
-                throw new ArgumentException("authenticationServiceSettings.CallBackUri");
-            }
+            var state = Guid.NewGuid().ToString();
 
             // First we need to grab a request token.
-            var oAuthToken = RetrieveRequestToken(authenticationServiceSettings);
+            var oAuthToken = RetrieveRequestToken(callbackUri, state);
 
             // Now we need the user to enter their name/password/accept this app @ Twitter.
             // This means we need to redirect them to the Twitter website.
             var request = new RestRequest("oauth/authenticate");
             request.AddParameter(OAuthTokenKey, oAuthToken.OAuthToken);
             var restClient = RestClientFactory.CreateRestClient(BaseUrl);
-            return restClient.BuildUri(request);
+
+            return new RedirectToAuthenticateSettings
+                   {
+                       RedirectUri = restClient.BuildUri(request),
+                       State = state
+                   };
         }
 
-        public override IAuthenticatedClient AuthenticateClient(
-            IAuthenticationServiceSettings authenticationServiceSettings,
-            NameValueCollection queryStringParameters)
+        public override IAuthenticatedClient AuthenticateClient(NameValueCollection queryStringParameters,
+                                                                string state,
+                                                                Uri callbackUri)
         {
+            #region Parameter checks
+
+            if (queryStringParameters == null ||
+                queryStringParameters.Count <= 0)
+            {
+                throw new ArgumentNullException("queryStringParameters");
+            }
+
+            if (string.IsNullOrEmpty(state))
+            {
+                throw new ArgumentNullException("state");
+            }
+
+            if (callbackUri == null)
+            {
+                throw new ArgumentNullException("callbackUri");
+            }
+
+            #endregion
+
             TraceSource.TraceVerbose(
                 "Trying to get the authenticated client details. NOTE: This is using OAuth 1.0a. ~~Le sigh~~.");
-
-            if (authenticationServiceSettings == null)
-            {
-                throw new ArgumentNullException("authenticationServiceSettings");
-            }
 
             // Retrieve the OAuth Verifier.
             var oAuthVerifier = RetrieveOAuthVerifier(queryStringParameters);
@@ -354,11 +368,6 @@ namespace WorldDomination.Web.Authentication.Providers
                     PublicToken = oAuthAccessToken.AccessToken
                 }
             };
-        }
-
-        public override IAuthenticationServiceSettings DefaultAuthenticationServiceSettings
-        {
-            get { return new TwitterAuthenticationServiceSettings(); }
         }
 
         #endregion

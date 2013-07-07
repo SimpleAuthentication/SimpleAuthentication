@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace WorldDomination.Web.Authentication.Providers.Twitter
+namespace SimpleAuthentication.Providers.Twitter
 {
     public class Geo
     {

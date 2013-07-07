@@ -87,6 +87,15 @@ namespace SimpleAuthentication.Mvc
             // Determine where we need to redirect to.
             var redirectToAuthenticateSettings = provider.RedirectToAuthenticate(callbackUri);
 
+            if (redirectToAuthenticateSettings == null)
+            {
+                // We failed to determine where to go. A classic example of this is with OpenId and a bad OpenId endpoint.
+                const string errorMessage =
+                    "No redirect to authencate settings retrieved. This means we don't know where to go. A classic example of this is with OpenId and a bad OpenId endpoint. Please check the data you are providing to the Controller. Otherwise, you will need to debug the individual provider class you are trying use to connect with.";
+                TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
+            }
+
             // Remember any important information for after we've come back.
             Session[SessionKeyState] = redirectToAuthenticateSettings.State;
             Session[SessionKeyRedirectToUrl] = Request.UrlReferrer;
