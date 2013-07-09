@@ -1,4 +1,4 @@
-﻿namespace WorldDomination.Sample.MvcAuto.Models
+﻿namespace SimpleAuthentication.Sample.MvcAuto.Models
 {
     public class IndexViewModel
     {

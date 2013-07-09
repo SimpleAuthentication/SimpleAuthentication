@@ -1,4 +1,4 @@
-﻿namespace Nancy.Authentication.WorldDomination
+﻿namespace Nancy.SimpleAuthentication
 {
     /// <summary>
     /// The result from the callback Process.
@@ -23,7 +23,7 @@
         }
 
         /// <summary>
-        /// Initializes a new isntance of the Nancy.Authentication.WorldDomination.ProcessResult with a specific Action result.
+        /// Initializes a new instance of the Nancy.SimpleAuthentication.ProcessResult with a specific Action result.
         /// </summary>
         /// <param name="action">The type of action this Process needs to do.</param>
         public ProcessResult(ActionType action)

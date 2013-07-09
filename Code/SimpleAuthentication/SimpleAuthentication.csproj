@@ -66,7 +66,6 @@
     <Compile Include="Providers\BaseProvider.cs" />
     <Compile Include="GenderType.cs" />
     <Compile Include="Providers\Google\AccessTokenResult.cs" />
-    <Compile Include="Providers\Google\GoogleAuthenticationServiceSettings.cs" />
     <Compile Include="Providers\GoogleProvider.cs" />
     <Compile Include="Providers\Google\UserInfoResult.cs" />
     <Compile Include="IAuthenticatedClient.cs" />

@@ -1,6 +1,6 @@
 ﻿using System.Web.Mvc;
+using SimpleAuthentication.Sample.MvcAuto.Models;
 using SimpleAuthentication.Tracing;
-using WorldDomination.Sample.MvcAuto.Models;
 
 namespace SimpleAuthentication.Sample.MvcAuto.Controllers
 {

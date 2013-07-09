@@ -2,7 +2,6 @@
 using System.Web.Mvc;
 using SimpleAuthentication.Mvc;
 using SimpleAuthentication.Sample.MvcAuto.Models;
-using WorldDomination.Sample.MvcAuto.Models;
 
 namespace SimpleAuthentication.Sample.MvcAuto.Controllers
 {

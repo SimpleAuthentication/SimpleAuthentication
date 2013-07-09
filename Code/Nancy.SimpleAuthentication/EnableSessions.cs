@@ -1,6 +1,6 @@
 ﻿using Nancy.Bootstrapper;
 
-namespace Nancy.Authentication.WorldDomination
+namespace Nancy.SimpleAuthentication
 {
     public class EnableSessions : IApplicationStartup
     {
