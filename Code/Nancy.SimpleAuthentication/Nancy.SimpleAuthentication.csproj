@@ -7,8 +7,8 @@
     <ProjectGuid>{94B8D947-6CAD-42C3-B328-F369CE7BC6C0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Nancy.Authentication.WorldDomination</RootNamespace>
-    <AssemblyName>Nancy.Authentication.WorldDomination</AssemblyName>
+    <RootNamespace>Nancy.SimpleAuthentication</RootNamespace>
+    <AssemblyName>Nancy.SimpleAuthentication</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -49,16 +49,16 @@
     <Compile Include="IAuthenticationCallbackProvider.cs" />
     <Compile Include="ProcessResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WorldDominationAuthenticationModule.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\WorldDomination.Web.Authentication\WorldDomination.Web.Authentication.csproj">
-      <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
-      <Name>WorldDomination.Web.Authentication</Name>
-    </ProjectReference>
+    <Compile Include="SimpleAuthenticationModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SimpleAuthentication\SimpleAuthentication.csproj">
+      <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
+      <Name>SimpleAuthentication</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

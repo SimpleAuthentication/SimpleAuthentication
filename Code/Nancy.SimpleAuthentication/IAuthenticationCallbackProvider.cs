@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Nancy.Authentication.WorldDomination
+﻿namespace Nancy.SimpleAuthentication
 {
     /// <summary>
     /// Defines the contract for the callback from an Authentication Provider.

@@ -110,6 +110,7 @@
   <ItemGroup>
     <Content Include="Content\37signals_32.png" />
     <Content Include="Content\AdmiralAckbarError.png" />
+    <Content Include="Content\amazon_32.png" />
     <Content Include="Content\bitbucket_32-NotAvailable.png" />
     <Content Include="Content\bitbucket_32.png" />
     <Content Include="Content\facebook_32.png" />

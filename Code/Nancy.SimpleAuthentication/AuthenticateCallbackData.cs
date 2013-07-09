@@ -1,7 +1,7 @@
 ﻿using System;
-using WorldDomination.Web.Authentication;
+using SimpleAuthentication;
 
-namespace Nancy.Authentication.WorldDomination
+namespace Nancy.SimpleAuthentication
 {
     public class AuthenticateCallbackData
     {

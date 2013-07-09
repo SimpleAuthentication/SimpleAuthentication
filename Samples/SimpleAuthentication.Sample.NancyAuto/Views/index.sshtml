@@ -11,8 +11,6 @@
                 <a class="login-logo" href="/authentication/redirect/twitter"><img src="/Content/twitter_32.png"></img></a>
                 <a class="login-logo" href="/authentication/redirect/facebook"><img src="/Content/facebook_32.png"></img></a>
                 <a class="login-logo" href="/authentication/redirect/google"><img src="/Content/google_32.png"></img></a>
-                <a class="login-logo" href="/authentication/redirect/linkedin"><img src="/Content/linkedin_32.png"></img></a>
-                <a class="login-logo" href="/authentication/redirect/amazon"><img src="/Content/amazon_32x32.png"></img></a>
             </fieldset>
             
             @If.HasError

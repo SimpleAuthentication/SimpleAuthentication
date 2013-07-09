@@ -1,33 +1,40 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Diagnostics;
-using System.Web.Mvc;
+using Nancy.Responses.Negotiation;
+using SimpleAuthentication;
 using SimpleAuthentication.Providers;
 using SimpleAuthentication.Tracing;
 
-namespace SimpleAuthentication.Mvc
+namespace Nancy.SimpleAuthentication
 {
-    public class SimpleAuthenticationController : Controller
+    public class SimpleAuthenticationModule : NancyModule
     {
-        private const string SessionKeyAccessToken = "SimpleAuthentication.Session.AccessToken";
-        private const string SessionKeyState = "SimpleAuthentication.Session.StateToken";
-        private const string SessionKeyRedirectToUrl = "SimpleAuthentication.Session.RedirectToUrl";
-        private const string SessionKeyRedirectToProviderUrl = "SimpleAuthentication.Session.";
+        private const string SessionKeyState = "SimpleAuthentication-StateKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
+
+        private const string SessionKeyRedirectToUrl =
+            "SimpleAuthentication-RedirectUrlKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
+
+        private const string SessionKeyRedirectToProviderUrl =
+            "SimpleAuthentication-RedirectToProviderUrlKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
+
+        public static string RedirectRoute = "/authentication/redirect/{providerkey}";
+        public static string CallbackRoute = "/authentication/authenticatecallback";
 
         private readonly AuthenticationProviderFactory _authenticationProviderFactory;
 
-        public SimpleAuthenticationController(IAuthenticationCallbackProvider callbackProvider)
+        public SimpleAuthenticationModule(IAuthenticationCallbackProvider callbackProvider)
         {
-            _authenticationProviderFactory = new AuthenticationProviderFactory();
-
-            if (callbackProvider == null)
-            {
-                throw new ArgumentNullException("callbackProvider");
-            }
-
-            CallbackProvider = callbackProvider;
-
             // Lazyily setup our TraceManager.
             TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
+
+            CallbackProvider = callbackProvider;
+            _authenticationProviderFactory = new AuthenticationProviderFactory();
+
+            // Define the routes and how they are handled.
+            Get[RedirectRoute] = parameters => RedirectToProvider(parameters);
+            Post[RedirectRoute] = parameters => RedirectToProvider(parameters);
+            Get[CallbackRoute] = parameters => AuthenticateCallback();
         }
 
         /// <summary>
@@ -39,37 +46,34 @@ namespace SimpleAuthentication.Mvc
 
         private TraceSource TraceSource
         {
-            get { return TraceManager["SimpleAuthentication.Mvc.SimpleAuthenticationController"]; }
+            get { return TraceManager["Nancy.SimpleAuthentication.SimpleAuthenticationModule"]; }
         }
 
-        public RedirectResult RedirectToProvider(RedirectToProviderInputModel inputModel)
+        private Response RedirectToProvider(dynamic parameters)
         {
             #region Input Model Validation
 
-            if (!ModelState.IsValid)
-            {
-                throw new ArgumentException(
-                    "Some binding errors occured. This means at least one Request value (eg. form post or querystring parameter) provided is invalid. Generally, we need a ProviderName as a string.");
-            }
+            var providerKey = (string) parameters.providerkey;
 
-            if (string.IsNullOrEmpty(inputModel.ProviderName))
+            if (string.IsNullOrEmpty(providerKey))
             {
                 throw new ArgumentException(
                     "ProviderKey value missing. You need to supply a valid provider key so we know where to redirect the user Eg. google.");
             }
 
+            var identityValue = (string) parameters.identifier;
             Uri identifier = null;
-            if (!string.IsNullOrEmpty(inputModel.Identifier) &&
-                !Uri.TryCreate(inputModel.Identifier, UriKind.Absolute, out identifier))
+            if (!string.IsNullOrEmpty(identityValue) &&
+                !Uri.TryCreate(identityValue, UriKind.Absolute, out identifier))
             {
-                throw new ArgumentException("The Identifier value [" + inputModel.Identifier +
+                throw new ArgumentException("The Identifier value [" + identityValue +
                                             "] is not a valid Uri. Please fix it up. eg. http://goto.some.website/authenticate/");
             }
 
             #endregion
 
             // Grab the Provider.
-            var provider = GetAuthenticationProvider(inputModel.ProviderName);
+            var provider = GetAuthenticationProvider(providerKey);
 
             // Most providers don't need any pre-setup crap, to redirect to authenticate.
             // But of course, there's always one - OpenId. We have no idea WHERE we want to
@@ -98,30 +102,21 @@ namespace SimpleAuthentication.Mvc
 
             // Remember any important information for after we've come back.
             Session[SessionKeyState] = redirectToAuthenticateSettings.State;
-            Session[SessionKeyRedirectToUrl] = Request.UrlReferrer;
+            Session[SessionKeyRedirectToUrl] = Request.Url.ToString();
             Session[SessionKeyRedirectToProviderUrl] = redirectToAuthenticateSettings.RedirectUri.AbsoluteUri;
 
             // Now redirect :)
-            return Redirect(redirectToAuthenticateSettings.RedirectUri.AbsoluteUri);
+            return Response.AsRedirect(redirectToAuthenticateSettings.RedirectUri.AbsoluteUri);
         }
 
-        public ActionResult AuthenticateCallback(AuthenticateCallBackInputModel inputModel)
+        private Negotiator AuthenticateCallback()
         {
-            #region Input Model Validation
-
-            if (!ModelState.IsValid)
-            {
-                throw new ArgumentException(
-                    "Some binding errors occured. This means at least one Request value (eg. form post or querystring parameter) provided is invalid. Generally, we need a ProviderName as a string.");
-            }
-
-            if (string.IsNullOrEmpty(inputModel.ProviderKey))
+            var providerKey = (string) Request.Query.providerKey;
+            if (string.IsNullOrEmpty(providerKey))
             {
                 throw new ArgumentException(
                     "ProviderKey value missing. You need to supply a valid provider key so we know where to redirect the user Eg. providerkey=google.");
             }
-
-            #endregion
 
             var previousRedirectUrl = string.IsNullOrEmpty((string) Session[SessionKeyRedirectToProviderUrl])
                                           ? "N.A."
@@ -146,13 +141,19 @@ namespace SimpleAuthentication.Mvc
             try
             {
                 // Which provider did we just authenticate with?
-                var provider = GetAuthenticationProvider(inputModel.ProviderKey);
+                var provider = GetAuthenticationProvider(providerKey);
 
                 // Where do we return to, after we've authenticated?
                 var callbackUri = GenerateCallbackUri(provider.Name);
 
+                var queryString = new NameValueCollection();
+                foreach (var key in Request.Query.Keys)
+                {
+                    queryString.Add(key, Request.Query[key]);
+                }
+
                 // Grab the user information.
-                model.AuthenticatedClient = provider.AuthenticateClient(Request.QueryString, state, callbackUri);
+                model.AuthenticatedClient = provider.AuthenticateClient(queryString, state, callbackUri);
             }
             catch (Exception exception)
             {
@@ -171,7 +172,7 @@ namespace SimpleAuthentication.Mvc
 
             // Finally! We can hand over the logic to the consumer to do whatever they want.
             TraceSource.TraceVerbose("About to execute your custom callback provider logic.");
-            return CallbackProvider.Process(HttpContext, model);
+            return CallbackProvider.Process(this, model);
         }
 
         private IAuthenticationProvider GetAuthenticationProvider(string providerKey)
@@ -218,8 +219,7 @@ namespace SimpleAuthentication.Mvc
 
         private Uri GenerateCallbackUri(string providerName)
         {
-            return SystemHelpers.CreateCallBackUri(providerName, Request.Url,
-                                                   Url.RouteUrl(SimpleAuthenticationRouteConfig.CallbackRouteName));
+            return SystemHelpers.CreateCallBackUri(providerName, Request.Url, CallbackRoute);
         }
     }
 }

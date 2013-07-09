@@ -11,8 +11,8 @@
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WorldDomination.Sample.NancyAuto</RootNamespace>
-    <AssemblyName>WorldDomination.Sample.NancyAuto</AssemblyName>
+    <RootNamespace>SimpleAuthentication.Sample.NancyAuto</RootNamespace>
+    <AssemblyName>SimpleAuthentication.Sample.NancyAuto</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
@@ -76,7 +76,6 @@
     <Content Include="Content\amazon_32x32.png" />
     <Content Include="Content\facebook_32.png" />
     <Content Include="Content\google_32.png" />
-    <Content Include="Content\linkedin_32.png" />
     <Content Include="Content\main.css" />
     <Content Include="Content\myopenid_64.png" />
     <Content Include="Content\twitter_32.png" />
@@ -93,6 +92,13 @@
   <ItemGroup>
     <Content Include="packages.config" />
     <Content Include="Views\index.sshtml" />
+    <Content Include="system.diagnostics.config" />
+    <Content Include="system.diagnostics.Debug.config">
+      <DependentUpon>system.diagnostics.config</DependentUpon>
+    </Content>
+    <Content Include="system.diagnostics.Release.config">
+      <DependentUpon>system.diagnostics.config</DependentUpon>
+    </Content>
     <None Include="Views\AuthenticateCallback.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -102,20 +108,19 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Code\Nancy.Authentication.WorldDomination\Nancy.Authentication.WorldDomination.csproj">
+    <ProjectReference Include="..\..\Code\Glimpse.SimpleAuthentication\Glimpse.SimpleAuthentication.csproj">
+      <Project>{2bafafc7-635a-40a4-9b25-df789c5976b7}</Project>
+      <Name>Glimpse.SimpleAuthentication</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Code\Nancy.SimpleAuthentication\Nancy.SimpleAuthentication.csproj">
       <Project>{94b8d947-6cad-42c3-b328-f369ce7bc6c0}</Project>
-      <Name>Nancy.Authentication.WorldDomination</Name>
+      <Name>Nancy.SimpleAuthentication</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Code\WorldDomination.Web.Authentication.ExtraProviders\WorldDomination.Web.Authentication.ExtraProviders.csproj">
-      <Project>{d75207d5-fa68-4dc6-939a-2ac3cad4bead}</Project>
-      <Name>WorldDomination.Web.Authentication.ExtraProviders</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Code\WorldDomination.Web.Authentication\WorldDomination.Web.Authentication.csproj">
+    <ProjectReference Include="..\..\Code\SimpleAuthentication\SimpleAuthentication.csproj">
       <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
-      <Name>WorldDomination.Web.Authentication</Name>
+      <Name>SimpleAuthentication</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

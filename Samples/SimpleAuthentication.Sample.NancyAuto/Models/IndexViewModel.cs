@@ -1,4 +1,4 @@
-﻿namespace WorldDomination.Sample.NancyAuto.Models
+﻿namespace SimpleAuthentication.Sample.NancyAuto.Models
 {
     public class IndexViewModel
     {
