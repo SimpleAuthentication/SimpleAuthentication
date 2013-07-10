@@ -1,9 +1,5 @@
-SimpleAuthentication - making Social Authentication ... simple!
-=
-- - -
+![SimpleAuthentication - making authentication ... simple](http://i.imgur.com/eEJBOiY.png)
 
-
-What is this?
 --
 **SimpleAuthentication** is a ASP.NET library that makes it really simple to for developers to add *Social Authentication* code to an ASP.NET application.
 
@@ -13,10 +9,7 @@ Out of the box, it offers **Facebook**, **Google**, **Twitter** and **Microsoft 
 
 There's also some less used authentication providers like GitHub or Amazon supplied but anyone can take advantage of the api and create your own provider extension. There are plenty of defaults in place (such as Routes, etc) but most things are available to adjust if you want to do advanced stuff.
 
-<br/>
-  
-- - -
-<br/>
+
 Developer friendly!
 --
 Take advantage of the [Glimpse plugin](http://getglimpse.com) so you can see what magic is happening under the hood if you need to debug a problem or just want to see what happens :)
@@ -28,18 +21,18 @@ Take advantage of the [Glimpse plugin](http://getglimpse.com) so you can see wha
 **The library only deals with authentication** - once we give you the user details for the person logging in, you can whatever you want with that (such as, create a new user or update an existing user).
 We do not attempt to insert data into a particular type of database or make any other assumptions about what you do with user data.
 
-<br/>
-- - -
-<br/>
-The "How simple is this?" example - Adding a 'Log in with Facebook' to an existing ASP.NET MVC web application.
---
 
-Quick summary:-
+The "How simple is this?" example 
+--
+#### Adding a 'Log in with Facebook' to an existing ASP.NET MVC web application.
+
+
+#### Quick summary
 * Create a Login button on some View.
 * Create a class which will have all the User data once they have authenticated
 * Add your provider keys to the `.config` file
 
-### Simple steps
+#### Simple steps
 1. Find the View you wish to modify.
 2. Add the Button or hyper link that will be used to kick start the authentication process.
 3. Set the button route to be `/authentication/authenticate/fakefacebook`
@@ -58,22 +51,14 @@ Once this works.
 
 Done.
 
-<br/>
 
-- - -
-
-<br/>
-
-# You had me at *Simple* ... what now?
-
+You had me at *Simple* ... what now?
+--
 * Detailed guide to adding SimpleAuthentication to an ASP.NET MVC or NancyFx web application.
 * Detailed Guide to using the Extra Providers to a web application.
 * Detailed guide to using the Glimpse Plugin.
 * How to create your own provider.
 
-<br/>
-- - -
-<br/>
 And Finally ...
 --
 * Still having problems? We hang out in [JabbR](http://www.jabbr.net) so you can ask questions in there :)
