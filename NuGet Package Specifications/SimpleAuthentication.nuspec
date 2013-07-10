@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>SimpleAuthentication</id>
+        <version>0.1.0</version>
+        <title>SimpleAuthentication: Social Authentication</title>
+        <authors>Justin Adler,Phillip Haydon and contributors</authors>
+        <owners>Justin Adler and Phillip Haydon</owners>
+        <projectUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</projectUrl>
+        <iconUrl>http://i.imgur.com/bR4Yf.jpg</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Sometimes using DotNetOpenAuth, Service Stack and/or MS Web WebPages can just get a bit frustrating because they have to handle so many different scenario's - making it complex.
+
+This library tries to simplify that complexity down to two basic steps
+
+1. Redirect to the 3rd party website to log in.
+2. Come back to your site and with some user data from the 3rd party website.
+
+What you do with that data, is up to you :)
+
+Simple.
+Modular.
+Simple.
+
+Did I say 'simple' already?</description>
+        <summary>A really simple way to Authenticate against Facebook, Twitter, Google or a Microsoft Account.</summary>
+        <releaseNotes />
+        <copyright>2012</copyright>
+        <language>en-au</language>
+        <tags>authentication twitter google facebook microsoftaccount oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
+        <dependencies>
+            <dependency id="RestSharp" version="104.1" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="..\Code\SimpleAuthentication\bin\Release\SimpleAuthentication.dll" target="lib\net40\SimpleAuthentication.dll" />
+        <file src="ReadMe.txt" target="ReadMe.txt" />
+    </files>
+</package>

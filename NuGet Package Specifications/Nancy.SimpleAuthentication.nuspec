@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>Nancy.SimpleAuthentication</id>
+        <version>0.1.0</version>
+        <title>SimpleAuthentication: Web Authentication for NancyFX</title>
+        <authors>Justin Adler,Phillip Haydon</authors>
+        <owners>Justin Adler</owners>
+        <projectUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</projectUrl>
+        <iconUrl>http://i.imgur.com/bR4Yf.jpg</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Used with SimpleAuthentication, provides automated configuration for ASP.NET NancFX projects.</description>
+        <summary>A really simple way to Authenticate against Facebook, Twitter or Google - but integrated for the NancyFX framework.</summary>
+        <releaseNotes />
+        <copyright>2012</copyright>
+        <language>en-au</language>
+        <tags>authentication twitter google facebook oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination nancy nancyfx</tags>
+        <dependencies>
+            <dependency id="Nancy" version="0.16.1" />
+            <dependency id="WorldDomination.Web.Authentication" version="0.17.0" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="..\Code\Nancy.SimpleAuthentication\bin\Release\Nancy.SimpleAuthentication.dll" target="lib\net40\Nancy.SimpleAuthentication.dll" />
+        <file src="ReadMe.txt" target="ReadMe.txt" />
+    </files>
+</package>
