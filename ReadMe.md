@@ -1,72 +1,83 @@
-![WTF](http://i.imgur.com/Jx9vL.jpg)
+SimpleAuthentication - making Social Authentication ... simple!
+=
+- - -
 
-![Not impressed](http://i.imgur.com/K2b91.jpg)
 
-![I just don't get it](http://i.imgur.com/AUEc3.jpg)
+What is this?
+--
+**SimpleAuthentication** is a ASP.NET library that makes it really simple to for developers to add *Social Authentication* code to an ASP.NET application.
 
-![Angry](http://i.imgur.com/hvYIx.jpg)
+![Sample Login Buttons](http://i.imgur.com/2X35uaQ.png)
 
-![Forever code alone](http://i.imgur.com/KIMGE.jpg)
+Out of the box, it offers **Facebook**, **Google**, **Twitter** and **Microsoft Live** integration for either [ASP.NET MVC](http://www.asp.net/mvc) or [NancyFX](http://nancyfx.org) applications. 
 
-![Insane programmer](http://i.imgur.com/m7gGt.jpg)
+There's also some less used authentication providers like GitHub or Amazon supplied but anyone can take advantage of the api and create your own provider extension. There are plenty of defaults in place (such as Routes, etc) but most things are available to adjust if you want to do advanced stuff.
 
-![Success Programmer](http://i.imgur.com/yQVJU.jpg)
+<br/>
+  
+- - -
+<br/>
+Developer friendly!
+--
+Take advantage of the [Glimpse plugin](http://getglimpse.com) so you can see what magic is happening under the hood if you need to debug a problem or just want to see what happens :)
 
-# A .NET package for using Facebook, Google or Twitter to Authenticate your Users #
+![Glimpse plugin](http://i.imgur.com/ALO3rab.png)
 
-I'm blond. I'm dumb. But I program. 
+<br/>
 
-So I want a <insert deity of your choice> damn simple way to authenticate with Facebook, Twitter or wherever.
+**The library only deals with authentication** - once we give you the user details for the person logging in, you can whatever you want with that (such as, create a new user or update an existing user).
+We do not attempt to insert data into a particular type of database or make any other assumptions about what you do with user data.
 
-**I DON'T CARE IF IT'S OAUTH OR OPENID OR O-GO-SCREW-YOURSELF.**
+<br/>
+- - -
+<br/>
+The "How simple is this?" example - Adding a 'Log in with Facebook' to an existing ASP.NET MVC web application.
+--
 
-I just want to do
+Quick summary:-
+* Create a Login button on some View.
+* Create a class which will have all the User data once they have authenticated
+* Add your provider keys to the `.config` file
 
-1. Send me off to Facebook, Google or Twitter.
-2. Come back to my site and the site now has whatever user data they handed over.
+### Simple steps
+1. Find the View you wish to modify.
+2. Add the Button or hyper link that will be used to kick start the authentication process.
+3. Set the button route to be `/authentication/authenticate/fakefacebook`
+4. Now we grab the library -> `install-package SimpleAuthentication.Mvc`
+5. Create a class which will be called -after- we come back from Facebook (or any provider). We have to do something with that user data, right?
+   `public class HandleCallback();`
+   A good example of what people do here is: save user to database then redirect to homepage or where they were originally referred from.
+6. Wire up the new class with our `ServiceLocator / Di-IoC` so the SimpleAuthentication code knows what to do when it's finished.
+7. Build and run the site :)
 
-That's It.
+Once this works.
 
-- No dabasase crap.
-- No Session stuff.
-- No over-generic-crazy one-solution-fits-every-provider-on-the-interwebs.
+8. Goto [developer.facebook.com](http://developer.facebook.com) and create an application. This will give you a `Client Key` and `Secret Key`.
+9. Enter the Client and Secret key to the `web.config`, `<providers>` section.
+10. Change the button route to `/authentication/authenticate/facebook`  <-- notice we've removed the `fake` prepended text? :)
 
-So install this bad boy :
+Done.
 
-[![Yes! Install this package!!](http://i.imgur.com/xevxLCl.png)](http://nuget.org/packages/WorldDomination.Web.Authentication)
+<br/>
 
-## Code or GTFO ##
+- - -
 
-Here's the main code that does what we want (excluding error checking, etc, for brevity).
+<br/>
 
-```c#
-public RedirectResult RedirectToAuthenticate(string providerKey)
-{
-    var uri = _authenticationService.RedirectToAuthenticationProvider(providerKey);
-    return Redirect(uri.AbsoluteUri);
-}
+# You had me at *Simple* ... what now?
 
-public ActionResult AuthenticateCallback(string providerKey)
-{
-    var model = new AuthenticateCallbackViewModel();
-    model.AuthenticatedClient = _authenticationService.CheckCallback(providerKey, Request.Params);
-    return View(model);
-}
-```
+* Detailed guide to adding SimpleAuthentication to an ASP.NET MVC or NancyFx web application.
+* Detailed Guide to using the Extra Providers to a web application.
+* Detailed guide to using the Glimpse Plugin.
+* How to create your own provider.
 
-## Ok. You had me at Bad Luck Brian. Now what?
-
-1. Read the [sample code pages in the project's Wiki](https://github.com/PureKrome/WorldDomination.Web.Authentication/wiki) - take 1 minute to grok.
-2. Install nuget pacakge.
-3. Win.
-
-## Play it forward ##
-
-Don't be scared to fork and then make some pull requests. I :heart: pull requests!
-
-Then this simple library can actually be really helpful to more than 1 person (le moi) on this rock called Earth.
-
-#### Disclaimer ####
-*No blonds or Unicorns were harmed in the coding of this library.*
-
-![Pew Pew](http://i.imgur.com/94PHAl.jpg)
+<br/>
+- - -
+<br/>
+And Finally ...
+--
+* Still having problems? We hang out in [JabbR](http://www.jabbr.net) so you can ask questions in there :)
+* We accept Pull Requests.
+* Please use the GitHub issues for any other problems.
+* License : [MIT](http://www.tldrlegal.com/license/mit-license)
+* No Unicorns were harmed in the coding of this library.
