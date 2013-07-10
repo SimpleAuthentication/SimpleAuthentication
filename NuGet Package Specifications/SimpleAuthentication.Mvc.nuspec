@@ -4,7 +4,7 @@
         <id>SimpleAuthentication.Mvc</id>
         <version>0.1.0</version>
         <title>SimpleAuthentication.Mvc: Web Authentication ASP.NET Mvc library</title>
-        <authors>Justin Adler,Phillip Haydon and contributors</authors>
+        <authors>Justin Adler, Phillip Haydon and contributors</authors>
         <owners>Justin Adler and Phillip Haydon</owners>
         <projectUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</projectUrl>
         <iconUrl>http://i.imgur.com/bR4Yf.jpg</iconUrl>

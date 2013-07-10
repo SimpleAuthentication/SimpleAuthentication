@@ -1,7 +1,7 @@
 
-             #################################################
-             ##    Web Authentication - made damn simple.   ##
-             #################################################
+         ####################################################################
+         ##    SimpleAuthentication - making authentication ... simple!    ##
+         ####################################################################
 
 
    
@@ -17,8 +17,8 @@ Easy vs Hard
 ^^^^^^^^^^^^
    1. EASY: Choose to use the provided Nancy Module or Mvc Controller to make setup -really- simple.
             If you do this, you will need to install-package ..
-      a. Nancy Module: Install-Package Nancy.Authentication.WorldDomination
-      b. Mvc Controller: Install-Package WorldDomination.Web.Authentication.Mvc 
+      a. Nancy Module: Install-Package Nancy.SimpleAuthentication
+      b. Mvc Controller: Install-Package SimpleAuthentication.Mvc 
                             or
    2. HARD: Create your own module/controller, your own routes and code all of this. Manually.
 
@@ -27,10 +27,9 @@ Easy vs Hard
 Setup Instructions
 ^^^^^^^^^^^^^^^^^^
 
-   1. NancyFX Manual Setup - https://github.com/PureKrome/WorldDomination.Web.Authentication/wiki/NancyFX-Manual-Setup
-   2. NancyFX Automatic Setup - https://github.com/PureKrome/WorldDomination.Web.Authentication/wiki/NancyFX-Automatic-Setup
-   3. MVC Manual Setup - https://github.com/PureKrome/WorldDomination.Web.Authentication/wiki/Mvc-Manual-Setup
-   4. MVC Automatic Setup - https://github.com/PureKrome/WorldDomination.Web.Authentication/wiki/Mvc-Automatic-Setup
+   1. MVC Automatic Setup - https://github.com/SimpleAuthentication/SimpleAuthentication/tree/master/Samples/SimpleAuthentication.Sample.MvcAuto
+   2. NancyFX Automatic Setup - https://github.com/SimpleAuthentication/SimpleAuthentication/tree/master/Samples/SimpleAuthentication.Sample.NancyAuto
+   
 
 
 !! SPECIAL INSTRUCTIONS IF YOU WANT TO OFFER AUTHENTICATION VIA MICROSOFT LIVE !!
@@ -79,5 +78,5 @@ Bonus Pro Tips
 Now go forth and execute World Domination! Seriously. Go. Dominate. Even a wee bit. Go.
 
 
--Pure Krome [from Melbourne, Australia ... mate :) ]-
+-Justin Adler [from Melbourne, Australia ... mate :) ]-
 -Phillip Haydon [from Auckland, New Zealand... kia ora... BRO!]-
