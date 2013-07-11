@@ -10,7 +10,7 @@ namespace SimpleAuthentication.Sample.MvcAuto.App_Start
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
-            SimpleAuthenticationRouteConfig.RegisterRoutes(routes);
+            //SimpleAuthenticationRouteConfig.RegisterRoutes(routes);
 
             routes.MapRoute(
                 name: "Default",

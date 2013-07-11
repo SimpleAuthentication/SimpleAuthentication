@@ -68,6 +68,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WebActivatorEx">
+      <HintPath>..\..\packages\WebActivatorEx.2.0.2\lib\net40\WebActivatorEx.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Shared Assembly Info\SharedAssemblyInfo.cs">
@@ -76,6 +79,7 @@
     <Compile Include="AuthenticateCallbackData.cs" />
     <Compile Include="AuthenticateCallBackInputModel.cs" />
     <Compile Include="RedirectToProviderInputModel.cs" />
+    <Compile Include="SimpleAuthenticationConfig.cs" />
     <Compile Include="UrlHelperExtensions.cs" />
     <Compile Include="SimpleAuthenticationController.cs" />
     <Compile Include="IAuthenticationCallbackProvider.cs" />
