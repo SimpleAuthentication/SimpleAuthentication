@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Net;
 using RestSharp;
+using SimpleAuthentication.Core;
+using SimpleAuthentication.Core.Exceptions;
+using SimpleAuthentication.Core.Providers;
+using SimpleAuthentication.Core.Tracing;
 using SimpleAuthentication.ExtraProviders.Amazon;
-using SimpleAuthentication.Providers;
-using SimpleAuthentication.Tracing;
 
 namespace SimpleAuthentication.ExtraProviders
 {
@@ -72,9 +74,9 @@ namespace SimpleAuthentication.ExtraProviders
             }
 
             return new AccessToken
-            {
-                PublicToken = accessTokenResult.AccessToken
-            };
+                   {
+                       PublicToken = accessTokenResult.AccessToken
+                   };
         }
 
         protected override UserInformation RetrieveUserInformation(AccessToken accessToken)
@@ -138,11 +140,11 @@ namespace SimpleAuthentication.ExtraProviders
             }
 
             return new UserInformation
-            {
-                Id = response.Data.Profile.CustomerId,
-                Name = response.Data.Profile.Name,
-                Email = response.Data.Profile.PrimaryEmail
-            };
+                   {
+                       Id = response.Data.Profile.CustomerId,
+                       Name = response.Data.Profile.Name,
+                       Email = response.Data.Profile.PrimaryEmail
+                   };
         }
 
         #endregion

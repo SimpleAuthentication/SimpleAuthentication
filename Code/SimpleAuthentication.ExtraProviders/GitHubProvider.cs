@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Net;
 using RestSharp;
+using SimpleAuthentication.Core;
+using SimpleAuthentication.Core.Exceptions;
+using SimpleAuthentication.Core.Providers;
+using SimpleAuthentication.Core.Tracing;
 using SimpleAuthentication.ExtraProviders.GitHub;
-using SimpleAuthentication.Providers;
-using SimpleAuthentication.Tracing;
 
 namespace SimpleAuthentication.ExtraProviders
 {
@@ -77,10 +79,10 @@ namespace SimpleAuthentication.ExtraProviders
             }
 
             return new AccessToken
-            {
-                PublicToken = accessTokenResult.AccessToken
-                //ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn)
-            };
+                   {
+                       PublicToken = accessTokenResult.AccessToken
+                       //ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn)
+                   };
         }
 
         protected override UserInformation RetrieveUserInformation(AccessToken accessToken)
@@ -133,13 +135,13 @@ namespace SimpleAuthentication.ExtraProviders
             }
 
             return new UserInformation
-            {
-                Id = response.Data.Id.ToString(),
-                Name = response.Data.Name,
-                Email = response.Data.Email ?? "",
-                Picture = response.Data.AvatarUrl,
-                UserName = response.Data.Login
-            };
+                   {
+                       Id = response.Data.Id.ToString(),
+                       Name = response.Data.Name,
+                       Email = response.Data.Email ?? "",
+                       Picture = response.Data.AvatarUrl,
+                       UserName = response.Data.Login
+                   };
         }
 
         #endregion

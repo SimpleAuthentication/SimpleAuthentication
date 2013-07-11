@@ -1,5 +1,5 @@
 ﻿using Nancy;
-using SimpleAuthentication.Tracing;
+using SimpleAuthentication.Core.Tracing;
 
 namespace SimpleAuthentication.Sample.NancyAuto.Modules
 {

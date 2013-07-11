@@ -2,9 +2,9 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>SimpleAuthentication.Mvc</id>
-        <version>0.1.0</version>
+        <version>0.2.0</version>
         <title>SimpleAuthentication.Mvc: Web Authentication ASP.NET Mvc library</title>
-        <authors>Justin Adler, Phillip Haydon and contributors</authors>
+        <authors>Justin Adler,Phillip Haydon and contributors</authors>
         <owners>Justin Adler and Phillip Haydon</owners>
         <projectUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</projectUrl>
         <iconUrl>http://i.imgur.com/bR4Yf.jpg</iconUrl>
@@ -17,7 +17,7 @@
         <tags>authentication twitter google facebook microsoftaccount oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
         <dependencies>
             <dependency id="RestSharp" version="104.1" />
-            <dependency id="SimpleAuthentication" version="0.1.0" />
+            <dependency id="SimpleAuthentication" version="0.2.0" />
         </dependencies>
     </metadata>
     <files>

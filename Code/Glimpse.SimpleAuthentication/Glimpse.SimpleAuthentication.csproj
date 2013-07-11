@@ -49,15 +49,15 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SimpleAuthentication\SimpleAuthentication.csproj">
-      <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
-      <Name>SimpleAuthentication</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SimpleAuthentication.Core\SimpleAuthentication.Core.csproj">
+      <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
+      <Name>SimpleAuthentication.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

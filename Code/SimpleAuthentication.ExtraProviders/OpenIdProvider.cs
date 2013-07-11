@@ -5,8 +5,10 @@ using System.Linq;
 using System.Net;
 using System.Xml.Linq;
 using RestSharp;
-using SimpleAuthentication.Providers;
-using SimpleAuthentication.Tracing;
+using SimpleAuthentication.Core;
+using SimpleAuthentication.Core.Exceptions;
+using SimpleAuthentication.Core.Providers;
+using SimpleAuthentication.Core.Tracing;
 
 namespace SimpleAuthentication.ExtraProviders
 {
@@ -15,10 +17,6 @@ namespace SimpleAuthentication.ExtraProviders
         private const string XrdsHeaderKey = "X-XRDS-Location";
         private static readonly IDictionary<string, Uri> YadisXrdsEndPointUris = new Dictionary<string, Uri>();
         private static readonly IDictionary<string, Uri> YadisOpenIdEndPointUris = new Dictionary<string, Uri>();
-
-        //public OpenIdProvider(ProviderParams providerParams) : base("OpenId")
-        //{
-        //}
 
         public OpenIdProvider(ProviderParams providerParams) : base("OpenId", "OpenId")
         {
@@ -66,27 +64,27 @@ namespace SimpleAuthentication.ExtraProviders
             var encodedCallbackUri = UrlEncode(updatedCallbackUri.ToString());
 
             var urlParts = new[]
-            {
-                "openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select",
-                "openid.identity=http://specs.openid.net/auth/2.0/identifier_select",
-                "openid.mode=checkid_setup",
-                "openid.ns=http://specs.openid.net/auth/2.0",
-                "openid.ns.sreg=http://openid.net/extensions/sreg/1.1",
-                "openid.sreg.required=nickname",
-                "openid.sreg.optional=email,fullname,gender,language",
-                "no_ssl=true",
-                "openid.return_to=" + encodedCallbackUri,
-                "openid.realm=" + encodedCallbackUri
-            };
+                           {
+                               "openid.claimed_id=http://specs.openid.net/auth/2.0/identifier_select",
+                               "openid.identity=http://specs.openid.net/auth/2.0/identifier_select",
+                               "openid.mode=checkid_setup",
+                               "openid.ns=http://specs.openid.net/auth/2.0",
+                               "openid.ns.sreg=http://openid.net/extensions/sreg/1.1",
+                               "openid.sreg.required=nickname",
+                               "openid.sreg.optional=email,fullname,gender,language",
+                               "no_ssl=true",
+                               "openid.return_to=" + encodedCallbackUri,
+                               "openid.realm=" + encodedCallbackUri
+                           };
 
 
             var redirectionUri = AppendQueryStringParameterToUri(openIdEndPoint, string.Join("&", urlParts));
 
             return new RedirectToAuthenticateSettings
-            {
-                RedirectUri = redirectionUri,
-                State = state
-            };
+                   {
+                       RedirectUri = redirectionUri,
+                       State = state
+                   };
         }
 
         public override IAuthenticatedClient AuthenticateClient(NameValueCollection queryStringParameters,
@@ -155,13 +153,13 @@ namespace SimpleAuthentication.ExtraProviders
             }
 
             return new AuthenticatedClient(Name.ToLowerInvariant())
-            {
-                AccessToken = new AccessToken
-                {
-                    PublicToken = "-NA for OpenId.-"
-                },
-                UserInformation = RetrieveMe(queryStringParameters)
-            };
+                   {
+                       AccessToken = new AccessToken
+                                     {
+                                         PublicToken = "-NA for OpenId.-"
+                                     },
+                       UserInformation = RetrieveMe(queryStringParameters)
+                   };
         }
 
         #endregion
@@ -342,14 +340,14 @@ namespace SimpleAuthentication.ExtraProviders
             }
 
             return new UserInformation
-            {
-                Email = queryStringParameters["openid.sreg.email"],
-                Gender = gender,
-                Id = queryStringParameters["openid.claimed_id"],
-                Locale = queryStringParameters["openid.sreg.language"],
-                Name = queryStringParameters["openid.sreg.fullname"],
-                UserName = queryStringParameters["openid.sreg.nickname"]
-            };
+                   {
+                       Email = queryStringParameters["openid.sreg.email"],
+                       Gender = gender,
+                       Id = queryStringParameters["openid.claimed_id"],
+                       Locale = queryStringParameters["openid.sreg.language"],
+                       Name = queryStringParameters["openid.sreg.fullname"],
+                       UserName = queryStringParameters["openid.sreg.nickname"]
+                   };
         }
 
         private static string UrlEncode(string url)

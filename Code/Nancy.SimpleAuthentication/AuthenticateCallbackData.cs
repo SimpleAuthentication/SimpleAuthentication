@@ -1,5 +1,5 @@
 ﻿using System;
-using SimpleAuthentication;
+using SimpleAuthentication.Core;
 
 namespace Nancy.SimpleAuthentication
 {

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Net;
 using RestSharp;
+using SimpleAuthentication.Core;
+using SimpleAuthentication.Core.Exceptions;
+using SimpleAuthentication.Core.Providers;
+using SimpleAuthentication.Core.Tracing;
 using SimpleAuthentication.ExtraProviders.LinkedIn;
-using SimpleAuthentication.Providers;
-using SimpleAuthentication.Tracing;
 
 namespace SimpleAuthentication.ExtraProviders
 {
@@ -74,10 +76,10 @@ namespace SimpleAuthentication.ExtraProviders
             }
 
             return new AccessToken
-            {
-                PublicToken = accessTokenResult.AccessToken,
-                ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn)
-            };
+                   {
+                       PublicToken = accessTokenResult.AccessToken,
+                       ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn)
+                   };
         }
 
         protected override UserInformation RetrieveUserInformation(AccessToken accessToken)
@@ -141,17 +143,17 @@ namespace SimpleAuthentication.ExtraProviders
             }
 
             return new UserInformation
-            {
-                Id = response.Data.Id,
-                Name = string.Format("{0}{1}",
-                                     string.IsNullOrEmpty(response.Data.FirstName)
-                                         ? string.Empty
-                                         : response.Data.FirstName + " ",
-                                     string.IsNullOrEmpty(response.Data.LastName)
-                                         ? string.Empty
-                                         : response.Data.LastName).Trim(),
-                Email = response.Data.EmailAddress
-            };
+                   {
+                       Id = response.Data.Id,
+                       Name = string.Format("{0}{1}",
+                                            string.IsNullOrEmpty(response.Data.FirstName)
+                                                ? string.Empty
+                                                : response.Data.FirstName + " ",
+                                            string.IsNullOrEmpty(response.Data.LastName)
+                                                ? string.Empty
+                                                : response.Data.LastName).Trim(),
+                       Email = response.Data.EmailAddress
+                   };
         }
 
         #endregion

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Net;
 using RestSharp;
+using SimpleAuthentication.Core;
+using SimpleAuthentication.Core.Exceptions;
+using SimpleAuthentication.Core.Providers;
+using SimpleAuthentication.Core.Tracing;
 using SimpleAuthentication.ExtraProviders.ThirtySevenSignals;
-using SimpleAuthentication.Providers;
-using SimpleAuthentication.Tracing;
 
 namespace SimpleAuthentication.ExtraProviders
 {
@@ -93,10 +95,10 @@ namespace SimpleAuthentication.ExtraProviders
             }
 
             return new AccessToken
-            {
-                PublicToken = accessTokenResult.access_token,
-                ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.expires_in)
-            };
+                   {
+                       PublicToken = accessTokenResult.access_token,
+                       ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.expires_in)
+                   };
         }
 
         protected override UserInformation RetrieveUserInformation(AccessToken accessToken)
@@ -169,12 +171,15 @@ namespace SimpleAuthentication.ExtraProviders
             //}
 
             return userInformation ?? (new UserInformation
-            {
-                Id = response.Data.Identity.Id,
-                Gender = GenderType.Unknown,
-                Name = string.Format("{0} {1}", response.Data.Identity.First_name ?? string.Empty, response.Data.Identity.Last_name ?? string.Empty),
-                Email = response.Data.Identity.Email_address
-            });
+                                       {
+                                           Id = response.Data.Identity.Id,
+                                           Gender = GenderType.Unknown,
+                                           Name =
+                                               string.Format("{0} {1}",
+                                                             response.Data.Identity.First_name ?? string.Empty,
+                                                             response.Data.Identity.Last_name ?? string.Empty),
+                                           Email = response.Data.Identity.Email_address
+                                       });
         }
 
         #endregion
@@ -264,12 +269,12 @@ namespace SimpleAuthentication.ExtraProviders
             }
 
             return new UserInformation
-            {
-                Email = response.Data.email_address,
-                Id = response.Data.identity_id,
-                Name = response.Data.Name,
-                Picture = response.Data.avatar_url
-            };
+                   {
+                       Email = response.Data.email_address,
+                       Id = response.Data.identity_id,
+                       Name = response.Data.Name,
+                       Picture = response.Data.avatar_url
+                   };
         }
 
         private UserInformation ExtractUserInformationFromBasecamp(Account account, AccessToken accessToken)
@@ -330,12 +335,12 @@ namespace SimpleAuthentication.ExtraProviders
             }
 
             return new UserInformation
-            {
-                Email = response.Data.email_address,
-                Id = response.Data.identity_id,
-                Name = response.Data.Name,
-                Picture = response.Data.avatar_url
-            };
+                   {
+                       Email = response.Data.email_address,
+                       Id = response.Data.identity_id,
+                       Name = response.Data.Name,
+                       Picture = response.Data.avatar_url
+                   };
         }
     }
 }

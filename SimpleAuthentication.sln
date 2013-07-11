@@ -15,8 +15,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared Assembly Info", "Sha
 		Code\Shared Assembly Info\SharedAssemblyInfo.cs = Code\Shared Assembly Info\SharedAssemblyInfo.cs
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleAuthentication", "Code\SimpleAuthentication\SimpleAuthentication.csproj", "{F94E2140-8262-4463-8054-0B1DCE8ABE03}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleAuthentication.Mvc", "Code\SimpleAuthentication.Mvc\SimpleAuthentication.Mvc.csproj", "{02C40D4A-17F3-465B-88D6-64D238A32396}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleAuthentication.Sample.MvcAuto", "Samples\SimpleAuthentication.Sample.MvcAuto\SimpleAuthentication.Sample.MvcAuto.csproj", "{F1AAC5AC-C356-460D-B5FF-097E84301622}"
@@ -29,16 +27,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nancy.SimpleAuthentication"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleAuthentication.Sample.NancyAuto", "Samples\SimpleAuthentication.Sample.NancyAuto\SimpleAuthentication.Sample.NancyAuto.csproj", "{C344D22C-5DC0-44E6-8595-D2EF49BF255B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleAuthentication.Core", "Code\SimpleAuthentication.Core\SimpleAuthentication.Core.csproj", "{F94E2140-8262-4463-8054-0B1DCE8ABE03}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F94E2140-8262-4463-8054-0B1DCE8ABE03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F94E2140-8262-4463-8054-0B1DCE8ABE03}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F94E2140-8262-4463-8054-0B1DCE8ABE03}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F94E2140-8262-4463-8054-0B1DCE8ABE03}.Release|Any CPU.Build.0 = Release|Any CPU
 		{02C40D4A-17F3-465B-88D6-64D238A32396}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{02C40D4A-17F3-465B-88D6-64D238A32396}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02C40D4A-17F3-465B-88D6-64D238A32396}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -63,6 +59,10 @@ Global
 		{C344D22C-5DC0-44E6-8595-D2EF49BF255B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C344D22C-5DC0-44E6-8595-D2EF49BF255B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C344D22C-5DC0-44E6-8595-D2EF49BF255B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F94E2140-8262-4463-8054-0B1DCE8ABE03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F94E2140-8262-4463-8054-0B1DCE8ABE03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F94E2140-8262-4463-8054-0B1DCE8ABE03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F94E2140-8262-4463-8054-0B1DCE8ABE03}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

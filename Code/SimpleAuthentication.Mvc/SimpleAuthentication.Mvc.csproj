@@ -87,13 +87,13 @@
     <Compile Include="SimpleAuthenticationRouteConfig.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SimpleAuthentication\SimpleAuthentication.csproj">
-      <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
-      <Name>WorldDomination.Web.Authentication</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ProjectReference Include="..\SimpleAuthentication.Core\SimpleAuthentication.Core.csproj">
+      <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
+      <Name>SimpleAuthentication.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

@@ -2,8 +2,8 @@
 using System.Linq;
 using Glimpse.Core.Extensibility;
 using Glimpse.Core.Tab.Assist;
-using SimpleAuthentication;
-using SimpleAuthentication.Providers;
+using SimpleAuthentication.Core;
+using SimpleAuthentication.Core.Providers;
 
 namespace Glimpse.SimpleAuthentication
 {

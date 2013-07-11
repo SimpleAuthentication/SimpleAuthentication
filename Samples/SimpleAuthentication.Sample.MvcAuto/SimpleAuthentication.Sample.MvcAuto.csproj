@@ -167,6 +167,10 @@
       <Project>{2bafafc7-635a-40a4-9b25-df789c5976b7}</Project>
       <Name>Glimpse.SimpleAuthentication</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Code\SimpleAuthentication.Core\SimpleAuthentication.Core.csproj">
+      <Project>{F94E2140-8262-4463-8054-0B1DCE8ABE03}</Project>
+      <Name>SimpleAuthentication.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Code\SimpleAuthentication.ExtraProviders\SimpleAuthentication.ExtraProviders.csproj">
       <Project>{d75207d5-fa68-4dc6-939a-2ac3cad4bead}</Project>
       <Name>SimpleAuthentication.ExtraProviders</Name>
@@ -174,10 +178,6 @@
     <ProjectReference Include="..\..\Code\SimpleAuthentication.Mvc\SimpleAuthentication.Mvc.csproj">
       <Project>{02c40d4a-17f3-465b-88d6-64d238a32396}</Project>
       <Name>WorldDomination.Web.Authentication.Mvc</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Code\SimpleAuthentication\SimpleAuthentication.csproj">
-      <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
-      <Name>WorldDomination.Web.Authentication</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

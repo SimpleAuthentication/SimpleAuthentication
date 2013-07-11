@@ -1,4 +1,5 @@
 ﻿using System;
+using SimpleAuthentication.Core;
 
 namespace SimpleAuthentication.Mvc
 {

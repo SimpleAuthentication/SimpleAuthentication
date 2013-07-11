@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Web.Mvc;
-using SimpleAuthentication.Providers;
-using SimpleAuthentication.Tracing;
+using SimpleAuthentication.Core;
+using SimpleAuthentication.Core.Exceptions;
+using SimpleAuthentication.Core.Providers;
+using SimpleAuthentication.Core.Tracing;
 
 namespace SimpleAuthentication.Mvc
 {

@@ -2,9 +2,10 @@
 using System.Collections.Specialized;
 using System.Diagnostics;
 using Nancy.Responses.Negotiation;
-using SimpleAuthentication;
-using SimpleAuthentication.Providers;
-using SimpleAuthentication.Tracing;
+using SimpleAuthentication.Core;
+using SimpleAuthentication.Core.Exceptions;
+using SimpleAuthentication.Core.Providers;
+using SimpleAuthentication.Core.Tracing;
 
 namespace Nancy.SimpleAuthentication
 {

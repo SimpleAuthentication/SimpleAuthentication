@@ -55,9 +55,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SimpleAuthentication\SimpleAuthentication.csproj">
+    <ProjectReference Include="..\SimpleAuthentication.Core\SimpleAuthentication.Core.csproj">
       <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
-      <Name>SimpleAuthentication</Name>
+      <Name>SimpleAuthentication.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
