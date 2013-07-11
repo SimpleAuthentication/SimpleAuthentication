@@ -2,8 +2,8 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>SimpleAuthentication.ExtraProviders</id>
-        <version>0.1.0</version>
-        <title>SimpleAuthentication: Web Authentication Extra Providers</title>
+        <version>0.2.0</version>
+        <title>SimpleAuthentication.ExtraProviders: Extra Providers for SimpleAuthentication.</title>
         <authors>Justin Adler,Phillip Haydon and contributors</authors>
         <owners>Justin Adler and Phillip Haydon</owners>
         <projectUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</projectUrl>
@@ -15,7 +15,7 @@
 2. Amazon
 3. 37 Signals
 4. LinkedIn
-5. OpenId</description>
+5. OpenId.</description>
         <summary>A really simple way to Authenticate against a number of popular providers like GitHub, Amazon, 37 Signals, etc...</summary>
         <releaseNotes />
         <copyright>2012</copyright>
@@ -23,7 +23,7 @@
         <tags>authentication github amazon 37signals thirtysevensignals basecamp highrise linkedin openid oauth oauth1 oauth2 unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
         <dependencies>
             <dependency id="RestSharp" version="104.1" />
-            <dependency id="SimpleAuthentication" version="0.1.0" />
+            <dependency id="SimpleAuthentication.Core" version="0.2.0" />
         </dependencies>
     </metadata>
     <files>

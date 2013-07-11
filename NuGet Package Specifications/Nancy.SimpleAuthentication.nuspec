@@ -2,8 +2,8 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Nancy.SimpleAuthentication</id>
-        <version>0.1.0</version>
-        <title>SimpleAuthentication: Web Authentication for NancyFX</title>
+        <version>0.2.0</version>
+        <title>Nancy.SimpleAuthentication: NancyFX library for SimpleAuthentication.</title>
         <authors>Justin Adler,Phillip Haydon</authors>
         <owners>Justin Adler</owners>
         <projectUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</projectUrl>
@@ -17,7 +17,7 @@
         <tags>authentication twitter google facebook oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination nancy nancyfx</tags>
         <dependencies>
             <dependency id="Nancy" version="0.18.0" />
-            <dependency id="SimpleAuthentication" version="0.1.0" />
+            <dependency id="SimpleAuthentication.Core" version="0.2.0" />
         </dependencies>
     </metadata>
     <files>
