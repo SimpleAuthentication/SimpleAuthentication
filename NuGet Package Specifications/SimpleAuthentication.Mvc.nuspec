@@ -2,9 +2,9 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>SimpleAuthentication.Mvc</id>
-        <version>0.2.1</version>
+        <version>0.2.2</version>
         <title>SimpleAuthentication.Mvc: ASP.NET Mvc library for SimpleAuthentication</title>
-        <authors>Justin Adler,Phillip Haydon and contributors</authors>
+        <authors>Justin Adler, Phillip Haydon and contributors</authors>
         <owners>Justin Adler and Phillip Haydon</owners>
         <projectUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</projectUrl>
         <iconUrl>http://i.imgur.com/bR4Yf.jpg</iconUrl>
