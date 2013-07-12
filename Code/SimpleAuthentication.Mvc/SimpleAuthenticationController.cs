@@ -10,26 +10,38 @@ namespace SimpleAuthentication.Mvc
 {
     public class SimpleAuthenticationController : Controller
     {
-        private const string SessionKeyAccessToken = "SimpleAuthentication.Session.AccessToken";
         private const string SessionKeyState = "SimpleAuthentication.Session.StateToken";
         private const string SessionKeyRedirectToUrl = "SimpleAuthentication.Session.RedirectToUrl";
         private const string SessionKeyRedirectToProviderUrl = "SimpleAuthentication.Session.";
 
         private readonly AuthenticationProviderFactory _authenticationProviderFactory;
 
-        public SimpleAuthenticationController(IAuthenticationCallbackProvider callbackProvider)
+        public SimpleAuthenticationController()
         {
-            _authenticationProviderFactory = new AuthenticationProviderFactory();
+            // Lazyily setup our TraceManager.
+            TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
 
+            if (CallbackProvider == null)
+            {
+
+                // We don't have the bare minimum requirements - so lets help the developer.
+                const string errorMessage =
+                    "Please use the SimpleAuthenticationController(IAuthenticationCallbackProvider) constructor. This is because we need to know what to do AFTER we've retrieved the User Information from the Authentication Provider. This is normally done by leveraging the ASP.NET MVC Dependency Resolver. So please pick a form of Dependency Injection and inject an IAuthenticationCallbackProvider into this constructor. For more information about ASP.NET MVC's Dependency Resolver: http://www.asp.net/mvc/tutorials/hands-on-labs/aspnet-mvc-4-dependency-injection .";
+                TraceSource.TraceError(errorMessage);
+                throw new NotImplementedException(errorMessage);
+            }
+
+            _authenticationProviderFactory = new AuthenticationProviderFactory();
+        }
+
+        public SimpleAuthenticationController(IAuthenticationCallbackProvider callbackProvider) : this()
+        {
             if (callbackProvider == null)
             {
                 throw new ArgumentNullException("callbackProvider");
             }
 
             CallbackProvider = callbackProvider;
-
-            // Lazyily setup our TraceManager.
-            TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
         }
 
         /// <summary>
