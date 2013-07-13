@@ -2,9 +2,9 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>SimpleAuthentication.Core</id>
-        <version>0.2.0</version>
+        <version>0.3.0</version>
         <title>SimpleAuthentication.Core: making authentication ... simple!</title>
-        <authors>Justin Adler,Phillip Haydon and contributors</authors>
+        <authors>Justin Adler, Phillip Haydon and contributors</authors>
         <owners>Justin Adler and Phillip Haydon</owners>
         <projectUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</projectUrl>
         <iconUrl>http://i.imgur.com/bR4Yf.jpg</iconUrl>

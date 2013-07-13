@@ -2,9 +2,9 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Nancy.SimpleAuthentication</id>
-        <version>0.2.0</version>
+        <version>0.3.0</version>
         <title>Nancy.SimpleAuthentication: NancyFX library for SimpleAuthentication.</title>
-        <authors>Justin Adler,Phillip Haydon</authors>
+        <authors>Justin Adler, Phillip Haydon</authors>
         <owners>Justin Adler</owners>
         <projectUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</projectUrl>
         <iconUrl>http://i.imgur.com/bR4Yf.jpg</iconUrl>
@@ -17,10 +17,11 @@
         <tags>authentication twitter google facebook oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination nancy nancyfx</tags>
         <dependencies>
             <dependency id="Nancy" version="0.18.0" />
-            <dependency id="SimpleAuthentication.Core" version="0.2.0" />
+            <dependency id="SimpleAuthentication.Core" version="0.3.0" />
         </dependencies>
     </metadata>
     <files>
+        <file src="web.config.transform" target="content\web.config.transform" />
         <file src="..\Code\Nancy.SimpleAuthentication\bin\Release\Nancy.SimpleAuthentication.dll" target="lib\net40\Nancy.SimpleAuthentication.dll" />
         <file src="ReadMe.txt" target="ReadMe.txt" />
     </files>
