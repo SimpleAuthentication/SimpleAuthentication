@@ -16,7 +16,7 @@ namespace SimpleAuthentication.Sample.MvcAuto.Controllers
                 {
                     AuthenticatedClient = model.AuthenticatedClient,
                     Exception = model.Exception,
-                    Referrer = model.RedirectUrl
+                    ReturnUrl = model.ReturnUrl
                 })
             };
         }

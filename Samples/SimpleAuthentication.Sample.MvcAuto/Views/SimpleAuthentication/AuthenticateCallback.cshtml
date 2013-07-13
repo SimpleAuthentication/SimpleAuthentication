@@ -29,7 +29,7 @@
             <p>Picture:<br/> <img alt="Provider Image" src="@Model.AuthenticatedClient.UserInformation.Picture" /></p>
         }
         <p>Gender: @Model.AuthenticatedClient.UserInformation.Gender.ToString()</p>
-        <p>Referrer/RedirectTo Url: @(Model.Referrer == null ? "-none/null-" : Model.Referrer.AbsoluteUri)</p>
+        <p>Referrer/RedirectTo Url: @(Model.ReturnUrl == null ? "-none/null-" : Model.ReturnUrl.AbsoluteUri)</p>
     }
 
 

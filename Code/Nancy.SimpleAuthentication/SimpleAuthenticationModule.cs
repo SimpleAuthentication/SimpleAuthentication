@@ -12,24 +12,19 @@ namespace Nancy.SimpleAuthentication
     public class SimpleAuthenticationModule : NancyModule
     {
         private const string SessionKeyState = "SimpleAuthentication-StateKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
-
-        private const string SessionKeyRedirectToUrl =
-            "SimpleAuthentication-RedirectUrlKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
-
-        private const string SessionKeyRedirectToProviderUrl =
-            "SimpleAuthentication-RedirectToProviderUrlKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
-
+        private const string SessionKeyRedirectToUrl = "SimpleAuthentication-RedirectUrlKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
+        private const string SessionKeyRedirectToProviderUrl = "SimpleAuthentication-RedirectToProviderUrlKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
         public static string RedirectRoute = "/authentication/redirect/{providerkey}";
         public static string CallbackRoute = "/authentication/authenticatecallback";
-
+        
+        private readonly Lazy<ITraceManager> _traceManager = new Lazy<ITraceManager>(() => new TraceManager());
         private readonly AuthenticationProviderFactory _authenticationProviderFactory;
+        private readonly IAuthenticationCallbackProvider _callbackProvider;
+        private string _returnToUrlParameterKey;
 
         public SimpleAuthenticationModule(IAuthenticationCallbackProvider callbackProvider)
         {
-            // Lazyily setup our TraceManager.
-            TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
-
-            CallbackProvider = callbackProvider;
+            _callbackProvider = callbackProvider;
             _authenticationProviderFactory = new AuthenticationProviderFactory();
 
             // Define the routes and how they are handled.
@@ -38,12 +33,13 @@ namespace Nancy.SimpleAuthentication
             Get[CallbackRoute] = parameters => AuthenticateCallback();
         }
 
-        /// <summary>
-        /// Your custom callback code which is used to handle whatever you want to do with the UserInformation and Access Tokens.
-        /// </summary>
-        public IAuthenticationCallbackProvider CallbackProvider { get; private set; }
+        public string ReturnToUrlParameterKey
+        {
+            get { return (string.IsNullOrEmpty(_returnToUrlParameterKey) ? "returnUrl" : _returnToUrlParameterKey); }
+            set { _returnToUrlParameterKey = value; }
+        }
 
-        public ITraceManager TraceManager { set; private get; }
+        public ITraceManager TraceManager { get { return _traceManager.Value; } }
 
         private TraceSource TraceSource
         {
@@ -103,7 +99,7 @@ namespace Nancy.SimpleAuthentication
 
             // Remember any important information for after we've come back.
             Session[SessionKeyState] = redirectToAuthenticateSettings.State;
-            Session[SessionKeyRedirectToUrl] = Request.Url.ToString();
+            Session[SessionKeyRedirectToUrl] = DetermineReturnUrl();
             Session[SessionKeyRedirectToProviderUrl] = redirectToAuthenticateSettings.RedirectUri.AbsoluteUri;
 
             // Now redirect :)
@@ -168,12 +164,12 @@ namespace Nancy.SimpleAuthentication
             if (redirectToUrl != null)
             {
                 TraceSource.TraceVerbose("Found redirectToUrl: " + redirectToUrl);
-                model.RedirectUrl = redirectToUrl;
+                model.ReturnUrl = redirectToUrl;
             }
 
             // Finally! We can hand over the logic to the consumer to do whatever they want.
             TraceSource.TraceVerbose("About to execute your custom callback provider logic.");
-            return CallbackProvider.Process(this, model);
+            return _callbackProvider.Process(this, model);
         }
 
         private IAuthenticationProvider GetAuthenticationProvider(string providerKey)
@@ -221,6 +217,15 @@ namespace Nancy.SimpleAuthentication
         private Uri GenerateCallbackUri(string providerName)
         {
             return SystemHelpers.CreateCallBackUri(providerName, Request.Url, CallbackRoute);
+        }
+
+        private Uri DetermineReturnUrl()
+        {
+            var returnUrl = Request.Query[ReturnToUrlParameterKey];
+
+            return string.IsNullOrEmpty(returnUrl)
+                ? Request.Url
+                : SystemHelpers.CreateRoute(Request.Url, returnUrl);
         }
     }
 }

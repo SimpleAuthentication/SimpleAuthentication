@@ -13,14 +13,28 @@ namespace SimpleAuthentication.Mvc
         private const string SessionKeyState = "SimpleAuthentication.Session.StateToken";
         private const string SessionKeyReturnToUrl = "SimpleAuthentication.Session.RedirectToUrl";
         private const string SessionKeyRedirectToProviderUrl = "SimpleAuthentication.Session.";
+        private readonly Lazy<ITraceManager> _traceManager = new Lazy<ITraceManager>(() => new TraceManager());
 
         private readonly AuthenticationProviderFactory _authenticationProviderFactory;
+        private readonly IAuthenticationCallbackProvider _callbackProvider;
         private string _returnToUrlParameterKey;
 
-        //public SimpleAuthenticationController()
-        //{
+        public SimpleAuthenticationController()
+        {
+            // We don't have the bare minimum requirements - so lets help the developer.
+            const string errorMessage =
+                "Please use the SimpleAuthenticationController(IAuthenticationCallbackProvider)" +
+                " constructor. This is because we need to know what to do AFTER we've retrieved the" +
+                " User Information from the Authentication Provider. This is normally done by" +
+                " leveraging the ASP.NET MVC Dependency Resolver. So please pick a form of Dependency" +
+                " Injection and inject an IAuthenticationCallbackProvider into this constructor. For" +
+                " more information about ASP.NET MVC's Dependency Resolver:" +
+                " http://www.asp.net/mvc/tutorials/hands-on-labs/aspnet-mvc-4-dependency-injection";
 
-        //}
+            TraceSource.TraceError(errorMessage);
+
+            throw new NotImplementedException(errorMessage);
+        }
 
         public SimpleAuthenticationController(IAuthenticationCallbackProvider callbackProvider)
         {
@@ -29,36 +43,17 @@ namespace SimpleAuthentication.Mvc
                 throw new ArgumentNullException("callbackProvider");
             }
 
-            CallbackProvider = callbackProvider;
-
-            // Lazyily setup our TraceManager.
-            TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
-
-            if (CallbackProvider == null)
-            {
-
-                // We don't have the bare minimum requirements - so lets help the developer.
-                const string errorMessage =
-                    "Please use the SimpleAuthenticationController(IAuthenticationCallbackProvider) constructor. This is because we need to know what to do AFTER we've retrieved the User Information from the Authentication Provider. This is normally done by leveraging the ASP.NET MVC Dependency Resolver. So please pick a form of Dependency Injection and inject an IAuthenticationCallbackProvider into this constructor. For more information about ASP.NET MVC's Dependency Resolver: http://www.asp.net/mvc/tutorials/hands-on-labs/aspnet-mvc-4-dependency-injection .";
-                TraceSource.TraceError(errorMessage);
-                throw new NotImplementedException(errorMessage);
-            }
-
+            _callbackProvider = callbackProvider;
             _authenticationProviderFactory = new AuthenticationProviderFactory();
         }
 
-        /// <summary>
-        /// Your custom callback code which is used to handle whatever you want to do with the UserInformation and Access Tokens.
-        /// </summary>
-        public IAuthenticationCallbackProvider CallbackProvider { get; private set; }
-
         public string ReturnToUrlParameterKey
         {
-            get { return (string.IsNullOrEmpty(_returnToUrlParameterKey) ? "returnToUrl" : _returnToUrlParameterKey); }
+            get { return (string.IsNullOrEmpty(_returnToUrlParameterKey) ? "returnUrl" : _returnToUrlParameterKey); }
             set { _returnToUrlParameterKey = value; }
         }
 
-        public ITraceManager TraceManager { set; private get; }
+        public ITraceManager TraceManager { get { return _traceManager.Value; } }
 
         private TraceSource TraceSource
         {
@@ -189,12 +184,12 @@ namespace SimpleAuthentication.Mvc
             if (redirectToUrl != null)
             {
                 TraceSource.TraceVerbose("Found redirectToUrl: " + redirectToUrl);
-                model.RedirectUrl = redirectToUrl;
+                model.ReturnUrl = redirectToUrl;
             }
 
             // Finally! We can hand over the logic to the consumer to do whatever they want.
             TraceSource.TraceVerbose("About to execute your custom callback provider logic.");
-            return CallbackProvider.Process(HttpContext, model);
+            return _callbackProvider.Process(HttpContext, model);
         }
 
         private IAuthenticationProvider GetAuthenticationProvider(string providerKey)

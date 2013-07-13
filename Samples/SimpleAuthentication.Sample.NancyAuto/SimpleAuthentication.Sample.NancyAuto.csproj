@@ -76,12 +76,11 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\amazon_32x32.png" />
     <Content Include="Content\facebook_32.png" />
     <Content Include="Content\google_32.png" />
     <Content Include="Content\main.css" />
-    <Content Include="Content\myopenid_64.png" />
     <Content Include="Content\twitter_32.png" />
+    <Content Include="Content\windowslive_32.png" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
