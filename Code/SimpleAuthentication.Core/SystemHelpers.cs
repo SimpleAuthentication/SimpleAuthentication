@@ -64,5 +64,32 @@ namespace SimpleAuthentication.Core
 
             return builder.Uri;
         }
+
+        public static Uri CreateRoute(Uri requestUrl, string path, string query = null)
+        {
+            if (requestUrl == null)
+            {
+                throw new ArgumentNullException("requestUrl");
+            }
+
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException("path");
+            }
+
+            var builder = new UriBuilder(requestUrl)
+            {
+                Path = path,
+                Query = query
+            };
+
+            // Don't include port 80/443 in the Uri.
+            if (builder.Uri.IsDefaultPort)
+            {
+                builder.Port = -1;
+            }
+
+            return builder.Uri;
+        }
     }
 }

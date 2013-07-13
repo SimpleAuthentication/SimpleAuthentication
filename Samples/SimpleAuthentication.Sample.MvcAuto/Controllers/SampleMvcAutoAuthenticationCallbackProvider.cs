@@ -15,7 +15,8 @@ namespace SimpleAuthentication.Sample.MvcAuto.Controllers
                 ViewData = new ViewDataDictionary(new AuthenticateCallbackViewModel
                 {
                     AuthenticatedClient = model.AuthenticatedClient,
-                    Exception = model.Exception
+                    Exception = model.Exception,
+                    Referrer = model.RedirectUrl
                 })
             };
         }

@@ -11,13 +11,26 @@ namespace SimpleAuthentication.Mvc
     public class SimpleAuthenticationController : Controller
     {
         private const string SessionKeyState = "SimpleAuthentication.Session.StateToken";
-        private const string SessionKeyRedirectToUrl = "SimpleAuthentication.Session.RedirectToUrl";
+        private const string SessionKeyReturnToUrl = "SimpleAuthentication.Session.RedirectToUrl";
         private const string SessionKeyRedirectToProviderUrl = "SimpleAuthentication.Session.";
 
         private readonly AuthenticationProviderFactory _authenticationProviderFactory;
+        private string _returnToUrlParameterKey;
 
-        public SimpleAuthenticationController()
+        //public SimpleAuthenticationController()
+        //{
+
+        //}
+
+        public SimpleAuthenticationController(IAuthenticationCallbackProvider callbackProvider)
         {
+            if (callbackProvider == null)
+            {
+                throw new ArgumentNullException("callbackProvider");
+            }
+
+            CallbackProvider = callbackProvider;
+
             // Lazyily setup our TraceManager.
             TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
 
@@ -34,20 +47,16 @@ namespace SimpleAuthentication.Mvc
             _authenticationProviderFactory = new AuthenticationProviderFactory();
         }
 
-        public SimpleAuthenticationController(IAuthenticationCallbackProvider callbackProvider) : this()
-        {
-            if (callbackProvider == null)
-            {
-                throw new ArgumentNullException("callbackProvider");
-            }
-
-            CallbackProvider = callbackProvider;
-        }
-
         /// <summary>
         /// Your custom callback code which is used to handle whatever you want to do with the UserInformation and Access Tokens.
         /// </summary>
         public IAuthenticationCallbackProvider CallbackProvider { get; private set; }
+
+        public string ReturnToUrlParameterKey
+        {
+            get { return (string.IsNullOrEmpty(_returnToUrlParameterKey) ? "returnToUrl" : _returnToUrlParameterKey); }
+            set { _returnToUrlParameterKey = value; }
+        }
 
         public ITraceManager TraceManager { set; private get; }
 
@@ -112,7 +121,7 @@ namespace SimpleAuthentication.Mvc
 
             // Remember any important information for after we've come back.
             Session[SessionKeyState] = redirectToAuthenticateSettings.State;
-            Session[SessionKeyRedirectToUrl] = Request.UrlReferrer;
+            Session[SessionKeyReturnToUrl] = DetermineReturnUrl(inputModel.ReturnUrl);
             Session[SessionKeyRedirectToProviderUrl] = redirectToAuthenticateSettings.RedirectUri.AbsoluteUri;
 
             // Now redirect :)
@@ -148,7 +157,7 @@ namespace SimpleAuthentication.Mvc
             // TODO: Check if this is an access token or an auth token thingy-thing.
             TraceSource.TraceVerbose("Retrieving (local serializaed) AccessToken, State and RedirectToUrl.");
             var state = Session[SessionKeyState] as string;
-            var redirectToUrl = Session[SessionKeyRedirectToUrl] as Uri;
+            var redirectToUrl = Session[SessionKeyReturnToUrl] as Uri;
 
             #endregion
 
@@ -234,6 +243,19 @@ namespace SimpleAuthentication.Mvc
         {
             return SystemHelpers.CreateCallBackUri(providerName, Request.Url,
                                                    Url.RouteUrl(SimpleAuthenticationRouteConfig.CallbackRouteName));
+        }
+
+        private Uri DetermineReturnUrl(string returnUrl)
+        {
+            if (string.IsNullOrEmpty(returnUrl))
+            {
+                // Maybe they have used another parameter key name, different to the input model?
+                returnUrl = Request.Params[ReturnToUrlParameterKey];
+            }
+
+            return string.IsNullOrEmpty(returnUrl)
+                ? Request.UrlReferrer
+                : SystemHelpers.CreateRoute(Request.Url, returnUrl);
         }
     }
 }
