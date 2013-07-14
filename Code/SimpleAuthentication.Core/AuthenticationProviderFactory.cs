@@ -9,72 +9,76 @@ namespace SimpleAuthentication.Core
 {
     public class AuthenticationProviderFactory
     {
+        private static readonly Lazy<IDictionary<string, IAuthenticationProvider>> Providers =
+            new Lazy<IDictionary<string, IAuthenticationProvider>>(
+                () =>
+                {
+                    var authenticationProviders = new Dictionary<string, IAuthenticationProvider>();
+                    Initialize(authenticationProviders);
+                    return authenticationProviders;
+                });
+
         public AuthenticationProviderFactory()
         {
             TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
-
-            AuthenticationProviders =
-                new Lazy<IDictionary<string, IAuthenticationProvider>>(
-                    () => new Dictionary<string, IAuthenticationProvider>()).Value;
-
-            Initialize();
         }
 
-        #region IAuthenticationFactory Implementation
-
-        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; private set; }
+        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders
+        {
+            get { return Providers.Value; }
+        }
 
         public ITraceManager TraceManager { set; private get; }
-
-        public void AddProvider(IAuthenticationProvider provider, bool replaceExisting = true)
-        {
-            if (provider == null)
-            {
-                throw new ArgumentNullException("provider");
-            }
-
-            var key = provider.Name.ToLower();
-
-            if (AuthenticationProviders.ContainsKey(key) &&
-                !replaceExisting)
-            {
-                throw new InvalidOperationException(
-                    string.Format(
-                        "The provider '{0}' already exists and cannot be overridden, either set `replaceExisting` to `true`, or remove the provider first.",
-                        provider.Name));
-            }
-
-            AuthenticationProviders[key] = provider;
-        }
-
-        public void RemoveProvider(string providerName)
-        {
-            AuthenticationProviders.Remove(providerName);
-        }
-
-        #endregion
 
         private TraceSource TraceSource
         {
             get { return TraceManager["SimpleAuthentication.AuthenticationProviderFactory"]; }
         }
 
-        private void Initialize()
+        public void AddProvider(IAuthenticationProvider provider, bool replaceExisting = true)
         {
+            AddProviderToDictionary(AuthenticationProviders, provider, replaceExisting);
+        }
+
+        public void RemoveProvider(string providerName)
+        {
+            RemoveProviderFromDictionary(providerName, AuthenticationProviders);
+        }
+
+        private static void Initialize(IDictionary<string, IAuthenticationProvider> authenticationProviders)
+        {
+            if (authenticationProviders == null)
+            {
+                throw new ArgumentNullException("authenticationProviders");
+            }
+
             var discoveredProviders = MefHelpers.GetExportedTypes<IAuthenticationProvider>();
+            if (discoveredProviders == null)
+            {
+                return;
+            }
 
-            //TODO: Try configure from appSettings
-
-            //Try configure from custom config section.
+            // Try configure from custom config section.
             var providerConfig = ProviderConfigHelper.UseConfig();
             if (providerConfig != null)
             {
-                SetupCustomConfigProviders(discoveredProviders, providerConfig);
+                SetupCustomConfigProviders(authenticationProviders, discoveredProviders, providerConfig);
             }
         }
 
-        private void SetupCustomConfigProviders(IList<Type> discoveredProviders, ProviderConfiguration providerConfig)
+        private static void SetupCustomConfigProviders(
+            IDictionary<string, IAuthenticationProvider> authenticationProviders,
+            IList<Type> discoveredProviders,
+            ProviderConfiguration providerConfig)
         {
+            if (authenticationProviders == null)
+            {
+                throw new ArgumentNullException("authenticationProviders");
+            }
+
+            if (discoveredProviders == null)
+            {
+            }
             if (providerConfig == null)
             {
                 throw new ArgumentNullException("providerConfig");
@@ -89,11 +93,12 @@ namespace SimpleAuthentication.Core
             {
                 var discoveredProvider = DiscoverProvider(discoveredProviders, provider);
 
-                AddProvider(discoveredProvider, false);
+                AddProviderToDictionary(authenticationProviders, discoveredProvider, false);
             }
         }
 
-        private IAuthenticationProvider DiscoverProvider(IEnumerable<Type> discoveredProviders, ProviderKey providerKey)
+        private static IAuthenticationProvider DiscoverProvider(IEnumerable<Type> discoveredProviders,
+                                                                ProviderKey providerKey)
         {
             if (discoveredProviders == null)
             {
@@ -115,7 +120,7 @@ namespace SimpleAuthentication.Core
                     string.Format(
                         "Unable to find the provider [{0}]. Is there a provider dll available? Is there a typo in the provider name? Solution suggestions: Check to make sure the correct dll's are in the 'bin' directory and/or check the name to make sure there's no typo's in there. Example: If you're trying include the GitHub provider, make sure the name is 'github' (any case) and that the ExtraProviders dll exists in the 'bin' directory or make sure you've downloaded the package via NuGet -> install-package SimpleAuthentication.ExtraProviders.",
                         name);
-                TraceSource.TraceError(errorMessage);
+                //TraceSource.TraceError(errorMessage);
                 throw new ApplicationException(errorMessage);
             }
 
@@ -127,13 +132,14 @@ namespace SimpleAuthentication.Core
             if (provider.GetConstructor(new[] {typeof (ProviderParams)}) != null)
             {
                 var parameters = new ProviderParams
-                {
-                    PublicApiKey = providerKey.Key,
-                    SecretApiKey = providerKey.Secret,
-                    Scopes = string.IsNullOrEmpty(providerKey.Scope)
-                                 ? null
-                                 : providerKey.Scope.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries)
-                };
+                                 {
+                                     PublicApiKey = providerKey.Key,
+                                     SecretApiKey = providerKey.Secret,
+                                     Scopes = string.IsNullOrEmpty(providerKey.Scope)
+                                                  ? null
+                                                  : providerKey.Scope.Split(new[] {','},
+                                                                            StringSplitOptions.RemoveEmptyEntries)
+                                 };
                 authenticationProvider = Activator.CreateInstance(provider, parameters) as IAuthenticationProvider;
             }
 
@@ -144,11 +150,57 @@ namespace SimpleAuthentication.Core
                     string.Format(
                         "The type {0} doesn't have the proper constructor. It requires a constructor that only accepts 1 argument of type ProviderParams. Eg. public MyProvider(ProviderParams providerParams){{ .. }}.",
                         provider.FullName);
-                TraceSource.TraceError(errorMessage);
+                //TraceSource.TraceError(errorMessage);
                 throw new ApplicationException(errorMessage);
             }
 
             return authenticationProvider;
+        }
+
+        private static void AddProviderToDictionary(
+            IDictionary<string, IAuthenticationProvider> authenticationProviders,
+            IAuthenticationProvider provider,
+            bool replaceExisting = true)
+        {
+            if (provider == null)
+            {
+                throw new ArgumentNullException("provider");
+            }
+
+            if (authenticationProviders == null)
+            {
+                throw new ArgumentNullException("authenticationProviders");
+            }
+
+            var key = provider.Name.ToLower();
+
+            if (authenticationProviders.ContainsKey(key) &&
+                !replaceExisting)
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        "The provider '{0}' already exists and cannot be overridden, either set `replaceExisting` to `true`, or remove the provider first.",
+                        provider.Name));
+            }
+
+            authenticationProviders[key] = provider;
+        }
+
+        private static void RemoveProviderFromDictionary(string providerName,
+                                                         IDictionary<string, IAuthenticationProvider>
+                                                             authenticationProviders)
+        {
+            if (providerName == null)
+            {
+                throw new ArgumentNullException("providerName");
+            }
+
+            if (authenticationProviders == null)
+            {
+                throw new ArgumentNullException("authenticationProviders");
+            }
+
+            authenticationProviders.Remove(providerName);
         }
     }
 }
