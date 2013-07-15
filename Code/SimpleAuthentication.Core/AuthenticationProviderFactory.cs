@@ -30,11 +30,6 @@ namespace SimpleAuthentication.Core
 
         public ITraceManager TraceManager { set; private get; }
 
-        private TraceSource TraceSource
-        {
-            get { return TraceManager["SimpleAuthentication.AuthenticationProviderFactory"]; }
-        }
-
         public void AddProvider(IAuthenticationProvider provider, bool replaceExisting = true)
         {
             AddProviderToDictionary(AuthenticationProviders, provider, replaceExisting);
@@ -78,7 +73,9 @@ namespace SimpleAuthentication.Core
 
             if (discoveredProviders == null)
             {
+                throw new ArgumentNullException("discoveredProviders");
             }
+
             if (providerConfig == null)
             {
                 throw new ArgumentNullException("providerConfig");
