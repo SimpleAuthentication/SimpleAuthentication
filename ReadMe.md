@@ -54,7 +54,7 @@ Done.
 
 You had me at *Simple* ... what now?
 --
-* Detailed guide to adding SimpleAuthentication to an ASP.NET MVC or NancyFx web application.
+* Detailed guide to adding SimpleAuthentication to [an ASP.NET MVC](https://github.com/SimpleAuthentication/SimpleAuthentication/wiki/Mvc-automatic-setup) or NancyFx web application.
 * Detailed Guide to using the Extra Providers to a web application.
 * Detailed guide to using the Glimpse Plugin.
 * How to create your own provider.
