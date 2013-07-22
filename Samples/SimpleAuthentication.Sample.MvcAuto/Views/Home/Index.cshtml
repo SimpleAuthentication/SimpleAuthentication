@@ -1,42 +1,44 @@
-﻿@{
+﻿@using SimpleAuthentication.Mvc
+@{
   Layout = "/Views/Shared/_Layout.cshtml";
 }
 
 <div id="container">
     <fieldset title="Primary Logins">
         <legend>Primary Logins:</legend>
-        <a href="/authentication/redirect/twitter"><img src="/Content/twitter_32.png" alt="Login with your Twitter account."/></a>
-        <a href="/authentication/redirect/facebook"><img src="/Content/facebook_32.png" alt="Login with your Facebook account."/></a>
-        <a href="/authentication/redirect/google"><img src="/Content/google_32.png" alt="Login with your Google account."/></a>
-        <a href="/authentication/redirect/WindowsLive"><img src="/Content/windowslive_32.png" alt="Login with your Windows Live account."/></a>
+        
+        <a href="@Url.RedirectToProvider("twitter")"><img src="/Content/twitter_32.png" alt="Login with your Twitter account."/></a>
+        <a href="@Url.RedirectToProvider("facebook")"><img src="/Content/facebook_32.png" alt="Login with your Facebook account."/></a>
+        <a href="@Url.RedirectToProvider("google")"><img src="/Content/google_32.png" alt="Login with your Google account."/></a>
+        <a href="@Url.RedirectToProvider("WindowsLive")"><img src="/Content/windowslive_32.png" alt="Login with your Windows Live account."/></a>
     </fieldset>
     
     <hr/>
     
     <fieldset title="Fake Logins (these do not require the internet - great for localhost testing)">
         <legend>Fake Logins:</legend>
-        <a href="/authentication/redirect/faketwitter?returnUrl=a/b/c"><img src="/Content/twitter_32.png" alt="Login with your Twitter account."/></a>
-        <a href="/authentication/redirect/fakefacebook"><img src="/Content/facebook_32.png" alt="Login with your Facebook account."/></a>
-        <a href="/authentication/redirect/fakegoogle"><img src="/Content/google_32.png" alt="Login with your Google account."/></a>
-        <a href="/authentication/redirect/fakeWindowsLive"><img src="/Content/windowslive_32.png" alt="Login with your Windows Live account."/></a>
+        <a href="@Url.RedirectToProvider("fakeTwitter", "a/b/c")"><img src="/Content/twitter_32.png" alt="Login with your Twitter account."/></a>
+        <a href="@Url.RedirectToProvider("fakeFacebook")"><img src="/Content/facebook_32.png" alt="Login with your Facebook account."/></a>
+        <a href="@Url.RedirectToProvider("fakeGoogle")"><img src="/Content/google_32.png" alt="Login with your Google account."/></a>
+        <a href="@Url.RedirectToProvider("FakeWindowsLive")"><img src="/Content/windowslive_32.png" alt="Login with your Windows Live account."/></a>
     </fieldset>
     
     <hr/>
 
     <fieldset title="Extra Logins">
         <legend>Extra Logins:</legend>
-        <a href="/authentication/redirect/github"><img src="/Content/github_32.png" alt="Login with your GitHub account."/></a>
+        <a href="@Url.RedirectToProvider("gitHub")"><img src="/Content/github_32.png" alt="Login with your GitHub account."/></a>
         <img src="/Content/bitbucket_32-NotAvailable.png" alt="Login with your BitBucket account."/>
-        <a href="/authentication/redirect/linkedin"><img src="/Content/linkedin_32.png" alt="Login with your LinkedIn account."/></a>
-        <a href="/authentication/redirect/amazon"><img src="/Content/amazon_32.png" alt="Login with your Amazon account."/></a>
-        <a href="/authentication/redirect/thirtysevensignals"><img src="/Content/37signals_32.png" alt="Login with your 37 Signals account."/></a>
+        <a href="@Url.RedirectToProvider("linkedIn")"><img src="/Content/linkedin_32.png" alt="Login with your LinkedIn account."/></a>
+        <a href="@Url.RedirectToProvider("amazon")"><img src="/Content/amazon_32.png" alt="Login with your Amazon account."/></a>
+        <a href="@Url.RedirectToProvider("thirtysevensignals")"><img src="/Content/37signals_32.png" alt="Login with your 37 Signals account."/></a>
     </fieldset>
     
     <hr/>
     
     <fieldset title="OpenId">
         <legend>Open Id:</legend>
-        <form action="/authentication/redirect/openid" method="POST">
+        <form action="@Url.RedirectToProvider("openid")" method="POST">
             <img src="/Content/myopenid_32.png" alt="Login with your OpenId account." height="32" width="32"/> 
             Identifier: <input type="text" id="identifier" name="identifier" value="http://myopenid.com"/>
             <input type="submit" value="k go!"/>

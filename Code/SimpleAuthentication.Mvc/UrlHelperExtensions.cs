@@ -4,14 +4,9 @@ namespace SimpleAuthentication.Mvc
 {
     public static class UrlHelperExtensions
     {
-        public static string RedirectToOAuthProvider(this UrlHelper url, string providerName)
+        public static string RedirectToProvider(this UrlHelper url, string providerName, string returnUrl = null)
         {
-            return url.Action("RedirectToProvider", "SimpleAuthentication", new { providerKey = providerName });
-        }
-
-        public static string CallbackFromOAuthProvider(this UrlHelper url)
-        {
-            return url.Action("AuthenticateCallback", "SimpleAuthentication");
+            return url.Action("RedirectToProvider", "SimpleAuthentication", new { providerName, returnUrl });
         }
     }
 }
