@@ -1,5 +1,4 @@
-﻿@using SimpleAuthentication.Mvc
-@{
+﻿@{
   Layout = "/Views/Shared/_Layout.cshtml";
 }
 
@@ -7,7 +6,7 @@
     <fieldset title="Primary Logins">
         <legend>Primary Logins:</legend>
         
-        <a href="@Url.RedirectToProvider("twitter")"><img src="/Content/twitter_32.png" alt="Login with your Twitter account."/></a>
+        @Html.RedirectToProvider("twitter", "<img src=\"/Content/twitter_32.png\" alt=\"Login with your Twitter account.\"/>")
         <a href="@Url.RedirectToProvider("facebook")"><img src="/Content/facebook_32.png" alt="Login with your Facebook account."/></a>
         <a href="@Url.RedirectToProvider("google")"><img src="/Content/google_32.png" alt="Login with your Google account."/></a>
         <a href="@Url.RedirectToProvider("WindowsLive")"><img src="/Content/windowslive_32.png" alt="Login with your Windows Live account."/></a>
