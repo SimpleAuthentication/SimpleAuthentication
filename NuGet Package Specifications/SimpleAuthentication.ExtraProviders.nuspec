@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>SimpleAuthentication.ExtraProviders</id>
-        <version>0.3.1</version>
+        <version>0.3.2</version>
         <title>SimpleAuthentication.ExtraProviders: Extra Providers for SimpleAuthentication.</title>
         <authors>Justin Adler, Phillip Haydon and contributors</authors>
         <owners>Justin Adler and Phillip Haydon</owners>
@@ -23,7 +23,7 @@
         <tags>authentication github amazon 37signals thirtysevensignals basecamp highrise linkedin openid oauth oauth1 oauth2 unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
         <dependencies>
             <dependency id="RestSharp" version="104.1" />
-            <dependency id="SimpleAuthentication.Core" version="0.3.1" />
+            <dependency id="SimpleAuthentication.Core" version="0.3.2" />
         </dependencies>
     </metadata>
     <files>
