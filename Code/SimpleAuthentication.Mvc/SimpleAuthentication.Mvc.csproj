@@ -78,6 +78,7 @@
     </Compile>
     <Compile Include="AuthenticateCallbackData.cs" />
     <Compile Include="AuthenticateCallBackInputModel.cs" />
+    <Compile Include="HtmlHelperExtensions.cs" />
     <Compile Include="RedirectToProviderInputModel.cs" />
     <Compile Include="SimpleAuthenticationConfig.cs" />
     <Compile Include="UrlHelperExtensions.cs" />
