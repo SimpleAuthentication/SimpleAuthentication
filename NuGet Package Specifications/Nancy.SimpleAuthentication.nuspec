@@ -24,6 +24,6 @@
         <file src="web.config.install.xdt" target="content\web.config.install.xdt" />
         <file src="web.config.uninstall.xdt" target="content\web.config.uninstall.xdt" />
         <file src="..\Code\Nancy.SimpleAuthentication\bin\Release\Nancy.SimpleAuthentication.dll" target="lib\net40\Nancy.SimpleAuthentication.dll" />
-        <!--<file src="ReadMe.txt" target="ReadMe.txt" />-->
+        <file src="ReadMe.txt" target="ReadMe.txt" />
     </files>
 </package>

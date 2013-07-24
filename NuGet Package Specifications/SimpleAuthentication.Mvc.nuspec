@@ -22,7 +22,8 @@
         </dependencies>
     </metadata>
     <files>
-        <file src="web.config.transform" target="content\web.config.transform" />
+        <file src="web.config.install.xdt" target="content\web.config.install.xdt" />
+        <file src="web.config.uninstall.xdt" target="content\web.config.uninstall.xdt" />
         <file src="..\Code\SimpleAuthentication.Mvc\bin\Release\SimpleAuthentication.Mvc.dll" target="lib\net40\SimpleAuthentication.Mvc.dll" />
         <file src="ReadMe.txt" target="ReadMe.txt" />
     </files>
