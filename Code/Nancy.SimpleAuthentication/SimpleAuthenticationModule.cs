@@ -106,7 +106,7 @@ namespace Nancy.SimpleAuthentication
             return Response.AsRedirect(redirectToAuthenticateSettings.RedirectUri.AbsoluteUri);
         }
 
-        private Negotiator AuthenticateCallback()
+        private dynamic AuthenticateCallback()
         {
             var providerKey = (string) Request.Query.providerKey;
             if (string.IsNullOrEmpty(providerKey))
