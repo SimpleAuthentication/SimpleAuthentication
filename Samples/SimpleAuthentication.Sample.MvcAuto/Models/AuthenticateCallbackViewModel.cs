@@ -7,6 +7,6 @@ namespace SimpleAuthentication.Sample.MvcAuto.Models
     {
         public IAuthenticatedClient AuthenticatedClient { get; set; }
         public Exception Exception { get; set; }
-        public Uri ReturnUrl { get; set; }
+        public string ReturnUrl { get; set; }
     }
 }

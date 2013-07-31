@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
-    <metadata>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd">
+    <metadata minClientVersion="2.6">
         <id>Nancy.SimpleAuthentication</id>
-        <version>0.3.2</version>
+        <version>0.3.3</version>
         <title>Nancy.SimpleAuthentication: NancyFX library for SimpleAuthentication.</title>
         <authors>Justin Adler, Phillip Haydon</authors>
         <owners>Justin Adler</owners>
@@ -11,13 +11,13 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Used with SimpleAuthentication, provides automated configuration for ASP.NET NancFX projects.</description>
         <summary>A really simple way to Authenticate against Facebook, Twitter or Google - but integrated for the NancyFX framework.</summary>
-        <releaseNotes />
+        <releaseNotes/>
         <copyright>2012</copyright>
         <language>en-au</language>
         <tags>authentication twitter google facebook oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination nancy nancyfx</tags>
         <dependencies>
             <dependency id="Nancy" version="0.18.0" />
-            <dependency id="SimpleAuthentication.Core" version="0.3.1" />
+            <dependency id="SimpleAuthentication.Core" version="0.3.3" />
         </dependencies>
     </metadata>
     <files>

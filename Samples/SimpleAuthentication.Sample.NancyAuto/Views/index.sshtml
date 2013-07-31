@@ -18,7 +18,7 @@
     
                 <fieldset title="Fake Logins (these do not require the internet - great for localhost testing)">
                     <legend>Fake Logins:</legend>
-                    <a href="/authentication/redirect/faketwitter?returnUrl=a/b/c"><img src="/Content/twitter_32.png" alt="Login with your Twitter account."/></a>
+                    <a href="/authentication/redirect/faketwitter?returnUrl=a/b/c%23fred=1234"><img src="/Content/twitter_32.png" alt="Login with your Twitter account."/></a>
                     <a href="/authentication/redirect/fakefacebook"><img src="/Content/facebook_32.png" alt="Login with your Facebook account."/></a>
                     <a href="/authentication/redirect/fakegoogle"><img src="/Content/google_32.png" alt="Login with your Google account."/></a>
                     <a href="/authentication/redirect/fakeWindowsLive"><img src="/Content/windowslive_32.png" alt="Login with your Windows Live account."/></a>

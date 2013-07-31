@@ -13,7 +13,7 @@ namespace SimpleAuthentication.Mvc
         /// <summary>
         /// Possible Url to redirect to.
         /// </summary>
-        public Uri ReturnUrl { get; set; }
+        public string ReturnUrl { get; set; }
 
         /// <summary>
         /// Exception information, if an error has occurred.

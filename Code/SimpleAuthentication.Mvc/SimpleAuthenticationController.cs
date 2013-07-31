@@ -152,7 +152,7 @@ namespace SimpleAuthentication.Mvc
             // TODO: Check if this is an access token or an auth token thingy-thing.
             TraceSource.TraceVerbose("Retrieving (local serializaed) AccessToken, State and RedirectToUrl.");
             var state = Session[SessionKeyState] as string;
-            var redirectToUrl = Session[SessionKeyReturnToUrl] as Uri;
+            var redirectToUrl = Session[SessionKeyReturnToUrl] as string;
 
             #endregion
 
@@ -240,7 +240,7 @@ namespace SimpleAuthentication.Mvc
                                                    Url.RouteUrl(SimpleAuthenticationRouteConfig.CallbackRouteName));
         }
 
-        private Uri DetermineReturnUrl(string returnUrl)
+        private string DetermineReturnUrl(string returnUrl)
         {
             if (string.IsNullOrEmpty(returnUrl))
             {
@@ -249,8 +249,8 @@ namespace SimpleAuthentication.Mvc
             }
 
             return string.IsNullOrEmpty(returnUrl)
-                ? Request.UrlReferrer
-                : SystemHelpers.CreateRoute(Request.Url, returnUrl);
+                       ? Request.UrlReferrer == null ? string.Empty : Request.UrlReferrer.AbsoluteUri
+                       : returnUrl;
         }
     }
 }

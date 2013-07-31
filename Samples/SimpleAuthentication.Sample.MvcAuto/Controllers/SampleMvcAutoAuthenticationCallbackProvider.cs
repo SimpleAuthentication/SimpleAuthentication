@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using System;
+using System.Web;
 using System.Web.Mvc;
 using SimpleAuthentication.Mvc;
 using SimpleAuthentication.Sample.MvcAuto.Models;

@@ -11,9 +11,9 @@ namespace Nancy.SimpleAuthentication
         public IAuthenticatedClient AuthenticatedClient { get; set; }
 
         /// <summary>
-        /// Possible Url to redirect to.
+        /// Possible Url or partial route to redirect to.
         /// </summary>
-        public Uri ReturnUrl { get; set; }
+        public string ReturnUrl { get; set; }
 
         /// <summary>
         /// Exception information, if an error has occurred.

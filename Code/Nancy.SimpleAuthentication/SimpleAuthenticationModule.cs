@@ -126,7 +126,7 @@ namespace Nancy.SimpleAuthentication
             // TODO: Check if this is an access token or an auth token thingy-thing.
             TraceSource.TraceVerbose("Retrieving (local serializaed) AccessToken, State and RedirectToUrl.");
             var state = Session[SessionKeyState] as string;
-            var redirectToUrl = Session[SessionKeyRedirectToUrl] as Uri;
+            var redirectToUrl = Session[SessionKeyRedirectToUrl] as string;
 
             #endregion
 
@@ -219,13 +219,13 @@ namespace Nancy.SimpleAuthentication
             return SystemHelpers.CreateCallBackUri(providerName, Request.Url, CallbackRoute);
         }
 
-        private Uri DetermineReturnUrl()
+        private string DetermineReturnUrl()
         {
             var returnUrl = Request.Query[ReturnToUrlParameterKey];
 
             return string.IsNullOrEmpty(returnUrl)
-                ? Request.Url
-                : SystemHelpers.CreateRoute(Request.Url, returnUrl);
+                       ? Request.Url.ToString()
+                       : returnUrl;
         }
     }
 }
