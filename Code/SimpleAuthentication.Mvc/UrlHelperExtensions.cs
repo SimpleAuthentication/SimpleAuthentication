@@ -13,7 +13,7 @@ namespace SimpleAuthentication.Mvc
                                                 "Missing a providerName value. Please provide one (boom tish!) so we know what route to generate.");
             }
 
-            return url.Action("RedirectToProvider", "SimpleAuthentication", new {providerName, returnUrl});
+            return url.Action("RedirectToProvider", "SimpleAuthentication", new {providerName, returnUrl, area = "" });
         }
     }
 }
