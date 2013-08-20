@@ -48,6 +48,7 @@
     </Compile>
     <Compile Include="AccessToken.cs" />
     <Compile Include="AuthenticationProviderFactory.cs" />
+    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Providers\FacebookProvider.cs" />
     <Compile Include="Providers\Facebook\AccessTokenResult.cs" />
     <Compile Include="Providers\Facebook\DisplayType.cs" />
@@ -60,7 +61,7 @@
     <Compile Include="Config\ProviderKey.cs" />
     <Compile Include="Config\ProviderKeyCollection.cs" />
     <Compile Include="Exceptions\ConfigurationException.cs" />
-    <Compile Include="MefHelpers.cs" />
+    <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="ProviderParams.cs" />
     <Compile Include="Providers\BaseOAuth20Provider.cs" />
     <Compile Include="Providers\BaseProvider.cs" />
