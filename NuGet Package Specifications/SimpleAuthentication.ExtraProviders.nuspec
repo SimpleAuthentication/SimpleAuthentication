@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>SimpleAuthentication.ExtraProviders</id>
-        <version>0.3.4</version>
+        <version>0.3.4.1</version>
         <title>SimpleAuthentication.ExtraProviders: Extra Providers for SimpleAuthentication.</title>
         <authors>Justin Adler,Phillip Haydon and contributors</authors>
         <owners>Justin Adler and Phillip Haydon</owners>
