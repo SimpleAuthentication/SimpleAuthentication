@@ -19,6 +19,7 @@ namespace SimpleAuthentication.ExtraProviders
 
         public LinkedInProvider(ProviderParams providerParams) : base("LinkedIn", providerParams)
         {
+            AuthenticateRedirectionUrl = new Uri("https://www.linkedin.com/uas/oauth2/authorization");
         }
 
         #region BaseOAuth20Token<AccessTokenResult> Implementation

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using SimpleAuthentication.Core.Config;
 using SimpleAuthentication.Core.Tracing;
@@ -47,7 +46,7 @@ namespace SimpleAuthentication.Core
                 throw new ArgumentNullException("authenticationProviders");
             }
 
-            var discoveredProviders = MefHelpers.GetExportedTypes<IAuthenticationProvider>();
+            var discoveredProviders = ReflectionHelpers.FindAllTypesOf<IAuthenticationProvider>();
             if (discoveredProviders == null)
             {
                 return;

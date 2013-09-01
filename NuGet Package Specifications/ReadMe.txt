@@ -1,4 +1,3 @@
-
          ####################################################################
          ##    SimpleAuthentication - making authentication ... simple!    ##
          ####################################################################
@@ -67,10 +66,11 @@ And now you should be able to accept the callback from MS Live, when it tries to
 Bonus Pro Tips
 ^^^^^^^^^^^^^^
 1. Free Login Images: Need some login buttons? Thought so: http://bit.ly/U3qSIL
-3. Coding Choons: You can't get away without some pro coding choons. Here's 2
-                  which will make your nipples hard :
-                  a) http://soundcloud.com/phazing-004/dirty-south-phazing-radio-004
-                  b) http://www.youtube.com/watch?v=cla38u6MrEI             
+3. Coding Choons: You can't get away without some pro coding choons. Here's four:
+        a) http://www.youtube.com/watch?v=byZO3dMLtpA
+        b) http://www.youtube.com/watch?v=ZG1AT6tylA4
+        c) http://soundcloud.com/phazing-004/dirty-south-phazing-radio-004
+        d) http://www.youtube.com/watch?v=cla38u6MrEI             
 
 ----------------------------------------------------------------------------------------
 
