@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
-    <configSections>
+    <configSections xdt:Transform="InsertIfMissing">
         <section name="authenticationProviders"
                  type="SimpleAuthentication.Core.Config.ProviderConfiguration, SimpleAuthentication.Core"
                  xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />

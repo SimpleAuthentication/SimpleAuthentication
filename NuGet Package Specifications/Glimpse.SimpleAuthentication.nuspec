@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Glimpse.SimpleAuthentication</id>
-        <version>0.3.4</version>
+        <version>0.3.5</version>
         <title>Glimpse.SimpleAuthentication: Glimpse plugin for SimpleAuthentication</title>
         <authors>Justin Adler,Phillip Haydon and contributors</authors>
         <owners>Justin Adler and Phillip Haydon</owners>
@@ -17,7 +17,7 @@
         <tags>glimpse authentication twitter google facebook microsoftaccount oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
         <dependencies>
             <dependency id="Glimpse" version="1.5.0" />
-            <dependency id="SimpleAuthentication" version="0.3.4" />
+            <dependency id="SimpleAuthentication" version="0.3.5" />
         </dependencies>
     </metadata>
     <files>
