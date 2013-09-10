@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
-        <id>SimpleAuthentication.Mvc</id>
-        <version>0.3.5</version>
-        <title>SimpleAuthentication.Mvc: ASP.NET Mvc library for SimpleAuthentication</title>
+        <id>SimpleAuthentication.Mvc4</id>
+        <version>0.3.6</version>
+        <title>SimpleAuthentication.Mvc: ASP.NET MVC 4 library for SimpleAuthentication</title>
         <authors>Justin Adler,Phillip Haydon and contributors</authors>
         <owners>Justin Adler and Phillip Haydon</owners>
         <projectUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</projectUrl>
@@ -17,8 +17,8 @@
         <tags>authentication mvc controller twitter google facebook microsoftaccount oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
         <dependencies>
             <dependency id="RestSharp" version="104.1" />
-            <dependency id="WebActivatorEx" version="2.0.2" />
-            <dependency id="SimpleAuthentication.Core" version="0.3.5" />
+            <dependency id="WebActivatorEx" />
+            <dependency id="SimpleAuthentication.Core" version="0.3.6" />
         </dependencies>
     </metadata>
     <files>

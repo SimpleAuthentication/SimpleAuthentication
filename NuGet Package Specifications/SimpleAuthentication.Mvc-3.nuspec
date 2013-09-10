@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
-        <id>SimpleAuthentication.Mvc</id>
+        <id>SimpleAuthentication.Mvc3</id>
         <version>0.3.6</version>
         <title>SimpleAuthentication.Mvc: ASP.NET MVC 3 library for SimpleAuthentication</title>
         <authors>Justin Adler,Phillip Haydon and contributors</authors>
