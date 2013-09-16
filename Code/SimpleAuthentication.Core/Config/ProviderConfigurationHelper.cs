@@ -4,6 +4,8 @@ using System.Configuration;
 
 namespace SimpleAuthentication.Core.Config
 {
+    using System.Linq;
+
     public static class ProviderConfigHelper
     {
         /// <summary>
@@ -76,6 +78,11 @@ namespace SimpleAuthentication.Core.Config
             }
 
             return provider;
+        }
+
+        public static IList<AppSettingsParser.ProviderKey> UseAppSettings()
+        {
+            return ConfigurationManager.AppSettings.ParseAppSettings().ToList();
         }
     }
 }
