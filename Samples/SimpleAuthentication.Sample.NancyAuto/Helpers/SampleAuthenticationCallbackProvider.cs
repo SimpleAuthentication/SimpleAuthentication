@@ -1,14 +1,14 @@
-﻿using Nancy;
-using Nancy.SimpleAuthentication;
-using SimpleAuthentication.Sample.NancyAuto.Models;
-
-namespace SimpleAuthentication.Sample.NancyAuto.Helpers
+﻿namespace SimpleAuthentication.Sample.NancyAuto.Helpers
 {
+    using Models;
+    using Nancy;
+    using Nancy.SimpleAuthentication;
+
     public class SampleAuthenticationCallbackProvider : IAuthenticationCallbackProvider
     {
         public dynamic Process(NancyModule nancyModule, AuthenticateCallbackData model)
         {
-            return nancyModule.Negotiate.WithView("AuthenticateCallback").WithModel(model);
+            return nancyModule.View["AuthenticateCallback", model];
         }
 
         public dynamic OnRedirectToAuthenticationProviderError(NancyModule nancyModule, string errorMessage)
