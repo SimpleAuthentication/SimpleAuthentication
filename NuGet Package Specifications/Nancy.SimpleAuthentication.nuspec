@@ -2,10 +2,10 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Nancy.SimpleAuthentication</id>
-        <version>0.3.6</version>
+        <version>0.3.7</version>
         <title>Nancy.SimpleAuthentication: NancyFX library for SimpleAuthentication.</title>
-        <authors>Justin Adler,Phillip Haydon</authors>
-        <owners>Justin Adler</owners>
+        <authors>Justin Adler,Phillip Haydon and contributors</authors>
+        <owners>Justin Adler and Phillip Haydon</owners>
         <projectUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</projectUrl>
         <iconUrl>http://i.imgur.com/bR4Yf.jpg</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -22,7 +22,6 @@
     </metadata>
     <files>
         <file src="web.config.install.xdt" target="content\web.config.install.xdt" />
-        <file src="web.config.uninstall.xdt" target="content\web.config.uninstall.xdt" />
         <file src="..\Code\Nancy.SimpleAuthentication\bin\Release\Nancy.SimpleAuthentication.dll" target="lib\net40\Nancy.SimpleAuthentication.dll" />
         <file src="ReadMe.txt" target="ReadMe.txt" />
     </files>

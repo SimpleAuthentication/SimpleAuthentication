@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>SimpleAuthentication.Mvc3</id>
-        <version>0.3.6</version>
+        <version>0.3.7</version>
         <title>SimpleAuthentication.Mvc: ASP.NET MVC 3 library for SimpleAuthentication</title>
         <authors>Justin Adler,Phillip Haydon and contributors</authors>
         <owners>Justin Adler and Phillip Haydon</owners>
@@ -23,8 +23,7 @@
     </metadata>
     <files>
         <file src="web.config.install.xdt" target="content\web.config.install.xdt" />
-        <file src="web.config.uninstall.xdt" target="content\web.config.uninstall.xdt" />
-        <file src="..\Code\SimpleAuthentication.Mvc\bin\Release\SimpleAuthentication.Mvc.dll" target="lib\net40\SimpleAuthentication.Mvc.dll" />
+        <file src="..\Code\SimpleAuthentication.Mvc-3\bin\Release\SimpleAuthentication.Mvc-3.dll" target="lib\net40\SimpleAuthentication.Mvc-3.dll" />
         <file src="ReadMe.txt" target="ReadMe.txt" />
     </files>
 </package>
