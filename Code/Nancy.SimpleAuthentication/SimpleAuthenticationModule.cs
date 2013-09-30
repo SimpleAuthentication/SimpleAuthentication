@@ -224,7 +224,7 @@ namespace Nancy.SimpleAuthentication
             var returnUrl = Request.Query[ReturnToUrlParameterKey];
 
             return string.IsNullOrEmpty(returnUrl)
-                       ? Request.Url.ToString()
+                       ? Request.Headers.Referrer
                        : returnUrl;
         }
     }
