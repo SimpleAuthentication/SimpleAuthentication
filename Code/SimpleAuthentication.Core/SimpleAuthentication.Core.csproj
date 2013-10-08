@@ -47,6 +47,7 @@
     </Compile>
     <Compile Include="AccessToken.cs" />
     <Compile Include="AuthenticationProviderFactory.cs" />
+    <Compile Include="ICache.cs" />
     <Compile Include="Config\AppSettingsParser.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Providers\FacebookProvider.cs" />

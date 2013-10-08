@@ -5,6 +5,7 @@ using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Providers;
 using SimpleAuthentication.Core.Tracing;
+using SimpleAuthentication.Mvc.Caching;
 
 namespace SimpleAuthentication.Mvc
 {
@@ -18,6 +19,7 @@ namespace SimpleAuthentication.Mvc
         private readonly AuthenticationProviderFactory _authenticationProviderFactory;
         private readonly IAuthenticationCallbackProvider _callbackProvider;
         private string _returnToUrlParameterKey;
+        private ICache _cache;
 
         public SimpleAuthenticationController()
         {
@@ -45,6 +47,14 @@ namespace SimpleAuthentication.Mvc
 
             _callbackProvider = callbackProvider;
             _authenticationProviderFactory = new AuthenticationProviderFactory();
+        }
+
+        protected override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            base.OnActionExecuting(filterContext);
+
+            // TODO: We need to be smarter here - if 'something' was 'provided', use that instead.
+            _cache = new SessionCache(filterContext.HttpContext.Session);
         }
 
         public string ReturnToUrlParameterKey
@@ -115,9 +125,12 @@ namespace SimpleAuthentication.Mvc
             }
 
             // Remember any important information for after we've come back.
-            Session[SessionKeyState] = redirectToAuthenticateSettings.State;
-            Session[SessionKeyReturnToUrl] = DetermineReturnUrl(inputModel.ReturnUrl);
-            Session[SessionKeyRedirectToProviderUrl] = redirectToAuthenticateSettings.RedirectUri.AbsoluteUri;
+            _cache.Add(SessionKeyState, redirectToAuthenticateSettings.State);
+            _cache.Add(SessionKeyReturnToUrl, DetermineReturnUrl(inputModel.ReturnUrl));
+            _cache.Add(SessionKeyRedirectToProviderUrl, redirectToAuthenticateSettings.RedirectUri.AbsoluteUri);
+            //Session[SessionKeyState] = redirectToAuthenticateSettings.State;
+            //Session[SessionKeyReturnToUrl] = DetermineReturnUrl(inputModel.ReturnUrl);
+            //Session[SessionKeyRedirectToProviderUrl] = redirectToAuthenticateSettings.RedirectUri.AbsoluteUri;
 
             // Now redirect :)
             return Redirect(redirectToAuthenticateSettings.RedirectUri.AbsoluteUri);
@@ -141,9 +154,12 @@ namespace SimpleAuthentication.Mvc
 
             #endregion
 
-            var previousRedirectUrl = string.IsNullOrEmpty((string) Session[SessionKeyRedirectToProviderUrl])
+            var previousRedirectUrl = string.IsNullOrEmpty((string)_cache.Get(SessionKeyRedirectToProviderUrl))
                                           ? "N.A."
-                                          : (string) Session[SessionKeyRedirectToProviderUrl];
+                                          : (string)_cache.Get(SessionKeyRedirectToProviderUrl);
+            //var previousRedirectUrl = string.IsNullOrEmpty((string) Session[SessionKeyRedirectToProviderUrl])
+            //                              ? "N.A."
+            //                              : (string) Session[SessionKeyRedirectToProviderUrl];
             TraceSource.TraceInformation("Previous Redirect Url: " + previousRedirectUrl);
 
             #region Deserialize Tokens, etc.
