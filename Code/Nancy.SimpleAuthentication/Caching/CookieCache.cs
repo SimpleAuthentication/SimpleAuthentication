@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Nancy.Cookies;
 using SimpleAuthentication.Core;
 
@@ -13,17 +10,39 @@ namespace Nancy.SimpleAuthentication.Caching
 
         public CookieCache(NancyContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException("context");
+            }
+
             _context = context;
         }
 
-        public void Add(string key, object data)
+        public object this[string key]
         {
-            _context.Response.Cookies.Add(new NancyCookie(key, data.ToString()));
+            get
+            {
+                if (string.IsNullOrEmpty(key))
+                {
+                    throw new ArgumentNullException("key");
+                }
+
+                return _context.Request.Cookies[key];
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(key))
+                {
+                    throw new ArgumentNullException("key");
+                }
+
+                _context.Response.Cookies.Add(new NancyCookie(key, value.ToString()));
+            }
         }
 
-        public object Get(string key)
+        public void Initialize()
         {
-            return _context.Request.Cookies[key];
+            // Not used.
         }
     }
 }

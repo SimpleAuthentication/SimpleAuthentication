@@ -1,46 +1,48 @@
 ﻿using System;
 using System.Web;
+using System.Web.SessionState;
 using SimpleAuthentication.Core;
 
 namespace SimpleAuthentication.Mvc.Caching
 {
     public class SessionCache : ICache
     {
-        private readonly HttpSessionStateBase _session;
+        private HttpSessionState _session;
 
-        public SessionCache(HttpSessionStateBase session)
+        public object this[string key]
         {
-            if (session == null)
+            get
             {
-                throw new ArgumentNullException("session");
-            }
+                if (string.IsNullOrWhiteSpace(key))
+                {
+                    throw new ArgumentException("Required: a 'key' value is required.", "key");
+                }
 
-            _session = session;
+                return _session[key];
+            }
+            set
+            {
+                if (string.IsNullOrWhiteSpace(key))
+                {
+                    throw new ArgumentException("Required: a 'key' value is required.", "key");
+                }
+
+                if (value == null)
+                {
+                    throw new ArgumentNullException("value", "Required: an instance of some object is required.");
+                }
+
+                _session[key] = value;
+            }
         }
 
-        public void Add(string key, object data)
+        public void Initialize()
         {
-            if (string.IsNullOrWhiteSpace(key))
+            if (HttpContext.Current != null &&
+                HttpContext.Current.Session != null)
             {
-                throw new ArgumentException("Required: a 'key' value is required.", "key");
+                _session = HttpContext.Current.Session;
             }
-
-            if (data == null)
-            {
-                throw new ArgumentNullException("data", "Required: an instance of some object is required.");
-            }
-
-            _session[key] = data;
-        }
-
-        public object Get(string key)
-        {
-            if (string.IsNullOrWhiteSpace(key))
-            {
-                throw new ArgumentException("Required: a 'key' value is required.", "key");
-            }
-
-            return _session[key];
         }
     }
 }

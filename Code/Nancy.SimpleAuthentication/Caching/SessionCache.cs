@@ -1,4 +1,5 @@
-﻿using Nancy.Session;
+﻿using System;
+using Nancy.Session;
 using SimpleAuthentication.Core;
 
 namespace Nancy.SimpleAuthentication.Caching
@@ -9,17 +10,29 @@ namespace Nancy.SimpleAuthentication.Caching
 
         public SessionCache(ISession session)
         {
+            if (session == null)
+            {
+                throw new ArgumentNullException("session");
+            }
+
             _session = session;
         }
 
-        public void Add(string key, object data)
+        public object this[string key]
         {
-            _session[key] = data;
+            get
+            {
+                return _session[key];
+            }
+            set
+            {
+                _session[key] = value;
+            }
         }
 
-        public object Get(string key)
+        public void Initialize()
         {
-            return _session[key];
+            // Not used.
         }
     }
 }
