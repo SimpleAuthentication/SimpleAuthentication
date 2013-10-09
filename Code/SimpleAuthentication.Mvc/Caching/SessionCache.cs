@@ -9,7 +9,7 @@ namespace SimpleAuthentication.Mvc.Caching
     {
         private HttpSessionState _session;
 
-        public object this[string key]
+        public string this[string key]
         {
             get
             {
@@ -18,7 +18,7 @@ namespace SimpleAuthentication.Mvc.Caching
                     throw new ArgumentException("Required: a 'key' value is required.", "key");
                 }
 
-                return _session[key];
+                return _session[key] as string;
             }
             set
             {

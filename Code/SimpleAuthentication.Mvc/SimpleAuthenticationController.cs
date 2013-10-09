@@ -159,9 +159,9 @@ namespace SimpleAuthentication.Mvc
 
             #endregion
 
-            var previousRedirectUrl = string.IsNullOrEmpty((string)_cache[SessionKeyRedirectToProviderUrl])
+            var previousRedirectUrl = string.IsNullOrEmpty(_cache[SessionKeyRedirectToProviderUrl])
                                           ? "N.A."
-                                          : (string)_cache[SessionKeyRedirectToProviderUrl];
+                                          : _cache[SessionKeyRedirectToProviderUrl];
             TraceSource.TraceInformation("Previous Redirect Url: " + previousRedirectUrl);
 
             #region Deserialize Tokens, etc.
@@ -169,8 +169,8 @@ namespace SimpleAuthentication.Mvc
             // Retrieve any (previously) serialized access token stuff. (eg. public/private keys and state).
             // TODO: Check if this is an access token or an auth token thingy-thing.
             TraceSource.TraceVerbose("Retrieving (local serializaed) AccessToken, State and RedirectToUrl.");
-            var state = Session[SessionKeyState] as string;
-            var redirectToUrl = Session[SessionKeyReturnToUrl] as string;
+            var state = _cache[SessionKeyState];
+            var redirectToUrl = _cache[SessionKeyReturnToUrl];
 
             #endregion
 

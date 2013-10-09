@@ -18,7 +18,7 @@ namespace Nancy.SimpleAuthentication.Caching
             _context = context;
         }
 
-        public object this[string key]
+        public string this[string key]
         {
             get
             {
@@ -36,7 +36,7 @@ namespace Nancy.SimpleAuthentication.Caching
                     throw new ArgumentNullException("key");
                 }
 
-                _context.Response.Cookies.Add(new NancyCookie(key, value.ToString()));
+                _context.Response.Cookies.Add(new NancyCookie(key, value));
             }
         }
 

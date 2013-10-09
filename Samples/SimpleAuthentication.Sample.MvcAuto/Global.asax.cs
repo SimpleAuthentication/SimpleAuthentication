@@ -25,7 +25,7 @@ namespace SimpleAuthentication.Sample.MvcAuto
             builder.RegisterType<SampleMvcAutoAuthenticationCallbackProvider>().As<IAuthenticationCallbackProvider>();
             builder.RegisterControllers(typeof(MvcApplication).Assembly);
             builder.RegisterControllers(typeof(SimpleAuthenticationController).Assembly);
-            builder.RegisterType<SessionCache>().As<ICache>();
+            builder.RegisterType<CookieCache>().As<ICache>();
 
             var container = builder.Build();
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));
