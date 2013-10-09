@@ -90,6 +90,7 @@
     <Compile Include="Models\IndexViewModel.cs" />
     <Compile Include="Helpers\SampleAuthenticationCallbackProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SampleBootstrapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
