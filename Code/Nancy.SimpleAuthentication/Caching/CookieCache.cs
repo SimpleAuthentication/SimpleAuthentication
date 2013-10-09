@@ -9,29 +9,21 @@ namespace Nancy.SimpleAuthentication.Caching
 {
     public class CookieCache : ICache
     {
-        private readonly INancyCookie _cookie;
-        private NancyModule _module;
+        private readonly NancyContext _context;
 
-        public CookieCache(NancyModule module)
+        public CookieCache(NancyContext context)
         {
-            //if (cookie == null)
-            //{
-            //    throw new ArgumentNullException("cookie");
-            //}
-
-            //_cookie = cookie;
-
-            _module = module;
+            _context = context;
         }
 
         public void Add(string key, object data)
         {
-            _module.Context.Response.Cookies.Add(new NancyCookie(key, data));
+            _context.Response.Cookies.Add(new NancyCookie(key, data.ToString()));
         }
 
         public object Get(string key)
         {
-            _module.Context.Request.Cookies[key];
+            return _context.Request.Cookies[key];
         }
     }
 }
