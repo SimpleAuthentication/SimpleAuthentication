@@ -97,6 +97,7 @@ namespace SimpleAuthentication.ExtraProviders
             return new AccessToken
                    {
                        PublicToken = accessTokenResult.access_token,
+                       SecretToken = accessTokenResult.refresh_token,
                        ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.expires_in)
                    };
         }
