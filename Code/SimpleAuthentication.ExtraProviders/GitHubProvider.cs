@@ -127,11 +127,13 @@ namespace SimpleAuthentication.ExtraProviders
 
             // Lets check to make sure we have some bare minimum data.
             if (string.IsNullOrEmpty(response.Data.Id.ToString()) ||
-                string.IsNullOrEmpty(response.Data.Login) ||
-                string.IsNullOrEmpty(response.Data.Name))
+                string.IsNullOrEmpty(response.Data.Login))
             {
                 throw new AuthenticationException(
-                    "Retrieve some user info from the GitHub Api, but we're missing one or more of either: Id, Login, and Name.");
+                    string.Format(
+                        "Retrieve some user info from the GitHub Api, but we're missing one or both: Id: '{0}' and Login: '{1}'.",
+                        string.IsNullOrEmpty(response.Data.Id.ToString()) ? "--missing--" : response.Data.Id.ToString(),
+                        string.IsNullOrEmpty(response.Data.Login) ? "--missing--" : response.Data.Login));
             }
 
             return new UserInformation
