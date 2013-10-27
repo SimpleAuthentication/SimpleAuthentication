@@ -1,13 +1,16 @@
-﻿namespace SimpleAuthentication.Core
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Config;
-    using Tracing;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using SimpleAuthentication.Core.Config;
+using SimpleAuthentication.Core.Tracing;
 
+namespace SimpleAuthentication.Core
+{
     public class AuthenticationProviderFactory
     {
+        public static Lazy<Configuration> Configuration =
+            new Lazy<Configuration>(() => ProviderConfigHelper.UseConfig() ?? ProviderConfigHelper.UseAppSettings());
+
         private static readonly Lazy<IDictionary<string, IAuthenticationProvider>> Providers =
             new Lazy<IDictionary<string, IAuthenticationProvider>>(
                 () =>
@@ -49,30 +52,28 @@
                 return;
             }
 
-            // Try configure from custom config section.
-            var providerConfig = ProviderConfigHelper.UseConfig();
-            if (providerConfig != null)
+            if (Configuration == null)
             {
-                SetupCustomConfigProviders(authenticationProviders, discoveredProviders, providerConfig);
+                return;
             }
 
-            var appSettings = ProviderConfigHelper.UseAppSettings();
-            if (appSettings != null && appSettings.Any())
+            if (Configuration.Value.Providers != null &&
+                Configuration.Value.Providers.Any())
             {
-                SetupAppSettingsConfigProviders(authenticationProviders, discoveredProviders, appSettings);
+                SetupConfigurationProviders(authenticationProviders, discoveredProviders, Configuration.Value.Providers);
             }
         }
 
-        private static void SetupAppSettingsConfigProviders(
+        private static void SetupConfigurationProviders(
             IDictionary<string, IAuthenticationProvider> authenticationProviders,
             IList<Type> discoveredProviders,
-            IList<AppSettingsParser.ProviderKey> appSettings)
+            IEnumerable<Provider> providers)
         {
             authenticationProviders.ThrowIfNull("authenticationProviders");
             discoveredProviders.ThrowIfNull("discoveredProviders");
-            appSettings.ThrowIfNull("appSettings");
+            providers.ThrowIfNull("appSettings");
 
-            foreach (var provider in appSettings)
+            foreach (var provider in providers)
             {
                 var discoveredProvider = DiscoverProvider(discoveredProviders, provider);
 
@@ -80,27 +81,27 @@
             }
         }
 
-        private static void SetupCustomConfigProviders(
-            IDictionary<string, IAuthenticationProvider> authenticationProviders,
-            IList<Type> discoveredProviders,
-            ProviderConfiguration providerConfig)
-        {
-            authenticationProviders.ThrowIfNull("authenticationProviders");
-            discoveredProviders.ThrowIfNull("discoveredProviders");
-            providerConfig.ThrowIfNull("providerConfig");
-            providerConfig.Providers.ThrowIfNull("providerConfig.Providers");
+        //private static void SetupCustomConfigProviders(
+        //    IDictionary<string, IAuthenticationProvider> authenticationProviders,
+        //    IList<Type> discoveredProviders,
+        //    ProviderConfiguration providerConfig)
+        //{
+        //    authenticationProviders.ThrowIfNull("authenticationProviders");
+        //    discoveredProviders.ThrowIfNull("discoveredProviders");
+        //    providerConfig.ThrowIfNull("providerConfig");
+        //    providerConfig.Providers.ThrowIfNull("providerConfig.Providers");
 
-            foreach (ProviderKey provider in providerConfig.Providers)
-            {
-                var discoveredProvider = DiscoverProvider(discoveredProviders, provider);
+        //    foreach (ProviderKey provider in providerConfig.Providers)
+        //    {
+        //        var discoveredProvider = DiscoverProvider(discoveredProviders, provider);
 
-                AddProviderToDictionary(authenticationProviders, discoveredProvider, false);
-            }
-        }
+        //        AddProviderToDictionary(authenticationProviders, discoveredProvider, false);
+        //    }
+        //}
 
         public static IAuthenticationProvider DiscoverProvider<T>(IList<Type> discoveredProviders,
-            string name,
-            Func<T> providerParamsFunc) where T : ProviderParams
+                                                                  string name,
+                                                                  Func<T> providerParamsFunc) where T : ProviderParams
         {
             discoveredProviders.ThrowIfNull("discoveredProviders");
 
@@ -112,7 +113,7 @@
                     string.Format(
                         "Unable to find the provider [{0}]. Is there a provider dll available? Is there a typo in the provider name? Solution suggestions: Check to make sure the correct dll's are in the 'bin' directory and/or check the name to make sure there's no typo's in there. Example: If you're trying include the GitHub provider, make sure the name is 'github' (any case) and that the ExtraProviders dll exists in the 'bin' directory or make sure you've downloaded the package via NuGet -> install-package SimpleAuthentication.ExtraProviders.",
                         name);
-                
+
                 throw new ApplicationException(errorMessage);
             }
 
@@ -142,40 +143,18 @@
             return authenticationProvider;
         }
 
-        /// <summary>
-        /// Method used when using appSettings section
-        /// </summary>
-        private static IAuthenticationProvider DiscoverProvider(IList<Type> discoveredProviders,
-            AppSettingsParser.ProviderKey providerKey)
+        private static IAuthenticationProvider DiscoverProvider(IList<Type> discoveredProviders, Provider provider)
         {
-            providerKey.ThrowIfNull("providerKey");
+            provider.ThrowIfNull("providerKey");
 
-            var name = providerKey.ProviderName.ToLowerInvariant();
+            var name = provider.Name.ToLowerInvariant();
 
             return DiscoverProvider(discoveredProviders, name, () => new ProviderParams
-            {
-                PublicApiKey = providerKey.Key,
-                SecretApiKey = providerKey.Secret,
-                Scopes = providerKey.Scope.ScopesToCollection()
-            });
-        }
-
-        /// <summary>
-        /// Method used when using custom config section
-        /// </summary>
-        private static IAuthenticationProvider DiscoverProvider(IList<Type> discoveredProviders,
-            ProviderKey providerKey)
-        {
-            providerKey.ThrowIfNull("providerKey");
-
-            var name = providerKey.Name.ToLowerInvariant();
-
-            return DiscoverProvider(discoveredProviders, name, () => new ProviderParams
-            {
-                PublicApiKey = providerKey.Key,
-                SecretApiKey = providerKey.Secret,
-                Scopes = providerKey.Scope.ScopesToCollection()
-            });
+                                                                     {
+                                                                         PublicApiKey = provider.Key,
+                                                                         SecretApiKey = provider.Secret,
+                                                                         Scopes = provider.Scopes.ScopesToCollection()
+                                                                     });
         }
 
         private static void AddProviderToDictionary(
@@ -201,7 +180,8 @@
         }
 
         private static void RemoveProviderFromDictionary(string providerName,
-            IDictionary<string, IAuthenticationProvider> authenticationProviders)
+                                                         IDictionary<string, IAuthenticationProvider>
+                                                             authenticationProviders)
         {
             providerName.ThrowIfNull("providerName");
             authenticationProviders.ThrowIfNull("authenticationProviders");

@@ -14,7 +14,7 @@ namespace SimpleAuthentication.Core
                             .GetAssemblies()
                             .ToList()
                             .SelectMany(s => s.GetTypes())
-                            .Where(p => type.IsAssignableFrom(p) && p.IsClass && !p.IsInterface)
+                            .Where(p => type.IsAssignableFrom(p) && p.IsClass && !p.IsAbstract && !p.IsInterface)
                             .ToList();
         }
     }
