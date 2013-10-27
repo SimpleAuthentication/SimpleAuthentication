@@ -79,6 +79,8 @@
     </Compile>
     <Compile Include="AuthenticateCallbackData.cs" />
     <Compile Include="AuthenticateCallBackInputModel.cs" />
+    <Compile Include="Caching\CookieCache.cs" />
+    <Compile Include="Caching\SessionCache.cs" />
     <Compile Include="HtmlHelperExtensions.cs" />
     <Compile Include="RedirectToProviderInputModel.cs" />
     <Compile Include="SimpleAuthenticationConfig.cs" />

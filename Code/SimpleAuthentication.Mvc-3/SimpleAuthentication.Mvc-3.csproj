@@ -76,6 +76,9 @@
     <Compile Include="..\SimpleAuthentication.Mvc\AuthenticateCallBackInputModel.cs">
       <Link>AuthenticateCallBackInputModel.cs</Link>
     </Compile>
+    <Compile Include="..\SimpleAuthentication.Mvc\Caching\SessionCache.cs">
+      <Link>Caching\SessionCache.cs</Link>
+    </Compile>
     <Compile Include="..\SimpleAuthentication.Mvc\HtmlHelperExtensions.cs">
       <Link>HtmlHelperExtensions.cs</Link>
     </Compile>
