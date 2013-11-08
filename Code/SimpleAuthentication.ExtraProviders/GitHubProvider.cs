@@ -79,10 +79,10 @@ namespace SimpleAuthentication.ExtraProviders
             }
 
             return new AccessToken
-                   {
-                       PublicToken = accessTokenResult.AccessToken
-                       //ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn)
-                   };
+            {
+                PublicToken = accessTokenResult.AccessToken
+                //ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn)
+            };
         }
 
         protected override UserInformation RetrieveUserInformation(AccessToken accessToken)
@@ -105,6 +105,9 @@ namespace SimpleAuthentication.ExtraProviders
                 restRequest.AddParameter(AccessTokenKey, accessToken.PublicToken);
 
                 var restClient = RestClientFactory.CreateRestClient("https://api.github.com");
+
+                restClient.UserAgent = PublicApiKey;
+
                 TraceSource.TraceVerbose("Retrieving user information. GitHub Endpoint: {0}",
                                          restClient.BuildUri(restRequest).AbsoluteUri);
 
