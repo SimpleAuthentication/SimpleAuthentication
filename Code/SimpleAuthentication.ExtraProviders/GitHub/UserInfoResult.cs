@@ -2,7 +2,7 @@
 {
     public class UserInfoResult
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string Login { get; set; }
         public string AvatarUrl { get; set; }
         public string GravatarId { get; set; }
