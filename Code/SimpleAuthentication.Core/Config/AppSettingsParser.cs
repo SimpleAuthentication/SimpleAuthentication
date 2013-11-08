@@ -8,39 +8,50 @@
     public static class AppSettingsParser
     {
         private const string KeyPrefix = "sa.";
+        private const string RedirectRouteKey = "redirectroute";
+        private const string CallbackRouteKey = "callbackroute";
 
-        public static IEnumerable<ProviderKey> ParseAppSettings(this NameValueCollection settings)
+        public static Configuration ParseAppSettings(this NameValueCollection settings)
         {
+            var configuration = new Configuration();
+
             for (int i = 0; i < settings.Count; i++)
             {
                 var key = settings.GetKey(i).ToLower();
 
-                //If it starts with the prefix then we can only assume its ours...
-                if (key.StartsWith(KeyPrefix))
+                // Example key: <app key="sa.github" value="secret:aaa;key:bbb;scopes:ccc..."/>
+
+                // If it doesn't start with our specific prefix then we ignore it.
+                if (!key.StartsWith(KeyPrefix))
                 {
-                    var provider = key.Replace(KeyPrefix, string.Empty);
-                    var value = settings[i];
-                    var values = value.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries)
-                                      .Select(x =>
-                                      {
-                                          var split = x.Split(new[] {':'}, StringSplitOptions.RemoveEmptyEntries);
+                    continue;
+                }
 
-                                          return new
-                                          {
-                                              Key = split[0].ToLower(),
-                                              Value = split[1]
-                                          };
-                                      }).ToList();
+                var provider = key.Replace(KeyPrefix.ToLowerInvariant(), string.Empty);
+                var value = settings[i];
 
-                    yield return new ProviderKey
-                    {
-                        ProviderName = provider,
-                        Secret = values.GetValue("secret"),
-                        Key = values.GetValue("key"),
-                        Scope = values.GetValue("scopes")
-                    };
+                // First we need to check for our specific Keys. Otherwise, we assume it's a provider key.
+                switch (provider)
+                {
+                    case RedirectRouteKey:
+                        configuration.RedirectRoute = value;
+                        break;
+                    case CallbackRouteKey:
+                        configuration.CallBackRoute = value;
+                        break;
+                    default:
+                        // Fallback - we're assuming the key is a provider...
+                        if (configuration.Providers == null)
+                        {
+                            configuration.Providers = new List<Provider>();
+                        }
+
+                        configuration.Providers.Add(ParseValueForProviderData(key, value));
+                        break;
                 }
             }
+
+            return configuration;
         }
 
         private static string GetValue(this IEnumerable<dynamic> values, string key)
@@ -55,12 +66,38 @@
             return value.Value;
         }
 
-        public class ProviderKey
+        private static Provider ParseValueForProviderData(string key, string value)
         {
-            public string ProviderName { get; set; }
-            public string Secret { get; set; }
-            public string Key { get; set; }
-            public string Scope { get; set; }
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentNullException(key);
+            }
+
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentNullException("value");
+            }
+
+            
+            var values = value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+                              .Select(x =>
+                              {
+                                  var split = x.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+
+                                  return new
+                                  {
+                                      Key = split[0].ToLower(),
+                                      Value = split[1]
+                                  };
+                              }).ToList();
+
+            return new Provider
+            {
+                Name = key,
+                Secret = values.GetValue("secret"),
+                Key = values.GetValue("key"),
+                Scopes = values.GetValue("scopes")
+            };
         }
     }
 }

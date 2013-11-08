@@ -45,6 +45,8 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AuthenticateCallbackData.cs" />
+    <Compile Include="Caching\CookieCache.cs" />
+    <Compile Include="Caching\SessionCache.cs" />
     <Compile Include="EnableSessions.cs" />
     <Compile Include="IAuthenticationCallbackProvider.cs" />
     <Compile Include="ProcessResult.cs" />
