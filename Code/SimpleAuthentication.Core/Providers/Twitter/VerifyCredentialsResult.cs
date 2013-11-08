@@ -43,10 +43,10 @@ namespace SimpleAuthentication.Core.Providers.Twitter
         public string InReplyToScreenName { get; set; }
         public long InReplyToStatusId { get; set; }
         public string InReplyToStatusIdStr { get; set; }
-        public int InReplyToUserId { get; set; }
+        public long InReplyToUserId { get; set; }
         public string InReplyToUserIdStr { get; set; }
         public Place Place { get; set; }
-        public int RetweetCount { get; set; }
+        public long RetweetCount { get; set; }
         public bool Retweeted { get; set; }
         public string Source { get; set; }
         public string Text { get; set; }
@@ -60,17 +60,17 @@ namespace SimpleAuthentication.Core.Providers.Twitter
         public bool DefaultProfile { get; set; }
         public bool DefaultProfileImage { get; set; }
         public string Description { get; set; }
-        public int FavouritesCount { get; set; }
+        public long FavouritesCount { get; set; }
         public bool? FollowRequestSent { get; set; }
-        public int FollowersCount { get; set; }
+        public long FollowersCount { get; set; }
         public bool? Following { get; set; }
-        public int FriendsCount { get; set; }
+        public long FriendsCount { get; set; }
         public bool GeoEnabled { get; set; }
-        public int Id { get; set; }
+        public long Id { get; set; }
         public string IdStr { get; set; }
         public bool IsTranslator { get; set; }
         public string Lang { get; set; }
-        public int ListedCount { get; set; }
+        public long ListedCount { get; set; }
         public string Location { get; set; }
         public string Name { get; set; }
         public bool? Notifications { get; set; }
@@ -89,10 +89,10 @@ namespace SimpleAuthentication.Core.Providers.Twitter
         public string ScreenName { get; set; }
         public bool ShowAllInlineMedia { get; set; }
         public Status Status { get; set; }
-        public int StatusesCount { get; set; }
+        public long StatusesCount { get; set; }
         public string TimeZone { get; set; }
         public string Url { get; set; }
-        public int UtcOffset { get; set; }
+        public long UtcOffset { get; set; }
         public bool Verified { get; set; }
     }
 }
