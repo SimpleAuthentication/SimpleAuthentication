@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>WorldDomination.Web.Authentication</id>
+        <version>1.0.1</version>
+        <title>WorldDomination: Web Authentication</title>
+        <authors>Pure Krome</authors>
+        <owners>Pure Krome</owners>
+        <projectUrl>https://github.com/PureKrome/World-Domination.Web.Authentication</projectUrl>
+        <iconUrl>http://i.imgur.com/bR4Yf.jpg</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>This package is now rebranded to: SimpleAuthentication.Core</description>
+        <summary>This package is now rebranded to: SimpleAuthentication.Core
+        
+        Install-Package SimpleAuthentication.Core
+        
+        Please use that package instead. This package is now obsolete and closed.</summary>
+        <releaseNotes />
+        <copyright>2012</copyright>
+        <language>en-au</language>
+        <tags>authentication twitter google facebook oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
+    </metadata>
+    <files>
+        <file src="WorldDomination Redirect ReadMe.txt" target="ReadMe.txt" />
+    </files>
+</package>

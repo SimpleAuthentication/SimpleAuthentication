@@ -2,6 +2,7 @@
 using System.Collections.Specialized;
 using System.Diagnostics;
 using Nancy.Responses.Negotiation;
+using Nancy.SimpleAuthentication.Caching;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Providers;
@@ -31,6 +32,17 @@ namespace Nancy.SimpleAuthentication
             Get[RedirectRoute] = parameters => RedirectToProvider(parameters);
             Post[RedirectRoute] = parameters => RedirectToProvider(parameters);
             Get[CallbackRoute] = parameters => AuthenticateCallback();
+
+            // If no Cache type is provided, we'll use a Session as the default.
+            Before += context =>
+            {
+                if (Cache == null)
+                {
+                    Cache = new SessionCache(context.Request.Session);
+                }
+
+                return null;
+            };
         }
 
         public string ReturnToUrlParameterKey
@@ -38,6 +50,8 @@ namespace Nancy.SimpleAuthentication
             get { return (string.IsNullOrEmpty(_returnToUrlParameterKey) ? "returnUrl" : _returnToUrlParameterKey); }
             set { _returnToUrlParameterKey = value; }
         }
+
+        public ICache Cache { get; set; }
 
         public ITraceManager TraceManager { get { return _traceManager.Value; } }
 
@@ -98,9 +112,9 @@ namespace Nancy.SimpleAuthentication
             }
 
             // Remember any important information for after we've come back.
-            Session[SessionKeyState] = redirectToAuthenticateSettings.State;
-            Session[SessionKeyRedirectToUrl] = DetermineReturnUrl();
-            Session[SessionKeyRedirectToProviderUrl] = redirectToAuthenticateSettings.RedirectUri.AbsoluteUri;
+            Cache[SessionKeyState] = redirectToAuthenticateSettings.State;
+            Cache[SessionKeyRedirectToUrl] = DetermineReturnUrl();
+            Cache[SessionKeyRedirectToProviderUrl] = redirectToAuthenticateSettings.RedirectUri.AbsoluteUri;
 
             // Now redirect :)
             return Response.AsRedirect(redirectToAuthenticateSettings.RedirectUri.AbsoluteUri);
@@ -115,9 +129,9 @@ namespace Nancy.SimpleAuthentication
                     "ProviderKey value missing. You need to supply a valid provider key so we know where to redirect the user Eg. providerkey=google.");
             }
 
-            var previousRedirectUrl = string.IsNullOrEmpty((string) Session[SessionKeyRedirectToProviderUrl])
+            var previousRedirectUrl = string.IsNullOrEmpty((string) Cache[SessionKeyRedirectToProviderUrl])
                                           ? "N.A."
-                                          : (string) Session[SessionKeyRedirectToProviderUrl];
+                                          : (string) Cache[SessionKeyRedirectToProviderUrl];
             TraceSource.TraceInformation("Previous Redirect Url: " + previousRedirectUrl);
 
             #region Deserialize Tokens, etc.
@@ -125,8 +139,8 @@ namespace Nancy.SimpleAuthentication
             // Retrieve any (previously) serialized access token stuff. (eg. public/private keys and state).
             // TODO: Check if this is an access token or an auth token thingy-thing.
             TraceSource.TraceVerbose("Retrieving (local serializaed) AccessToken, State and RedirectToUrl.");
-            var state = Session[SessionKeyState] as string;
-            var redirectToUrl = Session[SessionKeyRedirectToUrl] as string;
+            var state = Cache[SessionKeyState] as string;
+            var redirectToUrl = Cache[SessionKeyRedirectToUrl] as string;
 
             #endregion
 

@@ -5,13 +5,17 @@ namespace SimpleAuthentication.Mvc
 {
     public static class SimpleAuthenticationRouteConfig
     {
+        public const string DefaultRedirectRoute = "authentication/redirect";
+        public const string DefaultCallbackRoute = "authentication/authenticatecallback";
         public const string RedirectToProviderRouteName = "SimpleAuthentication.Mvc-Redirect";
         public const string CallbackRouteName = "SimpleAuthentication.Mvc-Callback";
 
-        public static void RegisterRoutes(RouteCollection routes)
+        public static void RegisterDefaultRoutes(RouteCollection routes,
+                                                 string redirectRoute = DefaultRedirectRoute,
+                                                 string callbackRoute = DefaultCallbackRoute)
         {
-            routes.MapOAuthRedirect("authentication/redirect");
-            routes.MapOAuthCallback("authentication/authenticatecallback");
+            routes.MapOAuthRedirect(string.IsNullOrWhiteSpace(redirectRoute) ? DefaultRedirectRoute : redirectRoute);
+            routes.MapOAuthCallback(string.IsNullOrWhiteSpace(callbackRoute) ? DefaultCallbackRoute : callbackRoute);
         }
 
         /// <summary>
@@ -24,8 +28,8 @@ namespace SimpleAuthentication.Mvc
             routes.MapRoute(
                 name: RedirectToProviderRouteName,
                 url: prefix + "/{providerName}",
-                defaults: new { controller = "SimpleAuthentication", action = "RedirectToProvider" }
-            );
+                defaults: new {controller = "SimpleAuthentication", action = "RedirectToProvider"}
+                );
         }
 
         /// <summary>
@@ -38,8 +42,8 @@ namespace SimpleAuthentication.Mvc
             routes.MapRoute(
                 name: CallbackRouteName,
                 url: route,
-                defaults: new { controller = "SimpleAuthentication", action = "AuthenticateCallback" }
-            );
+                defaults: new {controller = "SimpleAuthentication", action = "AuthenticateCallback"}
+                );
         }
     }
 }
