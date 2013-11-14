@@ -46,7 +46,7 @@
                             configuration.Providers = new List<Provider>();
                         }
 
-                        configuration.Providers.Add(ParseValueForProviderData(key, value));
+                        configuration.Providers.Add(ParseValueForProviderData(provider, value));
                         break;
                 }
             }

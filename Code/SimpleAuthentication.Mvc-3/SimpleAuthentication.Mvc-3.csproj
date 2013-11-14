@@ -70,6 +70,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Shared Assembly Info\SharedAssemblyInfo.cs">
+      <Link>Properties\SharedAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="..\SimpleAuthentication.Mvc\AuthenticateCallbackData.cs">
       <Link>AuthenticateCallbackData.cs</Link>
     </Compile>
