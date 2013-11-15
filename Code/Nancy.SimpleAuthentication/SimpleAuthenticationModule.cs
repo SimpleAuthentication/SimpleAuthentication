@@ -122,7 +122,7 @@ namespace Nancy.SimpleAuthentication
 
         private dynamic AuthenticateCallback()
         {
-            var providerKey = (string) Request.Query.providerKey;
+            var providerKey = (string) Request.Query.providerkey;
             if (string.IsNullOrEmpty(providerKey))
             {
                 throw new ArgumentException(
