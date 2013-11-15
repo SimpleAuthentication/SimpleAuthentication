@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>Nancy.SimpleAuthentication</id>
-        <version>0.3.9.1</version>
+        <version>0.3.9.2</version>
         <title>Nancy.SimpleAuthentication: NancyFX library for SimpleAuthentication.</title>
         <authors>Justin Adler,Phillip Haydon and contributors</authors>
         <owners>Justin Adler and Phillip Haydon</owners>
