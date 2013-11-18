@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>SimpleAuthentication.Mvc4</id>
-        <version>0.3.7</version>
+        <version>0.3.9</version>
         <title>SimpleAuthentication.Mvc: ASP.NET MVC 4 library for SimpleAuthentication</title>
         <authors>Justin Adler,Phillip Haydon and contributors</authors>
         <owners>Justin Adler and Phillip Haydon</owners>
@@ -19,7 +19,7 @@
             <dependency id="RestSharp" version="104.1" />
             <dependency id="WebActivatorEx" version="2.0.3" />
             <dependency id="Microsoft.AspNet.Mvc" version="4.0.30506.0" />
-            <dependency id="SimpleAuthentication.Core" version="0.3.6" />
+            <dependency id="SimpleAuthentication.Core" version="0.3.9" />
         </dependencies>
     </metadata>
     <files>
