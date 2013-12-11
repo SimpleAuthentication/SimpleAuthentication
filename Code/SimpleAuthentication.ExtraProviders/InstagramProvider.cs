@@ -5,7 +5,6 @@ using RestSharp;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Providers;
-using SimpleAuthentication.Core.Tracing;
 using SimpleAuthentication.ExtraProviders.Instagram;
 
 namespace SimpleAuthentication.ExtraProviders
