@@ -54,6 +54,9 @@
     <Compile Include="AmazonProvider.cs" />
     <Compile Include="Amazon\AccessTokenResult.cs" />
     <Compile Include="Amazon\UserInfoResult.cs" />
+    <Compile Include="InstagramProvider.cs" />
+    <Compile Include="Instagram\AccessTokenResult.cs" />
+    <Compile Include="Instagram\UserInfoResult.cs" />
     <Compile Include="ThirtySevenSignalsProvider.cs" />
     <Compile Include="GitHubProvider.cs">
       <SubType>Code</SubType>
@@ -92,6 +95,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
