@@ -114,22 +114,22 @@ namespace SimpleAuthentication.ExtraProviders
             }
 
             // Lets check to make sure we have some bare minimum data.
-            if (string.IsNullOrEmpty(response.Data.Id) ||
-                string.IsNullOrEmpty(response.Data.Username))
+            if (string.IsNullOrEmpty(response.Data.Data.Id) ||
+                string.IsNullOrEmpty(response.Data.Data.Username))
             {
                 throw new AuthenticationException(
                     string.Format(
                         "Retrieve some user info from the Instagram API, but we're missing one or both: Id: '{0}' and Username: '{1}'.",
-                        string.IsNullOrEmpty(response.Data.Id) ? "--missing--" : response.Data.Id,
-                        string.IsNullOrEmpty(response.Data.Username) ? "--missing--" : response.Data.Username));
+                        string.IsNullOrEmpty(response.Data.Data.Id) ? "--missing--" : response.Data.Data.Id,
+                        string.IsNullOrEmpty(response.Data.Data.Username) ? "--missing--" : response.Data.Data.Username));
             }
 
             return new UserInformation
             {
-                Id = response.Data.Id,
-                Name = response.Data.FullName,
-                Picture = response.Data.ProfilePicture,
-                UserName = response.Data.Username
+                Id = response.Data.Data.Id,
+                Name = response.Data.Data.FullName,
+                Picture = response.Data.Data.ProfilePicture,
+                UserName = response.Data.Data.Username
             };
         }
     }
