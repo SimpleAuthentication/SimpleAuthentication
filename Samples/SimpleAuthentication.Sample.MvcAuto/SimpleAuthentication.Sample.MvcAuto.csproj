@@ -118,6 +118,7 @@
     <Content Include="Content\facebook_mobile_32.png" />
     <Content Include="Content\github_32.png" />
     <Content Include="Content\google_32.png" />
+    <Content Include="Content\instagram_32.png" />
     <Content Include="Content\linkedin_32.png" />
     <Content Include="Content\main.css" />
     <Content Include="Content\myopenid_32.png" />
