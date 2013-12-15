@@ -15,7 +15,11 @@ namespace SimpleAuthentication.ExtraProviders
         private const string AccessTokenKey = "access_token";
         private const string TokenTypeKey = "token_type";
 
-        public GitHubProvider(ProviderParams providerParams) : base("GitHub", providerParams)
+        public GitHubProvider(ProviderParams providerParams) : this(providerParams, "GitHub")
+        {
+        }
+
+        protected GitHubProvider(ProviderParams providerParams, string name) : base(name, providerParams)
         {
             AuthenticateRedirectionUrl = new Uri("https://github.com/login/oauth/authorize");
         }
