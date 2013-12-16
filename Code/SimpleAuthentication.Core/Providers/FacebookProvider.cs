@@ -115,7 +115,7 @@ namespace SimpleAuthentication.Core.Providers
             restRequest.AddParameter("client_id", PublicApiKey);
             restRequest.AddParameter("client_secret", SecretApiKey);
             restRequest.AddParameter("code", authorizationCode);
-            restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
+            restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri.ToLowerInvariant());
             restRequest.AddHeader("Content-Type", "application/json");
             restRequest.AddParameter("format", "json");
 
