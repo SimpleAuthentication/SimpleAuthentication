@@ -17,7 +17,11 @@ namespace SimpleAuthentication.ExtraProviders
         private const string AccessTokenKey = "oauth2_access_token";
         private const string ExpiresInKey = "expires_in";
 
-        public LinkedInProvider(ProviderParams providerParams) : base("LinkedIn", providerParams)
+        public LinkedInProvider(ProviderParams providerParams) : this("LinkedIn", providerParams)
+        {
+        }
+
+        protected LinkedInProvider(string name, ProviderParams providerParams) : base(name, providerParams)
         {
             AuthenticateRedirectionUrl = new Uri("https://www.linkedin.com/uas/oauth2/authorization");
         }

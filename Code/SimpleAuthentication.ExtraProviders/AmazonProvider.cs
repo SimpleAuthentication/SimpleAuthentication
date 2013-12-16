@@ -17,7 +17,11 @@ namespace SimpleAuthentication.ExtraProviders
     {
         private const string AccessTokenKey = "access_token";
 
-        public AmazonProvider(ProviderParams providerParams) : base("Amazon", providerParams)
+        public AmazonProvider(ProviderParams providerParams) : this("Amazon", providerParams)
+        {
+        }
+
+        protected AmazonProvider(string name, ProviderParams providerParams) : base(name, providerParams)
         {
             AuthenticateRedirectionUrl = new Uri("https://www.amazon.com/ap/oa");
         }

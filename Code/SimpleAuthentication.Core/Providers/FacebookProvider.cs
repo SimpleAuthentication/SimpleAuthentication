@@ -18,7 +18,11 @@ namespace SimpleAuthentication.Core.Providers
         private const string BaseUrl = "https://graph.facebook.com";
         private bool _isMobile;
 
-        public FacebookProvider(ProviderParams providerParams) : base("Facebook", providerParams)
+        public FacebookProvider(ProviderParams providerParams) : this("Facebook", providerParams)
+        {
+        }
+
+        protected FacebookProvider(string name, ProviderParams providerParams) : base(name, providerParams)
         {
             DisplayType = DisplayType.Unknown;
             IsMobile = false;

@@ -16,7 +16,11 @@ namespace SimpleAuthentication.Core.Providers
         private const string ExpiresInKey = "expires_in";
         private const string TokenTypeKey = "token_type";
 
-        public GoogleProvider(ProviderParams providerParams) : base("Google", providerParams)
+        public GoogleProvider(ProviderParams providerParams) : this("Google", providerParams)
+        {
+        }
+
+        protected GoogleProvider(string name, ProviderParams providerParams) : base(name, providerParams)
         {
             AuthenticateRedirectionUrl = new Uri("https://accounts.google.com/o/oauth2/auth");
         }

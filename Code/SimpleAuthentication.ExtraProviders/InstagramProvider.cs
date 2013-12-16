@@ -13,8 +13,11 @@ namespace SimpleAuthentication.ExtraProviders
     {
         private const string AccessTokenKey = "access_token";
 
-        public InstagramProvider(ProviderParams providerParams)
-            : base("Instagram", providerParams)
+        public InstagramProvider(ProviderParams providerParams) : this("Instagram", providerParams)
+        {
+        }
+
+        protected InstagramProvider(string name, ProviderParams providerParams) : base(name, providerParams)
         {
             AuthenticateRedirectionUrl = new Uri("https://api.instagram.com/oauth/authorize/");
         }

@@ -16,7 +16,11 @@ namespace SimpleAuthentication.Core.Providers
 
         private const string AccessTokenKey = "access_token";
 
-        public WindowsLiveProvider(ProviderParams providerParams) : base("WindowsLive", providerParams)
+        public WindowsLiveProvider(ProviderParams providerParams) : this("WindowsLive", providerParams)
+        {
+        }
+
+        protected WindowsLiveProvider(string name, ProviderParams providerParams) : base(name, providerParams)
         {
             AuthenticateRedirectionUrl = new Uri("https://login.live.com/oauth20_authorize.srf");
         }
