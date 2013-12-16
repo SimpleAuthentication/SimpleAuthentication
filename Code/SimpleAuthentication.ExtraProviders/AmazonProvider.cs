@@ -23,7 +23,7 @@ namespace SimpleAuthentication.ExtraProviders
 
         protected AmazonProvider(string name, ProviderParams providerParams) : base(name, providerParams)
         {
-          AuthenticateRedirectionUrl = new Uri("https://www.amazon.com/ap/oa");
+            AuthenticateRedirectionUrl = new Uri("https://www.amazon.com/ap/oa");
         }
 
         #region BaseOAuth20Token<AccessTokenResult> Implementation
