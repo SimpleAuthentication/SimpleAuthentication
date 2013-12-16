@@ -16,7 +16,11 @@ namespace SimpleAuthentication.ExtraProviders
     {
         private const string BaseUri = "https://launchpad.37signals.com";
 
-        public ThirtySevenSignalsProvider(ProviderParams providerParams) : base("ThirtySevenSignals", providerParams)
+        public ThirtySevenSignalsProvider(ProviderParams providerParams) : this("ThirtySevenSignals", providerParams)
+        {
+        }
+
+        protected ThirtySevenSignalsProvider(string name, ProviderParams providerParams) : base(name, providerParams)
         {
             AuthenticateRedirectionUrl = new Uri("https://launchpad.37signals.com/authorization/new");
         }
