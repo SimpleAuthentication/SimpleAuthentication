@@ -128,27 +128,28 @@ namespace SimpleAuthentication.Core.Providers
             // We'll manually create the data - if possible.
             // How - we will try and recreate the content result.
             restRequest.OnBeforeDeserialization = response =>
-                                                  {
-                                                      // Grab the content and convert it into json.
-                                                      if (response.StatusCode != HttpStatusCode.OK)
-                                                      {
-                                                          // Something is wrong - so just leave. This is handled elsewhere.
-                                                          return;
-                                                      }
+            {
+                // Grab the content and convert it into json.
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    // Something is wrong - so just leave. This is handled elsewhere.
+                    return;
+                }
 
-                                                      // Lets do this!
-                                                      var querystringData =
-                                                          HttpUtility.ParseQueryString(response.Content);
-                                                      var json = new StringBuilder("{"); // Start.
-                                                      foreach (var key in querystringData.AllKeys)
-                                                      {
-                                                          json.AppendFormat("\"{0}\":\"{1}\"",
-                                                                            key, querystringData[key]);
-                                                      }
-                                                      json.Append("}"); // End.
-                                                      response.Content = json.ToString();
-                                                      response.ContentType = "text/json";
-                                                  };
+                // Lets do this!
+                var querystringData = HttpUtility.ParseQueryString(response.Content);
+                var json = new StringBuilder("{"); // Start.
+                
+                foreach (var key in querystringData.AllKeys)
+                {
+                    json.AppendFormat("\"{0}\":\"{1}\"", key, querystringData[key]);
+                }
+
+                json.Append("}"); // End.
+
+                response.Content = json.ToString();
+                response.ContentType = "text/json";
+            };
 
             return restClient.Execute<AccessTokenResult>(restRequest);
         }

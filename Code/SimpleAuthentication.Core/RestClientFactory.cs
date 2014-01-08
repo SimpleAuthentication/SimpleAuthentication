@@ -21,14 +21,14 @@ namespace SimpleAuthentication.Core
             }
 
             _restClientDictionary = new Dictionary<string, IRestClient>
-                                    {
-                                        {
-                                            string.IsNullOrEmpty(restClient.BaseUrl)
-                                                ? Guid.NewGuid().ToString()
-                                                : restClient.BaseUrl.ToLowerInvariant(),
-                                            restClient
-                                        }
-                                    };
+            {
+                {
+                    string.IsNullOrEmpty(restClient.BaseUrl)
+                        ? Guid.NewGuid().ToString()
+                        : restClient.BaseUrl.ToLowerInvariant(),
+                    restClient
+                }
+            };
         }
 
         public RestClientFactory(ICollection<IRestClient> restClients)
@@ -67,7 +67,10 @@ namespace SimpleAuthentication.Core
                                          ? _restClientDictionary[baseUrl]
                                          : _restClientDictionary.First().Value;
             }
-            return existingRestClient ?? new RestClient(baseUrl);
+            return existingRestClient ?? new RestClient(baseUrl)
+            {
+                UserAgent = "SimpleAuthentication"
+            };
         }
     }
 }
