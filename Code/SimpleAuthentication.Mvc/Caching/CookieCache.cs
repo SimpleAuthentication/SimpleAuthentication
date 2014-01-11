@@ -7,7 +7,7 @@ namespace SimpleAuthentication.Mvc.Caching
     {
         private const string DefaultCookieName = "SimpleAuthentication.MvcCache.NomNomNoms";
 
-        private HttpContext _httpContext;
+        private HttpContext httpContext;
 
         public CookieCache()
         {
@@ -20,26 +20,25 @@ namespace SimpleAuthentication.Mvc.Caching
         {
             get
             {
-                var cookie = _httpContext.Request.Cookies[Name];
+                var cookie = httpContext.Request.Cookies[Name];
                 return cookie == null ? null : cookie.Values[key];
             }
 
             set
             {
-                var cookie = _httpContext.Request.Cookies[Name] ?? new HttpCookie(Name);
+                var cookie = httpContext.Request.Cookies[Name] ?? new HttpCookie(Name);
 
                 cookie.Values[key] = value;
 
-                _httpContext.Response.AppendCookie(cookie);
+                httpContext.Response.AppendCookie(cookie);
             }
         }
 
         public void Initialize()
         {
-            if (HttpContext.Current != null &&
-                HttpContext.Current.Session != null)
+            if (HttpContext.Current != null)
             {
-                _httpContext = HttpContext.Current;
+                httpContext = HttpContext.Current;
             }
         }
     }
