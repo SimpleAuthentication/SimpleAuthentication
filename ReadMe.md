@@ -61,7 +61,7 @@ You had me at *Simple* ... what now?
 
 And Finally ...
 --
-* Still having problems? We hang out in [JabbR](http://www.jabbr.net) so you can ask questions in there :)
+* Still having problems? We hang out in [JabbR](https://jabbr.net/#/rooms/SimpleAuthentication) so you can ask questions in there :)
 * We accept Pull Requests.
 * Please use the GitHub issues for any other problems.
 * License : [MIT](http://www.tldrlegal.com/license/mit-license)
