@@ -36,8 +36,7 @@ namespace SimpleAuthentication.Mvc.Caching
 
         public void Initialize()
         {
-            if (HttpContext.Current != null &&
-                HttpContext.Current.Session != null)
+            if (HttpContext.Current != null)
             {
                 _httpContext = HttpContext.Current;
             }
