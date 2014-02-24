@@ -12,7 +12,9 @@ namespace SimpleAuthentication.Core
 
             return AppDomain.CurrentDomain
                             .GetAssemblies()
-                            .ToList()
+                            .Where(x =>
+                                x.FullName.StartsWith("SimpleAuthentication", StringComparison.OrdinalIgnoreCase)
+                                || x.GetReferencedAssemblies().Any(y => y.Name.StartsWith("SimpleAuthentication", StringComparison.OrdinalIgnoreCase)))
                             .SelectMany(s => s.GetTypes())
                             .Where(p => type.IsAssignableFrom(p) && p.IsClass && !p.IsAbstract && !p.IsInterface)
                             .ToList();
