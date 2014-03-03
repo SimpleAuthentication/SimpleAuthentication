@@ -15,6 +15,7 @@ namespace SimpleAuthentication.ExtraProviders
     public class OpenIdProvider : BaseProvider
     {
         private const string XrdsHeaderKey = "X-XRDS-Location";
+        private const string XrdsContentType = "application/xrds+xml";
         private static readonly IDictionary<string, Uri> YadisXrdsEndPointUris = new Dictionary<string, Uri>();
         private static readonly IDictionary<string, Uri> YadisOpenIdEndPointUris = new Dictionary<string, Uri>();
 
@@ -38,6 +39,7 @@ namespace SimpleAuthentication.ExtraProviders
             }
 
             // First we need to do a YADIS Discover, so we can get the real endpoint.
+            // It is possible that certain OpenID providers may skip this part and give us a XRDS file directly (e.g. Steam).
             var xrdsEndPoint = YadisDiscoverXrdsEndPoint(AuthenticateRedirectionUrl);
 
             if (xrdsEndPoint == null || string.IsNullOrEmpty(xrdsEndPoint.AbsoluteUri))
@@ -219,6 +221,15 @@ namespace SimpleAuthentication.ExtraProviders
                                   ? null
                                   : new Uri((string) endpoint.Value);
 
+            // If the endpoint is not found, check if the current URI is our XRDS location instead.
+            if (endPointUri == null && restResponse.ContentType.Contains(XrdsContentType))
+            {
+                endPointUri = identifier;
+
+                // Get the OpenID URI early so it will be cached, this prevents the need to get the XRDS file twice.
+                YadisGetOpenIdEndPoint(endPointUri, restResponse.Content);
+            }
+
             // Cache this result :)
             YadisXrdsEndPointUris.Add(identifier.AbsoluteUri, endPointUri);
 
@@ -262,7 +273,11 @@ namespace SimpleAuthentication.ExtraProviders
                     xrdsUri.AbsoluteUri + "].");
             }
 
-            var content = restResponse.Content;
+            return YadisGetOpenIdEndPoint(xrdsUri, restResponse.Content);
+        }
+
+        private Uri YadisGetOpenIdEndPoint(Uri xrdsUri, string content)
+        {
             if (string.IsNullOrEmpty(content))
             {
                 throw new AuthenticationException("Retrieved an Xrds document but there was no content!");
