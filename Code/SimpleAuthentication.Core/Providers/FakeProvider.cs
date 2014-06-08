@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.Threading.Tasks;
 
 namespace SimpleAuthentication.Core.Providers
 {
@@ -28,16 +29,16 @@ namespace SimpleAuthentication.Core.Providers
 
         #region BaseToken Implementation
 
-        public override RedirectToAuthenticateSettings RedirectToAuthenticate(Uri callbackUri)
+        public override RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri requestUrl)
         {
-            if (callbackUri == null ||
-                string.IsNullOrEmpty(callbackUri.AbsoluteUri))
+            if (requestUrl == null ||
+                string.IsNullOrEmpty(requestUrl.AbsoluteUri))
             {
-                throw new ArgumentNullException("callbackUri");
+                throw new ArgumentNullException("requestUrl");
             }
 
             var state = Guid.NewGuid().ToString();
-            var redirectUri = string.Format("{0}{1}", callbackUri.AbsoluteUri, GetQuerystringState(state));
+            var redirectUri = string.Format("{0}{1}", requestUrl.AbsoluteUri, GetQuerystringState(state));
 
             return new RedirectToAuthenticateSettings
                    {
@@ -46,9 +47,14 @@ namespace SimpleAuthentication.Core.Providers
                    };
         }
 
-        public override IAuthenticatedClient AuthenticateClient(NameValueCollection queryStringParameters,
-                                                                string state,
-                                                                Uri callbackUri)
+        public override Uri AuthenticateRedirectionUrl
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public override async Task<IAuthenticatedClient> AuthenticateClientAsync(NameValueCollection queryStringParameters, 
+            string state, 
+            Uri callbackUrl)
         {
             if (queryStringParameters == null)
             {
@@ -60,16 +66,16 @@ namespace SimpleAuthentication.Core.Providers
                 throw new ArgumentNullException("state");
             }
 
-            if (callbackUri == null)
+            if (callbackUrl == null)
             {
-                throw new ArgumentNullException("callbackUri");
+                throw new ArgumentNullException("callbackUrl");
             }
 
-            return new AuthenticatedClient(Name)
-                   {
-                       AccessToken = AccessToken,
-                       UserInformation = UserInformation
-                   };
+            return await Task.FromResult(new AuthenticatedClient(Name)
+            {
+                AccessToken = AccessToken,
+                UserInformation = UserInformation
+            });
         }
 
         #endregion

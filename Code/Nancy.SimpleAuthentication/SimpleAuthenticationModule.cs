@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Nancy.Responses.Negotiation;
 using Nancy.SimpleAuthentication.Caching;
 using SimpleAuthentication.Core;
+using SimpleAuthentication.Core.Config;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Providers;
 using SimpleAuthentication.Core.Tracing;
@@ -15,23 +17,34 @@ namespace Nancy.SimpleAuthentication
         private const string SessionKeyState = "SimpleAuthentication-StateKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
         private const string SessionKeyRedirectToUrl = "SimpleAuthentication-RedirectUrlKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
         private const string SessionKeyRedirectToProviderUrl = "SimpleAuthentication-RedirectToProviderUrlKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
-        public static string RedirectRoute = "/authentication/redirect/{providerkey}";
-        public static string CallbackRoute = "/authentication/authenticatecallback";
+        public static string RedirectRoute = "/authenticate/{providerkey}";
+        public static string CallbackRoute = "/authenticate/callback";
         
         private readonly Lazy<ITraceManager> _traceManager = new Lazy<ITraceManager>(() => new TraceManager());
         private readonly AuthenticationProviderFactory _authenticationProviderFactory;
         private readonly IAuthenticationCallbackProvider _callbackProvider;
         private string _returnToUrlParameterKey;
 
-        public SimpleAuthenticationModule(IAuthenticationCallbackProvider callbackProvider)
+        public SimpleAuthenticationModule(IAuthenticationCallbackProvider callbackProvider,
+            IConfigService configService)
         {
+            if (callbackProvider == null)
+            {
+                throw new ArgumentNullException("callbackProvider");
+            }
+
+            if (configService == null)
+            {
+                throw new ArgumentNullException("configService");
+            }
+
             _callbackProvider = callbackProvider;
-            _authenticationProviderFactory = new AuthenticationProviderFactory();
+            _authenticationProviderFactory = new AuthenticationProviderFactory(configService);
 
             // Define the routes and how they are handled.
             Get[RedirectRoute] = parameters => RedirectToProvider(parameters);
             Post[RedirectRoute] = parameters => RedirectToProvider(parameters);
-            Get[CallbackRoute] = parameters => AuthenticateCallback();
+            Get[CallbackRoute, true] = async(x, ct) => await AuthenticateCallbackAsync();
 
             // If no Cache type is provided, we'll use a Session as the default.
             Before += context =>
@@ -62,8 +75,6 @@ namespace Nancy.SimpleAuthentication
 
         private Response RedirectToProvider(dynamic parameters)
         {
-            #region Input Model Validation
-
             var providerKey = (string) parameters.providerkey;
 
             if (string.IsNullOrEmpty(providerKey))
@@ -72,36 +83,14 @@ namespace Nancy.SimpleAuthentication
                     "ProviderKey value missing. You need to supply a valid provider key so we know where to redirect the user Eg. google.");
             }
 
-            var identityValue = (string) parameters.identifier;
-            Uri identifier = null;
-            if (!string.IsNullOrEmpty(identityValue) &&
-                !Uri.TryCreate(identityValue, UriKind.Absolute, out identifier))
-            {
-                throw new ArgumentException("The Identifier value [" + identityValue +
-                                            "] is not a valid Uri. Please fix it up. eg. http://goto.some.website/authenticate/");
-            }
-
-            #endregion
-
             // Grab the Provider.
             var provider = GetAuthenticationProvider(providerKey);
-
-            // Most providers don't need any pre-setup crap, to redirect to authenticate.
-            // But of course, there's always one - OpenId. We have no idea WHERE we want to
-            // redirect to, so we need to do a particular check here.
-            // Of course, any value here could be used for any other provider. But that would be weird.
-            // TODO: Confirm this is not a security threat / open to abuse in some way.
-            if (identifier != null)
-            {
-                provider.AuthenticateRedirectionUrl = identifier;
-            }
 
             // Where do we return to, after we've authenticated?
             var callbackUri = GenerateCallbackUri(provider.Name);
 
             // Determine where we need to redirect to.
-            var redirectToAuthenticateSettings = provider.RedirectToAuthenticate(callbackUri);
-
+            var redirectToAuthenticateSettings = provider.GetRedirectToAuthenticateSettings(callbackUri);
             if (redirectToAuthenticateSettings == null)
             {
                 // We failed to determine where to go. A classic example of this is with OpenId and a bad OpenId endpoint.
@@ -120,7 +109,7 @@ namespace Nancy.SimpleAuthentication
             return Response.AsRedirect(redirectToAuthenticateSettings.RedirectUri.AbsoluteUri);
         }
 
-        private dynamic AuthenticateCallback()
+        private async Task<dynamic> AuthenticateCallbackAsync()
         {
             var providerKey = (string) Request.Query.providerkey;
             if (string.IsNullOrEmpty(providerKey))
@@ -164,7 +153,7 @@ namespace Nancy.SimpleAuthentication
                 }
 
                 // Grab the user information.
-                model.AuthenticatedClient = provider.AuthenticateClient(queryString, state, callbackUri);
+                model.AuthenticatedClient = await provider.AuthenticateClientAsync(queryString, state, callbackUri);
             }
             catch (Exception exception)
             {

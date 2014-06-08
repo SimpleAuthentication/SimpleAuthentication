@@ -54,7 +54,7 @@ namespace SimpleAuthentication.Core.Providers
                          .ToLowerInvariant();
         }
 
-        protected override string RetrieveAuthorizationCode(NameValueCollection queryStringParameters)
+        protected override string GetAuthorizationCodeFromQueryString(NameValueCollection queryStringParameters)
         {
             if (queryStringParameters == null)
             {

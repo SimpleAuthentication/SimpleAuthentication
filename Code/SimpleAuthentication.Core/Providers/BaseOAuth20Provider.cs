@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
-using RestSharp;
+using System.Threading.Tasks;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Tracing;
 
@@ -20,11 +20,7 @@ namespace SimpleAuthentication.Core.Providers
             PublicApiKey = providerParams.PublicApiKey;
             SecretApiKey = providerParams.SecretApiKey;
             Scopes = providerParams.Scopes;
-
-            RestClientFactory = new RestClientFactory();
         }
-
-        public IRestClientFactory RestClientFactory { get; set; }
 
         #region IPublicPrivateKeyProvider Implementation
 
@@ -53,11 +49,11 @@ namespace SimpleAuthentication.Core.Providers
 
         #region IAuthenticationProvider Members
 
-        public override RedirectToAuthenticateSettings RedirectToAuthenticate(Uri callbackUri)
+        public override RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri callbackUrl)
         {
-            if (callbackUri == null)
+            if (callbackUrl == null)
             {
-                throw new ArgumentNullException("callbackUri");
+                throw new ArgumentNullException("callbackUrl");
             }
 
             // Validations.
@@ -67,7 +63,7 @@ namespace SimpleAuthentication.Core.Providers
                     "AuthenticationRedirectUrl has no value. Please set the authentication Url location to redirect to.");
             }
 
-            if (string.IsNullOrEmpty(PublicApiKey))
+            if (string.IsNullOrWhiteSpace(PublicApiKey))
             {
                 throw new AuthenticationException("PublicApiKey has no value. Please set this value.");
             }
@@ -76,10 +72,13 @@ namespace SimpleAuthentication.Core.Providers
             var state = Guid.NewGuid().ToString();
 
             // Now the redirection uri.
-            var redirectUri = string.Format("{0}?{1}", AuthenticateRedirectionUrl.AbsoluteUri,
-                                            CreateRedirectionQuerystringParameters(callbackUri, state));
+            var redirectUri = string.Format("{0}?{1}",
+                AuthenticateRedirectionUrl.AbsoluteUri,
+                CreateRedirectionQuerystringParameters(callbackUrl, state));
 
-            TraceSource.TraceInformation("Google redirection uri: {0}.", redirectUri);
+            TraceSource.TraceInformation("{0} redirection uri: {1}.",
+                Name,
+                redirectUri);
 
             return new RedirectToAuthenticateSettings
             {
@@ -88,9 +87,10 @@ namespace SimpleAuthentication.Core.Providers
             };
         }
 
-        public override IAuthenticatedClient AuthenticateClient(NameValueCollection queryStringParameters,
-                                                                string state,
-                                                                Uri callbackUri)
+        public override async Task<IAuthenticatedClient> AuthenticateClientAsync(
+            NameValueCollection queryStringParameters,
+            string state,
+            Uri callbackUri)
         {
             #region Parameter checks
 
@@ -100,7 +100,7 @@ namespace SimpleAuthentication.Core.Providers
                 throw new ArgumentNullException("queryStringParameters");
             }
 
-            if (string.IsNullOrEmpty(state))
+            if (string.IsNullOrWhiteSpace(state))
             {
                 throw new ArgumentNullException("state");
             }
@@ -113,13 +113,15 @@ namespace SimpleAuthentication.Core.Providers
             #endregion
 
             TraceSource.TraceInformation("Callback parameters: " +
-                string.Join("&", queryStringParameters.AllKeys.Select(key => key + "=" + queryStringParameters[key]).ToArray()));
+                                         string.Join("&",
+                                             queryStringParameters.AllKeys.Select(
+                                                 key => key + "=" + queryStringParameters[key]).ToArray()));
 
             #region Cross Site Request Forgery checks -> state == state?
 
             // Start with the Cross Site Request Forgery check.
             var callbackState = queryStringParameters[StateKey];
-            if (string.IsNullOrEmpty(callbackState))
+            if (string.IsNullOrWhiteSpace(callbackState))
             {
                 var errorMessage =
                     "The callback querystring doesn't include a state key/value parameter. We need one of these so we can to a CSRF check. Please check why the request url from the provider is missing the parameter: " +
@@ -131,11 +133,11 @@ namespace SimpleAuthentication.Core.Providers
             #endregion
 
             TraceSource.TraceVerbose("Retrieving the Authorization Code.");
-            var authorizationCode = RetrieveAuthorizationCode(queryStringParameters);
+            var authorizationCode = GetAuthorizationCodeFromQueryString(queryStringParameters);
             TraceSource.TraceVerbose("Authorization Code retrieved.");
 
             TraceSource.TraceVerbose("Retrieving the Access Token.");
-            var accessToken = RetrieveAccessToken(authorizationCode, callbackUri);
+            var accessToken = await GetAccessTokenAsync(authorizationCode, callbackUri);
             TraceSource.TraceVerbose("Access Token retrieved.");
 
             if (accessToken == null)
@@ -146,13 +148,13 @@ namespace SimpleAuthentication.Core.Providers
             }
 
             TraceSource.TraceInformation("Authorization Code: {0}. {1}",
-                                         string.IsNullOrEmpty(authorizationCode)
-                                             ? "-no authorization code-"
-                                             : authorizationCode,
-                                         accessToken.ToString());
+                string.IsNullOrEmpty(authorizationCode)
+                    ? "-no authorization code-"
+                    : authorizationCode,
+                accessToken.ToString());
 
             TraceSource.TraceVerbose("Retrieving user information.");
-            var userInformation = RetrieveUserInformation(accessToken);
+            var userInformation = await RetrieveUserInformationAsync(accessToken);
             TraceSource.TraceVerbose("User information retrieved.");
 
             var authenticatedClient = new AuthenticatedClient(Name.ToLowerInvariant())
@@ -184,10 +186,10 @@ namespace SimpleAuthentication.Core.Providers
             }
 
             return string.Format("client_id={0}&redirect_uri={1}&response_type=code{2}{3}",
-                    PublicApiKey, callbackUri.AbsoluteUri, GetScope(), GetQuerystringState(state));
+                PublicApiKey, callbackUri.AbsoluteUri, GetScope(), GetQuerystringState(state));
         }
 
-        protected virtual string RetrieveAuthorizationCode(NameValueCollection queryStringParameters)
+        protected virtual string GetAuthorizationCodeFromQueryString(NameValueCollection queryStringParameters)
         {
             if (queryStringParameters == null)
             {
@@ -200,24 +202,25 @@ namespace SimpleAuthentication.Core.Providers
             }
 
             /* Documentation:
-               Google returns an authorization code to your application if the user grants your application the permissions it requested. 
+               Providers returns an authorization code to your application if the user grants your application the permissions it requested. 
                The authorization code is returned to your application in the query string parameter code. If the state parameter was included in the request,
                then it is also included in the response. */
             var code = queryStringParameters["code"];
             var error = queryStringParameters["error"];
 
             // First check for any errors.
-            if (!string.IsNullOrEmpty(error))
+            if (!string.IsNullOrWhiteSpace(error))
             {
                 var errorMessage =
-                    string.Format("Failed to retrieve an authorization code from {0}. The error provided is: {1}" +
-                                  Name, error);
+                    string.Format("Failed to retrieve an authorization code from {0}. The error provided is: {1}",
+                        Name,
+                        error);
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
             }
 
             // Otherwise, we need a code.
-            if (string.IsNullOrEmpty(code))
+            if (string.IsNullOrWhiteSpace(code))
             {
                 string errorMessage = string.Format(
                     "No code parameter provided in the response query string from {0}.", Name);
@@ -228,73 +231,53 @@ namespace SimpleAuthentication.Core.Providers
             return code;
         }
 
-        protected abstract IRestResponse<TAccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
-                                                                                        Uri redirectUri);
+        protected abstract Task<TAccessTokenResult> GetAccessTokenFromProviderAsync(string authorizationCode,
+            Uri redirectUrl);
 
         protected abstract AccessToken MapAccessTokenResultToAccessToken(TAccessTokenResult accessTokenResult);
 
-        protected AccessToken RetrieveAccessToken(string authorizationCode, Uri redirectUri)
+        protected async Task<AccessToken> GetAccessTokenAsync(string authorizationCode, Uri redirectUrl)
         {
-            if (string.IsNullOrEmpty(authorizationCode))
+            if (string.IsNullOrWhiteSpace(authorizationCode))
             {
                 throw new ArgumentNullException("authorizationCode");
             }
 
-            if (redirectUri == null ||
-                string.IsNullOrEmpty(redirectUri.AbsoluteUri))
+            if (redirectUrl == null ||
+                string.IsNullOrWhiteSpace(redirectUrl.AbsoluteUri))
             {
-                throw new ArgumentNullException("redirectUri");
+                throw new ArgumentNullException("redirectUrl");
             }
 
-            IRestResponse<TAccessTokenResult> response;
+            TAccessTokenResult accessTokenResult;
 
             try
             {
-                response = ExecuteRetrieveAccessToken(authorizationCode, redirectUri);
+                accessTokenResult = await GetAccessTokenFromProviderAsync(authorizationCode, redirectUrl);
             }
             catch (Exception exception)
             {
                 var authentictionException =
                     new AuthenticationException(string.Format("Failed to retrieve an Access Token from {0}.",
-                                                              Name), exception);
+                        Name), exception);
                 var errorMessage = string.Format("{0}", authentictionException.RecursiveErrorMessages());
                 TraceSource.TraceError(errorMessage);
                 throw authentictionException;
             }
 
-            if (response == null ||
-                response.StatusCode != HttpStatusCode.OK ||
-                response.ErrorException != null)
-            {
-                var errorMessage = string.Format(
-                    "Failed to obtain an Access Token from {0} OR the the response was not an HTTP Status 200 OK. Response Status: {1}. Response Description: {2}. Error Content: {3}. Error Message: {4}.",
-                    string.IsNullOrEmpty(Name) ? "--no name--" : Name,
-                    response == null ? "-- null response --" : response.StatusCode.ToString(),
-                    response == null ? string.Empty : response.StatusDescription,
-                    response == null ? string.Empty : response.Content,
-                    response == null
-                        ? string.Empty
-                        : response.ErrorException == null
-                              ? "--no error exception--"
-                              : response.ErrorException.RecursiveErrorMessages());
-
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            return MapAccessTokenResultToAccessToken(response.Data);
+            return MapAccessTokenResultToAccessToken(accessTokenResult);
         }
 
-        protected abstract UserInformation RetrieveUserInformation(AccessToken accessToken);
+        protected abstract Task<UserInformation> RetrieveUserInformationAsync(AccessToken accessToken);
 
         protected string GetScope()
         {
             return string.Format("&{0}={1}",
-                                 ScopeKey,
-                                 String.Join(ScopeSeparator, Scopes == null ||
-                                                             !Scopes.Any()
-                                                                 ? DefaultScopes
-                                                                 : Scopes));
+                ScopeKey,
+                String.Join(ScopeSeparator, Scopes == null ||
+                                            !Scopes.Any()
+                    ? DefaultScopes
+                    : Scopes));
         }
     }
 }

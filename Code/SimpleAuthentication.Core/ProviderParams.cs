@@ -22,14 +22,17 @@ namespace SimpleAuthentication.Core
         /// <value>The provider scope value.</value>
         public ICollection<string> Scopes { get; set; }
 
+        /// <summary>
+        /// Check to make sure that the data provided is correct and the bare minimum.
+        /// </summary>
         public void Validate ()
         {
-            if (string.IsNullOrEmpty (PublicApiKey)) 
+            if (string.IsNullOrWhiteSpace(PublicApiKey)) 
             {
                 throw new ArgumentException(PublicApiKey);
             }
 
-            if (string.IsNullOrEmpty(SecretApiKey)) 
+            if (string.IsNullOrWhiteSpace(SecretApiKey)) 
             {
                 throw new ArgumentException(SecretApiKey);
             }

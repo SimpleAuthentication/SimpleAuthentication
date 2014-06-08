@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using SimpleAuthentication.Core.Tracing;
 
 namespace SimpleAuthentication.Core.Providers
@@ -11,12 +12,12 @@ namespace SimpleAuthentication.Core.Providers
 
         protected BaseProvider(string name, string authenticationType)
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrWhiteSpace(name))
             {
                 throw new ArgumentNullException("name");
             }
 
-            if (string.IsNullOrEmpty(authenticationType))
+            if (string.IsNullOrWhiteSpace(authenticationType))
             {
                 throw new ArgumentNullException("authenticationType");
             }
@@ -31,7 +32,12 @@ namespace SimpleAuthentication.Core.Providers
 
         public string StateKey
         {
-            get { return (string.IsNullOrEmpty(_stateKey) ? "state" : _stateKey); }
+            get
+            {
+                return (string.IsNullOrWhiteSpace(_stateKey)
+                    ? "state"
+                    : _stateKey);
+            }
             set { _stateKey = value; }
         }
 
@@ -39,17 +45,17 @@ namespace SimpleAuthentication.Core.Providers
 
         public string AuthenticationType { get; private set; }
 
-        public Uri AuthenticateRedirectionUrl { get; set; }
+        public abstract Uri AuthenticateRedirectionUrl { get;}
 
         public AccessToken AccessToken { get; set; }
 
-        public abstract RedirectToAuthenticateSettings RedirectToAuthenticate(Uri requestUri);
-
-        public abstract IAuthenticatedClient AuthenticateClient(NameValueCollection queryStringParameters,
-                                                                string state,
-                                                                Uri callbackUri);
+        public abstract Task<IAuthenticatedClient> AuthenticateClientAsync(NameValueCollection queryStringParameters,
+            string state,
+            Uri callbackUrl);
 
         public ITraceManager TraceManager { set; protected get; }
+
+        public abstract RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri requestUrl);
 
         #endregion
 

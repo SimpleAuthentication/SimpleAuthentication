@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Net;
+using System.Threading.Tasks;
 using RestSharp;
 using RestSharp.Authenticators;
 using RestSharp.Contrib;
@@ -293,17 +294,17 @@ namespace SimpleAuthentication.Core.Providers
 
         #region IAuthenticationProvider Implementation
 
-        public override RedirectToAuthenticateSettings RedirectToAuthenticate(Uri callbackUri)
+        public override async Task<RedirectToAuthenticateSettings> RedirectToAuthenticateAsync(Uri callbackUrl)
         {
-            if (callbackUri == null)
+            if (callbackUrl == null)
             {
-                throw new ArgumentNullException("callbackUri");
+                throw new ArgumentNullException("callbackUrl");
             }
 
             var state = Guid.NewGuid().ToString();
 
             // First we need to grab a request token.
-            var oAuthToken = RetrieveRequestToken(callbackUri, state);
+            var oAuthToken = RetrieveRequestToken(callbackUrl, state);
 
             // Now we need the user to enter their name/password/accept this app @ Twitter.
             // This means we need to redirect them to the Twitter website.

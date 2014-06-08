@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
-using RestSharp;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Providers.Google;
 using SimpleAuthentication.Core.Tracing;
@@ -22,37 +23,65 @@ namespace SimpleAuthentication.Core.Providers
 
         protected GoogleProvider(string name, ProviderParams providerParams) : base(name, providerParams)
         {
-            AuthenticateRedirectionUrl = new Uri("https://accounts.google.com/o/oauth2/auth");
         }
 
         #region BaseOAuth20Token<AccessTokenResult> Implementation
 
-        protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
-                                                                                       Uri redirectUri)
+        public override Uri AuthenticateRedirectionUrl
         {
-            if (string.IsNullOrEmpty(authorizationCode))
+            get { return new Uri("https://accounts.google.com/o/oauth2/auth"); }
+        }
+
+        public override IEnumerable<string> DefaultScopes
+        {
+            get
+            {
+                return new[]
+                {
+                    "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
+                };
+            }
+        }
+
+        protected override async Task<AccessTokenResult> GetAccessTokenFromProviderAsync(string authorizationCode,
+            Uri redirectUrl)
+        {
+            if (string.IsNullOrWhiteSpace(authorizationCode))
             {
                 throw new ArgumentNullException("authorizationCode");
             }
 
-            if (redirectUri == null ||
-                string.IsNullOrEmpty(redirectUri.AbsoluteUri))
+            if (redirectUrl == null ||
+                string.IsNullOrWhiteSpace(redirectUrl.AbsoluteUri))
             {
-                throw new ArgumentNullException("redirectUri");
+                throw new ArgumentNullException("redirectUrl");
             }
 
-            var restRequest = new RestRequest("/o/oauth2/token", Method.POST);
-            restRequest.AddParameter("client_id", PublicApiKey);
-            restRequest.AddParameter("client_secret", SecretApiKey);
-            restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
-            restRequest.AddParameter("code", authorizationCode);
-            restRequest.AddParameter("grant_type", "authorization_code");
+            HttpResponseMessage response;
 
-            var restClient = RestClientFactory.CreateRestClient("https://accounts.google.com");
-            TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
-                                     restClient.BuildUri(restRequest).AbsoluteUri);
+            using (var client = new HttpClient())
+            {
+                var postData = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("client_id", PublicApiKey),
+                    new KeyValuePair<string, string>("client_secret", SecretApiKey),
+                    new KeyValuePair<string, string>("redirect_uri", redirectUrl.AbsoluteUri),
+                    new KeyValuePair<string, string>("code", authorizationCode),
+                    new KeyValuePair<string, string>("grant_type", "authorization_code")
+                };
 
-            return restClient.Execute<AccessTokenResult>(restRequest);
+                var content = new FormUrlEncodedContent(postData);
+
+                var requestUri = new Uri("https://accounts.google.com/o/oauth2/token");
+                TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
+                    requestUri.AbsoluteUri);
+
+                response = await client.PostAsync(redirectUrl, content);
+            }
+
+            var jsonContent = await response.Content.ReadAsStringAsync();
+
+            return JsonConvert.DeserializeObject<AccessTokenResult>(jsonContent);
         }
 
         protected override AccessToken MapAccessTokenResultToAccessToken(AccessTokenResult accessTokenResult)
@@ -62,9 +91,9 @@ namespace SimpleAuthentication.Core.Providers
                 throw new ArgumentNullException("accessTokenResult");
             }
 
-            if (string.IsNullOrEmpty(accessTokenResult.AccessToken) ||
+            if (string.IsNullOrWhiteSpace(accessTokenResult.AccessToken) ||
                 accessTokenResult.ExpiresIn <= 0 ||
-                string.IsNullOrEmpty(accessTokenResult.TokenType))
+                string.IsNullOrWhiteSpace(accessTokenResult.TokenType))
             {
                 var errorMessage =
                     string.Format(
@@ -75,98 +104,66 @@ namespace SimpleAuthentication.Core.Providers
             }
 
             return new AccessToken
-                   {
-                       PublicToken = accessTokenResult.AccessToken,
-                       ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn)
-                   };
+            {
+                PublicToken = accessTokenResult.AccessToken,
+                ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn)
+            };
         }
 
-        protected override UserInformation RetrieveUserInformation(AccessToken accessToken)
+        protected override async Task<UserInformation> RetrieveUserInformationAsync(AccessToken accessToken)
         {
             if (accessToken == null)
             {
                 throw new ArgumentNullException("accessToken");
             }
 
-            if (string.IsNullOrEmpty(accessToken.PublicToken))
+            if (string.IsNullOrWhiteSpace(accessToken.PublicToken))
             {
                 throw new ArgumentException("accessToken.PublicToken");
             }
 
-            IRestResponse<UserInfoResult> response;
+            UserInfoResult userInfoResult;
 
             try
             {
-                var restRequest = new RestRequest("/oauth2/v2/userinfo", Method.GET);
-                restRequest.AddParameter(AccessTokenKey, accessToken.PublicToken);
+                string jsonResponse;
 
-                var restClient = RestClientFactory.CreateRestClient("https://www.googleapis.com");
+                using (var client = new HttpClient())
+                {
+                    var requestUri = new Uri(string.Format("https://www.googleapis.com/oauth2/v2/userinfo?{0}={1}",
+                        AccessTokenKey, accessToken.PublicToken));
 
-                TraceSource.TraceVerbose("Retrieving user information. Google Endpoint: {0}",
-                                         restClient.BuildUri(restRequest).AbsoluteUri);
+                    TraceSource.TraceVerbose("Retrieving user information. Google Endpoint: {0}",
+                        requestUri.AbsoluteUri);
 
-                response = restClient.Execute<UserInfoResult>(restRequest);
+                    jsonResponse = await client.GetStringAsync(requestUri);
+                }
+
+                userInfoResult = JsonConvert.DeserializeObject<UserInfoResult>(jsonResponse);
             }
             catch (Exception exception)
             {
                 var errorMessage =
                     string.Format("Failed to retrieve any UserInfo data from the Google Api. Error Messages: {0}",
-                                  exception.RecursiveErrorMessages());
+                        exception.RecursiveErrorMessages());
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage, exception);
             }
 
-            if (response == null ||
-                response.StatusCode != HttpStatusCode.OK)
-            {
-                var errorMessage = string.Format(
-                    "Failed to obtain some UserInfo data from the Google Api OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Message: {2}.",
-                    response == null ? "-- null response --" : response.StatusCode.ToString(),
-                    response == null ? string.Empty : response.StatusDescription,
-                    response == null
-                        ? string.Empty
-                        : response.ErrorException == null
-                              ? "--no error exception--"
-                              : response.ErrorException.RecursiveErrorMessages());
-
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            // Lets check to make sure we have some bare minimum data.
-            if (string.IsNullOrEmpty(response.Data.Id))
-            {
-                const string errorMessage =
-                    "We were unable to retrieve the User Id from Google API, the user may have denied the authorization.";
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
-            }
-
             return new UserInformation
-                   {
-                       Id = response.Data.Id,
-                       Gender = string.IsNullOrEmpty(response.Data.Gender)
-                                    ? GenderType.Unknown
-                                    : GenderTypeHelpers.ToGenderType(response.Data.Gender),
-                       Name = response.Data.Name,
-                       Email = response.Data.Email,
-                       Locale = response.Data.Locale,
-                       Picture = response.Data.Picture,
-                       UserName = response.Data.GivenName
-                   };
+            {
+                Id = userInfoResult.Id,
+                Gender = string.IsNullOrWhiteSpace(userInfoResult.Gender)
+                    ? GenderType.Unknown
+                    : GenderTypeHelpers.ToGenderType(userInfoResult.Gender),
+                Name = userInfoResult.Name,
+                Email = userInfoResult.Email,
+                Locale = userInfoResult.Locale,
+                Picture = userInfoResult.Picture,
+                UserName = userInfoResult.GivenName
+            };
         }
 
         #endregion
-
-        public override IEnumerable<string> DefaultScopes
-        {
-            get
-            {
-                return new[]
-                       {
-                           "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
-                       };
-            }
-        }
     }
 }
