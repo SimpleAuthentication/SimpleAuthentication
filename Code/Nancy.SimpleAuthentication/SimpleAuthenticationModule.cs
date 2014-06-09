@@ -42,10 +42,10 @@ namespace Nancy.SimpleAuthentication
             _authenticationProviderFactory = new AuthenticationProviderFactory(configService);
 
             // Define the routes and how they are handled.
+            Get[CallbackRoute, true] = async (x, ct) => await AuthenticateCallbackAsync();
             Get[RedirectRoute] = parameters => RedirectToProvider(parameters);
             Post[RedirectRoute] = parameters => RedirectToProvider(parameters);
-            Get[CallbackRoute, true] = async(x, ct) => await AuthenticateCallbackAsync();
-
+            
             // If no Cache type is provided, we'll use a Session as the default.
             Before += context =>
             {
