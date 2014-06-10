@@ -13,22 +13,7 @@ namespace SimpleAuthentication.Core
         public static Lazy<Configuration> Configuration;
 
         private static readonly Lazy<IDictionary<string, IAuthenticationProvider>> Providers =
-            new Lazy<IDictionary<string, IAuthenticationProvider>>(
-                () =>
-                {
-                    var authenticationProviders = new Dictionary<string, IAuthenticationProvider>();
-                    Initialize(authenticationProviders);
-
-                    if (authenticationProviders.Any())
-                    {
-                        return authenticationProviders;
-                    }
-
-                    // No providers where found. Unable to go anywhere!
-                    const string errorMessage =
-                        "No Authentication Provider config settings where found. As such, we'll never be able to authenticate successfully against another service. How to fix this: add at least one Authentication Provider configuration data into your config file's <appSettings> section (recommended and easiest answer) or add a custom config section to your .config file (looks a bit more pro, but is also a bit more complex to setup). For more info: ";
-                    throw new AuthenticationException(errorMessage);
-                });
+            new Lazy<IDictionary<string, IAuthenticationProvider>>(Initialize);
 
         public AuthenticationProviderFactory(IConfigService configService)
         {
@@ -101,22 +86,18 @@ namespace SimpleAuthentication.Core
             return authenticationProvider;
         }
 
-        private static void Initialize(IDictionary<string, IAuthenticationProvider> authenticationProviders)
+        private static IDictionary<string, IAuthenticationProvider> Initialize()
         {
-            authenticationProviders.ThrowIfNull("authenticationProviders");
-
-            // TODO: Replace this with some smarts for providers.
+            var authenticationProviders = new Dictionary<string, IAuthenticationProvider>();
+           
+            // TODO: Replace this with Phillip Hayden's code for *smart scanning*.
             var availableProviders = new List<Type>
             {
                 typeof (GoogleProvider)
             };
 
-            if (Configuration == null)
-            {
-                return;
-            }
-
-            if (Configuration.Value.Providers != null &&
+            if (Configuration != null &&
+                Configuration.Value.Providers != null &&
                 Configuration.Value.Providers.Any())
             {
                 // Map the available providers to the config settings provided.
@@ -124,6 +105,16 @@ namespace SimpleAuthentication.Core
                     availableProviders,
                     Configuration.Value.Providers);
             }
+
+            if (authenticationProviders.Any())
+            {
+                return authenticationProviders;
+            }
+
+            // No providers where found. Unable to go anywhere!
+            const string errorMessage =
+                "No Authentication Provider config settings where found. As such, we'll never be able to authenticate successfully against another service. How to fix this: add at least one Authentication Provider configuration data into your config file's <appSettings> section (recommended and easiest answer) or add a custom config section to your .config file (looks a bit more pro, but is also a bit more complex to setup). For more info: ";
+            throw new AuthenticationException(errorMessage);
         }
 
         private static void SetupConfigurationProviders(
