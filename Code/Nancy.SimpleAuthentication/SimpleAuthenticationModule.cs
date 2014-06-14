@@ -230,7 +230,7 @@ namespace Nancy.SimpleAuthentication
 
         private Uri GenerateCallbackUri(string providerName)
         {
-            return SystemHelpers.CreateCallBackUri(providerName, Request.Url, CallbackRoute);
+            return SystemHelpers.CreateCallBackUri(providerName, Request.Url, Request.Url.BasePath + CallbackRoute);
         }
 
         private string DetermineReturnUrl()
