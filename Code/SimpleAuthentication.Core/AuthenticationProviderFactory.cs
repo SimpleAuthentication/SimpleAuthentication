@@ -113,7 +113,7 @@ namespace SimpleAuthentication.Core
 
             // No providers where found. Unable to go anywhere!
             const string errorMessage =
-                "No Authentication Provider config settings where found. As such, we'll never be able to authenticate successfully against another service. How to fix this: add at least one Authentication Provider configuration data into your config file's <appSettings> section (recommended and easiest answer) or add a custom config section to your .config file (looks a bit more pro, but is also a bit more complex to setup). For more info: ";
+                "No Authentication Provider config settings where found. As such, we'll never be able to authenticate successfully against another service. How to fix this: add at least one Authentication Provider configuration data into your config file's <appSettings> section (recommended and easiest answer) [eg. <add key=\"sa.Google\" value=\"key:587140099194.apps.googleusercontent.com;secret:npk1_gx-gqJmLiJRPFooxCEY\"/> or add a custom config section to your .config file (looks a bit more pro, but is also a bit more complex to setup). For more info (especially the convention rules for the appSettings key/value> please refer to: ";
             throw new AuthenticationException(errorMessage);
         }
 

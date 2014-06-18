@@ -57,6 +57,7 @@
     <Compile Include="Config\Configuration.cs" />
     <Compile Include="Config\IConfigService.cs" />
     <Compile Include="Config\Provider.cs" />
+    <Compile Include="HttpClientFactory.cs" />
     <Compile Include="ICache.cs" />
     <Compile Include="Config\AppSettingsParser.cs" />
     <Compile Include="Providers\Facebook\AccessTokenResult.cs" />

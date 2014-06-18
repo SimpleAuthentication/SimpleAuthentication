@@ -1,4 +1,6 @@
-﻿namespace SimpleAuthentication.Core.Providers.Google
+﻿using Newtonsoft.Json;
+
+namespace SimpleAuthentication.Core.Providers.Google
 {
     public class AccessTokenResult
     {

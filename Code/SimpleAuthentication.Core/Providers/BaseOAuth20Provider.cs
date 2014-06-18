@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Tracing;
@@ -10,7 +10,8 @@ using SimpleAuthentication.Core.Tracing;
 namespace SimpleAuthentication.Core.Providers
 {
     public abstract class BaseOAuth20Provider<TAccessTokenResult>
-        : BaseProvider, IPublicPrivateKeyProvider, IScopedProvider where TAccessTokenResult : class, new()
+        : BaseProvider, IPublicPrivateKeyProvider, IScopedProvider
+        where TAccessTokenResult : class, new()
     {
         protected BaseOAuth20Provider(string name, ProviderParams providerParams)
             : base(name, "OAuth 2.0")

@@ -59,7 +59,7 @@ namespace SimpleAuthentication.Core.Providers
 
             HttpResponseMessage response;
 
-            using (var client = new HttpClient())
+            using (var client = HttpClientFactory.GetHttpClient())
             {
                 var postData = new List<KeyValuePair<string, string>>
                 {
@@ -72,16 +72,23 @@ namespace SimpleAuthentication.Core.Providers
 
                 var content = new FormUrlEncodedContent(postData);
 
-                var requestUri = new Uri("https://accounts.google.com/o/oauth2/token");
-                TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
-                    requestUri.AbsoluteUri);
+                //var requestUri = new Uri("https://accounts.google.com/o/oauth2/token");
+                //TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
+                //    requestUri.AbsoluteUri);
 
                 response = await client.PostAsync(redirectUrl, content);
             }
 
             var jsonContent = await response.Content.ReadAsStringAsync();
 
-            return JsonConvert.DeserializeObject<AccessTokenResult>(jsonContent);
+            var result = JsonConvert.DeserializeObject<dynamic>(jsonContent);
+            if (result == null)
+            {
+                TraceSource.TraceWarning("No Access Token Result retrieved from Google.");
+            }
+
+            return MapDynamicResultToAccessTokenResult(result);
+
         }
 
         protected override AccessToken MapAccessTokenResultToAccessToken(AccessTokenResult accessTokenResult)
@@ -128,7 +135,7 @@ namespace SimpleAuthentication.Core.Providers
             {
                 string jsonResponse;
 
-                using (var client = new HttpClient())
+                using (var client = HttpClientFactory.GetHttpClient())
                 {
                     var requestUri = new Uri(string.Format("https://www.googleapis.com/oauth2/v2/userinfo?{0}={1}",
                         AccessTokenKey, accessToken.PublicToken));
@@ -165,5 +172,24 @@ namespace SimpleAuthentication.Core.Providers
         }
 
         #endregion
+
+        private static AccessTokenResult MapDynamicResultToAccessTokenResult(dynamic result)
+        {
+            if (result == null)
+            {
+                
+                return null;
+            }
+
+            var accessTokenResult = new AccessTokenResult
+            {
+                AccessToken = result.access_token,
+                TokenType = result.token_type,
+                ExpiresIn = result.expires_in,
+                IdToken = result.id_token
+            };
+
+            return accessTokenResult;
+        }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using Nancy;
+using Nancy.Session;
 using Nancy.Testing;
 
 namespace SimpleAuthentication.Tests.WebSites
@@ -16,9 +17,10 @@ namespace SimpleAuthentication.Tests.WebSites
                 : null);
         }
 
-        protected Browser Browser(IEnumerable<object> dependencies = null)
+        protected Browser Browser(IEnumerable<object> dependencies = null,
+            IDictionary<string, object> session = null)
         {
-            return new Browser(with =>
+            var bootstrapper = new ConfigurableBootstrapper(with =>
             {
                 // The nancy module we're testing against.
                 with.Module<TModule>();
@@ -36,6 +38,17 @@ namespace SimpleAuthentication.Tests.WebSites
                     with.Dependencies(dependencies);
                 }
             });
+
+            if (session != null)
+            {
+                bootstrapper.BeforeRequest.AddItemToEndOfPipeline(ctx =>
+                {
+                    ctx.Request.Session = new Session(session);
+                    return null;
+                });
+            }
+
+            return new Browser(bootstrapper);
         }
 
         protected IEnumerable<Tuple<Type, object>> MappedDependencies { get; set; }
