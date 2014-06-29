@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -72,14 +73,23 @@ namespace SimpleAuthentication.Core.Providers
 
                 var content = new FormUrlEncodedContent(postData);
 
-                //var requestUri = new Uri("https://accounts.google.com/o/oauth2/token");
-                //TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
-                //    requestUri.AbsoluteUri);
+                var requestUri = new Uri("https://accounts.google.com/o/oauth2/token");
 
-                response = await client.PostAsync(redirectUrl, content);
+                TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
+                    requestUri.AbsoluteUri);
+
+                response = await client.PostAsync(requestUri, content);
             }
 
             var jsonContent = await response.Content.ReadAsStringAsync();
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                TraceSource.TraceWarning("No Access Token Result retrieved from Google. Error Status Code: {0}. Error Message: {1}",
+                    response.StatusCode,
+                    jsonContent);
+                return null;
+            }
 
             var result = JsonConvert.DeserializeObject<dynamic>(jsonContent);
             if (result == null)
