@@ -210,8 +210,7 @@ namespace SimpleAuthentication.Core.Providers
             if (!string.IsNullOrEmpty(error))
             {
                 var errorMessage =
-                    string.Format("Failed to retrieve an authorization code from {0}. The error provided is: {1}" +
-                                  Name, error);
+                    string.Format("Failed to retrieve an authorization code from {0}. The error provided is: {1}", Name, error);
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
             }
