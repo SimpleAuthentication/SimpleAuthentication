@@ -17,7 +17,7 @@
         <tags>authentication twitter google facebook oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination nancy nancyfx</tags>
         <dependencies>
             <dependency id="Nancy" version="0.18.0" />
-            <dependency id="SimpleAuthentication.Core" version="0.3.9" />
+            <dependency id="SimpleAuthentication.Core" />
         </dependencies>
     </metadata>
     <files>
