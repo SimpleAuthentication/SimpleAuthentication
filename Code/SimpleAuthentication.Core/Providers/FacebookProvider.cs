@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
-using RestSharp;
-using RestSharp.Contrib;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Providers.Facebook;
 using SimpleAuthentication.Core.Tracing;
@@ -15,9 +17,6 @@ namespace SimpleAuthentication.Core.Providers
 
     public class FacebookProvider : BaseOAuth20Provider<AccessTokenResult>
     {
-        private const string BaseUrl = "https://graph.facebook.com";
-        private bool _isMobile;
-
         public FacebookProvider(ProviderParams providerParams) : this("Facebook", providerParams)
         {
         }
@@ -30,29 +29,80 @@ namespace SimpleAuthentication.Core.Providers
 
         #region BaseOAuth20Token<AccessTokenResult> Implementation
 
-        protected override string CreateRedirectionQuerystringParameters(Uri callbackUri, string state)
+        public override Uri AuthenticateRedirectionUrl
         {
-            if (callbackUri == null)
+            get
             {
-                throw new ArgumentNullException("callbackUri");
+                return IsMobile
+                    ? new Uri("https://m.facebook.com/dialog/oauth")
+                    : new Uri("https://www.facebook.com/dialog/oauth");
             }
-
-            if (string.IsNullOrEmpty(state))
-            {
-                throw new ArgumentNullException("state");
-            }
-
-            var display = DisplayType == DisplayType.Unknown
-                              ? string.Empty
-                              : "&display=" + DisplayType.ToString().ToLowerInvariant();
-
-            // REFERENCE: https://developers.facebook.com/docs/reference/dialogs/oauth/
-            // NOTE: Facebook is case-sensitive anal retentive with regards to their uri + querystring params.
-            //       So ... we'll lowercase the entire biatch. Thanks, Facebook :(
-            return string.Format("client_id={0}&redirect_uri={1}{2}{3}{4}",
-                                 PublicApiKey, callbackUri.AbsoluteUri, GetScope(), GetQuerystringState(state), display)
-                         .ToLowerInvariant();
         }
+
+        protected override async Task<AccessTokenResult> GetAccessTokenFromProviderAsync(string authorizationCode,
+            Uri redirectUrl)
+        {
+            if (string.IsNullOrWhiteSpace(authorizationCode))
+            {
+                throw new ArgumentNullException("authorizationCode");
+            }
+
+            if (redirectUrl == null ||
+                string.IsNullOrWhiteSpace(redirectUrl.AbsoluteUri))
+            {
+                throw new ArgumentNullException("redirectUrl");
+            }
+
+            HttpResponseMessage response;
+
+            using (var client = HttpClientFactory.GetHttpClient())
+            {
+                var requestUri = GetAccessTokenUri(redirectUrl.AbsoluteUri, authorizationCode);
+                TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
+                    requestUri.AbsoluteUri);
+
+                response = await client.GetAsync(requestUri);
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                TraceSource.TraceWarning(
+                    "No Access Token Result retrieved from Google. Error Status Code: {0}. Error Message: {1}",
+                    response.StatusCode,
+                    content);
+                return null;
+            }
+
+            return ExtractAccessTokenFromContent(content);
+
+            //return MapAccessTokenResultToAccessToken(accessTokenResult);
+        }
+
+        //protected override string CreateRedirectionQuerystringParameters(Uri callbackUri, string state)
+        //{
+        //    if (callbackUri == null)
+        //    {
+        //        throw new ArgumentNullException("callbackUri");
+        //    }
+
+        //    if (string.IsNullOrEmpty(state))
+        //    {
+        //        throw new ArgumentNullException("state");
+        //    }
+
+        //    var display = DisplayType == DisplayType.Unknown
+        //                      ? string.Empty
+        //                      : "&display=" + DisplayType.ToString().ToLowerInvariant();
+
+        //    // REFERENCE: https://developers.facebook.com/docs/reference/dialogs/oauth/
+        //    // NOTE: Facebook is case-sensitive anal retentive with regards to their uri + querystring params.
+        //    //       So ... we'll lowercase the entire biatch. Thanks, Facebook :(
+        //    return string.Format("client_id={0}&redirect_uri={1}{2}{3}{4}",
+        //                         PublicApiKey, callbackUri.AbsoluteUri, GetScope(), GetQuerystringState(state), display)
+        //                 .ToLowerInvariant();
+        //}
 
         protected override string GetAuthorizationCodeFromQueryString(NameValueCollection queryStringParameters)
         {
@@ -78,11 +128,11 @@ namespace SimpleAuthentication.Core.Providers
                 !string.IsNullOrEmpty(errorDescription))
             {
                 var errorMessage = string.Format("Reason: {0}. Error: {1}. Description: {2}.",
-                                                 string.IsNullOrEmpty(errorReason) ? "-no error reason-" : errorReason,
-                                                 string.IsNullOrEmpty(error) ? "-no error-" : error,
-                                                 string.IsNullOrEmpty(errorDescription)
-                                                     ? "-no error description-"
-                                                     : errorDescription);
+                    string.IsNullOrEmpty(errorReason) ? "-no error reason-" : errorReason,
+                    string.IsNullOrEmpty(error) ? "-no error-" : error,
+                    string.IsNullOrEmpty(errorDescription)
+                        ? "-no error description-"
+                        : errorDescription);
                 TraceSource.TraceVerbose(errorMessage);
                 throw new AuthenticationException(errorMessage);
             }
@@ -97,6 +147,7 @@ namespace SimpleAuthentication.Core.Providers
             return code;
         }
 
+        /*
         protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
                                                                                        Uri redirectUri)
         {
@@ -111,7 +162,7 @@ namespace SimpleAuthentication.Core.Providers
                 throw new ArgumentNullException("redirectUri");
             }
 
-            var restRequest = new RestRequest("oauth/access_token");
+            var restRequest = new RestRequest();
             restRequest.AddParameter("client_id", PublicApiKey);
             restRequest.AddParameter("client_secret", SecretApiKey);
             restRequest.AddParameter("code", authorizationCode);
@@ -153,6 +204,7 @@ namespace SimpleAuthentication.Core.Providers
 
             return restClient.Execute<AccessTokenResult>(restRequest);
         }
+        */
 
         protected override AccessToken MapAccessTokenResultToAccessToken(AccessTokenResult accessTokenResult)
         {
@@ -161,29 +213,29 @@ namespace SimpleAuthentication.Core.Providers
                 throw new ArgumentNullException("accessTokenResult");
             }
 
-            if (string.IsNullOrEmpty(accessTokenResult.access_token) ||
-                accessTokenResult.expires <= 0)
+            if (string.IsNullOrEmpty(accessTokenResult.AccessToken) ||
+                accessTokenResult.Expires <= 0)
             {
                 var errorMessage =
                     string.Format(
                         "Retrieved a Facebook Access Token but there's an error with either the access_token and/or expires_on parameters. Access Token: {0}. Expires In: {1}.",
-                        string.IsNullOrEmpty(accessTokenResult.access_token)
+                        string.IsNullOrEmpty(accessTokenResult.AccessToken)
                             ? "-no access token-"
-                            : accessTokenResult.access_token,
-                        accessTokenResult.expires.ToString());
+                            : accessTokenResult.AccessToken,
+                        accessTokenResult.Expires);
 
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
             }
 
             return new AccessToken
-                   {
-                       PublicToken = accessTokenResult.access_token,
-                       ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.expires)
-                   };
+            {
+                PublicToken = accessTokenResult.AccessToken,
+                ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.Expires)
+            };
         }
 
-        protected override UserInformation RetrieveUserInformation(AccessToken accessToken)
+        protected override async Task<UserInformation> RetrieveUserInformationAsync(AccessToken accessToken)
         {
             if (accessToken == null)
             {
@@ -195,19 +247,19 @@ namespace SimpleAuthentication.Core.Providers
                 throw new ArgumentException("accessToken.PublicToken");
             }
 
-            IRestResponse<MeResult> response;
+            HttpResponseMessage response;
 
             try
             {
-                var restRequest = new RestRequest("me");
-                restRequest.AddParameter("access_token", accessToken.PublicToken);
-
-                var restClient = RestClientFactory.CreateRestClient(BaseUrl);
-
+                var requestUrl = new Uri(string.Format("https://graph.facebook.com/me?access_token={0}",
+                    accessToken.PublicToken));
                 TraceSource.TraceVerbose("Retrieving user information. Facebook Endpoint: {0}",
-                                         restClient.BuildUri(restRequest).AbsoluteUri);
+                    requestUrl.AbsoluteUri);
 
-                response = restClient.Execute<MeResult>(restRequest);
+                using (var client = HttpClientFactory.GetHttpClient())
+                {
+                    response = await client.GetAsync(requestUrl);
+                }
             }
             catch (Exception exception)
             {
@@ -218,41 +270,41 @@ namespace SimpleAuthentication.Core.Providers
                 throw new AuthenticationException(errorMessage, exception);
             }
 
-            if (response == null ||
-                response.StatusCode != HttpStatusCode.OK ||
-                response.Data == null)
+            if (!response.IsSuccessStatusCode)
             {
                 var errorMessage = string.Format(
-                    "Failed to obtain some 'Me' data from the Facebook api OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}. Error Message: {2}.",
-                    response == null ? "-- null response --" : response.StatusCode.ToString(),
-                    response == null ? string.Empty : response.StatusDescription,
-                    response == null
-                        ? string.Empty
-                        : response.ErrorException == null
-                              ? "--no error exception--"
-                              : response.ErrorException.RecursiveErrorMessages());
+                    "Failed to obtain some 'Me' data from the Facebook api OR the the response was not an HTTP Status 200 OK. Response Status: {0}. Response Description: {1}.",
+                    response.StatusCode,
+                    string.IsNullOrWhiteSpace(response.ReasonPhrase)
+                        ? "-no description-"
+                        : response.ReasonPhrase);
 
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
             }
 
-            var id = response.Data.Id < 0 ? 0 : response.Data.Id;
-            var name = (string.IsNullOrEmpty(response.Data.FirstName)
-                            ? string.Empty
-                            : response.Data.FirstName) + " " +
-                       (string.IsNullOrEmpty(response.Data.LastName)
-                            ? string.Empty
-                            : response.Data.LastName).Trim();
+            var meResultJson = await response.Content.ReadAsStringAsync();
+            var meResult = JsonConvert.DeserializeObject<MeResult>(meResultJson);
+
+            var id = meResult.Id < 0 ? 0 : meResult.Id;
+            var name = string.Format("{0} {1}",
+                string.IsNullOrEmpty(meResult.FirstName)
+                    ? string.Empty
+                    : meResult.FirstName,
+                string.IsNullOrEmpty(meResult.LastName)
+                    ? string.Empty
+                    : meResult.LastName)
+                .Trim();
 
             return new UserInformation
-                   {
-                       Id = id.ToString(),
-                       Name = name,
-                       Email = response.Data.Email,
-                       Locale = response.Data.Locale,
-                       UserName = response.Data.Username,
-                       Picture = string.Format("https://graph.facebook.com/{0}/picture", id)
-                   };
+            {
+                Id = id.ToString(),
+                Name = name,
+                Email = meResult.Email,
+                Locale = meResult.Locale,
+                UserName = meResult.Username,
+                Picture = string.Format("https://graph.facebook.com/{0}/picture", id)
+            };
         }
 
         #endregion
@@ -260,20 +312,8 @@ namespace SimpleAuthentication.Core.Providers
         /// <summary>
         /// Are we on a mobile device?
         /// </summary>
-        /// <remarks>This will also have the side-effect of auto setting the AuthenticateRedirectionUrl property, based on this set value.</remarks>
-        public bool IsMobile
-        {
-            get { return _isMobile; }
-            set
-            {
-                _isMobile = value;
-
-                // Now auto set the redirection url. 
-                AuthenticateRedirectionUrl = IsMobile
-                                                 ? new Uri("https://m.facebook.com/dialog/oauth")
-                                                 : new Uri("https://www.facebook.com/dialog/oauth");
-            }
-        }
+        /// <remarks>This will have the side-effect of auto setting the AuthenticateRedirectionUrl property, based on this set value.</remarks>
+        public bool IsMobile { get; set; }
 
         public DisplayType DisplayType { get; set; }
 
@@ -285,6 +325,62 @@ namespace SimpleAuthentication.Core.Providers
         public override string ScopeSeparator
         {
             get { return ","; }
+        }
+
+        private Uri GetAccessTokenUri(string redirectUrl,
+            string authorizationCode)
+        {
+            // NOTE: StackOverflow has a waay better solution (http://stackoverflow.com/questions/17096201/build-query-string-for-system-net-httpclient-get)
+            //       but it has a dependency on System.Web (urgh!) so I'm not wanting to do that.. so .. I have to have my own.
+            //       Urgh^Urgh.
+
+            var queryString = new StringBuilder();
+            queryString.AppendFormat("https://graph.facebook.com/oauth/access_token?client_id={0}&client_secret={1}&redirect_uri={2}&code={3}&format=json",
+                Uri.EscapeDataString(PublicApiKey),
+                Uri.EscapeDataString(SecretApiKey),
+                Uri.EscapeDataString(redirectUrl.ToLowerInvariant()),
+                Uri.EscapeDataString(authorizationCode));
+
+            if (DisplayType != DisplayType.Unknown)
+            {
+                 queryString.AppendFormat("&display={0}", Uri.EscapeDataString(DisplayType.ToString().ToLowerInvariant()));
+            }
+
+            // Note: Do we need to do anything with scopes?
+
+            return new Uri(queryString.ToString());
+        }
+
+        private static AccessTokenResult ExtractAccessTokenFromContent(string content)
+        {
+            // <RANT>
+            // Most of the facebook stuff returns results as json. Nice.
+            //  -- E X C E P T --
+            //      -- T H I S   A P I   C A L L --
+            // FML.
+            // </RANT>
+
+            var accessTokenResult = new AccessTokenResult();
+
+            var results = content.Split(new[] {'&'});
+            foreach (var result in results)
+            {
+                var keyValue = result.Split(new[] {'='});
+                if (keyValue.First().Equals("access_token"))
+                {
+                    accessTokenResult.AccessToken = keyValue[1];
+                }
+                else if (keyValue.First().Equals("expires"))
+                {
+                    int value = 0;
+                    if (int.TryParse(keyValue[1], out value))
+                    {
+                        accessTokenResult.Expires = value;
+                    }
+                }
+            }
+
+            return accessTokenResult;
         }
     }
 }

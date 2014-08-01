@@ -210,13 +210,13 @@ namespace SimpleAuthentication.Tests.WebSites
 
                 var accessTokenJson = File.ReadAllText("Sample Data\\Google-AccessToken-Content.json");
                 var userInformationJson = File.ReadAllText("Sample Data\\Google-UserInfoResult-Content.json");
-
+                
                 var accessTokenResponse = FakeHttpMessageHandler.GetStringHttpResponseMessage(accessTokenJson);
                 var userInformationResponse = FakeHttpMessageHandler.GetStringHttpResponseMessage(userInformationJson);
                 HttpClientFactory.MessageHandler = new FakeHttpMessageHandler(
                     new Dictionary<string, HttpResponseMessage>
                     {
-                        {"http://foo.com/authenticate/callback?providerkey=google", accessTokenResponse},
+                        {"https://accounts.google.com/o/oauth2/token", accessTokenResponse },
                         {"https://www.googleapis.com/oauth2/v2/userinfo?access_token=", userInformationResponse}
                     });
                     

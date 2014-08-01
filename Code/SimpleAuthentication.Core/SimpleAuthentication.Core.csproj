@@ -60,6 +60,7 @@
     <Compile Include="HttpClientFactory.cs" />
     <Compile Include="ICache.cs" />
     <Compile Include="Config\AppSettingsParser.cs" />
+    <Compile Include="Providers\FacebookProvider.cs" />
     <Compile Include="Providers\Facebook\AccessTokenResult.cs" />
     <Compile Include="Providers\Facebook\DisplayType.cs" />
     <Compile Include="Providers\Facebook\MeResult.cs" />

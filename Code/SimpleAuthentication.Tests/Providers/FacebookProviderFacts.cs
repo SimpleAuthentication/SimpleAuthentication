@@ -9,16 +9,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SimpleAuthentication.Core.Providers.Google;
+using SimpleAuthentication.Core.Providers.Facebook;
 using Xunit;
 
 namespace SimpleAuthentication.Tests.Providers
 {
-    public class GoogleProviderFacts
+    public class FacebookProviderFacts
     {
-        public class GoogleProviderTestClass : GoogleProvider
+        
+        public class FacebookProviderTestClass : FacebookProvider
         {
-            public GoogleProviderTestClass(ProviderParams providerParams) : base(providerParams)
+            public FacebookProviderTestClass(ProviderParams providerParams) : base(providerParams)
             {
             }
 
@@ -39,6 +40,7 @@ namespace SimpleAuthentication.Tests.Providers
             }
         }
 
+        
         public class GetRedirectToAuthenticateSettingsFacts
         {
             [Fact]
@@ -50,7 +52,7 @@ namespace SimpleAuthentication.Tests.Providers
                     PublicApiKey = "some public api key",
                     SecretApiKey = "some secret api key"
                 };
-                var provider = new GoogleProvider(providerParams);
+                var provider = new FacebookProvider(providerParams);
                 var callBackUrl = new Uri("Http://www.foo.com/callback");
                 
                 // Act.
@@ -61,15 +63,11 @@ namespace SimpleAuthentication.Tests.Providers
                 settings.State.ShouldNotBeNullOrEmpty();
                 Guid.Parse(settings.State);
                 settings.RedirectUri.ShouldNotBe(null);
-                settings.RedirectUri.AbsoluteUri.ShouldStartWith("https://accounts.google.com/o/oauth2/auth?client_id=some%20public%20api%20key&redirect_uri=http://www.foo.com/callback&response_type=code&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email&state=");
-                                                                 // https://accounts.google.com/o/oauth2/auth?client_id=some%20public%20api%20key&redirect_uri=http://www.foo.com/callback&response_type=code&&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email&state=3c55b3bc-8391-4bd0-92a6-5d0379cf15e5"
+                settings.RedirectUri.AbsoluteUri.ShouldStartWith("https://www.facebook.com/dialog/oauth?client_id=some%20public%20api%20key&redirect_uri=http://www.foo.com/callback&response_type=code&scope=email&state=");
             }
-        }
 
-        public class GetAccessTokenFromProviderAsyncFacts
-        {
             [Fact]
-            public async Task GivenAValidAuthorizationCodeAndRedirectUri_GetAccessTokenFromProviderAsync_ReturnsAnAccessToken()
+            public void GivenACallbackUrlAndThisIsAMobileSite_GetRedirectToAuthenticateSettings_ReturnsSomeRedirectToAuthenticateSettings()
             {
                 // Arrange.
                 var providerParams = new ProviderParams
@@ -77,26 +75,57 @@ namespace SimpleAuthentication.Tests.Providers
                     PublicApiKey = "some public api key",
                     SecretApiKey = "some secret api key"
                 };
-                var provider = new GoogleProviderTestClass(providerParams);
+                var provider = new FacebookProvider(providerParams)
+                {
+                    IsMobile = true
+                };
+                var callBackUrl = new Uri("Http://www.foo.com/callback");
+
+                // Act.
+                var settings = provider.GetRedirectToAuthenticateSettings(callBackUrl);
+
+                // Assert.
+                settings.ShouldNotBe(null);
+                settings.State.ShouldNotBeNullOrEmpty();
+                Guid.Parse(settings.State);
+                settings.RedirectUri.ShouldNotBe(null);
+                settings.RedirectUri.AbsoluteUri.ShouldStartWith("https://m.facebook.com/dialog/oauth?client_id=some%20public%20api%20key&redirect_uri=http://www.foo.com/callback&response_type=code&scope=email&state=");
+            }
+        }
+
+
+        public class GetAccessTokenFromProviderAsyncFacts
+        {
+            [Fact]
+            public async Task
+                GivenAValidAuthorizationCodeAndRedirectUri_GetAccessTokenFromProviderAsync_ReturnsAnAccessToken()
+            {
+                // Arrange.
+                var providerParams = new ProviderParams
+                {
+                    PublicApiKey = "some public api key",
+                    SecretApiKey = "some secret api key"
+                };
+                var provider = new FacebookProviderTestClass(providerParams);
                 const string authorizationCode = "aasdasds";
                 var redirectUrl = new Uri("http://a.b.c.d");
-                var accessTokenJson = File.ReadAllText("Sample Data\\Google-AccessToken-Content.json");
+                var accessTokenJson = File.ReadAllText("Sample Data\\Facebook-AccessToken-Content.txt");
                 var accessTokenResponse = FakeHttpMessageHandler.GetStringHttpResponseMessage(accessTokenJson);
                 HttpClientFactory.MessageHandler = new FakeHttpMessageHandler(
-                        "https://accounts.google.com/o/oauth2/token",
-                        accessTokenResponse);
+                    "https://graph.facebook.com/oauth/access_token?client_id=some public api key&client_secret=some secret api key&redirect_uri=http:%2F%2Fa.b.c.d%2F&code=aasdasds&format=json",
+                    accessTokenResponse);
+
                 // Act.
                 var result = await provider.GetAccessTokenFromProviderAsync(authorizationCode, redirectUrl);
 
                 // Assert.
                 result.ShouldNotBe(null);
-                var expectedAccessToken = JsonConvert.DeserializeObject<dynamic>(accessTokenJson);
-                result.AccessToken.ShouldBe((string)expectedAccessToken.access_token);
-                result.ExpiresIn.ShouldBe((long)expectedAccessToken.expires_in);
-                result.IdToken.ShouldBe((string)expectedAccessToken.id_token);
-                result.TokenType.ShouldBe((string)expectedAccessToken.token_type);
+                result.AccessToken.ShouldBe("CAAGsQgZADz7EBAMCMehE0nR2HpS8NJklENXZCg8r1Q36AcV94c9pQycDKYNdyWXb0oqNBXJOkZCy4hosYmv2hNHjjZB5q8ZAhKG2rfhndrBHWyKZC3W4hVZBLvsZAgtzdlu0T8khnUBNl0ZA1P56n7LFQP6tZA89zc14y3EllZByTJZAZA9KVrTydltQZBZCZAQPWAvyqyKquXGcMnYO2wxeNMGcv9Ps");
+                result.Expires.ShouldBe(5183995);
             }
+        }
 
+        /*
             [Fact]
             public async Task GivenAnInvalidAuthorizationCode_GetAccessTokenFromProviderAsync_ReturnNoAccessToken()
             {
@@ -193,5 +222,6 @@ namespace SimpleAuthentication.Tests.Providers
                 result.UserName.ShouldBe(expectedUserInfoResult.GivenName);
             }
         }
+        */
     }
 }

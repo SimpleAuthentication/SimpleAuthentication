@@ -93,7 +93,8 @@ namespace SimpleAuthentication.Core
             // TODO: Replace this with Phillip Hayden's code for *smart scanning*.
             var availableProviders = new List<Type>
             {
-                typeof (GoogleProvider)
+                typeof (GoogleProvider),
+                typeof (FacebookProvider)
             };
 
             if (Configuration != null &&

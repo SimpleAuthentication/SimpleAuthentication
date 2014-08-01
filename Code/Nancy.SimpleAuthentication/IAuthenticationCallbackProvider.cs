@@ -1,4 +1,6 @@
-﻿namespace Nancy.SimpleAuthentication
+﻿using System;
+
+namespace Nancy.SimpleAuthentication
 {
     /// <summary>
     /// Defines the contract for the callback from an Authentication Provider.
@@ -16,10 +18,10 @@
         /// <summary>
         /// If an error occurs during the authentication process, this is where you can handle it.
         /// </summary>
-        /// <remarks>A good example of overriding this method would be to send the user to a custom view to explain that something bad happened.</remarks>
+        /// <remarks>An example of a valid error would be if the user cancels their permission check.</remarks>
         /// <param name="nancyModule">The current module.</param>
-        /// <param name="errorMessage">The error that occured.</param>
+        /// <param name="exception">The exception error that occured.</param>
         /// <returns></returns>
-        dynamic OnRedirectToAuthenticationProviderError(NancyModule nancyModule, string errorMessage);
+        dynamic OnRedirectToAuthenticationProviderError(NancyModule nancyModule, Exception exception);
     }
 }

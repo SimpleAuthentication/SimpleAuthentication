@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -71,7 +72,17 @@ namespace SimpleAuthentication.Core.Providers
                 throw new ArgumentNullException("state");
             }
 
-            return string.Format("&{0}={1}", StateKey, state);
+            return string.Format("{0}={1}", StateKey, state);
+        }
+
+        protected KeyValuePair<string, string> GetQuerystringStateAsKeyValuePair(string state)
+        {
+            if (string.IsNullOrWhiteSpace(state))
+            {
+                throw new ArgumentNullException("state");
+            }
+
+            return new KeyValuePair<string, string>(StateKey, state);
         }
     }
 }

@@ -162,7 +162,7 @@ namespace Nancy.SimpleAuthentication
             catch (Exception exception)
             {
                 TraceSource.TraceError(exception.Message);
-                model.Exception = exception;
+                return _callbackProvider.OnRedirectToAuthenticationProviderError(this, exception);
             }
 
             #endregion

@@ -1,5 +1,4 @@
-﻿using System;
-using SimpleAuthentication.Core;
+﻿using SimpleAuthentication.Core;
 
 namespace Nancy.SimpleAuthentication
 {
@@ -14,10 +13,5 @@ namespace Nancy.SimpleAuthentication
         /// Possible Url or partial route to redirect to.
         /// </summary>
         public string ReturnUrl { get; set; }
-
-        /// <summary>
-        /// Exception information, if an error has occurred.
-        /// </summary>
-        public Exception Exception { get; set; }
     }
 }

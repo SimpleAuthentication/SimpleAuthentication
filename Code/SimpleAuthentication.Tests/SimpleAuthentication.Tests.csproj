@@ -67,12 +67,16 @@
   <ItemGroup>
     <Compile Include="FakeHttpMessageHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Providers\FacebookProviderFacts.cs" />
     <Compile Include="Providers\GoogleProviderFacts.cs" />
     <Compile Include="WebSites\NancyModuleTestBase.cs" />
     <Compile Include="WebSites\SimpleAuthenticationModuleFacts.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <Content Include="Sample Data\Facebook-AccessToken-Content.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Sample Data\Google-AccessToken-Content.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

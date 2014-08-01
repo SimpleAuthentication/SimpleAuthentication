@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Tracing;
@@ -171,6 +171,17 @@ namespace SimpleAuthentication.Core.Providers
 
         #endregion
 
+        private string ScopesJoined
+        {
+            get
+            {
+                return string.Join(ScopeSeparator, Scopes == null ||
+                                                   !Scopes.Any()
+                    ? DefaultScopes
+                    : Scopes);
+            }
+        }
+
         /// <summary>
         /// Create the provider authentication parameters which make up the end part of the redirection url. eg. state=aaa&foo=bar, etc.
         /// </summary>
@@ -186,8 +197,24 @@ namespace SimpleAuthentication.Core.Providers
                 throw new ArgumentNullException("state");
             }
 
-            return string.Format("client_id={0}&redirect_uri={1}&response_type=code{2}{3}",
-                PublicApiKey, callbackUri.AbsoluteUri, GetScope(), GetQuerystringState(state));
+            var queryString = new StringBuilder();
+            queryString.AppendFormat("client_id={0}&redirect_uri={1}&response_type=code",
+                PublicApiKey, 
+                callbackUri.AbsoluteUri);
+
+            var scopesParameter = GetScopes();
+            if (!string.IsNullOrWhiteSpace(scopesParameter))
+            {
+                queryString.AppendFormat("&{0}", scopesParameter);
+            }
+
+            var stateParameter = GetQuerystringState(state);
+            if (!string.IsNullOrWhiteSpace(stateParameter))
+            {
+                queryString.AppendFormat("&{0}", stateParameter);
+            }
+
+            return queryString.ToString();
         }
 
         protected virtual string GetAuthorizationCodeFromQueryString(NameValueCollection queryStringParameters)
@@ -271,14 +298,14 @@ namespace SimpleAuthentication.Core.Providers
 
         protected abstract Task<UserInformation> RetrieveUserInformationAsync(AccessToken accessToken);
 
-        protected string GetScope()
+        protected string GetScopes()
         {
-            return string.Format("&{0}={1}",
-                ScopeKey,
-                String.Join(ScopeSeparator, Scopes == null ||
-                                            !Scopes.Any()
-                    ? DefaultScopes
-                    : Scopes));
+            return string.Format("{0}={1}", ScopeKey, ScopesJoined);
+        }
+
+        protected KeyValuePair<string, string> GetScopeAsKeyValuePair()
+        {
+            return new KeyValuePair<string, string>(ScopeKey, ScopesJoined);
         }
     }
 }
