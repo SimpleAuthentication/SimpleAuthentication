@@ -11,14 +11,16 @@ namespace SimpleAuthentication.Core
     public interface IAuthenticationProvider
     {
         /// <summary>
-        /// Provider name.
+        /// Name of this provider.
         /// </summary>
+        /// <example>Eg. Google or Fake or Custom Forms Auth, etc.</example>
         string Name { get; }
 
         /// <summary>
-        /// What type of authentication is this? OAuth? Custom? 
+        /// What type of authentication is this?
         /// </summary>
-        string AuthenticationType { get; }
+        /// <example>OAuth 2.0 or Custom Forms Authentication.</example>
+        string Description { get; }
 
         /// <summary>
         /// Authentication resource/endpoint we should redirect to.

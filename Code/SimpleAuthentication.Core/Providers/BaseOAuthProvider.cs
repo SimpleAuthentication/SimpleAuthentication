@@ -9,12 +9,11 @@ using SimpleAuthentication.Core.Tracing;
 
 namespace SimpleAuthentication.Core.Providers
 {
-    public abstract class BaseOAuth20Provider<TAccessTokenResult>
-        : BaseProvider, IPublicPrivateKeyProvider, IScopedProvider
+    public abstract class BaseOAuthProvider<TAccessTokenResult> : BaseProvider, IPublicPrivateKeyProvider, IScopedProvider
         where TAccessTokenResult : class, new()
     {
-        protected BaseOAuth20Provider(string name, ProviderParams providerParams)
-            : base(name, "OAuth 2.0")
+        protected BaseOAuthProvider(string name, ProviderParams providerParams, string description = null) 
+            : base(name, description)
         {
             providerParams.Validate();
 

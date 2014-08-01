@@ -12,17 +12,13 @@ namespace SimpleAuthentication.Core.Providers
 {
     // REFERENCE: https://developers.google.com/accounts/docs/OAuth2Login
 
-    public class GoogleProvider : BaseOAuth20Provider<AccessTokenResult>
+    public class GoogleProvider : BaseOAuthProvider<AccessTokenResult>
     {
         private const string AccessTokenKey = "access_token";
         private const string ExpiresInKey = "expires_in";
         private const string TokenTypeKey = "token_type";
 
-        public GoogleProvider(ProviderParams providerParams) : this("Google", providerParams)
-        {
-        }
-
-        protected GoogleProvider(string name, ProviderParams providerParams) : base(name, providerParams)
+        public GoogleProvider(ProviderParams providerParams) : base("Google", providerParams, "OAuth 2.0")
         {
         }
 

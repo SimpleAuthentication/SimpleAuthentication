@@ -74,9 +74,10 @@
     <Compile Include="Providers\FakeProvider.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Providers\TwitterProvider.cs" />
     <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="ProviderParams.cs" />
-    <Compile Include="Providers\BaseOAuth20Provider.cs" />
+    <Compile Include="Providers\BaseOAuthProvider.cs" />
     <Compile Include="Providers\BaseProvider.cs" />
     <Compile Include="GenderType.cs" />
     <Compile Include="Providers\Google\AccessTokenResult.cs" />

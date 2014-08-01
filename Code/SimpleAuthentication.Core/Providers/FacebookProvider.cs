@@ -15,13 +15,9 @@ namespace SimpleAuthentication.Core.Providers
 {
     // REFERENCE: https://developers.facebook.com/docs/facebook-login/login-flow-for-web-no-jssdk/
 
-    public class FacebookProvider : BaseOAuth20Provider<AccessTokenResult>
+    public class FacebookProvider : BaseOAuthProvider<AccessTokenResult>
     {
-        public FacebookProvider(ProviderParams providerParams) : this("Facebook", providerParams)
-        {
-        }
-
-        protected FacebookProvider(string name, ProviderParams providerParams) : base(name, providerParams)
+        public FacebookProvider(ProviderParams providerParams) : base("Facebook", providerParams)
         {
             DisplayType = DisplayType.Unknown;
             IsMobile = false;
