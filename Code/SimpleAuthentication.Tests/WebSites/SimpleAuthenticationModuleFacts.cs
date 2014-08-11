@@ -63,7 +63,8 @@ namespace SimpleAuthentication.Tests.WebSites
                 result.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
                 result.Body.AsString().ShouldBeNullOrEmpty();
                 result.Headers.Count.ShouldBe(1);
-                result.Headers["Location"].ShouldStartWith("https://accounts.google.com/o/oauth2/auth?client_id=some%20key&redirect_uri=http://foo.com/authenticate/callback?providerkey=google&response_type=code&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email&state=");
+                result.Headers["Location"]
+                    .ShouldStartWith("https://accounts.google.com/o/oauth2/auth?client_id=some%20key&redirect_uri=http%3A%2F%2Ffoo.com%2Fauthenticate%2Fcallback%3Fproviderkey%3Dgoogle&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&state=");
             }
 
             [Fact]
@@ -129,7 +130,7 @@ namespace SimpleAuthentication.Tests.WebSites
                 result.ShouldNotBe(null);
                 result.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
                 result.Headers.Count.ShouldBe(1);
-                result.Headers["Location"].ShouldStartWith("https://accounts.google.com/o/oauth2/auth?client_id=some%20key&redirect_uri=http://www.pewpew.com/authenticate/callback?providerkey=google&response_type=code&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email&state=");
+                result.Headers["Location"].ShouldStartWith("https://accounts.google.com/o/oauth2/auth?client_id=some%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fauthenticate%2Fcallback%3Fproviderkey%3Dgoogle&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&state=");
             }
 
             [Fact]
@@ -173,8 +174,7 @@ namespace SimpleAuthentication.Tests.WebSites
                 result.ShouldNotBe(null);
                 result.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
                 result.Headers.Count.ShouldBe(1);
-                result.Headers["Location"].ShouldStartWith("https://accounts.google.com/o/oauth2/auth?client_id=some%20key&redirect_uri=http://www.pewpew.com/authenticate/callback?providerkey=google&response_type=code&scope=https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/userinfo.email&state=");
-            
+                result.Headers["Location"].ShouldStartWith("https://accounts.google.com/o/oauth2/auth?client_id=some%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fauthenticate%2Fcallback%3Fproviderkey%3Dgoogle&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&state=");
             }
         }
 
@@ -187,7 +187,7 @@ namespace SimpleAuthentication.Tests.WebSites
                 const HttpStatusCode expectedStatusCode = HttpStatusCode.SeeOther;
                 var authenticationCallbackProvider = A.Fake<IAuthenticationCallbackProvider>();
                 A.CallTo(() => authenticationCallbackProvider
-                    .Process(A<NancyModule>._, A<AuthenticateCallbackData>._))
+                    .Process(A<NancyModule>._, A<AuthenticateCallbackResult>._))
                     .Returns(new Response
                     {
                         StatusCode = expectedStatusCode

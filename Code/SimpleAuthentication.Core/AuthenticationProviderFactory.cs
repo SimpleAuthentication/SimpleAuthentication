@@ -94,7 +94,8 @@ namespace SimpleAuthentication.Core
             var availableProviders = new List<Type>
             {
                 typeof (GoogleProvider),
-                typeof (FacebookProvider)
+                typeof (FacebookProvider),
+                typeof (TwitterProvider)
             };
 
             if (Configuration != null &&
@@ -142,12 +143,11 @@ namespace SimpleAuthentication.Core
 
             var name = provider.Name.ToLowerInvariant();
 
-            return AvailableProvider(discoveredProviders, name, () => new ProviderParams
-            {
-                PublicApiKey = provider.Key,
-                SecretApiKey = provider.Secret,
-                Scopes = provider.Scopes.ScopesToCollection()
-            });
+            return AvailableProvider(discoveredProviders, name, () =>
+                new ProviderParams(
+                    provider.Key,
+                    provider.Secret,
+                    provider.Scopes.ScopesToCollection()));
         }
 
         private static void AddProviderToDictionary(

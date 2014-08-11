@@ -2,7 +2,7 @@
 
 namespace Nancy.SimpleAuthentication
 {
-    public class AuthenticateCallbackData
+    public class AuthenticateCallbackResult
     {
         /// <summary>
         /// The authenticated client information, if we have successfully authenticated.

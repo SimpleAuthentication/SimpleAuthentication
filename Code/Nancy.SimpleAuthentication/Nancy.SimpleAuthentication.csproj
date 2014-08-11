@@ -47,7 +47,7 @@
     <Compile Include="..\Shared Assembly Info\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="AuthenticateCallbackData.cs" />
+    <Compile Include="AuthenticateCallbackResult.cs" />
     <Compile Include="Caching\CookieCache.cs" />
     <Compile Include="Caching\SessionCache.cs" />
     <Compile Include="EnableSessions.cs" />

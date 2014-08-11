@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -10,38 +12,49 @@ using SimpleAuthentication.Core.Tracing;
 
 namespace SimpleAuthentication.Core.Providers
 {
-    // REFERENCE: https://developers.google.com/accounts/docs/OAuth2Login
-
-    public class GoogleProvider : BaseOAuthProvider<AccessTokenResult>
+    public class GoogleProvider : OAuth20Provider
     {
-        private const string AccessTokenKey = "access_token";
-        private const string ExpiresInKey = "expires_in";
-        private const string TokenTypeKey = "token_type";
-
-        public GoogleProvider(ProviderParams providerParams) : base("Google", providerParams, "OAuth 2.0")
+        public GoogleProvider(ProviderParams providerParams) : base(providerParams)
         {
-        }
-
-        #region BaseOAuth20Token<AccessTokenResult> Implementation
-
-        public override Uri AuthenticateRedirectionUrl
-        {
-            get { return new Uri("https://accounts.google.com/o/oauth2/auth"); }
-        }
-
-        public override IEnumerable<string> DefaultScopes
-        {
-            get
+            if (providerParams.Scopes == null ||
+                !providerParams.Scopes.Any())
             {
-                return new[]
-                {
-                    "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
-                };
+                // Default our scopes if none have been provided.
+                Scopes = new[]
+                       {
+                           "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
+                       };
             }
         }
 
-        protected override async Task<AccessTokenResult> GetAccessTokenFromProviderAsync(string authorizationCode,
-            Uri redirectUrl)
+        #region IAuthenticationProvider Implementation
+
+        public override string Name
+        {
+            get { return "Google"; }
+        }
+
+        public override string Description
+        {
+            get { return "OAuth 2.0"; }
+        }
+
+        #endregion
+
+        #region OAuth20Provider Implementation
+
+        public override RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri callbackUrl)
+        {
+            if (callbackUrl == null)
+            {
+                throw new ArgumentNullException("callbackUrl");
+            }
+
+            var providerAuthenticationUrl = new Uri("https://accounts.google.com/o/oauth2/auth");
+            return GetRedirectToAuthenticateSettings(callbackUrl, providerAuthenticationUrl);
+        }
+
+        protected override async Task<AccessToken> GetAccessTokenAsync(string authorizationCode, Uri redirectUrl)
         {
             if (string.IsNullOrWhiteSpace(authorizationCode))
             {
@@ -71,8 +84,8 @@ namespace SimpleAuthentication.Core.Providers
 
                 var requestUri = new Uri("https://accounts.google.com/o/oauth2/token");
 
-                TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
-                    requestUri.AbsoluteUri);
+                //TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
+                //    requestUri.AbsoluteUri);
 
                 response = await client.PostAsync(requestUri, content);
             }
@@ -81,58 +94,26 @@ namespace SimpleAuthentication.Core.Providers
 
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                TraceSource.TraceWarning("No Access Token Result retrieved from Google. Error Status Code: {0}. Error Message: {1}",
-                    response.StatusCode,
-                    jsonContent);
+                //TraceSource.TraceWarning("No Access Token Result retrieved from Google. Error Status Code: {0}. Error Message: {1}",
+                //    response.StatusCode,
+                //    jsonContent);
                 return null;
             }
 
             var result = JsonConvert.DeserializeObject<dynamic>(jsonContent);
-            if (result == null)
-            {
-                TraceSource.TraceWarning("No Access Token Result retrieved from Google.");
-            }
-
-            return MapDynamicResultToAccessTokenResult(result);
-
+            return MapDynamicResultToAccessToken(result);
         }
 
-        protected override AccessToken MapAccessTokenResultToAccessToken(AccessTokenResult accessTokenResult)
-        {
-            if (accessTokenResult == null)
-            {
-                throw new ArgumentNullException("accessTokenResult");
-            }
-
-            if (string.IsNullOrWhiteSpace(accessTokenResult.AccessToken) ||
-                accessTokenResult.ExpiresIn <= 0 ||
-                string.IsNullOrWhiteSpace(accessTokenResult.TokenType))
-            {
-                var errorMessage =
-                    string.Format(
-                        "Retrieved a Google Access Token but it doesn't contain one or more of either: {0}, {1} or {2}.",
-                        AccessTokenKey, ExpiresInKey, TokenTypeKey);
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            return new AccessToken
-            {
-                PublicToken = accessTokenResult.AccessToken,
-                ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.ExpiresIn)
-            };
-        }
-
-        protected override async Task<UserInformation> RetrieveUserInformationAsync(AccessToken accessToken)
+        protected override async Task<UserInformation> GetUserInformationAsync(AccessToken accessToken)
         {
             if (accessToken == null)
             {
                 throw new ArgumentNullException("accessToken");
             }
 
-            if (string.IsNullOrWhiteSpace(accessToken.PublicToken))
+            if (string.IsNullOrWhiteSpace(accessToken.Token))
             {
-                throw new ArgumentException("accessToken.PublicToken");
+                throw new ArgumentException("accessToken.Token");
             }
 
             UserInfoResult userInfoResult;
@@ -143,11 +124,10 @@ namespace SimpleAuthentication.Core.Providers
 
                 using (var client = HttpClientFactory.GetHttpClient())
                 {
-                    var requestUri = new Uri(string.Format("https://www.googleapis.com/oauth2/v2/userinfo?{0}={1}",
-                        AccessTokenKey, accessToken.PublicToken));
+                    var requestUri = new Uri(string.Format("https://www.googleapis.com/oauth2/v2/userinfo?access_token={0}", accessToken.Token));
 
-                    TraceSource.TraceVerbose("Retrieving user information. Google Endpoint: {0}",
-                        requestUri.AbsoluteUri);
+                    //TraceSource.TraceVerbose("Retrieving user information. Google Endpoint: {0}",
+                    //    requestUri.AbsoluteUri);
 
                     jsonResponse = await client.GetStringAsync(requestUri);
                 }
@@ -159,7 +139,7 @@ namespace SimpleAuthentication.Core.Providers
                 var errorMessage =
                     string.Format("Failed to retrieve any UserInfo data from the Google Api. Error Messages: {0}",
                         exception.RecursiveErrorMessages());
-                TraceSource.TraceError(errorMessage);
+                //TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage, exception);
             }
 
@@ -179,23 +159,21 @@ namespace SimpleAuthentication.Core.Providers
 
         #endregion
 
-        private static AccessTokenResult MapDynamicResultToAccessTokenResult(dynamic result)
+        private static AccessToken MapDynamicResultToAccessToken(dynamic result)
         {
             if (result == null)
             {
-                
-                return null;
+                throw new ArgumentNullException("result");
             }
 
-            var accessTokenResult = new AccessTokenResult
+            var expiresIn = Convert.ToDouble(result.expires_in, CultureInfo.InvariantCulture);
+            return new AccessToken
             {
-                AccessToken = result.access_token,
-                TokenType = result.token_type,
-                ExpiresIn = result.expires_in,
-                IdToken = result.id_token
+                Token = result.access_token,
+                ExpiresOn = expiresIn > 0
+                    ? DateTime.UtcNow.AddSeconds(expiresIn)
+                    : DateTime.MaxValue
             };
-
-            return accessTokenResult;
         }
     }
 }

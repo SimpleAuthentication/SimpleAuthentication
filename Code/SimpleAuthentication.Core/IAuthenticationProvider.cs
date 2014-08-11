@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 using SimpleAuthentication.Core.Tracing;
@@ -23,35 +24,20 @@ namespace SimpleAuthentication.Core
         string Description { get; }
 
         /// <summary>
-        /// Authentication resource/endpoint we should redirect to.
-        /// </summary>
-        Uri AuthenticateRedirectionUrl { get; }
-
-        /// <summary>
-        /// Access token.
-        /// </summary>
-        AccessToken AccessToken { get; set; }
-
-        /// <summary>
-        /// (Optional) TraceManager for displaying trace information.
-        /// </summary>
-        ITraceManager TraceManager { set; }
-
-        /// <summary>
         /// Determine the url (and all querystring params) we require to kick off our authentication process with the external Authentication Provider.
         /// </summary>
-        /// <param name="requestUrl">The current request url. This is used to generate the return url.</param>
+        /// <param name="callbackUrl">The current request url. This is used to generate the return url.</param>
         /// <returns>The redirection details, like the Uri and any Access Token or State data we might need to persist between roundtrips.</returns>
-        RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri requestUrl);
+        RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri callbackUrl);
 
         /// <summary>
         /// Retrieve the user information from the Authentication Provider, now that we have authenticated.
         /// </summary>
-        /// <param name="queryStringParameters">QueryString parameters from the callback.</param>
+        /// <param name="queryString">QueryString parameters from the callback.</param>
         /// <param name="state">The (deserialized) state from before we did the redirect to the provider.</param>
         /// <param name="callbackUrl">The callback endpoint used for for authenticating.</param>
         /// <returns>An authenticatedClient with either user information or some error message(s).</returns>
-        Task<IAuthenticatedClient> AuthenticateClientAsync(NameValueCollection queryStringParameters,
+        Task<IAuthenticatedClient> AuthenticateClientAsync(IDictionary<string, string> queryString,
             string state,
             Uri callbackUrl);
     }

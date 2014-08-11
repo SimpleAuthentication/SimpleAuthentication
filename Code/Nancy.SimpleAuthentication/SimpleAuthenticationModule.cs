@@ -118,8 +118,8 @@ namespace Nancy.SimpleAuthentication
             }
 
             TraceSource.TraceVerbose("Retrieving Cache values - State and RedirectToUrl.");
-            var state = Cache[SessionKeyState] as string;
-            var redirectToUrl = Cache[SessionKeyRedirectToUrl] as string;
+            var state = Cache[SessionKeyState];
+            var redirectToUrl = Cache[SessionKeyRedirectToUrl];
 
             TraceSource.TraceInformation("Previous State: " +
                                          (string.IsNullOrWhiteSpace(state)
@@ -138,7 +138,7 @@ namespace Nancy.SimpleAuthentication
             }
 
             // Lets now start to setup the view model.
-            var model = new AuthenticateCallbackData();
+            var model = new AuthenticateCallbackResult();
 
             #region Retrieve the User Information
 
@@ -150,7 +150,7 @@ namespace Nancy.SimpleAuthentication
                 // Where do we return to, after we've authenticated?
                 var callbackUri = GenerateCallbackUri(provider.Name);
 
-                var queryString = new NameValueCollection();
+                var queryString = new Dictionary<string, string>();
                 foreach (var key in Request.Query.Keys)
                 {
                     queryString.Add(key, Request.Query[key]);

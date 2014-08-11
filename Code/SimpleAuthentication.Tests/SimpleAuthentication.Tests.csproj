@@ -69,15 +69,29 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\FacebookProviderFacts.cs" />
     <Compile Include="Providers\GoogleProviderFacts.cs" />
+    <Compile Include="Providers\TwitterProviderFacts.cs" />
+    <Compile Include="Providers\WindowsLiveProviderFacts.cs" />
     <Compile Include="WebSites\NancyModuleTestBase.cs" />
     <Compile Include="WebSites\SimpleAuthenticationModuleFacts.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <Content Include="Sample Data\Twitter-AccessToken-Content.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Sample Data\Twitter-RequestToken-Content.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Sample Data\Facebook-AccessToken-Content.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Sample Data\Google-AccessToken-Fail-UnAuthorized-Content-.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Sample Data\Google-AccessToken-Content.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Sample Data\Facebook-UserInfoResult-Content.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Sample Data\Google-UserInfoResult-Content.json">

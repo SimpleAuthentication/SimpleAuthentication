@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 
@@ -11,7 +12,7 @@ namespace SimpleAuthentication.Core.Providers
             // Defaults.
             AccessToken = new AccessToken
                           {
-                              PublicToken = "EstSularusOthMithas-MyHonorIsMyLife",
+                              Token = "EstSularusOthMithas-MyHonorIsMyLife",
                               ExpiresOn = DateTime.UtcNow.AddDays(30),
                           };
 
@@ -38,7 +39,7 @@ namespace SimpleAuthentication.Core.Providers
             }
 
             var state = Guid.NewGuid().ToString();
-            var redirectUri = string.Format("{0}{1}", requestUrl.AbsoluteUri, GetQuerystringState(state));
+            var redirectUri = string.Format("{0}&state={1}", requestUrl.AbsoluteUri, state);
 
             return new RedirectToAuthenticateSettings
                    {
@@ -52,11 +53,11 @@ namespace SimpleAuthentication.Core.Providers
             get { throw new NotImplementedException(); }
         }
 
-        public override async Task<IAuthenticatedClient> AuthenticateClientAsync(NameValueCollection queryStringParameters, 
+        public override async Task<IAuthenticatedClient> AuthenticateClientAsync(IDictionary<string, string> queryString, 
             string state, 
             Uri callbackUrl)
         {
-            if (queryStringParameters == null)
+            if (queryString == null)
             {
                 throw new ArgumentNullException("queryStringParameters");
             }

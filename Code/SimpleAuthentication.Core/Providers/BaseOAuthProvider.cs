@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Tracing;
 
@@ -15,8 +20,6 @@ namespace SimpleAuthentication.Core.Providers
         protected BaseOAuthProvider(string name, ProviderParams providerParams, string description = null) 
             : base(name, description)
         {
-            providerParams.Validate();
-
             PublicApiKey = providerParams.PublicApiKey;
             SecretApiKey = providerParams.SecretApiKey;
             Scopes = providerParams.Scopes;
@@ -87,17 +90,16 @@ namespace SimpleAuthentication.Core.Providers
             };
         }
 
-        public override async Task<IAuthenticatedClient> AuthenticateClientAsync(
-            NameValueCollection queryStringParameters,
+        public override async Task<IAuthenticatedClient> AuthenticateClientAsync(IDictionary<string, string> queryString,
             string state,
             Uri callbackUri)
         {
             #region Parameter checks
 
-            if (queryStringParameters == null ||
-                queryStringParameters.Count <= 0)
+            if (queryString == null ||
+                queryString.Count <= 0)
             {
-                throw new ArgumentNullException("queryStringParameters");
+                throw new ArgumentNullException("queryString");
             }
 
             if (string.IsNullOrWhiteSpace(state))
@@ -114,13 +116,13 @@ namespace SimpleAuthentication.Core.Providers
 
             TraceSource.TraceInformation("Callback parameters: " +
                                          string.Join("&",
-                                             queryStringParameters.AllKeys.Select(
-                                                 key => key + "=" + queryStringParameters[key]).ToArray()));
+                                             queryString.Keys.Select(
+                                                 key => key + "=" + queryString[key]).ToArray()));
 
             #region Cross Site Request Forgery checks -> state == state?
 
             // Start with the Cross Site Request Forgery check.
-            var callbackState = queryStringParameters[StateKey];
+            var callbackState = queryString[StateKey];
             if (string.IsNullOrWhiteSpace(callbackState))
             {
                 var errorMessage =
@@ -133,7 +135,7 @@ namespace SimpleAuthentication.Core.Providers
             #endregion
 
             TraceSource.TraceVerbose("Retrieving the Authorization Code.");
-            var authorizationCode = GetAuthorizationCodeFromQueryString(queryStringParameters);
+            var authorizationCode = GetAuthorizationCodeFromQueryString(queryString);
             TraceSource.TraceVerbose("Authorization Code retrieved.");
 
             TraceSource.TraceVerbose("Retrieving the Access Token.");
@@ -169,6 +171,8 @@ namespace SimpleAuthentication.Core.Providers
         }
 
         #endregion
+
+        protected abstract Uri AccessTokenUri { get; }
 
         private string ScopesJoined
         {
@@ -206,24 +210,22 @@ namespace SimpleAuthentication.Core.Providers
             {
                 queryString.AppendFormat("&{0}", scopesParameter);
             }
-
-            var stateParameter = GetQuerystringState(state);
-            if (!string.IsNullOrWhiteSpace(stateParameter))
+            if (!string.IsNullOrWhiteSpace(state))
             {
-                queryString.AppendFormat("&{0}", stateParameter);
+                queryString.AppendFormat("&{0}={1}", StateKey, state);
             }
 
             return queryString.ToString();
         }
 
-        protected virtual string GetAuthorizationCodeFromQueryString(NameValueCollection queryStringParameters)
+        protected virtual string GetAuthorizationCodeFromQueryString(IDictionary<string, string> queryString)
         {
-            if (queryStringParameters == null)
+            if (queryString == null)
             {
                 throw new ArgumentNullException("queryStringParameters");
             }
 
-            if (queryStringParameters.Count <= 0)
+            if (queryString.Count <= 0)
             {
                 throw new ArgumentOutOfRangeException("queryStringParameters");
             }
@@ -232,8 +234,8 @@ namespace SimpleAuthentication.Core.Providers
                Providers returns an authorization code to your application if the user grants your application the permissions it requested. 
                The authorization code is returned to your application in the query string parameter code. If the state parameter was included in the request,
                then it is also included in the response. */
-            var code = queryStringParameters["code"];
-            var error = queryStringParameters["error"];
+            var code = queryString["code"];
+            var error = queryString["error"];
 
             // First check for any errors.
             if (!string.IsNullOrWhiteSpace(error))
@@ -258,10 +260,64 @@ namespace SimpleAuthentication.Core.Providers
             return code;
         }
 
-        protected abstract Task<TAccessTokenResult> GetAccessTokenFromProviderAsync(string authorizationCode,
-            Uri redirectUrl);
-
         protected abstract AccessToken MapAccessTokenResultToAccessToken(TAccessTokenResult accessTokenResult);
+
+        protected virtual async Task<TAccessTokenResult> GetAccessTokenFromProviderAsync(string authorizationCode,
+            Uri redirectUrl)
+        {
+            if (string.IsNullOrWhiteSpace(authorizationCode))
+            {
+                throw new ArgumentNullException("authorizationCode");
+            }
+
+            if (redirectUrl == null ||
+                string.IsNullOrWhiteSpace(redirectUrl.AbsoluteUri))
+            {
+                throw new ArgumentNullException("redirectUrl");
+            }
+
+            HttpResponseMessage response;
+
+            using (var client = HttpClientFactory.GetHttpClient())
+            {
+                var postData = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("client_id", PublicApiKey),
+                    new KeyValuePair<string, string>("client_secret", SecretApiKey),
+                    new KeyValuePair<string, string>("redirect_uri", redirectUrl.AbsoluteUri),
+                    new KeyValuePair<string, string>("code", authorizationCode),
+                    new KeyValuePair<string, string>("grant_type", "authorization_code")
+                };
+
+                var content = new FormUrlEncodedContent(postData);
+
+                var requestUri = new Uri("https://login.live.com/oauth20_token.srf");
+
+                TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
+                    requestUri.AbsoluteUri);
+
+                response = await client.PostAsync(requestUri, content);
+            }
+
+            var jsonContent = await response.Content.ReadAsStringAsync();
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                TraceSource.TraceWarning("No Access Token Result retrieved from Google. Error Status Code: {0}. Error Message: {1}",
+                    response.StatusCode,
+                    jsonContent);
+                return null;
+            }
+
+            var result = JsonConvert.DeserializeObject<dynamic>(jsonContent);
+            if (result == null)
+            {
+                TraceSource.TraceWarning("No Access Token Result retrieved from Google.");
+            }
+
+            //return MapDynamicResultToAccessTokenResult(result);
+            throw new NotImplementedException();
+        }
 
         protected async Task<AccessToken> GetAccessTokenAsync(string authorizationCode, Uri redirectUrl)
         {
@@ -299,7 +355,10 @@ namespace SimpleAuthentication.Core.Providers
 
         protected string GetScopes()
         {
-            return string.Format("{0}={1}", ScopeKey, ScopesJoined);
+            var scopesJoined = ScopesJoined.Trim();
+            return string.IsNullOrWhiteSpace(scopesJoined)
+                ? null
+                : string.Format("{0}={1}", ScopeKey, ScopesJoined);
         }
 
         protected KeyValuePair<string, string> GetScopeAsKeyValuePair()

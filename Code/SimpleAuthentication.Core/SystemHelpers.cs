@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SimpleAuthentication.Core
@@ -64,6 +67,20 @@ namespace SimpleAuthentication.Core
             }
 
             return builder.Uri;
+        }
+
+        public static IDictionary<string, string> ConvertKeyValueContentToDictionary(string content,
+            char delimeter = '&')
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                throw new ArgumentNullException("content");
+            }
+
+            var parameters = content.Split(new[] { delimeter });
+            return parameters
+                .Select(parameter => parameter.Split(new[] { '=' }))
+                .ToDictionary(keyValue => keyValue[0], keyValue => keyValue[1]);
         }
     }
 }

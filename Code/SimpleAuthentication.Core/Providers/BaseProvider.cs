@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using SimpleAuthentication.Core.Tracing;
 
@@ -47,7 +48,7 @@ namespace SimpleAuthentication.Core.Providers
 
         public AccessToken AccessToken { get; set; }
 
-        public abstract Task<IAuthenticatedClient> AuthenticateClientAsync(NameValueCollection queryStringParameters,
+        public abstract Task<IAuthenticatedClient> AuthenticateClientAsync(IDictionary<string, string> queryString,
             string state,
             Uri callbackUrl);
 
@@ -60,16 +61,6 @@ namespace SimpleAuthentication.Core.Providers
         protected TraceSource TraceSource
         {
             get { return TraceManager["SimpleAuthentication.Providers." + Name]; }
-        }
-
-        protected string GetQuerystringState(string state)
-        {
-            if (string.IsNullOrWhiteSpace(state))
-            {
-                throw new ArgumentNullException("state");
-            }
-
-            return string.Format("{0}={1}", StateKey, state);
         }
 
         protected KeyValuePair<string, string> GetQuerystringStateAsKeyValuePair(string state)

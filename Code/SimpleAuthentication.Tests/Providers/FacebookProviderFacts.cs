@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Net;
+using System.Net.Http;
 using Newtonsoft.Json;
 using Shouldly;
 using SimpleAuthentication.Core;
@@ -16,7 +17,72 @@ namespace SimpleAuthentication.Tests.Providers
 {
     public class FacebookProviderFacts
     {
-        
+
+        public class GetRedirectToAuthenticateSettingsFacts
+        {
+            [Fact]
+            public void GivenACallbackUrl_GetRedirectToAuthenticateSettings_ReturnsSomeRedirectToAuthenticateSettings()
+            {
+                // Arrange.
+                const string publicApiKey = "adskfhsd kds j k&^%*&^%*%/\\/\\/\\/111";
+                const string secretApiKey = "xxxxxxxxx asdsad as das kds j k&^%*&^%*%/\\/\\/\\/111";
+                var provider = new FacebookProvider(new ProviderParams(publicApiKey, secretApiKey));
+                var callbackUrl = new Uri("http://www.mywebsite.com/auth/callback?provider=facebookz0r");
+
+                // Arrange.
+                var result = provider.GetRedirectToAuthenticateSettings(callbackUrl);
+
+                // Assert.
+                result.RedirectUri.AbsoluteUri.ShouldBe(
+                    string.Format("https://www.facebook.com/dialog/oauth?client_id=adskfhsd%20kds%20j%20k%26%5E%25%2A%26%5E%25%2A%25%2F%5C%2F%5C%2F%5C%2F111&redirect_uri=http%3A%2F%2Fwww.mywebsite.com%2Fauth%2Fcallback%3Fprovider%3Dfacebookz0r&response_type=code&state={0}",
+                    result.State));
+                result.State.ShouldNotBeNullOrEmpty();
+            }
+        }
+
+        public class AuthenticateClientAsyncFacts
+        {
+            [Fact]
+            public async Task GivenSomeValidCallbackData_AuthenticateClientAsync_ReturnsSomeUserInformation()
+            {
+                // Arrange.
+                const string publicApiKey = "adskfhsd kds j k&^%*&^%*%/\\/\\/\\/111";
+                const string secretApiKey = "xxxxxxxxx asdsad as das kds j k&^%*&^%*%/\\/\\/\\/111";
+                var provider = new FacebookProvider(new ProviderParams(publicApiKey, secretApiKey));
+                const string state = "adyiuhj97&^*&shdgf\\//////\\dsf";
+
+                var querystring = new Dictionary<string, string>
+                {
+                    {"state", state},
+                    {"code", "4/P7q7W91a-oMsCeLvIaQm6bTrgtp7"}
+                };
+                var redirectUrl = new Uri("http://www.mywebsite.com/go/here/please");
+                var accessTokenContent = File.ReadAllText("Sample Data\\Facebook-AccessToken-Content.txt");
+                var keyValues = SystemHelpers.ConvertKeyValueContentToDictionary(accessTokenContent);
+                var accessTokenResponse = FakeHttpMessageHandler.GetStringHttpResponseMessage(accessTokenContent);
+                var userInformationJson = File.ReadAllText("Sample Data\\Facebook-UserInfoResult-Content.json");
+                var userInformationResponse = FakeHttpMessageHandler.GetStringHttpResponseMessage(userInformationJson);
+                HttpClientFactory.MessageHandler = new FakeHttpMessageHandler(
+                    new Dictionary<string, HttpResponseMessage>
+                    {
+                        {"https://graph.facebook.com/oauth/access_token", accessTokenResponse},
+                        {
+                            string.Format("https://graph.facebook.com/v2.0/me?fields=id,name,gender,email,link,locale&access_token={0}", keyValues["access_token"]),
+                            userInformationResponse
+                        }
+                    });
+
+                // Arrange.
+                var result = await provider.AuthenticateClientAsync(querystring, state, redirectUrl);
+
+                // Assert.
+                result.ProviderName.ShouldBe("Facebook");
+                result.AccessToken.Token.ShouldBe(keyValues["access_token"]);
+                result.UserInformation.Email.ShouldBe("foo@pewpew.com");
+            }
+        }
+
+        /*
         public class FacebookProviderTestClass : FacebookProvider
         {
             public FacebookProviderTestClass(ProviderParams providerParams) : base(providerParams)
@@ -124,6 +190,11 @@ namespace SimpleAuthentication.Tests.Providers
                 result.Expires.ShouldBe(5183995);
             }
         }
+
+
+        */
+
+
 
         /*
             [Fact]
