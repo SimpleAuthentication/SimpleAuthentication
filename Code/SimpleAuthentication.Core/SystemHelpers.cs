@@ -23,39 +23,7 @@ namespace SimpleAuthentication.Core
                 .ToDictionary(keyValue => keyValue[0], keyValue => keyValue[1]);
         }
 
-        public static Uri CreateCallBackUri(string providerKey,
-            Uri requestUrl,
-            string path)
-        {
-            if (String.IsNullOrWhiteSpace(providerKey))
-            {
-                throw new ArgumentNullException("providerKey");
-            }
-
-            if (requestUrl == null)
-            {
-                throw new ArgumentNullException("requestUrl");
-            }
-
-            if (String.IsNullOrWhiteSpace(path))
-            {
-                throw new ArgumentNullException("path");
-            }
-
-            var builder = new UriBuilder(requestUrl)
-            {
-                Path = path,
-                Query = "providerkey=" + providerKey.ToLowerInvariant()
-            };
-
-            // Don't include port 80/443 in the Uri.
-            if (builder.Uri.IsDefaultPort)
-            {
-                builder.Port = -1;
-            }
-
-            return builder.Uri;
-        }
+        
 
         public static Uri CreateUri(Uri sourceUrl,
             IDictionary<string, string> querystringParameters)
@@ -144,7 +112,7 @@ namespace SimpleAuthentication.Core
             if (!querystring.ContainsKey(stateKey))
             {
                 var errorMessage = string.Format(
-                    "The callback querystring doesn't include a state key/value parameter. We need one of these so we can to a CSRF check. Please check why the request url from the provider is missing the parameter: '{0}'. eg. &{0}=something...",
+                    "The callback querystring doesn't include a state key/value parameter. We need one of these so we can do a CSRF check. Please check why the request url from the provider is missing the parameter: '{0}'. eg. &{0}=something...",
                     stateKey);
                 //TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
@@ -155,8 +123,10 @@ namespace SimpleAuthentication.Core
             {
                 var errorMessage =
                     string.Format(
-                        "CSRF check fails: The callback '{0}' value doesn't match the server's *remembered* state value.",
-                        stateKey);
+                        "CSRF check fails: The callback '{0}' value '{1}' doesn't match the server's *remembered* state value '{2}.",
+                        stateKey,
+                        callbackState,
+                        state);
                 throw new AuthenticationException(errorMessage);
             }
         }

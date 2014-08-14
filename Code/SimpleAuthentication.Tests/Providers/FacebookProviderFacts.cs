@@ -77,7 +77,7 @@ namespace SimpleAuthentication.Tests.Providers
 
                 // Assert.
                 result.Message.ShouldBe(
-                    "The callback querystring doesn't include a state key/value parameter. We need one of these so we can to a CSRF check. Please check why the request url from the provider is missing the parameter: 'state'. eg. &state=something...");
+                    "The callback querystring doesn't include a state key/value parameter. We need one of these so we can do a CSRF check. Please check why the request url from the provider is missing the parameter: 'state'. eg. &state=something...");
             }
 
             [Fact]
@@ -98,7 +98,7 @@ namespace SimpleAuthentication.Tests.Providers
                 var result = Should.Throw<AuthenticationException>(async () => await provider.AuthenticateClientAsync(querystring, state, redirectUrl));
 
                 // Assert.
-                result.Message.ShouldBe("CSRF check fails: The callback 'state' value doesn't match the server's *remembered* state value.");
+                result.Message.ShouldBe("CSRF check fails: The callback 'state' value 'pewpew' doesn't match the server's *remembered* state value 'hi.");
             }
 
             [Fact]

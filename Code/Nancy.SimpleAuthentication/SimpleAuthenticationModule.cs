@@ -223,7 +223,7 @@ namespace Nancy.SimpleAuthentication
 
         private Uri GenerateCallbackUri(string providerName)
         {
-            return SystemHelpers.CreateCallBackUri(providerName, Request.Url, CallbackRoute);
+            return CreateCallBackUri(providerName, Request.Url, CallbackRoute);
         }
 
         private string DetermineReturnUrl()
@@ -233,6 +233,40 @@ namespace Nancy.SimpleAuthentication
             return string.IsNullOrEmpty(returnUrl)
                        ? Request.Headers.Referrer
                        : returnUrl;
+        }
+
+        private static Uri CreateCallBackUri(string providerKey,
+            Uri requestUrl,
+            string path)
+        {
+            if (String.IsNullOrWhiteSpace(providerKey))
+            {
+                throw new ArgumentNullException("providerKey");
+            }
+
+            if (requestUrl == null)
+            {
+                throw new ArgumentNullException("requestUrl");
+            }
+
+            if (String.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentNullException("path");
+            }
+
+            var builder = new UriBuilder(requestUrl)
+            {
+                Path = path,
+                Query = "providerkey=" + providerKey.ToLowerInvariant()
+            };
+
+            // Don't include port 80/443 in the Uri.
+            if (builder.Uri.IsDefaultPort)
+            {
+                builder.Port = -1;
+            }
+
+            return builder.Uri;
         }
     }
 }
