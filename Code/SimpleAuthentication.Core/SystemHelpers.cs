@@ -26,8 +26,6 @@ namespace SimpleAuthentication.Core
                 .ToDictionary(keyValue => keyValue[0], keyValue => keyValue[1]);
         }
 
-
-
         public static Uri CreateUri(Uri sourceUrl,
             IDictionary<string, string> querystringParameters)
         {
