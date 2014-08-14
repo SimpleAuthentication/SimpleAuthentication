@@ -68,6 +68,7 @@
     <Compile Include="FakeHttpMessageHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\FacebookProviderFacts.cs" />
+    <Compile Include="Providers\FakeProviderFacts.cs" />
     <Compile Include="Providers\GoogleProviderFacts.cs" />
     <Compile Include="Providers\TwitterProviderFacts.cs" />
     <Compile Include="Providers\WindowsLiveProviderFacts.cs" />

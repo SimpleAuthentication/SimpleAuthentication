@@ -8,11 +8,11 @@ using SimpleAuthentication.Core.Tracing;
 
 namespace SimpleAuthentication.Core.Providers
 {
-    public abstract class BaseProvider : IAuthenticationProvider
+    public abstract class XBaseProvider : IAuthenticationProvider
     {
         private string _stateKey;
 
-        protected BaseProvider(string name, string description = null)
+        protected XBaseProvider(string name, string description = null)
         {
             if (string.IsNullOrWhiteSpace(name))
             {

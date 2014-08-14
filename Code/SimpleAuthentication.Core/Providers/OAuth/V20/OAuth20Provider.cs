@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Tracing;
 
-namespace SimpleAuthentication.Core.Providers
+namespace SimpleAuthentication.Core.Providers.OAuth.V20
 {
     public abstract class OAuth20Provider : IAuthenticationProvider
     {

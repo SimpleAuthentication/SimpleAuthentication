@@ -9,7 +9,7 @@
         /// (Optional) Error message if the redirect is suppose to fail. Set this if you wish to test handling an exception during the RedirectToAuthentication phase.
         /// </summary>
         /// <remarks>If this is not set, then no exception will be thrown during the RedirectToAuthenticate phase.</remarks>
-        string RedirectToAuthenticateExceptionMessage { set; }
+        string RedirectToAuthenticateAsyncExceptionMessage { set; }
 
         /// <summary>
         /// (Optional) Some fake user information that is retrieved.
@@ -18,9 +18,15 @@
         UserInformation UserInformation { set; }
 
         /// <summary>
+        /// (Optional) A Fake access token.
+        /// </summary>
+        /// <remarks>If this is not set, then some hardcoded, default Access Token data will be used.</remarks>
+        AccessToken AccessToken { set; }
+
+        /// <summary>
         /// (Optional) Fake error message if while trying to retrieve the Authenticate Client details, errored. Set this if you wish to test handling an exception during the AuthenticateClient phase.
         /// </summary>
         /// <remarks>If this is not set, then no exception will be thrown during the AuthenticateClient phase.</remarks>
-        string AuthenticateClientExceptionMessage { set; }
+        string AuthenticateClientAsyncExceptionMessage { set; }
     }
 }

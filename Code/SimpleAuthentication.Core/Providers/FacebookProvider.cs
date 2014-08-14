@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Providers.Facebook;
 using SimpleAuthentication.Core.Providers.Google;
+using SimpleAuthentication.Core.Providers.OAuth.V20;
 using SimpleAuthentication.Core.Tracing;
 using AccessTokenResult = SimpleAuthentication.Core.Providers.Facebook.AccessTokenResult;
 
