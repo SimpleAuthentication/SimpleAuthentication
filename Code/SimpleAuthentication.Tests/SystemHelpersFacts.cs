@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mime;
 using Shouldly;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Exceptions;
@@ -88,6 +89,34 @@ namespace SimpleAuthentication.Tests
                 result.ContainsKey("c").ShouldBe(true);
                 result["c"].ShouldBe("3");
                 result.ContainsKey("xx").ShouldBe(false);
+            }
+
+            [Fact]
+            public void GivenSomeBadContent_ConvertKeyValueContentToDictionary_ReturnsAnEmptyDictionary()
+            {
+                // Arrange.
+                const string content = "i am some bad content";
+
+                // Act.
+                var result = SystemHelpers.ConvertKeyValueContentToDictionary(content);
+
+                // Assert.
+                result.Count.ShouldBe(0);
+            }
+
+            [Fact]
+            public void GivenSomeMixedKeyValueContentAndSomeBadContent_ConvertKeyValueContentToDictionary_ReturnsADictionary()
+            {
+                // Arrange.
+                const string mixedContent = "a=1&i am some bad content";
+
+                // Act.
+                var result = SystemHelpers.ConvertKeyValueContentToDictionary(mixedContent);
+
+                // Assert.
+                result.Count.ShouldBe(1);
+                result.ContainsKey("a").ShouldBe(true);
+                result["a"].ShouldBe("1");
             }
         }
 

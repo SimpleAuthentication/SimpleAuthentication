@@ -117,11 +117,32 @@ namespace SimpleAuthentication.Core.Providers
                 throw new ArgumentNullException("content");
             }
 
-            var verifyCredentials = JsonConvert.DeserializeObject<TwitterUserInformation>(content);
+            TwitterUserInformation verifyCredentials;
+            try
+            {
+                verifyCredentials = JsonConvert.DeserializeObject<TwitterUserInformation>(content);
+            }
+            catch (Exception exception)
+            {
+                var errorMessage =
+                    string.Format(
+                        "Failed to deserialize the Twitter Verify Credentials response json content. Possibly because the content isn't json? Content attempted: {0}",
+                        string.IsNullOrWhiteSpace(content)
+                            ? "-- no content"
+                            : content);
+                throw new AuthenticationException(errorMessage, exception);
+            }
 
             if (verifyCredentials == null)
             {
-                throw new AuthenticationException("Failed to deserialize Twitter's Verify Credentials response body.");
+                var errorMessage =
+                    string.Format(
+                        "Failed to deserialize the Twitter Verify Credentials response json content. No content returned? Content attempted: {0}",
+                        string.IsNullOrWhiteSpace(content)
+                            ? "-- no content"
+                            : content);
+
+                throw new AuthenticationException(errorMessage);
             }
 
             return new UserInformation

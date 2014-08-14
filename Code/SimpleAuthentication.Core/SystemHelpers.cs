@@ -17,13 +17,16 @@ namespace SimpleAuthentication.Core
                 throw new ArgumentNullException("content");
             }
 
-            var parameters = content.Split(new[] { delimeter });
-            return parameters
-                .Select(parameter => parameter.Split(new[] { '=' }))
+            var parameters = content.Split(new[] {delimeter});
+
+            return (from p in parameters
+                let kv = p.Split(new[] {'='})
+                where kv.Length == 2
+                select kv)
                 .ToDictionary(keyValue => keyValue[0], keyValue => keyValue[1]);
         }
 
-        
+
 
         public static Uri CreateUri(Uri sourceUrl,
             IDictionary<string, string> querystringParameters)
