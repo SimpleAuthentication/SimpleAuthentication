@@ -7,6 +7,7 @@ using Shouldly;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Providers;
+using SimpleAuthentication.Core.Providers.Facebook;
 using Xunit;
 
 namespace SimpleAuthentication.Tests.Providers
@@ -169,6 +170,30 @@ namespace SimpleAuthentication.Tests.Providers
                         result.State));
                 result.State.ShouldNotBeNullOrEmpty();
             }
+
+            [Fact]
+            public async Task GivenACallbackUrlAndADisplayType_GetRedirectToAuthenticateSettingsAsync_ReturnsSomeRedirectToAuthenticateSettings()
+            {
+                // Arrange.
+                const string publicApiKey = "adskfhsd kds j k&^%*&^%*%/\\/\\/\\/111";
+                const string secretApiKey = "xxxxxxxxx asdsad as das kds j k&^%*&^%*%/\\/\\/\\/111";
+                var provider = new FacebookProvider(new ProviderParams(publicApiKey, secretApiKey))
+                {
+                    DisplayType = DisplayType.PopUp
+                };
+                var callbackUrl = new Uri("http://www.mywebsite.com/auth/callback?provider=facebookz0r");
+
+                // Arrange.
+                var result = await provider.GetRedirectToAuthenticateSettingsAsync(callbackUrl);
+
+                // Assert.
+                result.RedirectUri.AbsoluteUri.ShouldBe(
+                    string.Format(
+                        "https://www.facebook.com/dialog/oauth?client_id=adskfhsd%20kds%20j%20k%26%5E%25%2A%26%5E%25%2A%25%2F%5C%2F%5C%2F%5C%2F111&redirect_uri=http%3A%2F%2Fwww.mywebsite.com%2Fauth%2Fcallback%3Fprovider%3Dfacebookz0r&response_type=code&state={0}&display=popup",
+                        result.State));
+                result.State.ShouldNotBeNullOrEmpty();
+            }
+
         }
     }
 }

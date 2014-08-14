@@ -1,20 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Providers.Facebook;
-using SimpleAuthentication.Core.Providers.Google;
 using SimpleAuthentication.Core.Providers.OAuth.V20;
-using SimpleAuthentication.Core.Tracing;
-using AccessTokenResult = SimpleAuthentication.Core.Providers.Facebook.AccessTokenResult;
 
 namespace SimpleAuthentication.Core.Providers
 {
@@ -47,7 +39,13 @@ namespace SimpleAuthentication.Core.Providers
 
         #region OAuth20Provider Implementation
 
-        public override async Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(Uri callbackUrl)
+        protected override Uri AccessTokenUri
+        {
+            get { return new Uri("https://graph.facebook.com/oauth/access_token"); }
+        }
+
+        public override async Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(
+            Uri callbackUrl)
         {
             if (callbackUrl == null)
             {
@@ -55,19 +53,21 @@ namespace SimpleAuthentication.Core.Providers
             }
 
             var url = IsMobile
-                    ? "https://m.facebook.com/dialog/oauth"
-                    : "https://www.facebook.com/dialog/oauth";
+                ? "https://m.facebook.com/dialog/oauth"
+                : "https://www.facebook.com/dialog/oauth";
 
             var providerAuthenticationUrl = new Uri(url);
-            return GetRedirectToAuthenticateSettings(callbackUrl, providerAuthenticationUrl);
-        }
+            var settings = GetRedirectToAuthenticateSettings(callbackUrl, providerAuthenticationUrl);
 
-        protected override Uri AccessTokenUri
-        {
-            get
+            // Don't forget to append this Facebook specific option: DisplayType.
+            if (DisplayType != DisplayType.Unknown)
             {
-                return new Uri("https://graph.facebook.com/oauth/access_token");
+                settings.RedirectUri = SystemHelpers.CreateUri(settings.RedirectUri,
+                    new Dictionary<string, string>
+                    {{"display", DisplayType.ToString().ToLowerInvariant()}});
             }
+
+            return settings;
         }
 
         protected override AccessToken MapAccessTokenContentToAccessToken(string content)
@@ -132,7 +132,11 @@ namespace SimpleAuthentication.Core.Providers
 
                 using (var client = HttpClientFactory.GetHttpClient())
                 {
-                    var requestUri = new Uri(string.Format("https://graph.facebook.com/v2.0/me?fields=id,name,gender,email,link,locale&access_token={0}", accessToken.Token));
+                    var requestUri =
+                        new Uri(
+                            string.Format(
+                                "https://graph.facebook.com/v2.0/me?fields=id,name,gender,email,link,locale&access_token={0}",
+                                accessToken.Token));
 
                     //TraceSource.TraceVerbose("Retrieving user information. Google Endpoint: {0}",
                     //    requestUri.AbsoluteUri);

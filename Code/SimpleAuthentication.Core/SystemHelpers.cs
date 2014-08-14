@@ -10,6 +10,7 @@ namespace SimpleAuthentication.Core
     public static class SystemHelpers
     {
         public static IDictionary<string, string> ConvertKeyValueContentToDictionary(string content,
+            bool unescapeKeysAndValues = false,
             char delimeter = '&')
         {
             if (string.IsNullOrWhiteSpace(content))
@@ -23,7 +24,12 @@ namespace SimpleAuthentication.Core
                 let kv = p.Split(new[] {'='})
                 where kv.Length == 2
                 select kv)
-                .ToDictionary(keyValue => keyValue[0], keyValue => keyValue[1]);
+                .ToDictionary(keyValue => unescapeKeysAndValues
+                    ? Uri.UnescapeDataString(keyValue[0])
+                    : keyValue[0],
+                    keyValue => unescapeKeysAndValues
+                        ? Uri.UnescapeDataString(keyValue[1])
+                        : keyValue[1]);
         }
 
         public static Uri CreateUri(Uri sourceUrl,
@@ -54,12 +60,13 @@ namespace SimpleAuthentication.Core
 
             if (String.IsNullOrWhiteSpace(existingQuery))
             {
+                // No existing query - so just 
                 result.Query = JoinQueryStringParameters(querystringParameters);
             }
             else
             {
                 // We have some existing query, so we need to figure out if there's any 
-                var keyValues = ConvertKeyValueContentToDictionary(existingQuery);
+                var keyValues = ConvertKeyValueContentToDictionary(existingQuery, true);
                 if (keyValues == null ||
                     !keyValues.Any())
                 {
@@ -70,12 +77,13 @@ namespace SimpleAuthentication.Core
                     throw new Exception(errorMessage);
                 }
 
-                // If we have an existing key, we need to ovewrite the value.
+                // NOTE: If we have an existing key, we need to ovewrite the value.
                 foreach (var parameter in querystringParameters)
                 {
-                    if (keyValues.ContainsKey(parameter.Key))
+                    var key = Uri.EscapeDataString(parameter.Key);
+                    if (keyValues.ContainsKey(key))
                     {
-                        keyValues[parameter.Key] = parameter.Value;
+                        keyValues[key] = parameter.Value;
                     }
                     else
                     {
