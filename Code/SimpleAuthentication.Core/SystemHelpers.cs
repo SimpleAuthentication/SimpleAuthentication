@@ -3,43 +3,31 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SimpleAuthentication.Core.Exceptions;
 
 namespace SimpleAuthentication.Core
 {
     public static class SystemHelpers
     {
-        public static string RecursiveErrorMessages(this Exception exception)
+        public static IDictionary<string, string> ConvertKeyValueContentToDictionary(string content,
+            char delimeter = '&')
         {
-            if (exception == null)
+            if (string.IsNullOrWhiteSpace(content))
             {
-                throw new ArgumentNullException("exception");
+                throw new ArgumentNullException("content");
             }
 
-            var errorMessages = new StringBuilder();
-
-            // Keep grabbing any error messages while we have some inner exception.
-            Exception nextException = exception;
-            while (nextException != null)
-            {
-                if (errorMessages.Length > 0)
-                {
-                    errorMessages.Append(" ");
-                }
-                // Append this error message.
-                errorMessages.AppendFormat(nextException.Message);
-
-                // Grab the next error message.
-                nextException = nextException.InnerException;
-            }
-
-            return errorMessages.Length > 0 ? errorMessages.ToString() : null;
+            var parameters = content.Split(new[] { delimeter });
+            return parameters
+                .Select(parameter => parameter.Split(new[] { '=' }))
+                .ToDictionary(keyValue => keyValue[0], keyValue => keyValue[1]);
         }
 
         public static Uri CreateCallBackUri(string providerKey,
             Uri requestUrl,
             string path)
         {
-            if (string.IsNullOrWhiteSpace(providerKey))
+            if (String.IsNullOrWhiteSpace(providerKey))
             {
                 throw new ArgumentNullException("providerKey");
             }
@@ -49,7 +37,7 @@ namespace SimpleAuthentication.Core
                 throw new ArgumentNullException("requestUrl");
             }
 
-            if (string.IsNullOrWhiteSpace(path))
+            if (String.IsNullOrWhiteSpace(path))
             {
                 throw new ArgumentNullException("path");
             }
@@ -69,18 +57,129 @@ namespace SimpleAuthentication.Core
             return builder.Uri;
         }
 
-        public static IDictionary<string, string> ConvertKeyValueContentToDictionary(string content,
-            char delimeter = '&')
+        public static Uri CreateUri(Uri sourceUrl,
+            IDictionary<string, string> querystringParameters)
         {
-            if (string.IsNullOrWhiteSpace(content))
+            if (sourceUrl == null)
             {
-                throw new ArgumentNullException("content");
+                throw new ArgumentNullException("sourceUrl");
             }
 
-            var parameters = content.Split(new[] { delimeter });
-            return parameters
-                .Select(parameter => parameter.Split(new[] { '=' }))
-                .ToDictionary(keyValue => keyValue[0], keyValue => keyValue[1]);
+            if (querystringParameters == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            if (!querystringParameters.Any())
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            var result = new UriBuilder(sourceUrl);
+
+            // REF: http://msdn.microsoft.com/en-us/library/system.uribuilder.query(v=vs.110).aspx
+            // NOTE: first character is the '?'. So we need to skip it.
+            var existingQuery = String.IsNullOrWhiteSpace(result.Query)
+                ? null
+                : result.Query.Substring(1);
+
+            if (String.IsNullOrWhiteSpace(existingQuery))
+            {
+                result.Query = JoinQueryStringParameters(querystringParameters);
+            }
+            else
+            {
+                // We have some existing query, so we need to figure out if there's any 
+                var keyValues = ConvertKeyValueContentToDictionary(existingQuery);
+                if (keyValues == null ||
+                    !keyValues.Any())
+                {
+                    var errorMessage =
+                        String.Format(
+                            "Tried to convert the Query string '{0}' to a KeyValue collection, but it's either null or contains no items. We expected at least one key/value item.",
+                            String.IsNullOrWhiteSpace(existingQuery));
+                    throw new Exception(errorMessage);
+                }
+
+                // If we have an existing key, we need to ovewrite the value.
+                foreach (var parameter in querystringParameters)
+                {
+                    if (keyValues.ContainsKey(parameter.Key))
+                    {
+                        keyValues[parameter.Key] = parameter.Value;
+                    }
+                    else
+                    {
+                        // Key doesn't exist, so we need to add it in.
+                        keyValues.Add(parameter);
+                    }
+                }
+
+                result.Query = JoinQueryStringParameters(keyValues);
+            }
+
+            return new Uri(result.ToString());
+        }
+
+        public static void CrossSiteRequestForgeryCheck(IDictionary<string, string> querystring,
+            string state,
+            string stateKey)
+        {
+            if (querystring == null)
+            {
+                throw new ArgumentNullException("querystring");
+            }
+
+            if (string.IsNullOrWhiteSpace(state))
+            {
+                throw new ArgumentNullException("state");
+            }
+
+            if (string.IsNullOrWhiteSpace(stateKey))
+            {
+                throw new ArgumentNullException("stateKey");
+            }
+
+            // Start with the Cross Site Request Forgery check.
+            if (!querystring.ContainsKey(stateKey))
+            {
+                var errorMessage = string.Format(
+                    "The callback querystring doesn't include a state key/value parameter. We need one of these so we can to a CSRF check. Please check why the request url from the provider is missing the parameter: '{0}'. eg. &{0}=something...",
+                    stateKey);
+                //TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            var callbackState = querystring[stateKey];
+            if (!callbackState.Equals(state, StringComparison.InvariantCultureIgnoreCase))
+            {
+                var errorMessage =
+                    string.Format(
+                        "CSRF check fails: The callback '{0}' value doesn't match the server's *remembered* state value.",
+                        stateKey);
+                throw new AuthenticationException(errorMessage);
+            }
+        }
+
+        private static string JoinQueryStringParameters(IDictionary<string, string> querystringParameters)
+        {
+            if (querystringParameters == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            if (!querystringParameters.Any())
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            var parametersToAppend = querystringParameters
+                .Select(x => String.Format("{0}={1}",
+                    Uri.EscapeDataString(x.Key),
+                    Uri.EscapeDataString(x.Value)))
+                .ToArray();
+
+            return String.Join("&", parametersToAppend);
         }
     }
 }

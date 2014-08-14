@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using SimpleAuthentication.Core.Exceptions;
@@ -38,6 +40,8 @@ namespace SimpleAuthentication.Core.Providers
         public abstract string Name { get; }
         public abstract string Description { get; }
 
+        public abstract Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(Uri callbackUrl);
+
         public async Task<IAuthenticatedClient> AuthenticateClientAsync(IDictionary<string, string> queryString,
             string state,
             Uri callbackUri)
@@ -63,28 +67,9 @@ namespace SimpleAuthentication.Core.Providers
             //                                 queryString.Keys.Select(
             //                                     key => key + "=" + queryString[key]).ToArray()));
 
-            #region Cross Site Request Forgery checks -> state == state?
-
-            // Start with the Cross Site Request Forgery check.
-            if (!queryString.ContainsKey(StateKey))
-            {
-                var errorMessage =
-                    "The callback querystring doesn't include a state key/value parameter. We need one of these so we can to a CSRF check. Please check why the request url from the provider is missing the parameter: " +
-                    StateKey + ". eg. &state=something...";
-                //TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
-            }
-            var callbackState = queryString[StateKey];
-            if (!callbackState.Equals(state, StringComparison.InvariantCultureIgnoreCase))
-            {
-                var errorMessage =
-                    string.Format(
-                        "CSRF check fails: The callback '{0}' value doesn't match the server's *remembered* state value.",
-                        StateKey);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            #endregion
+            SystemHelpers.CrossSiteRequestForgeryCheck(queryString,
+                state,
+                StateKey);
 
             EnsureResultIsNotAnError(queryString);
 
@@ -115,36 +100,6 @@ namespace SimpleAuthentication.Core.Providers
             //TraceSource.TraceInformation(authenticatedClient.ToString());
 
             return authenticatedClient;
-        }
-
-        public RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri callbackUrl,
-            Uri providerAuthenticationUrl)
-        {
-            if (callbackUrl == null)
-            {
-                throw new ArgumentNullException("callbackUrl");
-            }
-
-            // Validations.
-            if (providerAuthenticationUrl == null)
-            {
-                throw new AuthenticationException(
-                    "ProviderAuthenticationUrl has no value. Please set the authentication Url location to redirect to. eg. http://www.google.com/some/oauth/authenticate/url");
-            }
-
-            // Generate some state which will be used in the redirection uri and used for CSRF checks.
-            var state = Guid.NewGuid().ToString();
-
-            // Now the redirection uri.
-            var redirectUri = string.Format("{0}?{1}",
-                providerAuthenticationUrl.AbsoluteUri,
-                CreateRedirectionQuerystringParameters(callbackUrl, state));
-
-            return new RedirectToAuthenticateSettings
-            {
-                RedirectUri = new Uri(redirectUri),
-                State = state
-            };
         }
 
         #endregion
@@ -196,11 +151,96 @@ namespace SimpleAuthentication.Core.Providers
 
         public ITraceManager TraceManager { set; private get; }
 
-        public abstract RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri callbackUrl);
+        protected abstract Uri AccessTokenUri { get; }
 
-        protected abstract Task<AccessToken> GetAccessTokenAsync(string authorizationCode, Uri redirectUrl);
+        protected async Task<AccessToken> GetAccessTokenAsync(string authorizationCode,
+            Uri redirectUrl)
+        {
+            if (string.IsNullOrWhiteSpace(authorizationCode))
+            {
+                throw new ArgumentNullException("authorizationCode");
+            }
+
+            if (redirectUrl == null ||
+                string.IsNullOrWhiteSpace(redirectUrl.AbsoluteUri))
+            {
+                throw new ArgumentNullException("redirectUrl");
+            }
+
+            HttpResponseMessage response;
+
+            using (var client = HttpClientFactory.GetHttpClient())
+            {
+                var postData = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("client_id", PublicApiKey),
+                    new KeyValuePair<string, string>("client_secret", SecretApiKey),
+                    new KeyValuePair<string, string>("redirect_uri", redirectUrl.AbsoluteUri),
+                    new KeyValuePair<string, string>("code", authorizationCode),
+                    new KeyValuePair<string, string>("grant_type", "authorization_code")
+                };
+
+                var encodedContent = new FormUrlEncodedContent(postData);
+
+                var requestUri = AccessTokenUri;
+
+                //TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
+                //    requestUri.AbsoluteUri);
+
+                response = await client.PostAsync(requestUri, encodedContent);
+            }
+
+            // RANT: Facebook send back all their data as Json except this f'ing endpoint.
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                var errorMessage =
+                    string.Format(
+                        "Failed to retrieve an Access Token from {0}. Status Code: {1}. Error Message: {2}",
+                        Name,
+                        response.StatusCode,
+                        content);
+
+                throw new AuthenticationException(errorMessage);
+            }
+
+            return MapAccessTokenContentToAccessToken(content);
+        }
+
+        protected abstract AccessToken MapAccessTokenContentToAccessToken(string content);
 
         protected abstract Task<UserInformation> GetUserInformationAsync(AccessToken accessToken);
+
+        public RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri callbackUrl,
+            Uri providerAuthenticationUrl)
+        {
+            if (callbackUrl == null)
+            {
+                throw new ArgumentNullException("callbackUrl");
+            }
+
+            // Validations.
+            if (providerAuthenticationUrl == null)
+            {
+                throw new AuthenticationException(
+                    "ProviderAuthenticationUrl has no value. Please set the authentication Url location to redirect to. eg. http://www.google.com/some/oauth/authenticate/url");
+            }
+
+            // Generate some state which will be used in the redirection uri and used for CSRF checks.
+            var state = Guid.NewGuid().ToString();
+
+            // Now the redirection uri.
+            var redirectUri = string.Format("{0}?{1}",
+                providerAuthenticationUrl.AbsoluteUri,
+                CreateRedirectionQuerystringParameters(callbackUrl, state));
+
+            return new RedirectToAuthenticateSettings
+            {
+                RedirectUri = new Uri(redirectUri),
+                State = state
+            };
+        }
 
         #region GetRedirectToAuthenticateSettings related methods
 
@@ -218,8 +258,8 @@ namespace SimpleAuthentication.Core.Providers
 
             var queryString = new StringBuilder();
             queryString.AppendFormat("client_id={0}&redirect_uri={1}&response_type=code",
-                 Uri.EscapeDataString(PublicApiKey),
-                 Uri.EscapeDataString(callbackUri.AbsoluteUri));
+                Uri.EscapeDataString(PublicApiKey),
+                Uri.EscapeDataString(callbackUri.AbsoluteUri));
 
             var scopesParameter = GetScopes();
             if (!string.IsNullOrWhiteSpace(scopesParameter))
@@ -232,8 +272,8 @@ namespace SimpleAuthentication.Core.Providers
                 var stateKey = string.IsNullOrWhiteSpace(StateKey)
                     ? "state"
                     : StateKey;
-                queryString.AppendFormat("&{0}={1}", 
-                    Uri.EscapeDataString(stateKey), 
+                queryString.AppendFormat("&{0}={1}",
+                    Uri.EscapeDataString(stateKey),
                     Uri.EscapeDataString(state));
             }
 

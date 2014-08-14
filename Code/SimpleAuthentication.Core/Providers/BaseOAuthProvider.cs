@@ -52,7 +52,7 @@ namespace SimpleAuthentication.Core.Providers
 
         #region IAuthenticationProvider Members
 
-        public override RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri callbackUrl)
+        public  RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri callbackUrl)
         {
             if (callbackUrl == null)
             {

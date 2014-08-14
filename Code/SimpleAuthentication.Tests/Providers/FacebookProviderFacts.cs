@@ -77,7 +77,7 @@ namespace SimpleAuthentication.Tests.Providers
 
                 // Assert.
                 result.Message.ShouldBe(
-                    "The callback querystring doesn't include a state key/value parameter. We need one of these so we can to a CSRF check. Please check why the request url from the provider is missing the parameter: state. eg. &state=something...");
+                    "The callback querystring doesn't include a state key/value parameter. We need one of these so we can to a CSRF check. Please check why the request url from the provider is missing the parameter: 'state'. eg. &state=something...");
             }
 
             [Fact]
@@ -128,7 +128,7 @@ namespace SimpleAuthentication.Tests.Providers
         public class GetRedirectToAuthenticateSettingsFacts
         {
             [Fact]
-            public void GivenACallbackUrl_GetRedirectToAuthenticateSettings_ReturnsSomeRedirectToAuthenticateSettings()
+            public async Task GivenACallbackUrl_GetRedirectToAuthenticateSettingsAsync_ReturnsSomeRedirectToAuthenticateSettings()
             {
                 // Arrange.
                 const string publicApiKey = "adskfhsd kds j k&^%*&^%*%/\\/\\/\\/111";
@@ -137,7 +137,7 @@ namespace SimpleAuthentication.Tests.Providers
                 var callbackUrl = new Uri("http://www.mywebsite.com/auth/callback?provider=facebookz0r");
 
                 // Arrange.
-                var result = provider.GetRedirectToAuthenticateSettings(callbackUrl);
+                var result = await provider.GetRedirectToAuthenticateSettingsAsync(callbackUrl);
 
                 // Assert.
                 result.RedirectUri.AbsoluteUri.ShouldBe(
@@ -148,7 +148,7 @@ namespace SimpleAuthentication.Tests.Providers
             }
 
             [Fact]
-            public void GivenACallbackUrlAndIsMobile_GetRedirectToAuthenticateSettings_ReturnsSomeRedirectToAuthenticateSettings()
+            public async Task GivenACallbackUrlAndIsMobile_GetRedirectToAuthenticateSettingsAsync_ReturnsSomeRedirectToAuthenticateSettings()
             {
                 // Arrange.
                 const string publicApiKey = "adskfhsd kds j k&^%*&^%*%/\\/\\/\\/111";
@@ -160,7 +160,7 @@ namespace SimpleAuthentication.Tests.Providers
                 var callbackUrl = new Uri("http://www.mywebsite.com/auth/callback?provider=facebookz0r");
 
                 // Arrange.
-                var result = provider.GetRedirectToAuthenticateSettings(callbackUrl);
+                var result = await provider.GetRedirectToAuthenticateSettingsAsync(callbackUrl);
 
                 // Assert.
                 result.RedirectUri.AbsoluteUri.ShouldBe(

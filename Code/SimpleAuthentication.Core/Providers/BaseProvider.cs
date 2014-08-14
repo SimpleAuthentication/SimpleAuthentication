@@ -54,7 +54,7 @@ namespace SimpleAuthentication.Core.Providers
 
         public ITraceManager TraceManager { set; protected get; }
 
-        public abstract RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri requestUrl);
+        public abstract Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(Uri requestUrl);
 
         #endregion
 

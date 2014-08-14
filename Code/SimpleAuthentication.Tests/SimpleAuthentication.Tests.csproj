@@ -71,12 +71,17 @@
     <Compile Include="Providers\GoogleProviderFacts.cs" />
     <Compile Include="Providers\TwitterProviderFacts.cs" />
     <Compile Include="Providers\WindowsLiveProviderFacts.cs" />
+    <Compile Include="SystemExtensionsFacts.cs" />
+    <Compile Include="SystemHelpersFacts.cs" />
     <Compile Include="WebSites\NancyModuleTestBase.cs" />
     <Compile Include="WebSites\SimpleAuthenticationModuleFacts.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <Content Include="Sample Data\Twitter-AccessToken-Content.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Sample Data\Twitter-VerifyCredentials-Content.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Sample Data\Twitter-RequestToken-Content.txt">

@@ -10,6 +10,12 @@ namespace SimpleAuthentication.Core
         public string Token { get; set; }
 
         /// <summary>
+        /// An access token secret.
+        /// </summary>
+        /// <remarks>This is only used for OAuth 1.0/1.0a providers.</remarks>
+        public string Secret { get; set; }
+
+        /// <summary>
         /// When the access token expires. Always in UTC.
         /// </summary>
         public DateTime ExpiresOn { get; set; }

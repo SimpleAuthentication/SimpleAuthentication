@@ -1,194 +1,85 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Shouldly;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Providers;
-using SimpleAuthentication.Core.Providers.Twitter;
 using Xunit;
 
 namespace SimpleAuthentication.Tests.Providers
 {
     public class TwitterProviderFacts
     {
-        public class TwitterProviderTestClass : TwitterProvider
-        {
-            public TwitterProviderTestClass(ProviderParams providerParams) : base(providerParams)
-            {
-            }
-
-            public new async Task<RequestTokenResult> GetRequestTokenAsync
-                (Uri callbackUri, string state)
-            {
-                return await base.GetRequestTokenAsync(callbackUri, state);
-            }
-
-            public new async Task<AccessToken> GetAccessTokenAsync(IDictionary<string, string> queryString,
-                string callbackUrl)
-            {
-                return await base.GetAccessTokenAsync(queryString, callbackUrl);
-            }
-        }
-
-        public class GetRequestTokenAsyncFacts
+        public class Facts
         {
             [Fact]
-            public async Task GivenSomeValidData_GetRequestTokenAsync_ReturnsARequestTokenResult()
+            public async Task GivenAValidQuerystring_AuthenticateClientAsync_ReturnsAnUserAuthenticatedUser()
             {
                 // Arrange.
-                var providerParams = new ProviderParams("a b c", "d e f / \\ & * @ #");
-                var twitterProvider = new TwitterProviderTestClass(providerParams);
-                var callbackUrl = new Uri("http://localhost/authenticate/callback");
-                const string state = "some-state";
+                var providerParams = new ProviderParams("Rb7qNNPUPsRSYkznFTbF6Q",
+                    "pP1jBdYOlmCzo08QFJjGIHY4YSyPdGLPO2m1q47hu9c");
+                var provider = new TwitterProvider(providerParams);
 
-                // Fake up a request token.
-                var requestTokenContent = File.ReadAllText("Sample Data\\Twitter-RequestToken-Content.txt");
-                var requestTokenResponse = FakeHttpMessageHandler.GetStringHttpResponseMessage(requestTokenContent,
-                    mediaType: "text/html");
-                HttpClientFactory.MessageHandler = new FakeHttpMessageHandler(
-                        "https://api.twitter.com/oauth/request_token",
-                        requestTokenResponse);
+                var accessTokenContent = File.ReadAllText("Sample Data\\Twitter-AccessToken-Content.txt");
+                var accessTokenResponse = FakeHttpMessageHandler.GetStringHttpResponseMessage(accessTokenContent);
+                var verifyCredentialsContent = File.ReadAllText("Sample Data\\Twitter-VerifyCredentials-Content.txt");
+                var verifyCredentialsResponse =
+                    FakeHttpMessageHandler.GetStringHttpResponseMessage(verifyCredentialsContent);
+                HttpClientFactory.MessageHandler =
+                    new FakeHttpMessageHandler(new Dictionary<string, HttpResponseMessage>
+                    {
+                        {"https://api.twitter.com/oauth/access_token", accessTokenResponse},
+                        {"https://api.twitter.com/1.1/account/verify_credentials.json", verifyCredentialsResponse}
+                    });
+
+                const string state = "B9608CE5-1E3F-4AF9-A4FA-043BFF70F53C";
+                var querystring = new Dictionary<string, string>
+                {
+                    {"state", state},
+                    {"oauth_token", "abcdef"},
+                    {"oauth_verifier", "qwerty"},
+                };
 
                 // Act.
-                var result = await twitterProvider.GetRequestTokenAsync(callbackUrl, state);
+                var authenticatedClient = await provider.AuthenticateClientAsync(querystring, state, null);
 
                 // Assert.
-                result.OAuthToken.ShouldBe("NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0");
-                result.OAuthTokenSecret.ShouldBe("veNRnAWe6inFuo8o2u8SLLZLjolYDmDP7SzL0YfYI");
-
+                authenticatedClient.ProviderName.ShouldBe("Twitter");
+                authenticatedClient.AccessToken.Token.ShouldBe("16357275-5h2o01LoiGsdEVPqNsvYzj9l9n9A7ThRednaL3JyI");
+                authenticatedClient.AccessToken.Secret.ShouldBe("CvYNcm7Vs2IGyguHrNw2DArmCVqTtwrCw0oWeb1hH8");
+                authenticatedClient.AccessToken.ExpiresOn.ShouldBe(DateTime.MaxValue);
+                authenticatedClient.UserInformation.Name.ShouldBe("Matt Harris");
+                authenticatedClient.UserInformation.Email.ShouldBeNullOrEmpty();
+                authenticatedClient.UserInformation.Id.ShouldBe("777925");
+                authenticatedClient.UserInformation.UserName.ShouldBe("themattharris");
             }
         }
 
-        public class GetAccessTokenAsyncFacts
-        {
-            [Fact]
-            public async Task GivenARequestToken_GetAccessTokenAsync_ReturnsAnAccessTokenResult()
-            {
-                // Arrange.
-                var providerParams = new ProviderParams("a b c", "d e f / \\ & * @ #");
-                var twitterProvider = new TwitterProviderTestClass(providerParams);
-                var queryString = new Dictionary<string, string>
-                {
-                    {"oauth_token", "aasdasd"},
-                    {"oauth_verifier", "asdsadas"},
-                    {"not-used", "xxxxxx"}
-                };
-                const string callbackUrl = "http://localhost/authenticate/callback";
-                
-
-                // Fake up a request token.
-                var requestTokenContent = File.ReadAllText("Sample Data\\Twitter-RequestToken-Content.txt");
-                var requestTokenResponse = FakeHttpMessageHandler.GetStringHttpResponseMessage(requestTokenContent,
-                    mediaType: "text/html");
-                HttpClientFactory.MessageHandler = new FakeHttpMessageHandler(
-                        "https://api.twitter.com/oauth/access_token",
-                        requestTokenResponse);
-
-                // Act.
-                var result = await twitterProvider.GetAccessTokenAsync(queryString, callbackUrl);
-
-                // Assert.
-            }
-
-            [Fact]
-            public void GivenAnIncompleteQueryString_GetAccessTokenAsync_ThrowsAnException()
-            {
-                // Arrange.
-                var providerParams = new ProviderParams("a b c", "d e f / \\ & * @ #");
-                var twitterProvider = new TwitterProviderTestClass(providerParams);
-
-                // NOTE: oauth_verifier is missing.
-                var queryString = new Dictionary<string, string>
-                {
-                    {"oauth_token", "aasdasd"},
-                    {"not-used", "xxxxxx"}
-                };
-                const string callbackUrl = "http://localhost/authenticate/callback";
-
-
-                // Fake up a request token.
-                var requestTokenContent = File.ReadAllText("Sample Data\\Twitter-RequestToken-Content.txt");
-                var requestTokenResponse = FakeHttpMessageHandler.GetStringHttpResponseMessage(requestTokenContent,
-                    mediaType: "text/html");
-                HttpClientFactory.MessageHandler = new FakeHttpMessageHandler(
-                        "https://api.twitter.com/oauth/access_token",
-                        requestTokenResponse);
-
-                // Act and Assert
-                var result =  Should.Throw<Exception>(() => twitterProvider.GetAccessTokenAsync(queryString, callbackUrl));
-                result.Message.ShouldBe("Failed to recieve an oauth_token and/or oauth_verifier values. Both are required. oauth_token: aasdasd. oauth_verifier: -no verifier-");
-            }
-        }
         public class GetRedirectToAuthenticateSettingsFacts
         {
             [Fact]
-            public void GivenACallbackUrl_GetRedirectToAuthenticateSettings_ReturnsSomeRedirectToAuthenticateSettings()
+            public async Task
+                GivenACallbackUrl_GetRedirectToAuthenticateSettingsAsync_ReturnsSomeRedirectToAuthenticationSettings()
             {
                 // Arrange.
-                var providerParams = new ProviderParams("a b c", "d e f / \\ & * @ #");
+                var providerParams = new ProviderParams("Rb7qNNPUPsRSYkznFTbF6Q",
+                    "pP1jBdYOlmCzo08QFJjGIHY4YSyPdGLPO2m1q47hu9c");
                 var provider = new TwitterProvider(providerParams);
-                var callBackUrl = new Uri("Http://www.foo.com/callback");
-
-                // Fake up a request token.
-                var requestTokenContent = File.ReadAllText("Sample Data\\Twitter-RequestToken-Content.txt");
-                var requestTokenResponse = FakeHttpMessageHandler.GetStringHttpResponseMessage(requestTokenContent,
-                    mediaType: "text/html");
-                HttpClientFactory.MessageHandler = new FakeHttpMessageHandler(
-                        "https://api.twitter.com/oauth/request_token",
-                        requestTokenResponse);
+                var callbackUrl = new Uri("http://www.mysite.com/callback/endpoint?provider=pewpew");
+                var accessTokenContent = File.ReadAllText("Sample Data\\Twitter-RequestToken-Content.txt");
+                var accessTokenResponse = FakeHttpMessageHandler.GetStringHttpResponseMessage(accessTokenContent);
+                HttpClientFactory.MessageHandler = new FakeHttpMessageHandler(accessTokenResponse);
 
                 // Act.
-                var settings = provider.GetRedirectToAuthenticateSettings(callBackUrl);
+                var settings = await provider.GetRedirectToAuthenticateSettingsAsync(callbackUrl);
 
                 // Assert.
-                settings.ShouldNotBe(null);
-                settings.State.ShouldNotBeNullOrEmpty();
-                Guid.Parse(settings.State);
-                settings.RedirectUri.ShouldNotBe(null);
-                settings.RedirectUri.AbsoluteUri.ShouldStartWith("https://api.twitter.com/oauth/authenticate?oauth_token=NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0");
-            }
-
-            [Fact(Skip = "TODO")]
-            public void
-                GivenACallbackUrlButTheRequestTokenIsMissingData_GetRedirectToAuthenticateSettings_ThrowsAnExeption()
-            {
-                
+                settings.RedirectUri.AbsoluteUri.ShouldBe(
+                    "https://twitter.com/oauth/authenticate?oauth_token=NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0");
+                settings.State.ShouldNotBe(null);
             }
         }
-
-        //public class AuthenticateClientAsyncFacts
-        //{
-        //    [Fact]
-        //    public void GivenAValidAccessToken_AuthenticateClientAsync_ReturnsSomeUserInformation()
-        //    {
-        //        // Arrange.
-        //        var providerParams = new ProviderParams
-        //        {
-        //            PublicApiKey = "some public api key",
-        //            SecretApiKey = "some secret api key"
-        //        };
-        //        var provider = new TwitterProvider(providerParams);
-        //        var callBackUrl = new Uri("Http://www.foo.com/callback");
-
-        //        // Fake up a request token.
-        //        var requestTokenContent = File.ReadAllText("Sample Data\\Twitter-RequestToken-Content.txt");
-        //        var requestTokenResponse = FakeHttpMessageHandler.GetStringHttpResponseMessage(requestTokenContent,
-        //            mediaType: "text/html");
-        //        HttpClientFactory.MessageHandler = new FakeHttpMessageHandler(
-        //                "https://api.twitter.com/oauth/request_token",
-        //                requestTokenResponse);
-
-        //        var state = "abcde";
-        //        var callbackUrl = "http://localhost/foo";
-
-        //        // Act.
-        //        var settings = provider.AuthenticateClientAsync();   
-        //    }
-        //}
     }
 }

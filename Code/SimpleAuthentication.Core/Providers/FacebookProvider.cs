@@ -46,7 +46,7 @@ namespace SimpleAuthentication.Core.Providers
 
         #region OAuth20Provider Implementation
 
-        public override RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri callbackUrl)
+        public override async Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(Uri callbackUrl)
         {
             if (callbackUrl == null)
             {
@@ -61,57 +61,54 @@ namespace SimpleAuthentication.Core.Providers
             return GetRedirectToAuthenticateSettings(callbackUrl, providerAuthenticationUrl);
         }
 
-        protected override async Task<AccessToken> GetAccessTokenAsync(string authorizationCode, Uri redirectUrl)
+        protected override Uri AccessTokenUri
         {
-            if (string.IsNullOrWhiteSpace(authorizationCode))
+            get
             {
-                throw new ArgumentNullException("authorizationCode");
+                return new Uri("https://graph.facebook.com/oauth/access_token");
+            }
+        }
+
+        protected override AccessToken MapAccessTokenContentToAccessToken(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                throw new ArgumentNullException("content");
             }
 
-            if (redirectUrl == null ||
-                string.IsNullOrWhiteSpace(redirectUrl.AbsoluteUri))
-            {
-                throw new ArgumentNullException("redirectUrl");
-            }
-
-            HttpResponseMessage response;
-
-            using (var client = HttpClientFactory.GetHttpClient())
-            {
-                var postData = new List<KeyValuePair<string, string>>
-                {
-                    new KeyValuePair<string, string>("client_id", PublicApiKey),
-                    new KeyValuePair<string, string>("client_secret", SecretApiKey),
-                    new KeyValuePair<string, string>("redirect_uri", redirectUrl.AbsoluteUri),
-                    new KeyValuePair<string, string>("code", authorizationCode),
-                    new KeyValuePair<string, string>("grant_type", "authorization_code")
-                };
-
-                var encodedContent = new FormUrlEncodedContent(postData);
-
-                var requestUri = new Uri("https://graph.facebook.com/oauth/access_token");
-
-                //TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
-                //    requestUri.AbsoluteUri);
-
-                response = await client.PostAsync(requestUri, encodedContent);
-            }
-
-            // RANT: Facebook send back all their data as Json except this f'ing endpoint.
-            var content = await response.Content.ReadAsStringAsync();
-
-            if (response.StatusCode != HttpStatusCode.OK)
+            // The data is in a key/value format. So lets split this data out.
+            var keyValues = SystemHelpers.ConvertKeyValueContentToDictionary(content);
+            if (keyValues == null ||
+                !keyValues.Any())
             {
                 var errorMessage =
-                    string.Format(
-                        "Failed to retrieve an Access Token from Facebook. Status Code: {0}. Error Message: {1}",
-                        response.StatusCode,
+                    string.Format("Failed to extract the access token from the body content. Content returned: {0}",
                         content);
-
                 throw new AuthenticationException(errorMessage);
             }
 
-            return MapDynamicResultToAccessToken(content);
+            const string tokenKey = "access_token";
+            const string expiresOnKey = "expires";
+
+            if (!keyValues.ContainsKey(tokenKey) &&
+                !keyValues.ContainsKey(expiresOnKey))
+            {
+                var errorMessage =
+                    string.Format(
+                        "Failed to extract the access token from the body content. Content needs both the '{0}' and '{1}' keys.",
+                        tokenKey,
+                        expiresOnKey);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            var expiresIn = Convert.ToDouble(keyValues[expiresOnKey], CultureInfo.InvariantCulture);
+            return new AccessToken
+            {
+                Token = keyValues[tokenKey],
+                ExpiresOn = expiresIn > 0
+                    ? DateTime.UtcNow.AddSeconds(expiresIn)
+                    : DateTime.MaxValue
+            };
         }
 
         protected override async Task<UserInformation> GetUserInformationAsync(AccessToken accessToken)
@@ -170,47 +167,5 @@ namespace SimpleAuthentication.Core.Providers
         }
 
         #endregion
-
-        private static AccessToken MapDynamicResultToAccessToken(string content)
-        {
-            if (string.IsNullOrWhiteSpace(content))
-            {
-                throw new ArgumentNullException("content");
-            }
-
-            // The data is in a key/value format. So lets split this data out.
-            var keyValues = SystemHelpers.ConvertKeyValueContentToDictionary(content);
-            if (keyValues == null ||
-                !keyValues.Any())
-            {
-                var errorMessage =
-                    string.Format("Failed to extract the access token from the body content. Content returned: {0}",
-                        content);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            const string tokenKey = "access_token";
-            const string expiresOnKey = "expires";
-
-            if (!keyValues.ContainsKey(tokenKey) &&
-                !keyValues.ContainsKey(expiresOnKey))
-            {
-                var errorMessage =
-                    string.Format(
-                        "Failed to extract the access token from the body content. Content needs both the '{0}' and '{1}' keys.",
-                        tokenKey,
-                        expiresOnKey);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            var expiresIn = Convert.ToDouble(keyValues[expiresOnKey], CultureInfo.InvariantCulture);
-            return new AccessToken
-            {
-                Token = keyValues[tokenKey],
-                ExpiresOn = expiresIn > 0
-                    ? DateTime.UtcNow.AddSeconds(expiresIn)
-                    : DateTime.MaxValue
-            };
-        }
     }
 }

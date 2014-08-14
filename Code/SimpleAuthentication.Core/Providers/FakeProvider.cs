@@ -30,7 +30,7 @@ namespace SimpleAuthentication.Core.Providers
 
         #region BaseToken Implementation
 
-        public override RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri requestUrl)
+        public override async Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(Uri requestUrl)
         {
             if (requestUrl == null ||
                 string.IsNullOrEmpty(requestUrl.AbsoluteUri))

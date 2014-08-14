@@ -39,11 +39,7 @@ namespace SimpleAuthentication.Core.Providers
             get { return "OAuth 2.0"; }
         }
 
-        #endregion
-
-        #region OAuth20Provider Implementation
-
-        public override RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri callbackUrl)
+        public override async Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(Uri callbackUrl)
         {
             if (callbackUrl == null)
             {
@@ -54,54 +50,13 @@ namespace SimpleAuthentication.Core.Providers
             return GetRedirectToAuthenticateSettings(callbackUrl, providerAuthenticationUrl);
         }
 
-        protected override async Task<AccessToken> GetAccessTokenAsync(string authorizationCode, Uri redirectUrl)
+        #endregion
+
+        #region OAuth20Provider Implementation
+
+        protected override Uri AccessTokenUri
         {
-            if (string.IsNullOrWhiteSpace(authorizationCode))
-            {
-                throw new ArgumentNullException("authorizationCode");
-            }
-
-            if (redirectUrl == null ||
-                string.IsNullOrWhiteSpace(redirectUrl.AbsoluteUri))
-            {
-                throw new ArgumentNullException("redirectUrl");
-            }
-
-            HttpResponseMessage response;
-
-            using (var client = HttpClientFactory.GetHttpClient())
-            {
-                var postData = new List<KeyValuePair<string, string>>
-                {
-                    new KeyValuePair<string, string>("client_id", PublicApiKey),
-                    new KeyValuePair<string, string>("client_secret", SecretApiKey),
-                    new KeyValuePair<string, string>("redirect_uri", redirectUrl.AbsoluteUri),
-                    new KeyValuePair<string, string>("code", authorizationCode),
-                    new KeyValuePair<string, string>("grant_type", "authorization_code")
-                };
-
-                var content = new FormUrlEncodedContent(postData);
-
-                var requestUri = new Uri("https://accounts.google.com/o/oauth2/token");
-
-                //TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
-                //    requestUri.AbsoluteUri);
-
-                response = await client.PostAsync(requestUri, content);
-            }
-
-            var jsonContent = await response.Content.ReadAsStringAsync();
-
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                //TraceSource.TraceWarning("No Access Token Result retrieved from Google. Error Status Code: {0}. Error Message: {1}",
-                //    response.StatusCode,
-                //    jsonContent);
-                return null;
-            }
-
-            var result = JsonConvert.DeserializeObject<dynamic>(jsonContent);
-            return MapDynamicResultToAccessToken(result);
+            get { return new Uri("https://accounts.google.com/o/oauth2/token"); }
         }
 
         protected override async Task<UserInformation> GetUserInformationAsync(AccessToken accessToken)
@@ -157,15 +112,14 @@ namespace SimpleAuthentication.Core.Providers
             };
         }
 
-        #endregion
-
-        private static AccessToken MapDynamicResultToAccessToken(dynamic result)
+        protected override AccessToken MapAccessTokenContentToAccessToken(string content)
         {
-            if (result == null)
+            if (string.IsNullOrWhiteSpace(content))
             {
-                throw new ArgumentNullException("result");
+                throw new ArgumentNullException("content");
             }
 
+            var result = JsonConvert.DeserializeObject<dynamic>(content);
             var expiresIn = Convert.ToDouble(result.expires_in, CultureInfo.InvariantCulture);
             return new AccessToken
             {
@@ -175,5 +129,7 @@ namespace SimpleAuthentication.Core.Providers
                     : DateTime.MaxValue
             };
         }
+
+        #endregion
     }
 }
