@@ -64,7 +64,7 @@ namespace SimpleAuthentication.Tests.WebSites
                 result.Body.AsString().ShouldBeNullOrEmpty();
                 result.Headers.Count.ShouldBe(1);
                 result.Headers["Location"]
-                    .ShouldStartWith("https://accounts.google.com/o/oauth2/auth?client_id=some%20key&redirect_uri=http%3A%2F%2Ffoo.com%2Fauthenticate%2Fcallback%3Fproviderkey%3Dgoogle&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&state=");
+                    .ShouldStartWith("https://accounts.google.com/o/oauth2/auth?client_id=some%20key&redirect_uri=http%3A%2F%2Ffoo.com%2Fauthenticate%2Fcallback%3Fproviderkey%3Dgoogle&response_type=code&scope=profile%20email&state=");
             }
 
             [Fact]
@@ -130,7 +130,7 @@ namespace SimpleAuthentication.Tests.WebSites
                 result.ShouldNotBe(null);
                 result.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
                 result.Headers.Count.ShouldBe(1);
-                result.Headers["Location"].ShouldStartWith("https://accounts.google.com/o/oauth2/auth?client_id=some%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fauthenticate%2Fcallback%3Fproviderkey%3Dgoogle&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&state=");
+                result.Headers["Location"].ShouldStartWith("https://accounts.google.com/o/oauth2/auth?client_id=some%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fauthenticate%2Fcallback%3Fproviderkey%3Dgoogle&response_type=code&scope=profile%20email&state=");
             }
 
             [Fact]
@@ -174,7 +174,7 @@ namespace SimpleAuthentication.Tests.WebSites
                 result.ShouldNotBe(null);
                 result.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
                 result.Headers.Count.ShouldBe(1);
-                result.Headers["Location"].ShouldStartWith("https://accounts.google.com/o/oauth2/auth?client_id=some%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fauthenticate%2Fcallback%3Fproviderkey%3Dgoogle&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&state=");
+                result.Headers["Location"].ShouldStartWith("https://accounts.google.com/o/oauth2/auth?client_id=some%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fauthenticate%2Fcallback%3Fproviderkey%3Dgoogle&response_type=code&scope=profile%20email&state=");
             }
         }
 

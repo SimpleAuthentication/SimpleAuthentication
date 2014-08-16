@@ -29,7 +29,7 @@ namespace SimpleAuthentication.Tests.Providers
 
                 // Assert.
                 result.RedirectUri.AbsoluteUri.ShouldStartWith(
-                    string.Format("https://accounts.google.com/o/oauth2/auth?client_id=adskfhsd%20kds%20j%20k%26%5E%25%2A%26%5E%25%2A%25%2F%5C%2F%5C%2F%5C%2F111&redirect_uri=http%3A%2F%2Fwww.mywebsite.com%2Fauth%2Fcallback%3Fprovider%3Dgooglez0r&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&state={0}",
+                    string.Format("https://accounts.google.com/o/oauth2/auth?client_id=adskfhsd%20kds%20j%20k%26%5E%25%2A%26%5E%25%2A%25%2F%5C%2F%5C%2F%5C%2F111&redirect_uri=http%3A%2F%2Fwww.mywebsite.com%2Fauth%2Fcallback%3Fprovider%3Dgooglez0r&response_type=code&scope=profile%20email&state={0}",
                     result.State));
                 result.State.ShouldNotBeNullOrEmpty();
             }
