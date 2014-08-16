@@ -78,13 +78,19 @@
     <Compile Include="WebSites\SimpleAuthenticationModuleFacts.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Sample Data\WindowsLive-UserInfo-Content.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Sample Data\WindowsLive-AccessToken-Content.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <Content Include="Sample Data\Twitter-AccessToken-Content.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Sample Data\Twitter-VerifyCredentials-Content.txt">
+    <None Include="Sample Data\Twitter-VerifyCredentials-Content.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
     <Content Include="Sample Data\Twitter-RequestToken-Content.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -95,7 +95,9 @@ namespace SimpleAuthentication.Core
             {
                 typeof (GoogleProvider),
                 typeof (FacebookProvider),
-                typeof (TwitterProvider)
+                typeof (TwitterProvider),
+                typeof (WindowsLiveProvider),
+                typeof (FakeProvider)
             };
 
             if (Configuration != null &&

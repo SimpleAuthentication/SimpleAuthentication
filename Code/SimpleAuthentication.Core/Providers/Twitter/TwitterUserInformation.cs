@@ -5,17 +5,17 @@ namespace SimpleAuthentication.Core.Providers.Twitter
 {
     // ReSharper disable InconsistentNaming
 
-    public class Description
+    internal class Description
     {
         public List<object> urls { get; set; }
     }
 
-    public class Entities
+    internal class Entities
     {
         public Description description { get; set; }
     }
 
-    public class Url
+    internal class Url
     {
         public string url { get; set; }
         public string expanded_url { get; set; }
@@ -23,7 +23,7 @@ namespace SimpleAuthentication.Core.Providers.Twitter
         public List<int> indices { get; set; }
     }
 
-    public class UserMention
+    internal class UserMention
     {
         public string screen_name { get; set; }
         public string name { get; set; }
@@ -32,7 +32,7 @@ namespace SimpleAuthentication.Core.Providers.Twitter
         public List<int> indices { get; set; }
     }
 
-    public class Entities2
+    internal class Entities2
     {
         public List<object> hashtags { get; set; }
         public List<object> symbols { get; set; }
@@ -40,7 +40,7 @@ namespace SimpleAuthentication.Core.Providers.Twitter
         public List<UserMention> user_mentions { get; set; }
     }
 
-    public class Status
+    internal class Status
     {
         public string created_at { get; set; }
         public long id { get; set; }
@@ -66,7 +66,7 @@ namespace SimpleAuthentication.Core.Providers.Twitter
         public string lang { get; set; }
     }
 
-    public class TwitterUserInformation
+    internal class TwitterUserInformation
     {
         public int id { get; set; }
         public string id_str { get; set; }

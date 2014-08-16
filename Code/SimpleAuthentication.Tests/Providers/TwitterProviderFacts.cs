@@ -26,7 +26,7 @@ namespace SimpleAuthentication.Tests.Providers
 
                 var accessTokenContent = File.ReadAllText("Sample Data\\Twitter-AccessToken-Content.txt");
                 var accessTokenResponse = FakeHttpMessageHandler.GetStringHttpResponseMessage(accessTokenContent);
-                var verifyCredentialsContent = File.ReadAllText("Sample Data\\Twitter-VerifyCredentials-Content.txt");
+                var verifyCredentialsContent = File.ReadAllText("Sample Data\\Twitter-VerifyCredentials-Content.json");
                 var verifyCredentialsResponse =
                     FakeHttpMessageHandler.GetStringHttpResponseMessage(verifyCredentialsContent);
                 HttpClientFactory.MessageHandler =

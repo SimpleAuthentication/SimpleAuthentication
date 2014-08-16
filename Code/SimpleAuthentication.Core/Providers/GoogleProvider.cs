@@ -17,15 +17,7 @@ namespace SimpleAuthentication.Core.Providers
     {
         public GoogleProvider(ProviderParams providerParams) : base(providerParams)
         {
-            if (providerParams.Scopes == null ||
-                !providerParams.Scopes.Any())
-            {
-                // Default our scopes if none have been provided.
-                Scopes = new[]
-                       {
-                           "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
-                       };
-            }
+            ScopeSeparator = " ";
         }
 
         #region IAuthenticationProvider Implementation
@@ -33,11 +25,6 @@ namespace SimpleAuthentication.Core.Providers
         public override string Name
         {
             get { return "Google"; }
-        }
-
-        public override string Description
-        {
-            get { return "OAuth 2.0"; }
         }
 
         public override async Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(Uri callbackUrl)
@@ -55,49 +42,37 @@ namespace SimpleAuthentication.Core.Providers
 
         #region OAuth20Provider Implementation
 
+        protected override IEnumerable<string> DefaultScopes
+        {
+            get { return new[] {"profile", "email"}; }
+        }
+
         protected override Uri AccessTokenUri
         {
             get { return new Uri("https://accounts.google.com/o/oauth2/token"); }
         }
 
-        protected override async Task<UserInformation> GetUserInformationAsync(AccessToken accessToken)
+        protected override Uri GetUserInformationUri(AccessToken accessToken)
         {
             if (accessToken == null)
             {
-                throw new ArgumentNullException("accessToken");
+                throw new ArgumentNullException();
             }
 
-            if (string.IsNullOrWhiteSpace(accessToken.Token))
+            var requestUri = string.Format("https://www.googleapis.com/oauth2/v2/userinfo?access_token={0}", 
+                accessToken.Token);
+
+            return new Uri(requestUri);
+        }
+
+        protected override UserInformation GetUserInformationFromContent(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
             {
-                throw new ArgumentException("accessToken.Token");
+                throw new ArgumentNullException("content");
             }
 
-            UserInfoResult userInfoResult;
-
-            try
-            {
-                string jsonResponse;
-
-                using (var client = HttpClientFactory.GetHttpClient())
-                {
-                    var requestUri = new Uri(string.Format("https://www.googleapis.com/oauth2/v2/userinfo?access_token={0}", accessToken.Token));
-
-                    //TraceSource.TraceVerbose("Retrieving user information. Google Endpoint: {0}",
-                    //    requestUri.AbsoluteUri);
-
-                    jsonResponse = await client.GetStringAsync(requestUri);
-                }
-
-                userInfoResult = JsonConvert.DeserializeObject<UserInfoResult>(jsonResponse);
-            }
-            catch (Exception exception)
-            {
-                var errorMessage =
-                    string.Format("Failed to retrieve any UserInfo data from the Google Api. Error Messages: {0}",
-                        exception.RecursiveErrorMessages());
-                //TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage, exception);
-            }
+            var userInfoResult = JsonConvert.DeserializeObject<UserInfoResult>(content);
 
             return new UserInformation
             {
@@ -110,24 +85,6 @@ namespace SimpleAuthentication.Core.Providers
                 Locale = userInfoResult.Locale,
                 Picture = userInfoResult.Picture,
                 UserName = userInfoResult.GivenName
-            };
-        }
-
-        protected override AccessToken MapAccessTokenContentToAccessToken(string content)
-        {
-            if (string.IsNullOrWhiteSpace(content))
-            {
-                throw new ArgumentNullException("content");
-            }
-
-            var result = JsonConvert.DeserializeObject<dynamic>(content);
-            var expiresIn = Convert.ToDouble(result.expires_in, CultureInfo.InvariantCulture);
-            return new AccessToken
-            {
-                Token = result.access_token,
-                ExpiresOn = expiresIn > 0
-                    ? DateTime.UtcNow.AddSeconds(expiresIn)
-                    : DateTime.MaxValue
             };
         }
 

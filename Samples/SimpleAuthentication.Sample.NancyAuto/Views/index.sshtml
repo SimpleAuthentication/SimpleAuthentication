@@ -11,7 +11,7 @@
                     <a href="/authenticate/twitter"><img src="/Content/twitter_32.png" alt="Login with your Twitter account."/></a>
                     <a href="/authenticate/facebook"><img src="/Content/facebook_32.png" alt="Login with your Facebook account."/></a>
                     <a href="/authenticate/google"><img src="/Content/google_32.png" alt="Login with your Google account."/></a>
-                    <a href="/authenticate/WindowsLive"><img src="/Content/windowslive_32.png" alt="Login with your Windows Live account."/></a>
+                    <a href="http://simpleauthentication.localtest.me:7000/authenticate/WindowsLive"><img src="/Content/windowslive_32.png" alt="Login with your Windows Live account."/></a>
                 </fieldset>
     
                 <hr/>

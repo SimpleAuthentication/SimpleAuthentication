@@ -143,7 +143,7 @@ namespace SimpleAuthentication.Tests.Providers
                 // Assert.
                 result.RedirectUri.AbsoluteUri.ShouldBe(
                     string.Format(
-                        "https://www.facebook.com/dialog/oauth?client_id=adskfhsd%20kds%20j%20k%26%5E%25%2A%26%5E%25%2A%25%2F%5C%2F%5C%2F%5C%2F111&redirect_uri=http%3A%2F%2Fwww.mywebsite.com%2Fauth%2Fcallback%3Fprovider%3Dfacebookz0r&response_type=code&state={0}",
+                        "https://www.facebook.com/dialog/oauth?client_id=adskfhsd%20kds%20j%20k%26%5E%25%2A%26%5E%25%2A%25%2F%5C%2F%5C%2F%5C%2F111&redirect_uri=http%3A%2F%2Fwww.mywebsite.com%2Fauth%2Fcallback%3Fprovider%3Dfacebookz0r&response_type=code&scope=public_profile%2Cemail&state={0}",
                         result.State));
                 result.State.ShouldNotBeNullOrEmpty();
             }
@@ -166,7 +166,7 @@ namespace SimpleAuthentication.Tests.Providers
                 // Assert.
                 result.RedirectUri.AbsoluteUri.ShouldBe(
                     string.Format(
-                        "https://m.facebook.com/dialog/oauth?client_id=adskfhsd%20kds%20j%20k%26%5E%25%2A%26%5E%25%2A%25%2F%5C%2F%5C%2F%5C%2F111&redirect_uri=http%3A%2F%2Fwww.mywebsite.com%2Fauth%2Fcallback%3Fprovider%3Dfacebookz0r&response_type=code&state={0}",
+                         "https://m.facebook.com/dialog/oauth?client_id=adskfhsd%20kds%20j%20k%26%5E%25%2A%26%5E%25%2A%25%2F%5C%2F%5C%2F%5C%2F111&redirect_uri=http%3A%2F%2Fwww.mywebsite.com%2Fauth%2Fcallback%3Fprovider%3Dfacebookz0r&response_type=code&scope=public_profile%2Cemail&state={0}",
                         result.State));
                 result.State.ShouldNotBeNullOrEmpty();
             }
@@ -189,7 +189,7 @@ namespace SimpleAuthentication.Tests.Providers
                 // Assert.
                 result.RedirectUri.AbsoluteUri.ShouldBe(
                     string.Format(
-                        "https://www.facebook.com/dialog/oauth?client_id=adskfhsd%20kds%20j%20k%26%5E%25%2A%26%5E%25%2A%25%2F%5C%2F%5C%2F%5C%2F111&redirect_uri=http%3A%2F%2Fwww.mywebsite.com%2Fauth%2Fcallback%3Fprovider%3Dfacebookz0r&response_type=code&state={0}&display=popup",
+                         "https://www.facebook.com/dialog/oauth?client_id=adskfhsd%20kds%20j%20k%26%5E%25%2A%26%5E%25%2A%25%2F%5C%2F%5C%2F%5C%2F111&redirect_uri=http%3A%2F%2Fwww.mywebsite.com%2Fauth%2Fcallback%3Fprovider%3Dfacebookz0r&response_type=code&scope=public_profile%2Cemail&state={0}&display=popup",
                         result.State));
                 result.State.ShouldNotBeNullOrEmpty();
             }

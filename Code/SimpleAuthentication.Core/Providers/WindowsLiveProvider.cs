@@ -8,8 +8,98 @@
 //using SimpleAuthentication.Core.Providers.WindowsLive;
 //using SimpleAuthentication.Core.Tracing;
 
-//namespace SimpleAuthentication.Core.Providers
-//{
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using SimpleAuthentication.Core.Providers.OAuth.V20;
+using SimpleAuthentication.Core.Providers.WindowsLive;
+
+namespace SimpleAuthentication.Core.Providers
+{
+    public class WindowsLiveProvider : OAuth20Provider
+    {
+        public WindowsLiveProvider(ProviderParams providerParams) : base(providerParams)
+        {
+        }
+
+        #region IAuthenticationProvider Implementation
+
+        public override string Name
+        {
+            get { return "WindowsLive"; }
+        }
+
+        public override async Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(
+            Uri callbackUrl)
+        {
+            if (callbackUrl == null)
+            {
+                throw new ArgumentNullException("callbackUrl");
+            }
+
+            var providerAuthenticationUrl = new Uri("https://login.live.com/oauth20_authorize.srf");
+            return GetRedirectToAuthenticateSettings(callbackUrl, providerAuthenticationUrl);
+        }
+
+        #endregion
+
+        #region OAuth20Provider Implementation
+
+        protected override IEnumerable<string> DefaultScopes
+        {
+            get { return new[] { "wl.signin", "wl.basic", "wl.emails" }; }
+        }
+
+        protected override Uri AccessTokenUri
+        {
+            get { return new Uri("https://login.live.com/oauth20_token.srf"); }
+        }
+
+        protected override Uri GetUserInformationUri(AccessToken accessToken)
+        {
+            var requestUrl = string.Format("https://apis.live.net/v5.0/me?access_token={0}",
+                accessToken.Token);
+
+            return new Uri(requestUrl);
+        }
+
+        protected override UserInformation GetUserInformationFromContent(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                throw new ArgumentNullException("content");
+            }
+
+            var result = JsonConvert.DeserializeObject<UserInfoResult>(content);
+
+            var name = string.Format("{0} {1}",
+                string.IsNullOrWhiteSpace(result.FirstName)
+                    ? string.Empty
+                    : result.FirstName,
+                string.IsNullOrWhiteSpace(result.LastName)
+                    ? string.Empty
+                    : result.LastName);
+            var picture = string.Format("https://apis.live.net/v5.0/{0}/picture", result.Id);
+            var gender = (GenderType) Enum.Parse(typeof (GenderType), result.Gender ?? "Unknown", true);
+
+            // NOTE: No username field provided.
+            return new UserInformation
+            {
+                Name = result.Name,
+                Locale = result.Locale,
+                Id = result.Id,
+                Email = result.Emails == null
+                    ? null
+                    : result.Emails.Preferred,
+                Picture = picture,
+                Gender = gender
+            };
+        }
+
+        #endregion
+    }
+
 //    public class WindowsLiveProvider : BaseOAuthProvider<AccessTokenResult>
 //    {
 //        // *********************************************************************
@@ -174,8 +264,6 @@
 //        #endregion
 
 
-
-
 //        #region BaseOAuth20Token<AccessTokenResult> Implementation
 
 //        protected override IRestResponse<AccessTokenResult> ExecuteRetrieveAccessToken(string authorizationCode,
@@ -313,4 +401,4 @@
 
 //        #endregion
 //    }
-//}
+}

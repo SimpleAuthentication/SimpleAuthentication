@@ -2,7 +2,7 @@
 
 namespace SimpleAuthentication.Core.Providers.Facebook
 {
-    public class MeResult
+    internal class MeResult
     {
         public long Id { get; set; }
         public string Name { get; set; }

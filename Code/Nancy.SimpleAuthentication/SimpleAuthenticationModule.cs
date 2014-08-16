@@ -150,6 +150,7 @@ namespace Nancy.SimpleAuthentication
                 // Where do we return to, after we've authenticated?
                 var callbackUri = GenerateCallbackUri(provider.Name);
 
+                // Nancy.Request Nancy.DynamicDictionary
                 var queryString = new Dictionary<string, string>();
                 foreach (var key in Request.Query.Keys)
                 {

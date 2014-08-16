@@ -44,11 +44,11 @@ namespace SimpleAuthentication.Tests.Providers
                 const string publicApiKey = "adskfhsd kds j k&^%*&^%*%/\\/\\/\\/111";
                 const string secretApiKey = "xxxxxxxxx asdsad as das kds j k&^%*&^%*%/\\/\\/\\/111";
                 var provider = new GoogleProvider(new ProviderParams(publicApiKey, secretApiKey));
+                const string stateKey = "state";
                 const string state = "adyiuhj97&^*&shdgf\\//////\\dsf";
-
                 var querystring = new Dictionary<string, string>
                 {
-                    {"state", state},
+                    {stateKey, state},
                     {"code", "4/P7q7W91a-oMsCeLvIaQm6bTrgtp7"}
                 };
                 var redirectUrl = new Uri("http://www.mywebsite.com/go/here/please");

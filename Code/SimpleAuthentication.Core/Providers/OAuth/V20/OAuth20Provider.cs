@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Tracing;
 
@@ -38,7 +40,11 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
         #region IAuthenticationProvider Implementation
 
         public abstract string Name { get; }
-        public abstract string Description { get; }
+
+        public string Description
+        {
+            get { return "OAuth 2.0"; }
+        }
 
         public abstract Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(Uri callbackUrl);
 
@@ -125,7 +131,8 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
             get { return _scopeSeparator; }
             set
             {
-                if (string.IsNullOrWhiteSpace(value))
+                // NOTE: can be a 'space'.
+                if (string.IsNullOrEmpty(value))
                 {
                     throw new ArgumentNullException("value");
                 }
@@ -133,7 +140,6 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
             }
         }
 
-        public virtual IEnumerable<string> DefaultScopes { get; private set; }
         public IEnumerable<string> Scopes { get; set; }
 
         public string StateKey
@@ -151,7 +157,11 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
 
         public ITraceManager TraceManager { set; private get; }
 
+        protected abstract IEnumerable<string> DefaultScopes { get; }
+
         protected abstract Uri AccessTokenUri { get; }
+
+        protected abstract Uri GetUserInformationUri(AccessToken accessToken);
 
         protected async Task<AccessToken> GetAccessTokenAsync(string authorizationCode,
             Uri redirectUrl)
@@ -208,9 +218,45 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
             return MapAccessTokenContentToAccessToken(content);
         }
 
-        protected abstract AccessToken MapAccessTokenContentToAccessToken(string content);
+        protected virtual async Task<UserInformation> GetUserInformationAsync(AccessToken accessToken)
+        {
+            if (accessToken == null)
+            {
+                throw new ArgumentNullException("accessToken");
+            }
 
-        protected abstract Task<UserInformation> GetUserInformationAsync(AccessToken accessToken);
+            if (string.IsNullOrWhiteSpace(accessToken.Token))
+            {
+                throw new ArgumentException("accessToken.Token");
+            }
+
+            try
+            {
+                string content;
+
+                using (var client = HttpClientFactory.GetHttpClient())
+                {
+                    var requestUri = GetUserInformationUri(accessToken);
+
+                    //TraceSource.TraceVerbose("Retrieving user information. Google Endpoint: {0}",
+                    //    requestUri.AbsoluteUri);
+                    content = await client.GetStringAsync(requestUri);
+                }
+
+                return GetUserInformationFromContent(content);
+            }
+            catch (Exception exception)
+            {
+                var errorMessage =
+                    string.Format("Failed to retrieve UserInfo data from the {0} Api. Error Messages: {1}",
+                        Name,
+                        exception.RecursiveErrorMessages());
+                //TraceSource.TraceError(errorMessage);
+                throw new AuthenticationException(errorMessage, exception);
+            }
+        }
+
+        protected abstract UserInformation GetUserInformationFromContent(string content);
 
         public RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri callbackUrl,
             Uri providerAuthenticationUrl)
@@ -295,7 +341,8 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
                 return string.Empty;
             }
 
-            var separator = string.IsNullOrWhiteSpace(ScopeSeparator)
+            // NOTE: sepatator can be a space.
+            var separator = string.IsNullOrEmpty(ScopeSeparator)
                 ? ","
                 : ScopeSeparator;
             var scopesJoined = string.Join(separator, scopes).Trim();
@@ -369,6 +416,47 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
             }
 
             return code;
+        }
+
+        protected virtual AccessToken MapAccessTokenContentToAccessToken(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                throw new ArgumentNullException("content");
+            }
+
+            var accessToken = JsonConvert.DeserializeObject<dynamic>(content);
+
+            string token = accessToken.access_token;
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                var errorMessage =
+                    string.Format(
+                        "No 'access_token' key/value found in the {0} access token response. Content retrieved: {1}.",
+                        Name,
+                        content);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            string expiresInValue = accessToken.expires_in;
+            if (string.IsNullOrWhiteSpace(expiresInValue))
+            {
+                var errorMessage =
+                    string.Format(
+                        "No 'expires_in' key/value found in the {0} access token response Content retrieved: {1}.",
+                        Name,
+                        content);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            var expiresIn = Convert.ToDouble(accessToken.expires_in, CultureInfo.InvariantCulture);
+            return new AccessToken
+            {
+                Token = accessToken.access_token,
+                ExpiresOn = expiresIn > 0
+                    ? DateTime.UtcNow.AddSeconds(expiresIn)
+                    : DateTime.MaxValue
+            };
         }
 
         #endregion

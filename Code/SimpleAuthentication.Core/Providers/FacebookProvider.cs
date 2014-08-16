@@ -30,18 +30,27 @@ namespace SimpleAuthentication.Core.Providers
             get { return "Facebook"; }
         }
 
-        public override string Description
-        {
-            get { return "OAuth 2.0"; }
-        }
-
         #endregion
 
         #region OAuth20Provider Implementation
 
+        protected override IEnumerable<string> DefaultScopes
+        {
+            get { return new[] {"public_profile", "email"}; }
+        }
+
         protected override Uri AccessTokenUri
         {
             get { return new Uri("https://graph.facebook.com/oauth/access_token"); }
+        }
+
+        protected override Uri GetUserInformationUri(AccessToken accessToken)
+        {
+            var requestUri = string.Format(
+                "https://graph.facebook.com/v2.0/me?fields=id,name,gender,email,link,locale&access_token={0}",
+                accessToken.Token);
+
+            return new Uri(requestUri);
         }
 
         public override async Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(
@@ -112,49 +121,18 @@ namespace SimpleAuthentication.Core.Providers
             };
         }
 
-        protected override async Task<UserInformation> GetUserInformationAsync(AccessToken accessToken)
+        protected override UserInformation GetUserInformationFromContent(string content)
         {
-            if (accessToken == null)
+            if (string.IsNullOrWhiteSpace(content))
             {
-                throw new ArgumentNullException("accessToken");
+                throw new ArgumentNullException("content");
             }
 
-            if (string.IsNullOrWhiteSpace(accessToken.Token))
-            {
-                throw new ArgumentException("accessToken.Token");
-            }
+            var meResult = JsonConvert.DeserializeObject<MeResult>(content);
 
-            MeResult meResult;
-
-            try
-            {
-                string jsonResponse;
-
-                using (var client = HttpClientFactory.GetHttpClient())
-                {
-                    var requestUri =
-                        new Uri(
-                            string.Format(
-                                "https://graph.facebook.com/v2.0/me?fields=id,name,gender,email,link,locale&access_token={0}",
-                                accessToken.Token));
-
-                    //TraceSource.TraceVerbose("Retrieving user information. Google Endpoint: {0}",
-                    //    requestUri.AbsoluteUri);
-
-                    jsonResponse = await client.GetStringAsync(requestUri);
-                }
-
-                meResult = JsonConvert.DeserializeObject<MeResult>(jsonResponse);
-            }
-            catch (Exception exception)
-            {
-                var errorMessage =
-                    string.Format("Failed to retrieve any UserInfo data from the Google Api. Error Messages: {0}",
-                        exception.RecursiveErrorMessages());
-                //TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage, exception);
-            }
-
+            // Note: UserName has been removed from API >= 2.0.
+            // REF: https://developers.facebook.com/docs/apps/upgrading
+            //      => "The /me/username field has been removed."
             return new UserInformation
             {
                 Id = meResult.Id < 0
@@ -163,7 +141,6 @@ namespace SimpleAuthentication.Core.Providers
                 Name = meResult.Name.Trim(),
                 Email = meResult.Email,
                 Locale = meResult.Locale,
-                UserName = meResult.Username,
                 Gender = string.IsNullOrWhiteSpace(meResult.Gender)
                     ? GenderType.Unknown
                     : GenderTypeHelpers.ToGenderType(meResult.Gender),

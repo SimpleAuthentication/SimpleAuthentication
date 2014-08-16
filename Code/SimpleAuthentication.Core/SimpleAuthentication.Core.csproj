@@ -94,7 +94,6 @@
     <Compile Include="Providers\OAuth\V10a\RequestToken.cs" />
     <Compile Include="Providers\OAuth\V10a\OAuthVerifier.cs" />
     <Compile Include="Providers\Twitter\TwitterUserInformation.cs" />
-    <Compile Include="Providers\WindowsLive\AccessTokenResult.cs" />
     <Compile Include="Providers\WindowsLive\Emails.cs" />
     <Compile Include="Providers\WindowsLive\UserInfoResult.cs" />
     <Compile Include="RedirectToAuthenticateSettings.cs" />
