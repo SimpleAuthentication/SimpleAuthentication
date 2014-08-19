@@ -65,6 +65,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExtraProviders\GitHubProviderFacts.cs" />
     <Compile Include="FakeHttpMessageHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\FacebookProviderFacts.cs" />
@@ -78,6 +79,12 @@
     <Compile Include="WebSites\SimpleAuthenticationModuleFacts.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Sample Data\GitHub-AccessToken-Content.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Sample Data\GitHub-UserInfoResult-Content.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Sample Data\WindowsLive-UserInfo-Content.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -118,6 +125,10 @@
     <ProjectReference Include="..\SimpleAuthentication.Core\SimpleAuthentication.Core.csproj">
       <Project>{f94e2140-8262-4463-8054-0b1dce8abe03}</Project>
       <Name>SimpleAuthentication.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SimpleAuthentication.ExtraProviders\SimpleAuthentication.ExtraProviders.csproj">
+      <Project>{B402F572-08B1-42AE-A8AA-6DC68452F28B}</Project>
+      <Name>SimpleAuthentication.ExtraProviders</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

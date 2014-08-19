@@ -161,7 +161,12 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
 
         protected abstract Uri AccessTokenUri { get; }
 
-        protected abstract Uri GetUserInformationUri(AccessToken accessToken);
+        protected abstract Uri UserInformationUri(AccessToken accessToken);
+
+        protected virtual string UserAgent
+        {
+            get { return null; }
+        }
 
         protected async Task<AccessToken> GetAccessTokenAsync(string authorizationCode,
             Uri redirectUrl)
@@ -236,7 +241,13 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
 
                 using (var client = HttpClientFactory.GetHttpClient())
                 {
-                    var requestUri = GetUserInformationUri(accessToken);
+                    var requestUri = UserInformationUri(accessToken);
+
+                    // Some API's (like GitHub) require a UserAgent header.
+                    if (!string.IsNullOrWhiteSpace(UserAgent))
+                    {
+                        client.DefaultRequestHeaders.Add("user-agent", UserAgent);
+                    }
 
                     //TraceSource.TraceVerbose("Retrieving user information. Google Endpoint: {0}",
                     //    requestUri.AbsoluteUri);
@@ -420,6 +431,11 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
 
         protected virtual AccessToken MapAccessTokenContentToAccessToken(string content)
         {
+            return MapAccessTokenContentToAccessTokenForSomeJson(content);
+        }
+
+        protected AccessToken MapAccessTokenContentToAccessTokenForSomeJson(string content)
+        {
             if (string.IsNullOrWhiteSpace(content))
             {
                 throw new ArgumentNullException("content");
@@ -453,6 +469,61 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
             return new AccessToken
             {
                 Token = accessToken.access_token,
+                ExpiresOn = expiresIn > 0
+                    ? DateTime.UtcNow.AddSeconds(expiresIn)
+                    : DateTime.MaxValue
+            };
+        }
+
+        protected AccessToken MapAccessTokenContentToAccessTokenForSomeKeyValues(string content,
+            string tokenKey = "access_token",
+            string expiresOnKey = "expires")
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                throw new ArgumentNullException("content");
+            }
+
+            if (string.IsNullOrWhiteSpace(tokenKey))
+            {
+                throw new ArgumentNullException("tokenKey");
+            }
+
+            if (string.IsNullOrWhiteSpace(expiresOnKey))
+            {
+                throw new ArgumentNullException("expiresOnKey");
+            }
+
+            // The data is in a key/value format. So lets split this data out.
+            var keyValues = SystemHelpers.ConvertKeyValueContentToDictionary(content);
+            if (keyValues == null ||
+                !keyValues.Any())
+            {
+                var errorMessage =
+                    string.Format("Failed to extract the access token from the body content. Content returned: {0}",
+                        content);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            // NOTE: It's possible that we don't always have an expires key/value.
+            //       Some places don't care about expiring an acess token, I guess.
+            if (!keyValues.ContainsKey(tokenKey))
+            {
+                var errorMessage =
+                    string.Format(
+                        "Failed to extract the access token from the body content. Content needs both the '{0}' and '{1}' keys.",
+                        tokenKey,
+                        expiresOnKey);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            var expiresIn = keyValues.ContainsKey(expiresOnKey)
+                ? Convert.ToDouble(keyValues[expiresOnKey], CultureInfo.InvariantCulture)
+                : 0;
+
+            return new AccessToken
+            {
+                Token = keyValues[tokenKey],
                 ExpiresOn = expiresIn > 0
                     ? DateTime.UtcNow.AddSeconds(expiresIn)
                     : DateTime.MaxValue

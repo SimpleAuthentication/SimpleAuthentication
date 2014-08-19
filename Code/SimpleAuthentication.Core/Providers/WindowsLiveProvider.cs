@@ -56,7 +56,7 @@ namespace SimpleAuthentication.Core.Providers
             get { return new Uri("https://login.live.com/oauth20_token.srf"); }
         }
 
-        protected override Uri GetUserInformationUri(AccessToken accessToken)
+        protected override Uri UserInformationUri(AccessToken accessToken)
         {
             var requestUrl = string.Format("https://apis.live.net/v5.0/me?access_token={0}",
                 accessToken.Token);

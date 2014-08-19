@@ -44,7 +44,7 @@ namespace SimpleAuthentication.Core.Providers
             get { return new Uri("https://graph.facebook.com/oauth/access_token"); }
         }
 
-        protected override Uri GetUserInformationUri(AccessToken accessToken)
+        protected override Uri UserInformationUri(AccessToken accessToken)
         {
             var requestUri = string.Format(
                 "https://graph.facebook.com/v2.0/me?fields=id,name,gender,email,link,locale&access_token={0}",
@@ -81,44 +81,7 @@ namespace SimpleAuthentication.Core.Providers
 
         protected override AccessToken MapAccessTokenContentToAccessToken(string content)
         {
-            if (string.IsNullOrWhiteSpace(content))
-            {
-                throw new ArgumentNullException("content");
-            }
-
-            // The data is in a key/value format. So lets split this data out.
-            var keyValues = SystemHelpers.ConvertKeyValueContentToDictionary(content);
-            if (keyValues == null ||
-                !keyValues.Any())
-            {
-                var errorMessage =
-                    string.Format("Failed to extract the access token from the body content. Content returned: {0}",
-                        content);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            const string tokenKey = "access_token";
-            const string expiresOnKey = "expires";
-
-            if (!keyValues.ContainsKey(tokenKey) &&
-                !keyValues.ContainsKey(expiresOnKey))
-            {
-                var errorMessage =
-                    string.Format(
-                        "Failed to extract the access token from the body content. Content needs both the '{0}' and '{1}' keys.",
-                        tokenKey,
-                        expiresOnKey);
-                throw new AuthenticationException(errorMessage);
-            }
-
-            var expiresIn = Convert.ToDouble(keyValues[expiresOnKey], CultureInfo.InvariantCulture);
-            return new AccessToken
-            {
-                Token = keyValues[tokenKey],
-                ExpiresOn = expiresIn > 0
-                    ? DateTime.UtcNow.AddSeconds(expiresIn)
-                    : DateTime.MaxValue
-            };
+            return MapAccessTokenContentToAccessTokenForSomeKeyValues(content);
         }
 
         protected override UserInformation GetUserInformationFromContent(string content)

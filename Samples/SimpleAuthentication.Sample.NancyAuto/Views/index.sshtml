@@ -15,6 +15,12 @@
                 </fieldset>
     
                 <hr/>
+                <fieldset title="Extra Providers">
+                    <legend>Extra Providers</legend>
+                    <a href="/authenticate/github"><img src="/Content/github_32.png" alt="Login with your GitHub account."</a>
+                </fieldset>
+
+                <hr/>
     
                 <fieldset title="Fake Logins (these do not require the internet - great for localhost testing)">
                     <legend>Fake Logins:</legend>

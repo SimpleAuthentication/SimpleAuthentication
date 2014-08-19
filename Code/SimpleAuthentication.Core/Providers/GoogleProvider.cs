@@ -52,7 +52,7 @@ namespace SimpleAuthentication.Core.Providers
             get { return new Uri("https://accounts.google.com/o/oauth2/token"); }
         }
 
-        protected override Uri GetUserInformationUri(AccessToken accessToken)
+        protected override Uri UserInformationUri(AccessToken accessToken)
         {
             if (accessToken == null)
             {
