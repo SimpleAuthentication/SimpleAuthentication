@@ -70,6 +70,7 @@ namespace SimpleAuthentication.Tests.Providers
                 result.ProviderName.ShouldBe("Google");
                 result.AccessToken.Token.ShouldBe("ya29.MwAjlO-LAHrX3RoAAABjuR4Tt5Ctgp8PvfK5RN8RURPjQW_dYL5Hu7-hETXapw");
                 result.UserInformation.Email.ShouldBe("foo@pewpew.com");
+                result.RawUserInformation.ShouldNotBe(null);
             }
 
             [Fact]

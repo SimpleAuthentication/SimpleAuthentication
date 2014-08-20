@@ -82,6 +82,7 @@ namespace SimpleAuthentication.Tests.Providers
                 result.UserInformation.UserName.ShouldBe(null);
                 result.UserInformation.Email.ShouldBe("tanis.half-elven@InnOfLastHope.krynn");
                 result.UserInformation.Picture.ShouldBe("https://apis.live.net/v5.0/1234/picture");
+                result.RawUserInformation.ShouldNotBe(null);
             }
         }
     }

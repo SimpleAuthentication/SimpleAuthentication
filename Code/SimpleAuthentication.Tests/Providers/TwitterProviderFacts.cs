@@ -45,17 +45,18 @@ namespace SimpleAuthentication.Tests.Providers
                 };
 
                 // Act.
-                var authenticatedClient = await provider.AuthenticateClientAsync(querystring, state, null);
+                var result = await provider.AuthenticateClientAsync(querystring, state, null);
 
                 // Assert.
-                authenticatedClient.ProviderName.ShouldBe("Twitter");
-                authenticatedClient.AccessToken.Token.ShouldBe("16357275-5h2o01LoiGsdEVPqNsvYzj9l9n9A7ThRednaL3JyI");
-                authenticatedClient.AccessToken.Secret.ShouldBe("CvYNcm7Vs2IGyguHrNw2DArmCVqTtwrCw0oWeb1hH8");
-                authenticatedClient.AccessToken.ExpiresOn.ShouldBe(DateTime.MaxValue);
-                authenticatedClient.UserInformation.Name.ShouldBe("Matt Harris");
-                authenticatedClient.UserInformation.Email.ShouldBeNullOrEmpty();
-                authenticatedClient.UserInformation.Id.ShouldBe("777925");
-                authenticatedClient.UserInformation.UserName.ShouldBe("themattharris");
+                result.ProviderName.ShouldBe("Twitter");
+                result.AccessToken.Token.ShouldBe("16357275-5h2o01LoiGsdEVPqNsvYzj9l9n9A7ThRednaL3JyI");
+                result.AccessToken.Secret.ShouldBe("CvYNcm7Vs2IGyguHrNw2DArmCVqTtwrCw0oWeb1hH8");
+                result.AccessToken.ExpiresOn.ShouldBe(DateTime.MaxValue);
+                result.UserInformation.Name.ShouldBe("Matt Harris");
+                result.UserInformation.Email.ShouldBeNullOrEmpty();
+                result.UserInformation.Id.ShouldBe("777925");
+                result.UserInformation.UserName.ShouldBe("themattharris");
+                result.RawUserInformation.ShouldNotBe(null);
             }
 
             [Fact]

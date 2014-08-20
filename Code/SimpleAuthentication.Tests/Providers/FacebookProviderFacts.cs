@@ -55,6 +55,7 @@ namespace SimpleAuthentication.Tests.Providers
                 result.ProviderName.ShouldBe("Facebook");
                 result.AccessToken.Token.ShouldBe(keyValues["access_token"]);
                 result.UserInformation.Email.ShouldBe("foo@pewpew.com");
+                result.RawUserInformation.ShouldNotBe(null);
             }
 
             [Fact]

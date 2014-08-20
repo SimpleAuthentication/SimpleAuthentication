@@ -80,13 +80,13 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V10a
             
             var accessToken = await GetAccessTokenAsync(oAuthVerifier);
 
-            var userInformation = await GetUserInformationAsync(accessToken);
+            var userInformationContent = await GetUserInformationAsync(accessToken);
+            var userInformation = GetUserInformationFromContent(userInformationContent);
 
-            return new AuthenticatedClient(Name)
-            {
-                AccessToken = accessToken,
-                UserInformation = userInformation
-            };
+            return new AuthenticatedClient(Name,
+                accessToken,
+                userInformation,
+                userInformationContent);
         }
 
         #endregion
@@ -266,7 +266,7 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V10a
             return GetAccessTokenFromResponseContent(content);
         }
 
-        private async Task<UserInformation> GetUserInformationAsync(AccessToken accessToken)
+        private async Task<string> GetUserInformationAsync(AccessToken accessToken)
         {
             if (accessToken == null)
             {
@@ -300,7 +300,7 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V10a
                 throw new AuthenticationException(errorMessage);
             }
 
-            return GetUserInformationFromContent(content);
+            return content;
         }
     }
 }

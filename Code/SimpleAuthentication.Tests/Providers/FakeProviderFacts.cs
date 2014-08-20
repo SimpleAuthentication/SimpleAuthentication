@@ -38,6 +38,7 @@ namespace SimpleAuthentication.Tests.Providers
                 result.UserInformation.Picture.Length.ShouldBeGreaterThan(0);
                 result.UserInformation.UserName.ShouldBe("Sturm.Brightblade");
                 result.UserInformation.Name.ShouldBe("Sturm Brightblade");
+                result.RawUserInformation.ShouldNotBe(null);
             }
 
             [Fact]
