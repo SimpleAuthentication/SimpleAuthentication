@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExtraProviders\GitHubProviderFacts.cs" />
+    <Compile Include="ExtraProviders\InstagramProviderFacts.cs" />
     <Compile Include="FakeHttpMessageHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\FacebookProviderFacts.cs" />
@@ -82,6 +83,12 @@
     <Content Include="Sample Data\GitHub-AccessToken-Content.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Sample Data\Instagram-AccessToken-Content.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Sample Data\Instagram-UserInfoResult-Content.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Sample Data\GitHub-UserInfoResult-Content.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

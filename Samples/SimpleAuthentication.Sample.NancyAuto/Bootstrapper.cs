@@ -15,9 +15,14 @@ namespace SimpleAuthentication.Sample.NancyAuto
 
             var gitHubProvider = new GitHubProvider(new ProviderParams("9403c7920a82689969d1",
                 "e5b3807c7c97466634bdf21ddf9a179485f1fe60"));
+            var instagramProvider = new InstagramProvider(
+                new ProviderParams("76310ae10207427f878c23001dc10d2a",
+                    "b43c02181f754debac0cf4e38b59fd7f"));
+
             var authenticationProviderFactory = new AuthenticationProviderFactory(new ConfigService());
 
             authenticationProviderFactory.AddProvider(gitHubProvider);
+            authenticationProviderFactory.AddProvider(instagramProvider);
         }
 
         protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
