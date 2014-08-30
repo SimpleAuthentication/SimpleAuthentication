@@ -65,6 +65,9 @@
     <Compile Include="ICache.cs" />
     <Compile Include="Config\AppSettingsParser.cs" />
     <Compile Include="Providers\GoogleProvider.cs" />
+    <Compile Include="Providers\Google\Emails.cs" />
+    <Compile Include="Providers\Google\Image.cs" />
+    <Compile Include="Providers\Google\Name.cs" />
     <Compile Include="Providers\OAuth\V10a\OAuth10Provider.cs" />
     <Compile Include="Providers\OAuth\V20\OAuth20Provider.cs" />
     <Compile Include="Providers\FacebookProvider.cs" />

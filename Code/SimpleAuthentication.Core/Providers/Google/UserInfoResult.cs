@@ -1,16 +1,16 @@
-﻿namespace SimpleAuthentication.Core.Providers.Google
+﻿using System.Collections.Generic;
+
+namespace SimpleAuthentication.Core.Providers.Google
 {
     internal class UserInfoResult
     {
         public string Id { get; set; }
-        public string Email { get; set; }
+        public ICollection<Emails> Emails { get; set; }
         public bool VerifiedEmail { get; set; }
-        public string Name { get; set; }
-        public string GivenName { get; set; }
-        public string FamilyName { get; set; }
-        public string Link { get; set; }
-        public string Picture { get; set; }
+        public Name Name { get; set; }
+        public string DisplayName { get; set; }
+        public Image Image { get; set; }
         public string Gender { get; set; }
-        public string Locale { get; set; }
+        public string Language { get; set; }
     }
 }

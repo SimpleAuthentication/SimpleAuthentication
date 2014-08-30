@@ -59,7 +59,7 @@ namespace SimpleAuthentication.Core.Providers
                 throw new ArgumentNullException();
             }
 
-            var requestUri = string.Format("https://www.googleapis.com/oauth2/v2/userinfo?access_token={0}", 
+            var requestUri = string.Format("https://www.googleapis.com/plus/v1/people/me?access_token={0}", 
                 accessToken.Token);
 
             return new Uri(requestUri);
@@ -80,11 +80,16 @@ namespace SimpleAuthentication.Core.Providers
                 Gender = string.IsNullOrWhiteSpace(userInfoResult.Gender)
                     ? GenderType.Unknown
                     : GenderTypeHelpers.ToGenderType(userInfoResult.Gender),
-                Name = userInfoResult.Name,
-                Email = userInfoResult.Email,
-                Locale = userInfoResult.Locale,
-                Picture = userInfoResult.Picture,
-                UserName = userInfoResult.GivenName
+                Name = string.Format("{0} {1}",
+                    userInfoResult.Name.GivenName,
+                    userInfoResult.Name.FamilyName).Trim(),
+                Email = userInfoResult.Emails != null &&
+                        userInfoResult.Emails.Any()
+                    ? userInfoResult.Emails.First().Value
+                    : null,
+                Locale = userInfoResult.Language,
+                Picture = userInfoResult.Image.Url,
+                UserName = userInfoResult.DisplayName
             };
         }
 

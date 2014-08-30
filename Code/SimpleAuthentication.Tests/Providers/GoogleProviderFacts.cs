@@ -60,7 +60,7 @@ namespace SimpleAuthentication.Tests.Providers
                     new Dictionary<string, HttpResponseMessage>
                     {
                         {"https://accounts.google.com/o/oauth2/token", accessTokenResponse},
-                        {"https://www.googleapis.com/oauth2/v2/userinfo?access_token=ya29.MwAjlO-LAHrX3RoAAABjuR4Tt5Ctgp8PvfK5RN8RURPjQW_dYL5Hu7-hETXapw", userInformationResponse}
+                        {"https://www.googleapis.com/plus/v1/people/me?access_token=ya29.MwAjlO-LAHrX3RoAAABjuR4Tt5Ctgp8PvfK5RN8RURPjQW_dYL5Hu7-hETXapw", userInformationResponse}
                     });
 
                 // Arrange.
