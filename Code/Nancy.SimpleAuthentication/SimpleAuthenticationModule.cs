@@ -142,6 +142,7 @@ namespace Nancy.SimpleAuthentication
 
             #region Retrieve the User Information
 
+            Exception errorException = null;
             try
             {
                 // Which provider did we just authenticate with?
@@ -163,7 +164,13 @@ namespace Nancy.SimpleAuthentication
             catch (Exception exception)
             {
                 TraceSource.TraceError(exception.Message);
-                return _callbackProvider.OnRedirectToAuthenticationProviderError(this, exception);
+                errorException = exception;
+            }
+
+            // NOTE: can't await in a try/catch :/
+            if (errorException != null)
+            {
+                return _callbackProvider.OnRedirectToAuthenticationProviderError(this, errorException);
             }
 
             #endregion
@@ -177,7 +184,7 @@ namespace Nancy.SimpleAuthentication
 
             // Finally! We can hand over the logic to the consumer to do whatever they want.
             TraceSource.TraceVerbose("About to execute your custom callback provider logic.");
-            return _callbackProvider.Process(this, model);
+            return await _callbackProvider.ProcessAsync(this, model);
         }
 
         private IAuthenticationProvider GetAuthenticationProvider(string providerKey)

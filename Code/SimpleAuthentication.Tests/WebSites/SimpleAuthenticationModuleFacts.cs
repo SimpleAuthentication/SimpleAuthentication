@@ -187,11 +187,11 @@ namespace SimpleAuthentication.Tests.WebSites
                 const HttpStatusCode expectedStatusCode = HttpStatusCode.SeeOther;
                 var authenticationCallbackProvider = A.Fake<IAuthenticationCallbackProvider>();
                 A.CallTo(() => authenticationCallbackProvider
-                    .Process(A<NancyModule>._, A<AuthenticateCallbackResult>._))
-                    .Returns(new Response
+                    .ProcessAsync(A<NancyModule>._, A<AuthenticateCallbackResult>._))
+                    .Returns(Task.FromResult(new Response
                     {
                         StatusCode = expectedStatusCode
-                    });
+                    }));
                 var configuration = new Configuration
                 {
                     Providers = new[]
@@ -217,7 +217,7 @@ namespace SimpleAuthentication.Tests.WebSites
                     new Dictionary<string, HttpResponseMessage>
                     {
                         {"https://accounts.google.com/o/oauth2/token", accessTokenResponse },
-                        {"https://www.googleapis.com/oauth2/v2/userinfo?access_token=", userInformationResponse}
+                        {"https://www.googleapis.com/plus/v1/people/me?access_token=", userInformationResponse}
                     });
                     
                 MappedDependencies = new List<Tuple<Type, object>>
