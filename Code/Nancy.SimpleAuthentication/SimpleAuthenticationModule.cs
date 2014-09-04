@@ -258,7 +258,7 @@ namespace Nancy.SimpleAuthentication
                 throw new ArgumentNullException("requestUrl");
             }
 
-            if (String.IsNullOrWhiteSpace(path))
+            if (string.IsNullOrWhiteSpace(path))
             {
                 throw new ArgumentNullException("path");
             }
