@@ -178,20 +178,20 @@ namespace SimpleAuthentication.Tests.WebSites
             }
         }
 
-        public class AuthenticateCallbackAsyncFacts : NancyModuleTestBase<SimpleAuthenticationModule>
+        public class AuthenticateCallbackFacts : NancyModuleTestBase<SimpleAuthenticationModule>
         {
             [Fact]
-            public void GivenAValidAuthenticatedUser_AuthenticateCallbackAsync_ReturnsARedirectStatus()
+            public void GivenAValidAuthenticatedUser_AuthenticateCallback_ReturnsARedirectStatus()
             {
                 // Arrange.
                 const HttpStatusCode expectedStatusCode = HttpStatusCode.SeeOther;
                 var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
                 A.CallTo(() => authenticationCallbackProvider
                     .Process(A<NancyModule>._, A<AuthenticateCallbackResult>._))
-                    .Returns(Task.FromResult(new Response
+                    .Returns(new Response
                     {
                         StatusCode = expectedStatusCode
-                    }));
+                    });
                 var configuration = new Configuration
                 {
                     Providers = new[]
@@ -249,7 +249,7 @@ namespace SimpleAuthentication.Tests.WebSites
             }
 
             [Fact]
-            public void GivenAMissingQueryStringProviderName_AuthenticateCallbackAsync_ThrowsAnException()
+            public void GivenAMissingQueryStringProviderName_AuthenticateCallback_ThrowsAnException()
             {
                 // Arrange.
                 var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
@@ -295,7 +295,7 @@ namespace SimpleAuthentication.Tests.WebSites
             }
 
             [Fact]
-            public void GivenAMissingCachedStateValue_AuthenticateCallbackAsync_ThrowsAnException()
+            public void GivenAMissingCachedStateValue_AuthenticateCallback_ThrowsAnException()
             {
                 // Arrange.
                 var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
