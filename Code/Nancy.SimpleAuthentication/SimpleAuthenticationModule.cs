@@ -91,7 +91,7 @@ namespace Nancy.SimpleAuthentication
             var callbackUri = GenerateCallbackUri(provider.Name);
 
             // Determine where we need to redirect to.
-            var redirectToAuthenticateSettings = await provider.GetRedirectToAuthenticateSettingsAsync(callbackUri);
+            var redirectToAuthenticateSettings = provider.GetRedirectToAuthenticateSettings(callbackUri);
             if (redirectToAuthenticateSettings == null)
             {
                 // We failed to determine where to go. A classic example of this is with OpenId and a bad OpenId endpoint.

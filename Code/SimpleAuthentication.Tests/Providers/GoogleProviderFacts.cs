@@ -16,7 +16,7 @@ namespace SimpleAuthentication.Tests.Providers
         public class GetRedirectToAuthenticateSettingsFacts
         {
             [Fact]
-            public async Task GivenACallbackUrl_GetRedirectToAuthenticateSettingsAsync_ReturnsSomeRedirectToAuthenticateSettings()
+            public void GivenACallbackUrl_GetRedirectToAuthenticateSettings_ReturnsSomeRedirectToAuthenticateSettings()
             {
                 // Arrange.
                 const string publicApiKey = "adskfhsd kds j k&^%*&^%*%/\\/\\/\\/111";
@@ -25,7 +25,7 @@ namespace SimpleAuthentication.Tests.Providers
                 var callbackUrl = new Uri("http://www.mywebsite.com/auth/callback?provider=googlez0r");
 
                 // Arrange.
-                var result = await provider.GetRedirectToAuthenticateSettingsAsync(callbackUrl);
+                var result = provider.GetRedirectToAuthenticateSettings(callbackUrl);
 
                 // Assert.
                 result.RedirectUri.AbsoluteUri.ShouldStartWith(

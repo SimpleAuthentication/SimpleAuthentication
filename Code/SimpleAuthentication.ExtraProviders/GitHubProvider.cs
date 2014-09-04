@@ -34,7 +34,7 @@ namespace SimpleAuthentication.ExtraProviders
             get { return new Uri("https://api.github.com/login/oauth/access_token"); }
         }
 
-        public override async Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(
+        public override RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(
             Uri callbackUrl)
         {
             if (callbackUrl == null)

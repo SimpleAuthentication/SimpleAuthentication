@@ -107,15 +107,14 @@ namespace SimpleAuthentication.Tests.Providers
         public class GetRedirectToAuthenticateSettingsAsyncFacts
         {
             [Fact]
-            public async Task
-                GivenARequestUri_GetRedirectToAuthenticateSettingsAsync_ReturnsSomeRedirectToAuthenticateSettings()
+            public void GivenARequestUri_GetRedirectToAuthenticateSettings_ReturnsSomeRedirectToAuthenticateSettings()
             {
                 // Arrange.
                 var provider = new FakeProvider("FakePewPewProvider");
                 var requestUri = new Uri("http://www.pewpew.com/a/b/c?provider=fakePewPewProvider");
 
                 // Act.
-                var result = await provider.GetRedirectToAuthenticateSettingsAsync(requestUri);
+                var result = provider.GetRedirectToAuthenticateSettings(requestUri);
 
                 // Assert.
                 result.State.ShouldNotBeNullOrEmpty();
@@ -125,7 +124,7 @@ namespace SimpleAuthentication.Tests.Providers
             }
 
             [Fact]
-            public void GivenAnExceptionMessage_GetRedirectToAuthenticateSettingsAsync_ThrowsAnException()
+            public void GivenAnExceptionMessage_GetRedirectToAuthenticateSettings_ThrowsAnException()
             {
                 // Arrange.
                 const string exceptionMessage = "Something bad has happened. Ru-roh.";
@@ -136,8 +135,8 @@ namespace SimpleAuthentication.Tests.Providers
                 var requestUri = new Uri("http://www.pewpew.com/a/b/c?provider=fakePewPewProvider");
 
                 // Act.
-                var exception = Should.Throw<AuthenticationException>(async () =>
-                    await provider.GetRedirectToAuthenticateSettingsAsync(requestUri));
+                var exception = Should.Throw<AuthenticationException>(() =>
+                    provider.GetRedirectToAuthenticateSettings(requestUri));
 
                 // Assert.
                 exception.Message.ShouldBe(exceptionMessage);

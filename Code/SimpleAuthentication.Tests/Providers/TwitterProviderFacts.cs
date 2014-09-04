@@ -175,8 +175,7 @@ namespace SimpleAuthentication.Tests.Providers
         public class GetRedirectToAuthenticateSettingsFacts
         {
             [Fact]
-            public async Task
-                GivenACallbackUrl_GetRedirectToAuthenticateSettingsAsync_ReturnsSomeRedirectToAuthenticationSettings()
+            public void GivenACallbackUrl_GetRedirectToAuthenticateSettingsAsync_ReturnsSomeRedirectToAuthenticationSettings()
             {
                 // Arrange.
                 var providerParams = new ProviderParams("Rb7qNNPUPsRSYkznFTbF6Q",
@@ -188,7 +187,7 @@ namespace SimpleAuthentication.Tests.Providers
                 HttpClientFactory.MessageHandler = new FakeHttpMessageHandler(accessTokenResponse);
 
                 // Act.
-                var settings = await provider.GetRedirectToAuthenticateSettingsAsync(callbackUrl);
+                var settings = provider.GetRedirectToAuthenticateSettings(callbackUrl);
 
                 // Assert.
                 settings.RedirectUri.AbsoluteUri.ShouldBe(

@@ -27,7 +27,7 @@ namespace SimpleAuthentication.Core.Providers
             get { return "Google"; }
         }
 
-        public override async Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(Uri callbackUrl)
+        public override RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri callbackUrl)
         {
             if (callbackUrl == null)
             {

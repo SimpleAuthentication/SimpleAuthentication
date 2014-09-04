@@ -48,7 +48,7 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V10a
         public abstract string Name { get; }
         public abstract string Description { get; }
 
-        public abstract Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(Uri callbackUrl);
+        public abstract RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri callbackUrl);
 
         public async Task<IAuthenticatedClient> AuthenticateClientAsync(IDictionary<string, string> querystring,
             string state,
