@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Nancy.Responses.Negotiation;
 using Nancy.SimpleAuthentication.Caching;
@@ -23,13 +24,13 @@ namespace Nancy.SimpleAuthentication
         
         private readonly Lazy<ITraceManager> _traceManager = new Lazy<ITraceManager>(() => new TraceManager());
         private readonly AuthenticationProviderFactory _authenticationProviderFactory;
-        private readonly IAuthenticationCallbackProvider _callbackProvider;
+        private readonly IAuthenticationProviderCallback _providerCallback;
         private string _returnToUrlParameterKey;
 
-        public SimpleAuthenticationModule(IAuthenticationCallbackProvider callbackProvider,
+        public SimpleAuthenticationModule(IAuthenticationProviderCallback providerCallback,
             IConfigService configService)
         {
-            if (callbackProvider == null)
+            if (providerCallback == null)
             {
                 throw new ArgumentNullException("callbackProvider");
             }
@@ -39,7 +40,7 @@ namespace Nancy.SimpleAuthentication
                 throw new ArgumentNullException("configService");
             }
 
-            _callbackProvider = callbackProvider;
+            _providerCallback = providerCallback;
             _authenticationProviderFactory = new AuthenticationProviderFactory(configService);
 
             // Define the routes and how they are handled.
@@ -170,7 +171,7 @@ namespace Nancy.SimpleAuthentication
             // NOTE: can't await in a try/catch :/
             if (errorException != null)
             {
-                return _callbackProvider.OnRedirectToAuthenticationProviderError(this, errorException);
+                return _providerCallback.OnRedirectToAuthenticationProviderError(this, errorException);
             }
 
             #endregion
@@ -184,7 +185,7 @@ namespace Nancy.SimpleAuthentication
 
             // Finally! We can hand over the logic to the consumer to do whatever they want.
             TraceSource.TraceVerbose("About to execute your custom callback provider logic.");
-            return await _callbackProvider.ProcessAsync(this, model);
+            return await _providerCallback.Process(this, model);
         }
 
         private IAuthenticationProvider GetAuthenticationProvider(string providerKey)

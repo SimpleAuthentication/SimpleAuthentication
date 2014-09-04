@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Threading.Tasks;
 
 namespace Nancy.SimpleAuthentication
 {
     /// <summary>
     /// Defines the contract for the callback from an Authentication Provider.
     /// </summary>
-    public interface IAuthenticationCallbackProvider
+    public interface IAuthenticationProviderCallback
     {
         /// <summary>
         /// Custom processing during the callback from an Authentication Provider.
@@ -14,7 +13,7 @@ namespace Nancy.SimpleAuthentication
         /// <param name="nancyModule">The current module.</param>
         /// <param name="result">Some data related to the callback, such as the authenticated user data.</param>
         /// <returns>What do we do once we've authenticated? Redirect somewhere? A view? a status code?</returns>
-        Task<dynamic> ProcessAsync(NancyModule nancyModule, AuthenticateCallbackResult result);
+        dynamic Process(NancyModule nancyModule, AuthenticateCallbackResult result);
 
         /// <summary>
         /// If an error occurs during the authentication process, this is where you can handle it.

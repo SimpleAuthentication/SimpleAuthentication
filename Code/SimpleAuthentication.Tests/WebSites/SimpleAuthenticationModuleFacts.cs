@@ -27,7 +27,7 @@ namespace SimpleAuthentication.Tests.WebSites
             public void GivenAValidProviderKey_GetRedirectToProvider_ReturnsARedirectResponse()
             {
                 // Arrange.
-                var authenticationCallbackProvider = A.Fake<IAuthenticationCallbackProvider>();
+                var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
                 var configuration = new Configuration
                 {
                     Providers = new []
@@ -45,7 +45,7 @@ namespace SimpleAuthentication.Tests.WebSites
                 A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
                 MappedDependencies = new List<Tuple<Type, object>>
                 {
-                    new Tuple<Type, object>(typeof(IAuthenticationCallbackProvider), authenticationCallbackProvider),
+                    new Tuple<Type, object>(typeof(IAuthenticationProviderCallback), authenticationCallbackProvider),
                     new Tuple<Type, object>(typeof(IConfigService), configService)
                 };
 
@@ -71,12 +71,12 @@ namespace SimpleAuthentication.Tests.WebSites
             public void GivenAMissingProviderKey_GetRedirectToProvider_ReturnsANotFound()
             {
                 // Arrange.
-                var authenticationCallbackProvider = A.Fake<IAuthenticationCallbackProvider>();
+                var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
                 var configService = A.Fake<IConfigService>();
 
                 MappedDependencies = new List<Tuple<Type, object>>
                 {
-                    new Tuple<Type, object>(typeof(IAuthenticationCallbackProvider), authenticationCallbackProvider),
+                    new Tuple<Type, object>(typeof(IAuthenticationProviderCallback), authenticationCallbackProvider),
                     new Tuple<Type, object>(typeof(IConfigService), configService)
                 };
 
@@ -94,7 +94,7 @@ namespace SimpleAuthentication.Tests.WebSites
             public void GivenAValidProviderKeyAndAValidIdentifier_GetRedirectToProvider_ReturnsARedirectResponse()
             {
                 // Arrange.
-                var authenticationCallbackProvider = A.Fake<IAuthenticationCallbackProvider>();
+                var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
 
                 var configuration = new Configuration
                 {
@@ -113,7 +113,7 @@ namespace SimpleAuthentication.Tests.WebSites
 
                 MappedDependencies = new List<Tuple<Type, object>>
                 {
-                    new Tuple<Type, object>(typeof(IAuthenticationCallbackProvider), authenticationCallbackProvider),
+                    new Tuple<Type, object>(typeof(IAuthenticationProviderCallback), authenticationCallbackProvider),
                     new Tuple<Type, object>(typeof(IConfigService), configService)
                 };
 
@@ -137,7 +137,7 @@ namespace SimpleAuthentication.Tests.WebSites
             public void GivenAValidProviderKeyAndAReferrerHeader_GetRedirectToProvider_ReturnsARedirectResponse()
             {
                 // Arrange.
-                var authenticationCallbackProvider = A.Fake<IAuthenticationCallbackProvider>();
+                var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
 
                 var configuration = new Configuration
                 {
@@ -156,7 +156,7 @@ namespace SimpleAuthentication.Tests.WebSites
 
                 MappedDependencies = new List<Tuple<Type, object>>
                 {
-                    new Tuple<Type, object>(typeof(IAuthenticationCallbackProvider), authenticationCallbackProvider),
+                    new Tuple<Type, object>(typeof(IAuthenticationProviderCallback), authenticationCallbackProvider),
                     new Tuple<Type, object>(typeof(IConfigService), configService)
                 };
 
@@ -185,9 +185,9 @@ namespace SimpleAuthentication.Tests.WebSites
             {
                 // Arrange.
                 const HttpStatusCode expectedStatusCode = HttpStatusCode.SeeOther;
-                var authenticationCallbackProvider = A.Fake<IAuthenticationCallbackProvider>();
+                var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
                 A.CallTo(() => authenticationCallbackProvider
-                    .ProcessAsync(A<NancyModule>._, A<AuthenticateCallbackResult>._))
+                    .Process(A<NancyModule>._, A<AuthenticateCallbackResult>._))
                     .Returns(Task.FromResult(new Response
                     {
                         StatusCode = expectedStatusCode
@@ -222,7 +222,7 @@ namespace SimpleAuthentication.Tests.WebSites
                     
                 MappedDependencies = new List<Tuple<Type, object>>
                 {
-                    new Tuple<Type, object>(typeof(IAuthenticationCallbackProvider), authenticationCallbackProvider),
+                    new Tuple<Type, object>(typeof(IAuthenticationProviderCallback), authenticationCallbackProvider),
                     new Tuple<Type, object>(typeof(IConfigService), configService),
                 };
 
@@ -252,7 +252,7 @@ namespace SimpleAuthentication.Tests.WebSites
             public void GivenAMissingQueryStringProviderName_AuthenticateCallbackAsync_ThrowsAnException()
             {
                 // Arrange.
-                var authenticationCallbackProvider = A.Fake<IAuthenticationCallbackProvider>();
+                var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
                 var configuration = new Configuration
                 {
                     Providers = new[]
@@ -270,7 +270,7 @@ namespace SimpleAuthentication.Tests.WebSites
                 A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
                 MappedDependencies = new List<Tuple<Type, object>>
                 {
-                    new Tuple<Type, object>(typeof(IAuthenticationCallbackProvider), authenticationCallbackProvider),
+                    new Tuple<Type, object>(typeof(IAuthenticationProviderCallback), authenticationCallbackProvider),
                     new Tuple<Type, object>(typeof(IConfigService), configService)
                 };
 
@@ -298,7 +298,7 @@ namespace SimpleAuthentication.Tests.WebSites
             public void GivenAMissingCachedStateValue_AuthenticateCallbackAsync_ThrowsAnException()
             {
                 // Arrange.
-                var authenticationCallbackProvider = A.Fake<IAuthenticationCallbackProvider>();
+                var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
                 var configuration = new Configuration
                 {
                     Providers = new[]
@@ -316,7 +316,7 @@ namespace SimpleAuthentication.Tests.WebSites
                 A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
                 MappedDependencies = new List<Tuple<Type, object>>
                 {
-                    new Tuple<Type, object>(typeof(IAuthenticationCallbackProvider), authenticationCallbackProvider),
+                    new Tuple<Type, object>(typeof(IAuthenticationProviderCallback), authenticationCallbackProvider),
                     new Tuple<Type, object>(typeof(IConfigService), configService)
                 };
 

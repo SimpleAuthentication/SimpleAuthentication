@@ -1,21 +1,20 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Nancy;
 using Nancy.SimpleAuthentication;
 using SimpleAuthentication.Sample.NancyAuto.Models;
 
 namespace SimpleAuthentication.Sample.NancyAuto.Helpers
 {
-    public class SampleAuthenticationCallbackProvider : IAuthenticationCallbackProvider
+    public class SampleAuthenticationCallbackProvider : IAuthenticationProviderCallback
     {
-        public async Task<dynamic> ProcessAsync(NancyModule nancyModule, AuthenticateCallbackResult result)
+        public dynamic Process(NancyModule nancyModule, AuthenticateCallbackResult result)
         {
             var model = new AuthenticationViewModel
             {
                 AuthenticatedClient = result.AuthenticatedClient,
                 ReturnUrl = result.ReturnUrl
             };
-            return await Task.FromResult(nancyModule.View["AuthenticateCallback", model]);
+            return nancyModule.View["AuthenticateCallback", model];
         }
 
         public dynamic OnRedirectToAuthenticationProviderError(NancyModule nancyModule, 
