@@ -6,7 +6,7 @@ using Nancy;
 using Nancy.Session;
 using Nancy.Testing;
 
-namespace SimpleAuthentication.Tests.WebSites
+namespace SimpleAuthentication.Tests.WebSites.Nancy
 {
     public class NancyModuleTestBase<TModule> where TModule : NancyModule
     {

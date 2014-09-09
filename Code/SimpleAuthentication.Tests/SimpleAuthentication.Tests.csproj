@@ -76,8 +76,11 @@
     <Compile Include="Providers\WindowsLiveProviderFacts.cs" />
     <Compile Include="SystemExtensionsFacts.cs" />
     <Compile Include="SystemHelpersFacts.cs" />
-    <Compile Include="WebSites\NancyModuleTestBase.cs" />
-    <Compile Include="WebSites\SimpleAuthenticationModuleFacts.cs" />
+    <Compile Include="WebSites\Nancy\AuthenticationProviderCallbackFacts.cs" />
+    <Compile Include="WebSites\Nancy\FakeAuthenticationProviderCallback.cs" />
+    <Compile Include="WebSites\Nancy\NancyModuleTestBase.cs" />
+    <Compile Include="WebSites\Nancy\SimpleAuthenticationModuleFacts.cs" />
+    <Compile Include="WebSites\Nancy\UserViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Sample Data\GitHub-AccessToken-Content.txt">

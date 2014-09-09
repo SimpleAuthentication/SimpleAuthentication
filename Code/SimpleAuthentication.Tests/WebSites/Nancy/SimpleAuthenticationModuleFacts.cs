@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using CsQuery;
 using FakeItEasy;
 using Nancy;
 using Nancy.SimpleAuthentication;
@@ -13,11 +9,9 @@ using Nancy.Testing;
 using Shouldly;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Config;
-using SimpleAuthentication.Core.Providers;
-using SimpleAuthentication.Core.Providers.Google;
 using Xunit;
 
-namespace SimpleAuthentication.Tests.WebSites
+namespace SimpleAuthentication.Tests.WebSites.Nancy
 {
     public class SimpleAuthenticationModuleFacts
     {

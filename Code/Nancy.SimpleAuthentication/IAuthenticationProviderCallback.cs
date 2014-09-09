@@ -13,7 +13,7 @@ namespace Nancy.SimpleAuthentication
         /// <param name="nancyModule">The current module.</param>
         /// <param name="result">Some data related to the callback, such as the authenticated user data.</param>
         /// <returns>What do we do once we've authenticated? Redirect somewhere? A view? a status code?</returns>
-        dynamic Process(NancyModule nancyModule, AuthenticateCallbackResult result);
+        dynamic Process(INancyModule nancyModule, AuthenticateCallbackResult result);
 
         /// <summary>
         /// If an error occurs during the authentication process, this is where you can handle it.
@@ -22,6 +22,6 @@ namespace Nancy.SimpleAuthentication
         /// <param name="nancyModule">The current module.</param>
         /// <param name="exception">The exception error that occured.</param>
         /// <returns></returns>
-        dynamic OnRedirectToAuthenticationProviderError(NancyModule nancyModule, Exception exception);
+        dynamic OnRedirectToAuthenticationProviderError(INancyModule nancyModule, Exception exception);
     }
 }

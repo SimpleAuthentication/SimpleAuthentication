@@ -34,6 +34,11 @@ namespace SimpleAuthentication.Tests
             [Fact]
             public void GivenAUriWithSomeQuerystringParameters_AddOrUpdateQuery_AddsTheQuerystringParameters()
             {
+                // NOTE: Since .NET 4.5, Uri.EscapeDataString *correctly* escapes the querystring.
+                // unescaped:  "!", "*", "'", "(", ")"
+                // escaped: ALPHA / DIGIT / "-" / "." / "_" / "~"
+                // REF: 
+                
                 // Arrange.
                 var uri = new Uri("http://www.mysite.com/a/b/c?pewpew=woot&foo=bar&x=y");
                 var querystringParameters = new Dictionary<string, string>

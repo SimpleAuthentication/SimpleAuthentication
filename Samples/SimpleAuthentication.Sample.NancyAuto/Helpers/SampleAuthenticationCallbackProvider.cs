@@ -7,7 +7,7 @@ namespace SimpleAuthentication.Sample.NancyAuto.Helpers
 {
     public class SampleAuthenticationCallbackProvider : IAuthenticationProviderCallback
     {
-        public dynamic Process(NancyModule nancyModule, AuthenticateCallbackResult result)
+        public dynamic Process(INancyModule nancyModule, AuthenticateCallbackResult result)
         {
             var model = new AuthenticationViewModel
             {
@@ -17,7 +17,7 @@ namespace SimpleAuthentication.Sample.NancyAuto.Helpers
             return nancyModule.View["AuthenticateCallback", model];
         }
 
-        public dynamic OnRedirectToAuthenticationProviderError(NancyModule nancyModule, 
+        public dynamic OnRedirectToAuthenticationProviderError(INancyModule nancyModule, 
             Exception exception)
         {
             var model = new AuthenticationViewModel
