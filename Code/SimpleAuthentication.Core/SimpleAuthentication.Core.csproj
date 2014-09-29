@@ -57,6 +57,7 @@
     </Compile>
     <Compile Include="AccessToken.cs" />
     <Compile Include="AuthenticationProviderFactory.cs" />
+    <Compile Include="CacheData.cs" />
     <Compile Include="Config\ConfigService.cs" />
     <Compile Include="Config\Configuration.cs" />
     <Compile Include="Config\IConfigService.cs" />

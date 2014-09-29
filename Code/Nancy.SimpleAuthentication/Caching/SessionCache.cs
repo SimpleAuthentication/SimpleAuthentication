@@ -18,21 +18,16 @@ namespace Nancy.SimpleAuthentication.Caching
             _session = session;
         }
 
-        public string this[string key]
+        public CacheData this[string key]
         {
             get
             {
-                return _session[key] as string;
+                return _session[key] as CacheData;
             }
             set
             {
                 _session[key] = value;
             }
-        }
-
-        public void Initialize()
-        {
-            // Not used.
         }
     }
 }

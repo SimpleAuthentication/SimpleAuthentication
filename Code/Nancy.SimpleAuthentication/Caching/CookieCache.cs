@@ -1,5 +1,4 @@
 ﻿using System;
-using Nancy.Cookies;
 using SimpleAuthentication.Core;
 
 namespace Nancy.SimpleAuthentication.Caching
@@ -18,7 +17,7 @@ namespace Nancy.SimpleAuthentication.Caching
             _context = context;
         }
 
-        public string this[string key]
+        public CacheData this[string key]
         {
             get
             {
@@ -27,7 +26,8 @@ namespace Nancy.SimpleAuthentication.Caching
                     throw new ArgumentNullException("key");
                 }
 
-                return _context.Request.Cookies[key];
+                throw new NotImplementedException();
+                //return _context.Request.Cookies[key];
             }
             set
             {
@@ -36,13 +36,9 @@ namespace Nancy.SimpleAuthentication.Caching
                     throw new ArgumentNullException("key");
                 }
 
-                _context.Response.Cookies.Add(new NancyCookie(key, value));
+                throw new NotImplementedException();
+                //_context.Response.Cookies.Add(new NancyCookie(key, value));
             }
-        }
-
-        public void Initialize()
-        {
-            // Not used.
         }
     }
 }
