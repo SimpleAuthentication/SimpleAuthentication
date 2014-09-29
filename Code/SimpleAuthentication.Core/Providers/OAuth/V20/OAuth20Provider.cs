@@ -46,7 +46,7 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
             get { return "OAuth 2.0"; }
         }
 
-        public abstract Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(Uri callbackUrl);
+        public abstract RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri callbackUrl);
 
         public async Task<IAuthenticatedClient> AuthenticateClientAsync(IDictionary<string, string> queryString,
             string state,

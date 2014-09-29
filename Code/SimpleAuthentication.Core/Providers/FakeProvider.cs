@@ -79,7 +79,7 @@ namespace SimpleAuthentication.Core.Providers
             get { return "Custom fake provider."; }
         }
 
-        public async Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(Uri requestUrl)
+        public RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri requestUrl)
         {
             if (requestUrl == null ||
                 string.IsNullOrEmpty(requestUrl.AbsoluteUri))
@@ -95,11 +95,11 @@ namespace SimpleAuthentication.Core.Providers
             var state = Guid.NewGuid().ToString();
             var redirectUri = string.Format("{0}&state={1}", requestUrl.AbsoluteUri, state);
 
-            return await Task.FromResult(new RedirectToAuthenticateSettings
+            return new RedirectToAuthenticateSettings
             {
                 RedirectUri = new Uri(redirectUri),
                 State = state
-            });
+            };
         }
 
         public async Task<IAuthenticatedClient> AuthenticateClientAsync(IDictionary<string, string> querystring,

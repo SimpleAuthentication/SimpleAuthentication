@@ -87,7 +87,7 @@ namespace SimpleAuthentication.ExtraProviders
             };
         }
 
-        public override async Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(Uri callbackUrl)
+        public override RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri callbackUrl)
         {
             if (callbackUrl == null)
             {

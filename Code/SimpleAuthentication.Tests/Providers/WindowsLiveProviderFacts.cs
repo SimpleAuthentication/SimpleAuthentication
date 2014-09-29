@@ -17,8 +17,7 @@ namespace SimpleAuthentication.Tests.Providers
         public class GetRedirectToAuthenticateSettingsFacts
         {
             [Fact]
-            public async Task
-                GivenACallbackUrl_GetRedirectToAuthenticateSettingsFacts_ReturnsSomeRedirectToAUthenticateSettings()
+            public void GivenACallbackUrl_GetRedirectToAuthenticateSettingsFacts_ReturnsSomeRedirectToAUthenticateSettings()
             {
                 // Arramge.
                 var providerParams = new ProviderParams("00000000400ED488",
@@ -27,7 +26,7 @@ namespace SimpleAuthentication.Tests.Providers
                 var callbackUri = new Uri("http://www.localhost.me?provider=windowsLive");
 
                 // Act.
-                var result = await provider.GetRedirectToAuthenticateSettingsAsync(callbackUri);
+                var result = provider.GetRedirectToAuthenticateSettings(callbackUri);
 
                 // Assert.
                 result.State.ShouldNotBeNullOrEmpty();

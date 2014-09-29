@@ -1,12 +1,75 @@
 ﻿{
-    "id": "1",
-    "email": "foo@pewpew.com",
-    "verifiedEmail": true,
-    "givenname": "Pure",
-    "familyname": "Krome",
-    "link": "http://a.b.c.d/",
-    "picture": "http://www.imgur.com/a.png",
-    "gender": "male",
-    "locale": "en-au",
-    "name":  "Pure Krome"
+ "kind": "plus#person",
+ "etag": "\"pNz5TVTpPz2Rn5Xw8UrubkkbOJ0/K6_2-gs645p31qQZXTSWupiU0m4\"",
+ "occupation": "Computer Programmer",
+ "gender": "male",
+ "emails": [
+  {
+   "value": "foo@pewpew.com",
+   "type": "account"
+  }
+ ],
+ "objectType": "person",
+ "id": "1",
+ "displayName": "Pure krome",
+ "name": {
+  "familyName": "Krome",
+  "givenName": "Pure"
+ },
+ "url": "https://plus.google.com/+PureKrome",
+ "image": {
+  "url": "http://www.imgur.com/a.png",
+  "isDefault": false
+ },
+ "organizations": [
+  {
+   "name": "Company1",
+   "title": "Developer",
+   "type": "work",
+   "primary": true
+  },
+  {
+   "name": "Company 2",
+   "title": "Developer",
+   "type": "work",
+   "primary": false
+  },
+  {
+   "name": "Company 3",
+   "title": "Developer",
+   "type": "work",
+   "primary": false
+  }
+ ],
+ "placesLived": [
+  {
+   "value": "Melbourne, Australia"
+  },
+  {
+   "value": "Manila, Phillippines"
+  },
+  {
+   "value": "Singapore"
+  },
+  {
+   "value": "Geelong, Australia"
+  }
+ ],
+ "isPlusUser": true,
+ "language": "en_GB",
+ "circledByCount": 32,
+ "verified": false,
+ "cover": {
+  "layout": "banner",
+  "coverPhoto": {
+   "url": "https://lh5.googleusercontent.com/-_LPLPqahUGE/UeiO-gnKfLI/AAAAAAAAAIc/L58tZ_soF1Y/s630-fcrop64=1,0a0a0000ffffae2c/tumblr_mpiq3gwRmQ1qetnlco1_500%255B1%255D.jpg",
+   "height": 746,
+   "width": 940
+  },
+  "coverInfo": {
+   "topImageOffset": 0,
+   "leftImageOffset": 0
+  }
+ },
+ "domain": "pewpew.com.au"
 }

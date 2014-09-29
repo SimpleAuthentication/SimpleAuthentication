@@ -5,7 +5,7 @@ using SimpleAuthentication.Sample.NancyAuto.Models;
 
 namespace SimpleAuthentication.Sample.NancyAuto.Helpers
 {
-    public class SampleAuthenticationCallbackProvider : IAuthenticationCallbackProvider
+    public class SampleAuthenticationCallbackProvider : IAuthenticationProviderCallback
     {
         public dynamic Process(NancyModule nancyModule, AuthenticateCallbackResult result)
         {
@@ -17,7 +17,8 @@ namespace SimpleAuthentication.Sample.NancyAuto.Helpers
             return nancyModule.View["AuthenticateCallback", model];
         }
 
-        public dynamic OnRedirectToAuthenticationProviderError(NancyModule nancyModule, Exception exception)
+        public dynamic OnRedirectToAuthenticationProviderError(NancyModule nancyModule, 
+            Exception exception)
         {
             var model = new AuthenticationViewModel
             {

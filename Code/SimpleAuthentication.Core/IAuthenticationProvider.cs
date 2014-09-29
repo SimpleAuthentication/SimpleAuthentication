@@ -28,7 +28,7 @@ namespace SimpleAuthentication.Core
         /// </summary>
         /// <param name="callbackUrl">The current request url. This is used to generate the return url.</param>
         /// <returns>The redirection details, like the Uri and any Access Token or State data we might need to persist between roundtrips.</returns>
-        Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(Uri callbackUrl);
+        RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(Uri callbackUrl);
 
         /// <summary>
         /// Retrieve the user information from the Authentication Provider, now that we have authenticated.

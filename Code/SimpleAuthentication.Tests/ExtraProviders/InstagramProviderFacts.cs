@@ -15,8 +15,7 @@ namespace SimpleAuthentication.Tests.ExtraProviders
         public class GetRedirectToAuthenticateSettingsAsyncFacts
         {
             [Fact]
-            public async Task
-                GivenARedirectUrl_GetRedirectToAuthenticateSettingsAsync_ReturnsARedirectToAuthenticateSettings()
+            public void GivenARedirectUrl_GetRedirectToAuthenticateSettings_ReturnsARedirectToAuthenticateSettings()
             {
                 // Arrange.
                 var providerParams = new ProviderParams("zdskjhf&*^65sdfh/.<>\\sdf",
@@ -25,7 +24,7 @@ namespace SimpleAuthentication.Tests.ExtraProviders
                 var callbackUri = new Uri("http://www.mysite.com/pew/pew?provider=instagram");
 
                 // Act.
-                var result = await provider.GetRedirectToAuthenticateSettingsAsync(callbackUri);
+                var result = provider.GetRedirectToAuthenticateSettings(callbackUri);
 
                 // Assert.
                 result.State.ShouldNotBe(null);

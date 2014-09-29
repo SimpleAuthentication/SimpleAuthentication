@@ -53,7 +53,7 @@ namespace SimpleAuthentication.Core.Providers
             return new Uri(requestUri);
         }
 
-        public override async Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(
+        public override RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(
             Uri callbackUrl)
         {
             if (callbackUrl == null)

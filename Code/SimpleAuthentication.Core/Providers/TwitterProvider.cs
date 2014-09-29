@@ -27,7 +27,7 @@ namespace SimpleAuthentication.Core.Providers
             get { return "OAuth 1.0a"; }
         }
 
-        public override async Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(
+        public override RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(
             Uri callbackUrl)
         {
             //TraceSource.TraceVerbose("Retrieving the Request Token.");
@@ -41,8 +41,8 @@ namespace SimpleAuthentication.Core.Providers
             var updatedCallbackUrl = SystemHelpers.CreateUri(callbackUrl,
                 new Dictionary<string, string> {{"state", state.ToString()}});
 
-            var settings = await GetRedirectToAuthenticateSettingsAsync(updatedCallbackUrl,
-                new Uri("http://twitter.com/oauth/request_token"));
+            var settings = GetRedirectToAuthenticateSettingsAsync(updatedCallbackUrl,
+                new Uri("http://twitter.com/oauth/request_token")).Result;
 
             settings.State = state.ToString();
             return settings;

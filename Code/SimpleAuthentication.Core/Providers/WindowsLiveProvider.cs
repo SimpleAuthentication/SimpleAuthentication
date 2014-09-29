@@ -30,7 +30,7 @@ namespace SimpleAuthentication.Core.Providers
             get { return "WindowsLive"; }
         }
 
-        public override async Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(
+        public override RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(
             Uri callbackUrl)
         {
             if (callbackUrl == null)
@@ -73,13 +73,13 @@ namespace SimpleAuthentication.Core.Providers
 
             var result = JsonConvert.DeserializeObject<UserInfoResult>(content);
 
-            var name = string.Format("{0} {1}",
-                string.IsNullOrWhiteSpace(result.FirstName)
-                    ? string.Empty
-                    : result.FirstName,
-                string.IsNullOrWhiteSpace(result.LastName)
-                    ? string.Empty
-                    : result.LastName);
+            //var name = string.Format("{0} {1}",
+            //    string.IsNullOrWhiteSpace(result.FirstName)
+            //        ? string.Empty
+            //        : result.FirstName,
+            //    string.IsNullOrWhiteSpace(result.LastName)
+            //        ? string.Empty
+            //        : result.LastName);
             var picture = string.Format("https://apis.live.net/v5.0/{0}/picture", result.Id);
             var gender = (GenderType) Enum.Parse(typeof (GenderType), result.Gender ?? "Unknown", true);
 
