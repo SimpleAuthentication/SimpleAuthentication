@@ -1,14 +1,46 @@
 ![SimpleAuthentication - making authentication ... simple](http://i.imgur.com/eEJBOiY.png)
 
---
-**SimpleAuthentication** is a ASP.NET library that makes it really simple to for developers to add *Social Authentication* code to an ASP.NET application.
+**SimpleAuthentication** is a ASP.NET library that makes it really easy and simple for developers to add *Social Authentication* to an ASP.NET application.
+
+## What does the term "Social Authentication" mean"?
+
+Social Authentication are login buttons that use popular social websites (like Facebook or Google) as the way to login to your own website.
+These social websites Facebook/Google/etc are referred to as Social Authentication Providers (aka. AP's).
 
 ![Sample Login Buttons](http://i.imgur.com/2X35uaQ.png)
 
+## Why do we want to offer Social Authentication?
+
+A few reasons:
+
+  - People are getting tired of creating new usernames/passwords all the time.
+  - People generally only use the same few passwords for all their accounts. This means that if one of those websites is compromised, then there is a high chance those compromised credentials can be reused on other sites the user has an account on.
+  - If you store passwords, then your server is now a possible target/attack vector and now you have to make sure you're protecting your sensitive user data. 
+  - The Authentication Providers now have to deal with the security of storing passwords. You've just delegated a huge security responsibility to them :)
+
+## What Authentication Providers are available?
+
 Out of the box, it offers **Facebook**, **Google**, **Twitter** and **Microsoft Live** integration for either [ASP.NET MVC](http://www.asp.net/mvc) or [NancyFX](http://nancyfx.org) applications. 
 
-There's also some less used authentication providers like GitHub or Amazon supplied but anyone can take advantage of the api and create your own provider extension. There are plenty of defaults in place (such as Routes, etc) but most things are available to adjust if you want to do advanced stuff.
+## How does this compare to ASP.NET Identity / ASP.NET Membership?
 
+ - **Simple Authentication**: An extreamly *lightweight* library that only deals with the *authentication*. No database code. No rules forcing you to impliment contracts. *No passwords*
+ - **ASP.NET Identity / Membership**: a heavy, enterprisy, one-huge-hammer-fits-all approach that is strongly tied to sql server and entity framework.
+
+Simple Authentication doesn't want to tie you into any particular database, data access layer or forcing / maintaining passwords. In essense, we've tried to pass this security concern onto other systems. Once you've received some *authenticated* user information, *you* decide what you want to do with.
+On the other hand, ASP.NET Identity/Membership is a full end-to-end stack for user credentials. It's tied to Sql Server and you're tied to impliementing all the interface contracts. But most importantly, passwords are still stored in your database if forms authentiction was used. It's a one-big-hammer approach.
+
+[Read this wiki page](http://asd) for an elaborate discussion on the differences (pro's/con's) of Simple Authentication vs ASP.NET.
+
+## Extensible
+
+Have an OAuth 1.0a or OAuth 2.0 Athentication Provider? It's really easy to create your own providers, extending what's already out of the box.
+These AP's are also available:
+
+- GitHub
+- 37 Signals
+- Instagram
+- LinkedIn
 
 Developer friendly!
 --
@@ -16,48 +48,7 @@ Take advantage of the [Glimpse plugin](http://getglimpse.com) so you can see wha
 
 ![Glimpse plugin](http://i.imgur.com/ALO3rab.png)
 
-<br/>
 
-**The library only deals with authentication** - once we give you the user details for the person logging in, you can whatever you want with that (such as, create a new user or update an existing user).
-We do not attempt to insert data into a particular type of database or make any other assumptions about what you do with user data.
-
-
-The "How simple is this?" example 
---
-#### Adding a 'Log in with Facebook' to an existing ASP.NET MVC web application.
-
-
-#### Quick summary
-* Create a Login button on some View.
-* Create a class which will have all the User data once they have authenticated
-* Add your provider keys to the `.config` file
-
-#### Simple steps
-1. Find the View you wish to modify.
-2. Add the Button or hyper link that will be used to kick start the authentication process.
-3. Set the button route to be `/authentication/authenticate/fakefacebook`
-4. Now we grab the library -> `install-package SimpleAuthentication.Mvc`
-5. Create a class which will be called -after- we come back from Facebook (or any provider). We have to do something with that user data, right?
-   `public class HandleCallback();`
-   A good example of what people do here is: save user to database then redirect to homepage or where they were originally referred from.
-6. Wire up the new class with our `ServiceLocator / Di-IoC` so the SimpleAuthentication code knows what to do when it's finished.
-7. Build and run the site :)
-
-Once this works.
-
-8. Goto [developer.facebook.com](http://developer.facebook.com) and create an application. This will give you a `Client Key` and `Secret Key`.
-9. Enter the Client and Secret key to the `web.config`, `<providers>` section.
-10. Change the button route to `/authentication/authenticate/facebook`  <-- notice we've removed the `fake` prepended text? :)
-
-Done.
-
-
-You had me at *Simple* ... what now?
---
-* Detailed guide to adding SimpleAuthentication to [an ASP.NET MVC](https://github.com/SimpleAuthentication/SimpleAuthentication/wiki/Mvc-automatic-setup) or NancyFx web application.
-* Detailed Guide to using the Extra Providers to a web application.
-* Detailed guide to using the Glimpse Plugin.
-* How to create your own provider.
 
 And Finally ...
 --
