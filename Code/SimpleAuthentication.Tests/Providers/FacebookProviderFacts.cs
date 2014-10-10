@@ -8,6 +8,7 @@ using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Providers;
 using SimpleAuthentication.Core.Providers.Facebook;
+using WorldDomination.Net.Http;
 using Xunit;
 
 namespace SimpleAuthentication.Tests.Providers

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using OAuth;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Providers.Twitter;
+using WorldDomination.Net.Http;
 
 namespace SimpleAuthentication.Core.Providers.OAuth.V10a
 {

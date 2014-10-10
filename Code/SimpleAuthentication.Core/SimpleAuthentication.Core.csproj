@@ -50,6 +50,10 @@
       <HintPath>..\..\packages\Microsoft.Net.Http.2.2.22\lib\net45\System.Net.Http.Primitives.dll</HintPath>
     </Reference>
     <Reference Include="System.Security" />
+    <Reference Include="WorldDomination.HttpClient.Helpers, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\WorldDomination.HttpClient.Helpers.2.0\lib\net45\WorldDomination.HttpClient.Helpers.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Shared Assembly Info\SharedAssemblyInfo.cs">
@@ -62,8 +66,6 @@
     <Compile Include="Config\Configuration.cs" />
     <Compile Include="Config\IConfigService.cs" />
     <Compile Include="Config\Provider.cs" />
-    <Compile Include="HttpClientFactory.cs" />
-    <Compile Include="ICache.cs" />
     <Compile Include="Config\AppSettingsParser.cs" />
     <Compile Include="Providers\GoogleProvider.cs" />
     <Compile Include="Providers\Google\Emails.cs" />

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Tracing;
+using WorldDomination.Net.Http;
 
 namespace SimpleAuthentication.Core.Providers.OAuth.V20
 {

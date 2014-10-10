@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Shouldly;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Providers;
+using WorldDomination.Net.Http;
 using Xunit;
 
 namespace SimpleAuthentication.Tests.Providers

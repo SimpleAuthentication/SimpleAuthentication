@@ -2,6 +2,7 @@
 
 namespace SimpleAuthentication.Core
 {
+    [Serializable]
     public class CacheData
     {
         public CacheData(string providerKey,

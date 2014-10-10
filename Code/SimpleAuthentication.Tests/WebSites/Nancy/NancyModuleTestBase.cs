@@ -51,6 +51,16 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
             return new Browser(bootstrapper);
         }
 
-        protected IEnumerable<Tuple<Type, object>> MappedDependencies { get; set; }
+        protected ICollection<Tuple<Type, object>> MappedDependencies { get; set; }
+
+        protected void AddModuleDependency(Type type, object instance)
+        {
+            if (MappedDependencies == null)
+            {
+                MappedDependencies = new List<Tuple<Type, object>>();
+            }
+
+            MappedDependencies.Add(new Tuple<Type, object>(type, instance));
+        }
     }
 }

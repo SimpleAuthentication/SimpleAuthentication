@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Shouldly;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.ExtraProviders;
+using WorldDomination.Net.Http;
 using Xunit;
 
 namespace SimpleAuthentication.Tests.ExtraProviders

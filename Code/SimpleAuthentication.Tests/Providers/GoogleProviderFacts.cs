@@ -7,6 +7,7 @@ using Shouldly;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Providers;
+using WorldDomination.Net.Http;
 using Xunit;
 
 namespace SimpleAuthentication.Tests.Providers

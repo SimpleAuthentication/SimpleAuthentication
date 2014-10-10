@@ -1,5 +1,6 @@
 ﻿using Nancy;
 using Nancy.Bootstrapper;
+using Nancy.Session;
 using Nancy.TinyIoc;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Config;
@@ -23,11 +24,8 @@ namespace SimpleAuthentication.Sample.NancyAuto
 
             authenticationProviderFactory.AddProvider(gitHubProvider);
             authenticationProviderFactory.AddProvider(instagramProvider);
-        }
 
-        protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
-        {
-            base.ConfigureRequestContainer(container, context);
+            CookieBasedSessions.Enable(pipelines);
         }
     }
 }
