@@ -78,6 +78,7 @@
     <Compile Include="Providers\WindowsLiveProviderFacts.cs" />
     <Compile Include="SystemExtensionsFacts.cs" />
     <Compile Include="SystemHelpersFacts.cs" />
+    <Compile Include="WebApplicationServiceFacts.cs" />
     <Compile Include="WebSites\Nancy\AuthenticationProviderCallbackFacts.cs" />
     <Compile Include="WebSites\Nancy\FakeAuthenticationProviderCallback.cs" />
     <Compile Include="WebSites\Nancy\NancyModuleTestBase.cs" />

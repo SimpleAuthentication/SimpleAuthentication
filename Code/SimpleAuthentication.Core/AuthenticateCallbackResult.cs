@@ -1,10 +1,6 @@
-﻿using System;
-using SimpleAuthentication.Core;
-
-namespace Nancy.SimpleAuthentication
+﻿namespace SimpleAuthentication.Core
 {
-    [Obsolete]
-    public class AuthenticateCallbackResultX
+    public class AuthenticateCallbackResult
     {
         /// <summary>
         /// The authenticated client information, if we have successfully authenticated.

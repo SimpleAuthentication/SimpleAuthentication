@@ -60,6 +60,8 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AccessToken.cs" />
+    <Compile Include="AuthenticateCallbackAsyncData.cs" />
+    <Compile Include="AuthenticateCallbackResult.cs" />
     <Compile Include="AuthenticationProviderFactory.cs" />
     <Compile Include="CacheData.cs" />
     <Compile Include="Config\ConfigService.cs" />
@@ -67,6 +69,7 @@
     <Compile Include="Config\IConfigService.cs" />
     <Compile Include="Config\Provider.cs" />
     <Compile Include="Config\AppSettingsParser.cs" />
+    <Compile Include="IAuthenticationProviderCallback.cs" />
     <Compile Include="Providers\GoogleProvider.cs" />
     <Compile Include="Providers\Google\Emails.cs" />
     <Compile Include="Providers\Google\Image.cs" />
@@ -88,6 +91,8 @@
     </Compile>
     <Compile Include="Providers\TwitterProvider.cs" />
     <Compile Include="Providers\WindowsLiveProvider.cs" />
+    <Compile Include="RedirectToProviderData.cs" />
+    <Compile Include="RedirectToProviderResult.cs" />
     <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="ProviderParams.cs" />
     <Compile Include="GenderType.cs" />
@@ -110,6 +115,7 @@
     <Compile Include="Tracing\TraceManager.cs" />
     <Compile Include="Tracing\TraceSourceExtensions.cs" />
     <Compile Include="UserInformation.cs" />
+    <Compile Include="WebApplicationService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -201,7 +201,7 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
                 var redirectResponse = formatter.AsRedirect(returnUrl);
                 var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
                 A.CallTo(() => authenticationCallbackProvider
-                    .Process(A<INancyModule>._, A<AuthenticateCallbackResult>._))
+                    .Process(A<AuthenticateCallbackResult>._))
                     .Returns(redirectResponse);
 
                 var configuration = new Configuration

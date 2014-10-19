@@ -5,6 +5,7 @@ using Nancy.TinyIoc;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Config;
 using SimpleAuthentication.ExtraProviders;
+using SimpleAuthentication.Sample.NancyAuto.Helpers;
 
 namespace SimpleAuthentication.Sample.NancyAuto
 {
@@ -27,5 +28,12 @@ namespace SimpleAuthentication.Sample.NancyAuto
 
             CookieBasedSessions.Enable(pipelines);
         }
+
+        //protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
+        //{
+        //    base.ConfigureRequestContainer(container, context);
+
+        //    container.Register<IAuthenticationProviderCallback>(new SampleAuthenticationCallbackProvider(context.));
+        //}
     }
 }

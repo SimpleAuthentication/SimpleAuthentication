@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Reflection;
 using Nancy;
 using Nancy.Responses.Negotiation;
 using Nancy.SimpleAuthentication;
+using SimpleAuthentication.Core;
 using SimpleAuthentication.Sample.NancyAuto.Models;
 
 namespace SimpleAuthentication.Sample.NancyAuto.Helpers
 {
-    public class SampleAuthenticationCallbackProvider : IAuthenticationProviderCallback
+    public class SampleAuthenticationCallbackProvider : INancyAuthenticationProviderCallback
     {
-        public dynamic Process(INancyModule nancyModule, AuthenticateCallbackResult result)
+        public dynamic Process(INancyModule module, AuthenticateCallbackResult result)
         {
             var model = new AuthenticationViewModel
             {
@@ -24,10 +24,10 @@ namespace SimpleAuthentication.Sample.NancyAuto.Helpers
             //    .WithModel(model)
             //    .WithView("AuthenticateCallback");
 
-            return nancyModule.View["AuthenticateCallback", model];
+            return module.View["AuthenticateCallback", model];
         }
 
-        public dynamic OnRedirectToAuthenticationProviderError(INancyModule nancyModule,
+        public dynamic OnRedirectToAuthenticationProviderError(INancyModule module,
             Exception exception)
         {
             var model = new AuthenticationViewModel
@@ -35,9 +35,9 @@ namespace SimpleAuthentication.Sample.NancyAuto.Helpers
                 ErrorMessage = exception.Message
             };
 
-            return nancyModule.Response.AsRedirect("/");
+            //return nancyModule.Response.AsRedirect("/");
 
-            return new Negotiator(nancyModule.Context)
+            return new Negotiator(module.Context)
                 .WithModel(model)
                 .WithView("AuthenticateCallback");
         }

@@ -13,33 +13,77 @@ namespace Nancy.SimpleAuthentication
     public class SimpleAuthenticationModule : NancyModule
     {
         private const string SessionKeyState = "SimpleAuthentication-StateKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
-        public static string RedirectRoute = "/authenticate/{providerkey}";
-        public static string CallbackRoute = "/authenticate/callback";
+        public const string DefaultRedirectRoute = "/authenticate/{providerkey}";
+        public const string DefaultCallbackRoute = "/authenticate/callback";
 
-        private readonly AuthenticationProviderFactory _authenticationProviderFactory;
-        private readonly IAuthenticationProviderCallback _providerCallback;
+        private string _redirectRoute;
+        private string _callbackRoute;
+        private readonly WebApplicationService _webApplicationService;
+        private readonly INancyAuthenticationProviderCallback _authenticationProviderCallback;
+
         private readonly Lazy<ITraceManager> _traceManager = new Lazy<ITraceManager>(() => new TraceManager());
         private string _returnToUrlParameterKey;
 
-        public SimpleAuthenticationModule(IAuthenticationProviderCallback providerCallback,
-            IConfigService configService)
+        public SimpleAuthenticationModule(INancyAuthenticationProviderCallback authenticationProviderCallback,
+            IConfigService configService,
+            string redirectRoute = DefaultRedirectRoute,
+            string callbackRoute = DefaultCallbackRoute)
         {
-            if (providerCallback == null)
+            if (authenticationProviderCallback == null)
             {
-                throw new ArgumentNullException("providerCallback");
+                throw new ArgumentNullException("authenticationProviderCallback");
             }
 
             if (configService == null)
             {
                 throw new ArgumentNullException("configService");
             }
+            
+            _authenticationProviderCallback = authenticationProviderCallback;
 
-            _providerCallback = providerCallback;
-            _authenticationProviderFactory = new AuthenticationProviderFactory(configService);
+            RedirectRoute = redirectRoute;
+            CallbackRoute = callbackRoute;
+
+            _webApplicationService = new WebApplicationService(configService,
+                TraceSource,
+                CallbackRoute);
 
             // Define the routes and how they are handled.
             Get[RedirectRoute] = parameters => RedirectToProvider(parameters);
             Get[CallbackRoute, true] = async (x, ct) => await AuthenticateCallbackAsync();
+        }
+
+        public string RedirectRoute
+        {
+            get
+            {
+                return (string.IsNullOrWhiteSpace(_redirectRoute))
+                    ? DefaultRedirectRoute
+                    : _redirectRoute;
+            }
+            private set
+            {
+                if (!string.IsNullOrWhiteSpace(value) &&
+                    !value.Contains("{providerkey}"))
+                {
+                    var errorMessage = string.Format(
+                        "The RedirectRoute requires a 'capture segment' with the Nancy route segment variable name '{{providerkey}}'. Eg. '{0}'",
+                        DefaultRedirectRoute);
+                    throw new ArgumentException(errorMessage, "value");
+                }
+                _redirectRoute = value;
+            }
+        }
+
+        public string CallbackRoute
+        {
+            get
+            {
+                return (string.IsNullOrWhiteSpace(_callbackRoute))
+                    ? DefaultCallbackRoute
+                    : _callbackRoute;
+            }
+            set { _callbackRoute = value; }
         }
 
         public string ReturnToUrlParameterKey
@@ -60,39 +104,34 @@ namespace Nancy.SimpleAuthentication
 
         private Response RedirectToProvider(dynamic parameters)
         {
-            var providerKey = (string) parameters.providerkey;
+            var providerKey = (string)parameters.providerkey;
 
             if (string.IsNullOrEmpty(providerKey))
             {
-                throw new ArgumentException(
-                    "ProviderKey value missing. You need to supply a valid provider key so we know where to redirect the user Eg. google.");
+                var sampleUrl = RedirectRoute.Replace("{providerkey}", "google");
+                var errorMessage = string.Format(
+                    "ProviderKey value missing. You need to supply a valid provider key so we know where to redirect the user Eg. ....{0}",
+                    sampleUrl);
+                throw new ArgumentException(errorMessage);
             }
 
-            // Grab the Provider.
-            var provider = GetAuthenticationProvider(providerKey);
+            var returnUrl = Request.Query[ReturnToUrlParameterKey];
+            var referer = !string.IsNullOrWhiteSpace(Request.Headers.Referrer)
+                ? Request.Headers.Referrer
+                : null;
 
-            // Where do we return to, after we've authenticated?
-            var callbackUri = GenerateCallbackUri();
+            var redirectToProviderData = new RedirectToProviderData(providerKey,
+                Request.Url,
+                referer,
+                returnUrl);
 
-            // Determine where we need to redirect to.
-            var redirectToAuthenticateSettings = provider.GetRedirectToAuthenticateSettings(callbackUri);
-            if (redirectToAuthenticateSettings == null)
-            {
-                // We failed to determine where to go. A classic example of this is with OpenId and a bad OpenId endpoint.
-                const string errorMessage =
-                    "No redirect to authencate settings retrieved. This means we don't know where to go. A classic example of this is with OpenId and a bad OpenId endpoint. Please check the data you are providing to the Controller. Otherwise, you will need to debug the individual provider class you are trying use to connect with.";
-                TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
-            }
+            var result = _webApplicationService.RedirectToProvider(redirectToProviderData);
 
             // Remember any important information for later, after we've returned back here.
-            var cacheData = new CacheData(providerKey,
-                redirectToAuthenticateSettings.State,
-                DetermineReturnUrl());
-            Session[SessionKeyState] = cacheData;
+            Session[SessionKeyState] = result.CacheData;
 
             // Now redirect :)
-            return Response.AsRedirect(redirectToAuthenticateSettings.RedirectUri.AbsoluteUri);
+            return Response.AsRedirect(result.RedirectUrl.AbsoluteUri);
         }
 
         private async Task<dynamic> AuthenticateCallbackAsync()
@@ -115,145 +154,21 @@ namespace Nancy.SimpleAuthentication
                     "No cache data or cached State value was found which generally means that a Cross Site Request Forgery attempt might be made. A 'State' value is generated by the server when a client prepares to rediect to an Authentication Provider and passes that generated state value to that Provider. The provider then passes that state value back, which proves that the client (ie. that's -you-) have actually authenticated against a provider. Otherwise, anyone can just hit the callback Url and impersonate another user, bypassing the authentication stage. So what's the solution: make sure you call the 'RedirectToProvider' endpoint *before* you hit the 'AuthenticateCallbackAsync' callback endpoint.");
             }
 
-            dynamic result;
-
-            try
-            {
-                var model = await RetrieveUserInformation(cacheData.ProviderKey,
-                    cacheData.State);
-
-                // Do we have an optional redirect resource? Usually a previous referer?
-                if (!string.IsNullOrWhiteSpace(cacheData.ReturnUrl))
-                {
-                    TraceSource.TraceVerbose("Found return url: " + cacheData.ReturnUrl);
-                    model.ReturnUrl = cacheData.ReturnUrl;
-                }
-
-                // Finally! We can hand over the logic to the consumer to do whatever they want.
-                TraceSource.TraceVerbose("About to execute your custom callback provider logic.");
-                result = _providerCallback.Process(this, model);
-            }
-            catch (Exception exception)
-            {
-                TraceSource.TraceError(exception.Message);
-                result = _providerCallback.OnRedirectToAuthenticationProviderError(this, exception);
-            }
-
-            return result;
-        }
-
-        private IAuthenticationProvider GetAuthenticationProvider(string providerKey)
-        {
-            if (string.IsNullOrEmpty(providerKey))
-            {
-                throw new ArgumentNullException("providerKey");
-            }
-
-            TraceSource.TraceVerbose("Trying to retrieve a provider for the given key: " + providerKey);
-
-            IAuthenticationProvider provider = null;
-
-            // Dictionary keys are case sensitive.
-            var key = providerKey.ToLowerInvariant();
-
-            if (_authenticationProviderFactory.AuthenticationProviders.ContainsKey(key))
-            {
-                TraceSource.TraceVerbose("Found registered provider: " + key);
-                provider = _authenticationProviderFactory.AuthenticationProviders[key];
-            }
-            else if (providerKey.StartsWith("fake", StringComparison.InvariantCultureIgnoreCase))
-            {
-                // Ah-ha! We've been asked for a fake key :P
-                TraceSource.TraceVerbose("Request for a *Fake* provider. Creating the fake provider: " + providerKey);
-                provider = new FakeProvider(providerKey);
-            }
-
-            // So, did we get a real or fake key?
-            if (provider == null)
-            {
-                var errorMessage = string.Format("There was no provider registered for the given key: {0}.", providerKey);
-                TraceSource.TraceError(errorMessage);
-                throw new InvalidOperationException(errorMessage);
-            }
-
-            TraceSource.TraceVerbose("Found - Provider: {0}.",
-                string.IsNullOrEmpty(provider.Name)
-                    ? "-no provider name-"
-                    : provider.Name);
-
-            return provider;
-        }
-
-        private Uri GenerateCallbackUri(string query = null)
-        {
-            // Optional, but UriBuilder doesn't like a null query value.
-            if (query == null)
-            {
-                query = string.Empty;
-            }
-
-            var builder = new UriBuilder((System.Uri)Request.Url)
-            {
-                Path = CallbackRoute,
-                Query = query
-            };
-
-            // Don't include port 80/443 in the Uri.
-            if (builder.Uri.IsDefaultPort)
-            {
-                builder.Port = -1;
-            }
-
-            return builder.Uri;
-        }
-
-        private string DetermineReturnUrl()
-        {
-            var returnUrl = Request.Query[ReturnToUrlParameterKey];
-
-            return !string.IsNullOrEmpty(returnUrl)
-                ? returnUrl
-                : !string.IsNullOrWhiteSpace(Request.Headers.Referrer)
-                    ? Request.Headers.Referrer
-                    : null;
-        }
-
-        private async Task<AuthenticateCallbackResult> RetrieveUserInformation(string providerKey,
-            string state)
-        {
-            if (string.IsNullOrWhiteSpace(providerKey))
-            {
-                throw new ArgumentNullException("providerKey");
-            }
-
-            if (string.IsNullOrWhiteSpace(state))
-            {
-                throw new ArgumentNullException("state");
-            }
-
-            // Which provider did we just authenticate with?
-            var provider = GetAuthenticationProvider(providerKey);
-
-            // CRAZY?? Yeah, we still need the callback uri (even though we're -IN- the callback
-            // because some providers use that as some security check or something. Urgh...
-            var callbackUri = GenerateCallbackUri();
-
-            // Nancy.Request Nancy.DynamicDictionary
             var queryString = new Dictionary<string, string>();
             foreach (var key in Request.Query.Keys)
             {
                 queryString.Add(key, Request.Query[key]);
             }
 
-            // Grab the user information.
-            var model = new AuthenticateCallbackResult
-            {
-                AuthenticatedClient = await provider.AuthenticateClientAsync(queryString,
-                    state,
-                    callbackUri)
-            };
+            var authenticateCallbackAsyncData = new AuthenticateCallbackAsyncData(Request.Url,
+                cacheData,
+                this,
+                queryString);
 
-            return model;
+            // TODO: PHILLIP: Somehow, pass the Nancy-explicit callback code to this framework-agnostic method...
+            // ref: _authenticationProviderCallback
+            // ref: this (which is this module ... for returning a redirect or view, etc). 
+            return await _webApplicationService.AuthenticateCallbackAsync(authenticateCallbackAsyncData);
         }
     }
 }
