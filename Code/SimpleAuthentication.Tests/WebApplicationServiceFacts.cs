@@ -6,6 +6,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using CsQuery;
 using FakeItEasy;
 using Nancy;
 using Nancy.SimpleAuthentication;
@@ -20,216 +21,202 @@ namespace SimpleAuthentication.Tests
 {
     public class WebApplicationServiceFacts
     {
-        private static AuthenticateCallbackAsyncData FakeAuthenticateCallbackAsyncData
-        {
-            get
-            {
-                const string state = "qweryt*%%$*/.;'";
-                var requestUrl = new Uri("http://www.foo.com.au");
-                var cacheData = new CacheData("google", state, "someReturnUrl");
-                var queryStringValues = new Dictionary<string, string>
-                    {
-                        {"state", state},
-                        {"code", "offline"},
-                        {"a", "b"}
-                    };
-                return new AuthenticateCallbackAsyncData(requestUrl,
-                    cacheData,
-                    queryStringValues);
-            }
-        }
-
         public class RedirectToProviderFacts
         {
-            [Fact(Skip = "Waiting for Phillip to help.")]
+            [Fact]
             public void GivenSomeRedirectToProviderData_RedirectToProvider_ReturnsARedirectResult()
-            {   
-                
+            {
+                // Arrange.
+                var provider = new Provider
+                {
+                    Name = "Google",
+                    Key = "some ** key",
+                    Secret = "some secret"
+                };
+                var configuration = new Configuration
+                {
+                    Providers = new[]
+                    {
+                        provider
+                    }
+                };
 
-                //// Arrange.
-                //var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
-                //var provider = new Provider
-                //{
-                //    Name = "Google",
-                //    Key = "some ** key",
-                //    Secret = "some secret"
-                //};
-                //var configuration = new Configuration
-                //{
-                //    Providers = new[]
-                //    {
-                //        provider
-                //    }
-                //};
+                var configService = A.Fake<IConfigService>();
+                A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
 
-                //var configService = A.Fake<IConfigService>();
-                //A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
+                var traceSource = new TraceSource("test");
 
-                //var redirectToProviderData = new RedirectToProviderData(provider.Name,
-                //    new Uri("http://www.pewpew.com/a/b/c"),
-                //    null,
-                //    null);
+                var webApplicationService = new WebApplicationService(configService,
+                    traceSource,
+                    "asdjhsdkfhds");
 
-                //var traceSource = new TraceSource("test");
+                var redirectToProviderData = new RedirectToProviderData(provider.Name,
+                    new Uri("http://www.pewpew.com/a/b/c"),
+                    null,
+                    null);
 
-                //var webApplicationService = new WebApplicationService(authenticationProviderCallback,
-                //    configService,
-                //    traceSource,
-                //    "asdasdasd",
-                //    "axxxxxxxxxx");
+                // Act.
+                var result = webApplicationService.RedirectToProvider(redirectToProviderData);
 
-                //// Act.
-                //var result = webApplicationService.RedirectToProvider(redirectToProviderData);
-
-                //// Assert.
-                //result.RedirectUrl.AbsoluteUri.ShouldStartWith(
-                //    "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Faxxxxxxxxxx&response_type=code&scope=profile%20email&state=");
-                //result.CacheData.ProviderKey.ShouldBe(redirectToProviderData.ProviderKey);
-                //result.CacheData.State.ShouldNotBe(null);
-                //result.CacheData.ReturnUrl.ShouldBe(null);
+                // Assert.
+                result.RedirectUrl.AbsoluteUri.ShouldStartWith(
+                    "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fasdjhsdkfhds&response_type=code&scope=profile%20email&state=");
+                result.CacheData.ProviderKey.ShouldBe(redirectToProviderData.ProviderKey);
+                result.CacheData.State.ShouldNotBe(null);
+                result.CacheData.ReturnUrl.ShouldBe(null);
             }
 
-            [Fact(Skip = "Waiting for Phillip to help.")]
+            [Fact]
             public void GivenSomeRedirectToProviderDataIncludingAReturnUrl_GetRedirectToProvider_ReturnsARedirectResponse()
             {
-                //// Arrange.
-                //var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
-                //var provider = new Provider
-                //{
-                //    Name = "Google",
-                //    Key = "some ** key",
-                //    Secret = "some secret"
-                //};
-                //var configuration = new Configuration
-                //{
-                //    Providers = new[]
-                //    {
-                //        provider
-                //    }
-                //};
+                // Arrange.
+                var provider = new Provider
+                {
+                    Name = "Google",
+                    Key = "some ** key",
+                    Secret = "some secret"
+                };
+                var configuration = new Configuration
+                {
+                    Providers = new[]
+                    {
+                        provider
+                    }
+                };
 
-                //var configService = A.Fake<IConfigService>();
-                //A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
+                var configService = A.Fake<IConfigService>();
+                A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
 
-                //var redirectToProviderData = new RedirectToProviderData(provider.Name,
-                //    new Uri("http://www.pewpew.com/a/b/c"),
-                //    null,
-                //    "/foo/bar?a=b");
+                var traceSource = new TraceSource("test");
 
-                //var traceSource = new TraceSource("test");
+                var webApplicationService = new WebApplicationService(configService,
+                    traceSource,
+                    "asdjhsdkfhds");
 
-                //var webApplicationService = new WebApplicationService(authenticationProviderCallback,
-                //    configService,
-                //    traceSource,
-                //    "asdasdasd",
-                //    "axxxxxxxxxx");
+                var redirectToProviderData = new RedirectToProviderData(provider.Name,
+                    new Uri("http://www.pewpew.com/a/b/c"),
+                    null,
+                    "/foo/bar?a=b");
 
-                //// Act.
-                //var result = webApplicationService.RedirectToProvider(redirectToProviderData);
+                // Act.
+                var result = webApplicationService.RedirectToProvider(redirectToProviderData);
 
-                //// Assert.
-                //result.RedirectUrl.AbsoluteUri.ShouldStartWith(
-                //    "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Faxxxxxxxxxx&response_type=code&scope=profile%20email&state=");
-                //result.CacheData.ProviderKey.ShouldBe(redirectToProviderData.ProviderKey);
-                //result.CacheData.State.ShouldNotBe(null);
-                //result.CacheData.ReturnUrl.ShouldBe(redirectToProviderData.ReturnUrl);
+                // Assert.
+                result.RedirectUrl.AbsoluteUri.ShouldStartWith(
+                     "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fasdjhsdkfhds&response_type=code&scope=profile%20email&state=");
+                result.CacheData.ProviderKey.ShouldBe(redirectToProviderData.ProviderKey);
+                result.CacheData.State.ShouldNotBe(null);
+                result.CacheData.ReturnUrl.ShouldBe(redirectToProviderData.ReturnUrl);
             }
 
-            [Fact(Skip = "Waiting for Phillip to help.")]
+            [Fact]
             public void GivenSomeRedirectToProviderDataIncludingAReferer_GetRedirectToProvider_ReturnsARedirectResponse()
             {
-                //// Arrange.
-                //var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
-                //var provider = new Provider
-                //{
-                //    Name = "Google",
-                //    Key = "some ** key",
-                //    Secret = "some secret"
-                //};
-                //var configuration = new Configuration
-                //{
-                //    Providers = new[]
-                //    {
-                //        provider
-                //    }
-                //};
+                // Arrange.
+                var provider = new Provider
+                {
+                    Name = "Google",
+                    Key = "some ** key",
+                    Secret = "some secret"
+                };
+                var configuration = new Configuration
+                {
+                    Providers = new[]
+                    {
+                        provider
+                    }
+                };
 
-                //var configService = A.Fake<IConfigService>();
-                //A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
+                var configService = A.Fake<IConfigService>();
+                A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
 
-                //var redirectToProviderData = new RedirectToProviderData(provider.Name,
-                //    new Uri("http://www.pewpew.com/a/b/c"),
-                //    "http://www.aa.bb.com",
-                //    null);
+                var traceSource = new TraceSource("test");
 
-                //var traceSource = new TraceSource("test");
+                var webApplicationService = new WebApplicationService(configService,
+                    traceSource,
+                    "asdjhsdkfhds");
 
-                //var webApplicationService = new WebApplicationService(authenticationProviderCallback,
-                //    configService,
-                //    traceSource,
-                //    "asdasdasd",
-                //    "axxxxxxxxxx");
+                var redirectToProviderData = new RedirectToProviderData(provider.Name,
+                    new Uri("http://www.pewpew.com/a/b/c"),
+                    "http://www.aa.bb.com",
+                    null);
 
-                //// Act.
-                //var result = webApplicationService.RedirectToProvider(redirectToProviderData);
+                // Act.
+                var result = webApplicationService.RedirectToProvider(redirectToProviderData);
 
-                //// Assert.
-                //result.RedirectUrl.AbsoluteUri.ShouldStartWith(
-                //    "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Faxxxxxxxxxx&response_type=code&scope=profile%20email&state=");
-                //result.CacheData.ProviderKey.ShouldBe(redirectToProviderData.ProviderKey);
-                //result.CacheData.State.ShouldNotBe(null);
-                //result.CacheData.ReturnUrl.ShouldBe(redirectToProviderData.Referer);
+                // Assert.
+                result.RedirectUrl.AbsoluteUri.ShouldStartWith(
+                      "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fasdjhsdkfhds&response_type=code&scope=profile%20email&state=");
+                result.CacheData.ProviderKey.ShouldBe(redirectToProviderData.ProviderKey);
+                result.CacheData.State.ShouldNotBe(null);
+                result.CacheData.ReturnUrl.ShouldBe(redirectToProviderData.Referer);
             }
 
-            [Fact(Skip = "Waiting for Phillip to help.")]
+            [Fact]
             public void GivenSomeRedirectToProviderDataIncludingAReturnUrlAndAReferer_GetRedirectToProvider_ReturnsARedirectResponse()
             {
-                //// Arrange.
-                //var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
-                //var provider = new Provider
-                //{
-                //    Name = "Google",
-                //    Key = "some ** key",
-                //    Secret = "some secret"
-                //};
-                //var configuration = new Configuration
-                //{
-                //    Providers = new[]
-                //    {
-                //        provider
-                //    }
-                //};
+                // Arrange.
+                var provider = new Provider
+                {
+                    Name = "Google",
+                    Key = "some ** key",
+                    Secret = "some secret"
+                };
+                var configuration = new Configuration
+                {
+                    Providers = new[]
+                    {
+                        provider
+                    }
+                };
 
-                //var configService = A.Fake<IConfigService>();
-                //A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
+                var configService = A.Fake<IConfigService>();
+                A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
 
-                //var redirectToProviderData = new RedirectToProviderData(provider.Name,
-                //    new Uri("http://www.pewpew.com/a/b/c"),
-                //    "http://www.aa.bb.com",
-                //    "http://www.xxx.net/a/b/c?d=e&f=g");
+                var traceSource = new TraceSource("test");
 
-                //var traceSource = new TraceSource("test");
+                var webApplicationService = new WebApplicationService(configService,
+                                    traceSource,
+                                    "asdjhsdkfhds");
 
-                //var webApplicationService = new WebApplicationService(authenticationProviderCallback,
-                //    configService,
-                //    traceSource,
-                //    "asdasdasd",
-                //    "axxxxxxxxxx");
+                var redirectToProviderData = new RedirectToProviderData(provider.Name,
+                    new Uri("http://www.pewpew.com/a/b/c"),
+                    "http://www.aa.bb.com",
+                    "http://www.xxx.net/a/b/c?d=e&f=g");
 
-                //// Act.
-                //var result = webApplicationService.RedirectToProvider(redirectToProviderData);
+                // Act.
+                var result = webApplicationService.RedirectToProvider(redirectToProviderData);
 
-                //// Assert.
-                //result.RedirectUrl.AbsoluteUri.ShouldStartWith(
-                //    "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Faxxxxxxxxxx&response_type=code&scope=profile%20email&state=");
-                //result.CacheData.ProviderKey.ShouldBe(redirectToProviderData.ProviderKey);
-                //result.CacheData.State.ShouldNotBe(null);
-                //result.CacheData.ReturnUrl.ShouldBe(redirectToProviderData.ReturnUrl);
+                // Assert.
+                result.RedirectUrl.AbsoluteUri.ShouldStartWith(
+                     "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fasdjhsdkfhds&response_type=code&scope=profile%20email&state=");
+                result.CacheData.ProviderKey.ShouldBe(redirectToProviderData.ProviderKey);
+                result.CacheData.State.ShouldNotBe(null);
+                result.CacheData.ReturnUrl.ShouldBe(redirectToProviderData.ReturnUrl);
             }
         }
 
         public class AuthenticateCallbackAsyncFacts
         {
+            private static AuthenticateCallbackAsyncData FakeAuthenticateCallbackAsyncData
+            {
+                get
+                {
+                    const string state = "qweryt*%%$*/.;'";
+                    var requestUrl = new Uri("http://www.foo.com.au");
+                    var cacheData = new CacheData("google", state, "someReturnUrl");
+                    var queryStringValues = new Dictionary<string, string>
+                    {
+                        {"state", state},
+                        {"code", "offline"},
+                        {"a", "b"}
+                    };
+                    return new AuthenticateCallbackAsyncData(requestUrl,
+                        cacheData,
+                        queryStringValues);
+                }
+            }
+
             [Fact]
             public void GivenNoStateKeyInTheQueryString_AuthenticateCallbackAsync_ThrowsAnException()
             {
