@@ -113,7 +113,7 @@ namespace SimpleAuthentication.Tests.Providers
                 var result = Should.Throw<AuthenticationException>(async () => await provider.AuthenticateClientAsync(querystring, state, redirectUrl));
 
                 // Assert.
-                result.Message.ShouldBe("CSRF check fails: The callback 'state' value 'pewpew' doesn't match the server's *remembered* state value 'hi.");
+                result.Message.ShouldBe("CSRF check fails: The callback 'state' value 'pewpew' doesn't match the server's *remembered* state value '**'.");
             }
 
             [Fact]

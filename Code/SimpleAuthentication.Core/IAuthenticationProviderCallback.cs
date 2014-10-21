@@ -6,7 +6,7 @@ namespace SimpleAuthentication.Core
     /// Defines the contract for the callback from an Authentication Provider.
     /// </summary>
     [Obsolete]
-    public interface IAuthenticationProviderCallback
+    public interface IAuthenticationProviderCallbackXXX
     {
         /// <summary>
         /// Custom processing during the callback from an Authentication Provider.

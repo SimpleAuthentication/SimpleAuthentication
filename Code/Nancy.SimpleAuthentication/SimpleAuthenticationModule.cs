@@ -25,9 +25,11 @@ namespace Nancy.SimpleAuthentication
         private string _returnToUrlParameterKey;
 
         public SimpleAuthenticationModule(INancyAuthenticationProviderCallback authenticationProviderCallback,
-            IConfigService configService,
-            string redirectRoute = DefaultRedirectRoute,
-            string callbackRoute = DefaultCallbackRoute)
+            IConfigService configService
+            //,
+            //string redirectRoute = DefaultRedirectRoute,
+            //string callbackRoute = DefaultCallbackRoute
+            )
         {
             if (authenticationProviderCallback == null)
             {
@@ -41,8 +43,8 @@ namespace Nancy.SimpleAuthentication
             
             _authenticationProviderCallback = authenticationProviderCallback;
 
-            RedirectRoute = redirectRoute;
-            CallbackRoute = callbackRoute;
+            //RedirectRoute = redirectRoute;
+            //CallbackRoute = callbackRoute;
 
             _webApplicationService = new WebApplicationService(configService,
                 TraceSource,
@@ -162,13 +164,15 @@ namespace Nancy.SimpleAuthentication
 
             var authenticateCallbackAsyncData = new AuthenticateCallbackAsyncData(Request.Url,
                 cacheData,
-                this,
                 queryString);
 
-            // TODO: PHILLIP: Somehow, pass the Nancy-explicit callback code to this framework-agnostic method...
-            // ref: _authenticationProviderCallback
-            // ref: this (which is this module ... for returning a redirect or view, etc). 
-            return await _webApplicationService.AuthenticateCallbackAsync(authenticateCallbackAsyncData);
+            return
+                await
+                    _webApplicationService
+                        .AuthenticateCallbackAsync<INancyAuthenticationProviderCallback, INancyModule, dynamic>(
+                        _authenticationProviderCallback,
+                            this,
+                            authenticateCallbackAsyncData);
         }
     }
 }

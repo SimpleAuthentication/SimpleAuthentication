@@ -102,15 +102,9 @@ namespace SimpleAuthentication.Core
             string state,
             string stateKey)
         {
-            if (querystring == null)
-            {
-                throw new ArgumentNullException("querystring");
-            }
-
-            if (string.IsNullOrWhiteSpace(state))
-            {
-                throw new ArgumentNullException("state");
-            }
+            // NOTE: queryString can be null or empty.
+            //       Means we didn't have any (which is not good - because we require some stuff
+            //       but it's possible that there is none because a person hit the route directly, etc)
 
             if (string.IsNullOrWhiteSpace(stateKey))
             {
@@ -118,7 +112,8 @@ namespace SimpleAuthentication.Core
             }
 
             // Start with the Cross Site Request Forgery check.
-            if (!querystring.ContainsKey(stateKey))
+            if (querystring == null ||
+                !querystring.ContainsKey(stateKey))
             {
                 var errorMessage = string.Format(
                     "The callback querystring doesn't include a state key/value parameter. We need one of these so we can do a CSRF check. Please check why the request url from the provider is missing the parameter: '{0}'. eg. &{0}=something...",
@@ -130,12 +125,19 @@ namespace SimpleAuthentication.Core
             var callbackState = querystring[stateKey];
             if (!callbackState.Equals(state, StringComparison.InvariantCultureIgnoreCase))
             {
+                // Replace all remembered state characters with stars. This is so a hacker can't probe the server for the rememebered value.
+                var hashedState = "";
+                for (int i = 0; i < state.Length; i++)
+                {
+                    hashedState += "*";
+                }
+
                 var errorMessage =
                     string.Format(
-                        "CSRF check fails: The callback '{0}' value '{1}' doesn't match the server's *remembered* state value '{2}.",
+                        "CSRF check fails: The callback '{0}' value '{1}' doesn't match the server's *remembered* state value '{2}'.",
                         stateKey,
                         callbackState,
-                        state);
+                        hashedState);
                 throw new AuthenticationException(errorMessage);
             }
         }

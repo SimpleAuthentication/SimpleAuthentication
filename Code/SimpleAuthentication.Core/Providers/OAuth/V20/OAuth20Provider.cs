@@ -53,11 +53,9 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
             string state,
             Uri callbackUri)
         {
-            if (queryString == null ||
-                queryString.Count <= 0)
-            {
-                throw new ArgumentNullException("queryString");
-            }
+            // NOTE: queryString can be null or empty.
+            //       Means we didn't have any (which is not good - because we require some stuff
+            //       but it's possible that there is none because a person hit the route directly, etc)
 
             if (string.IsNullOrWhiteSpace(state))
             {

@@ -179,7 +179,7 @@ namespace SimpleAuthentication.Tests
 
                 // Assert.
                 exception.Message.ShouldBe(
-                    "CSRF check fails: The callback 'state' value 'asdasd' doesn't match the server's *remembered* state value '675E6D63-B292-4D0E-B0FA-0DC39FDD8C89.");
+                    "CSRF check fails: The callback 'state' value 'asdasd' doesn't match the server's *remembered* state value '************************************'.");
             }
         }
     }

@@ -7,21 +7,9 @@ using SimpleAuthentication.Core;
 
 namespace SimpleAuthentication.Tests.WebSites.Nancy
 {
-    public class FakeAuthenticationProviderCallback : IAuthenticationProviderCallback
+    public class FakeAuthenticationProviderCallback : INancyAuthenticationProviderCallback
     {
-        private readonly INancyModule _nancyModule;
-
-        public FakeAuthenticationProviderCallback(INancyModule nancyModule)
-        {
-            if (nancyModule == null)
-            {
-                throw new ArgumentNullException("nancyModule");
-            }
-
-            _nancyModule = nancyModule;
-        }
-
-        public dynamic Process(AuthenticateCallbackResult result)
+        public dynamic Process(INancyModule nancyModule, AuthenticateCallbackResult result)
         {
             var model = new UserViewModel
             {
@@ -37,20 +25,20 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
                 //response = new Negotiator(nancyModule.Context)
                 //    .WithHeader("location", result.ReturnUrl)
                 //    .WithStatusCode(HttpStatusCode.TemporaryRedirect);
-                return _nancyModule.Response.AsRedirect(result.ReturnUrl, RedirectResponse.RedirectType.Temporary);
+                return nancyModule.Response.AsRedirect(result.ReturnUrl, RedirectResponse.RedirectType.Temporary);
             }
 
                 // We have a user, so lets do something with their data :)
             else if (string.IsNullOrWhiteSpace(result.ReturnUrl))
             {
-                response = new Negotiator(_nancyModule.Context)
+                response = new Negotiator(nancyModule.Context)
                     .WithModel(model)
                     .WithView("FakeView");
                 //return nancyModule.View[model];
             }
             else
             {
-                response = new Negotiator(_nancyModule.Context)
+                response = new Negotiator(nancyModule.Context)
                     .WithHeader("location", result.ReturnUrl)
                     .WithStatusCode(HttpStatusCode.MovedPermanently);
             }
@@ -60,7 +48,7 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
             return response;
         }
 
-        public dynamic OnRedirectToAuthenticationProviderError(Exception exception)
+        public dynamic OnRedirectToAuthenticationProviderError(INancyModule nancyModule, Exception exception)
         {
             throw new NotImplementedException();
         }

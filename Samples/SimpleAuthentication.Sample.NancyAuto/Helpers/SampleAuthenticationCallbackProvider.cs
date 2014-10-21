@@ -20,11 +20,14 @@ namespace SimpleAuthentication.Sample.NancyAuto.Helpers
             // Usually, magic stuff with a database happens here ...
             // but for this demo, we'll just dump the result back..
 
-            //return new Negotiator(nancyModule.Context)
-            //    .WithModel(model)
-            //    .WithView("AuthenticateCallback");
 
             return module.View["AuthenticateCallback", model];
+
+            // --Or--
+            // you can use a Negotiator...
+            //return new Negotiator(module.Context)
+            //    .WithModel(model)
+            //    .WithView("AuthenticateCallback");
         }
 
         public dynamic OnRedirectToAuthenticationProviderError(INancyModule module,
