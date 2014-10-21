@@ -6,7 +6,7 @@ namespace Nancy.SimpleAuthentication
     /// <summary>
     /// Defines the contract for the callback from an Authentication Provider.
     /// </summary>
-    public interface INancyAuthenticationProviderCallback
+    public interface IAuthenticationProviderCallback
     {
         /// <summary>
         /// Custom processing during the callback from an Authentication Provider.

@@ -19,12 +19,12 @@ namespace Nancy.SimpleAuthentication
         private string _redirectRoute;
         private string _callbackRoute;
         private readonly WebApplicationService _webApplicationService;
-        private readonly INancyAuthenticationProviderCallback _authenticationProviderCallback;
+        private readonly IAuthenticationProviderCallback _authenticationProviderCallback;
 
         private readonly Lazy<ITraceManager> _traceManager = new Lazy<ITraceManager>(() => new TraceManager());
         private string _returnToUrlParameterKey;
 
-        public SimpleAuthenticationModule(INancyAuthenticationProviderCallback authenticationProviderCallback,
+        public SimpleAuthenticationModule(IAuthenticationProviderCallback authenticationProviderCallback,
             IConfigService configService
             //,
             //string redirectRoute = DefaultRedirectRoute,
@@ -169,7 +169,7 @@ namespace Nancy.SimpleAuthentication
             return
                 await
                     _webApplicationService
-                        .AuthenticateCallbackAsync<INancyAuthenticationProviderCallback, INancyModule, dynamic>(
+                        .AuthenticateCallbackAsync<IAuthenticationProviderCallback, INancyModule, dynamic>(
                         _authenticationProviderCallback,
                             this,
                             authenticateCallbackAsyncData);

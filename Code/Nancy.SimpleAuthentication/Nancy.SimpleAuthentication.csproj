@@ -51,7 +51,7 @@
     </Compile>
     <Compile Include="AuthenticateCallbackResult.cs" />
     <Compile Include="EnableSessions.cs" />
-    <Compile Include="INancyAuthenticationProviderCallback.cs" />
+    <Compile Include="IAuthenticationProviderCallback.cs" />
     <Compile Include="ProcessResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleAuthenticationModuleOriginal.cs" />

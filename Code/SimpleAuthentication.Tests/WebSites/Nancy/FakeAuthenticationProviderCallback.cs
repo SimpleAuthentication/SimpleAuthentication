@@ -7,7 +7,7 @@ using SimpleAuthentication.Core;
 
 namespace SimpleAuthentication.Tests.WebSites.Nancy
 {
-    public class FakeAuthenticationProviderCallback : INancyAuthenticationProviderCallback
+    public class FakeAuthenticationProviderCallback : IAuthenticationProviderCallback
     {
         public dynamic Process(INancyModule nancyModule, AuthenticateCallbackResult result)
         {
