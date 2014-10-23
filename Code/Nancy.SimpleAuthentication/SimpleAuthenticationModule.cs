@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Config;
 using SimpleAuthentication.Core.Exceptions;
-using SimpleAuthentication.Core.Providers;
 using SimpleAuthentication.Core.Tracing;
 
 namespace Nancy.SimpleAuthentication

@@ -1,7 +1,6 @@
 ﻿using System;
 using Nancy;
 using Nancy.Responses;
-using Nancy.Responses.Negotiation;
 using Nancy.SimpleAuthentication;
 using SimpleAuthentication.Core;
 
@@ -17,35 +16,19 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
                 Email = result.AuthenticatedClient.UserInformation.Email
             };
 
-            Negotiator response;
-
             // User cancelled during the Authentication process.
             if (result.AuthenticatedClient == null)
             {
-                //response = new Negotiator(nancyModule.Context)
-                //    .WithHeader("location", result.ReturnUrl)
-                //    .WithStatusCode(HttpStatusCode.TemporaryRedirect);
                 return nancyModule.Response.AsRedirect(result.ReturnUrl, RedirectResponse.RedirectType.Temporary);
             }
 
-                // We have a user, so lets do something with their data :)
-            else if (string.IsNullOrWhiteSpace(result.ReturnUrl))
+            // We have a user, so lets do something with their data :)
+            if (string.IsNullOrWhiteSpace(result.ReturnUrl))
             {
-                response = new Negotiator(nancyModule.Context)
-                    .WithModel(model)
-                    .WithView("FakeView");
-                //return nancyModule.View[model];
-            }
-            else
-            {
-                response = new Negotiator(nancyModule.Context)
-                    .WithHeader("location", result.ReturnUrl)
-                    .WithStatusCode(HttpStatusCode.MovedPermanently);
+                return nancyModule.View[model];
             }
 
-            //return nancyModule.Response.AsRedirect(result.ReturnUrl);
-
-            return response;
+            return nancyModule.Response.AsRedirect(result.ReturnUrl);
         }
 
         public dynamic OnRedirectToAuthenticationProviderError(INancyModule nancyModule, Exception exception)

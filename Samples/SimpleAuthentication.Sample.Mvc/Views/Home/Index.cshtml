@@ -1,0 +1,15 @@
+﻿@{
+  Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<div id="container">
+    <fieldset title="Primary Logins">
+        <legend>Primary Logins:</legend>
+        
+        @Html.RedirectToProvider("google", "<img src=\"/Content/google_32.png\" alt=\"Login with your Google account.\"/>")
+        @*<a href="@Url.RedirectToProvider("facebook")"><img src="/Content/facebook_32.png" alt="Login with your Facebook account."/></a>*@
+    </fieldset>
+    
+    <hr/>
+    
+</div>

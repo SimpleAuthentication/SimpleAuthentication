@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}"
 EndProject
@@ -19,6 +19,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleAuthentication.Sample.NancyAuto", "Samples\SimpleAuthentication.Sample.NancyAuto\SimpleAuthentication.Sample.NancyAuto.csproj", "{C344D22C-5DC0-44E6-8595-D2EF49BF255B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleAuthentication.ExtraProviders", "Code\SimpleAuthentication.ExtraProviders\SimpleAuthentication.ExtraProviders.csproj", "{B402F572-08B1-42AE-A8AA-6DC68452F28B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleAuthentication.Sample.Mvc", "Samples\SimpleAuthentication.Sample.Mvc\SimpleAuthentication.Sample.Mvc.csproj", "{F1AAC5AC-C356-460D-B5FF-097E84301622}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleAuthentication.Mvc", "Code\SimpleAuthentication.Mvc\SimpleAuthentication.Mvc.csproj", "{FF30BDE9-3B3F-467A-B206-11C1BA83E316}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,11 +50,20 @@ Global
 		{B402F572-08B1-42AE-A8AA-6DC68452F28B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B402F572-08B1-42AE-A8AA-6DC68452F28B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B402F572-08B1-42AE-A8AA-6DC68452F28B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1AAC5AC-C356-460D-B5FF-097E84301622}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1AAC5AC-C356-460D-B5FF-097E84301622}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1AAC5AC-C356-460D-B5FF-097E84301622}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1AAC5AC-C356-460D-B5FF-097E84301622}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF30BDE9-3B3F-467A-B206-11C1BA83E316}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF30BDE9-3B3F-467A-B206-11C1BA83E316}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF30BDE9-3B3F-467A-B206-11C1BA83E316}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF30BDE9-3B3F-467A-B206-11C1BA83E316}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C344D22C-5DC0-44E6-8595-D2EF49BF255B} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}
+		{F1AAC5AC-C356-460D-B5FF-097E84301622} = {D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}
 	EndGlobalSection
 EndGlobal
