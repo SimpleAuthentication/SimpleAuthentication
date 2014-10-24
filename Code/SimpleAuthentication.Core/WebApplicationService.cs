@@ -68,9 +68,9 @@ namespace SimpleAuthentication.Core
                 cacheData);
         }
 
-        public async Task<TResult> AuthenticateCallbackAsync<T, TY, TResult>(
-            T objectToInvokeOn,
-            TY moduleOrController,
+        public async Task<TResult> AuthenticateCallbackAsync<TInvokeObject, TModuleOrController, TResult>(
+            TInvokeObject objectToInvokeOn,
+            TModuleOrController moduleOrController,
             AuthenticateCallbackAsyncData data)
         {
             if (data == null)
@@ -110,7 +110,8 @@ namespace SimpleAuthentication.Core
                 // Finally! We can hand over the logic to the consumer to do whatever they want.
                 _traceSource.TraceVerbose("About to execute your custom callback provider logic.");
 
-                var type = typeof (T);
+                // TODO: CACHE THE METHOD AND TYPE.
+                var type = typeof (TInvokeObject);
                 var method = type.GetMethod("Process");
                 result = (TResult) method.Invoke(objectToInvokeOn,
                     new object[] {moduleOrController, model});
