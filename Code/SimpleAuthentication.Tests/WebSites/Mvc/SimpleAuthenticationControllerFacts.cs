@@ -43,15 +43,12 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 A.CallTo(() => httpContext.Request).Returns(request);
                 var controllerContext = new ControllerContext(httpContext, new RouteData(), A.Fake<ControllerBase>());
 
-                var controller = new SimpleAuthenticationController(authenticationProviderCallback, configService)
-                {
-                    ControllerContext = controllerContext
-                };
-
-                const string providerName = "google";
-
                 // Act.
-                var exception = Should.Throw<AuthenticationException>(() => controller.RedirectToProvider(providerName));
+                var exception = Should.Throw<AuthenticationException>(() =>
+                    new SimpleAuthenticationController(authenticationProviderCallback, configService)
+                    {
+                        ControllerContext = controllerContext
+                    });
 
                 // Assert.
                 exception.Message.ShouldBe("No Authentication Provider config settings where found. As such, we'll never be able to authenticate successfully against another service. How to fix this: add at least one Authentication Provider configuration data into your config file's <appSettings> section (recommended and easiest answer) [eg. <add key=\"sa.Google\" value=\"key:587140099194.apps.googleusercontent.com;secret:npk1_gx-gqJmLiJRPFooxCEY\"/> or add a custom config section to your .config file (looks a bit more pro, but is also a bit more complex to setup). For more info (especially the convention rules for the appSettings key/value> please refer to: ");
@@ -61,8 +58,25 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
             public void GivenNoProviderNameRoute_RedirectToProvider_ThrowsAnException()
             {
                 // Arrange.
+                var provider = new Provider
+                {
+                    Name = "Google",
+                    Key = "some ** key",
+                    Secret = "some secret"
+                };
+                var configuration = new Configuration
+                {
+                    Providers = new[]
+                    {
+                        provider
+                    }
+                };
+
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
                 var configService = A.Fake<IConfigService>();
+
+                A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
+
                 var controller = new SimpleAuthenticationController(authenticationProviderCallback, configService);
 
                 // Act.
