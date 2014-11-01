@@ -10,22 +10,20 @@ namespace SimpleAuthentication.Core
 {
     public class AuthenticationProviderFactory
     {
-        public static Lazy<Configuration> Configuration;
-
-        private static readonly Lazy<IDictionary<string, IAuthenticationProvider>> Providers =
-            new Lazy<IDictionary<string, IAuthenticationProvider>>(Initialize);
+        private readonly IDictionary<string, IAuthenticationProvider> _providers;
 
         public AuthenticationProviderFactory(IConfigService configService)
         {
             configService.ThrowIfNull("configService");
 
             TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
-            Configuration = new Lazy<Configuration>(configService.GetConfiguration);
+
+            _providers = Initialize(configService.GetConfiguration());
         }
 
         public IDictionary<string, IAuthenticationProvider> AuthenticationProviders
         {
-            get { return Providers.Value; }
+            get { return _providers; }
         }
 
         public ITraceManager TraceManager { set; private get; }
@@ -86,7 +84,7 @@ namespace SimpleAuthentication.Core
             return authenticationProvider;
         }
 
-        private static IDictionary<string, IAuthenticationProvider> Initialize()
+        IDictionary<string, IAuthenticationProvider> Initialize(Configuration configuration)
         {
             var authenticationProviders = new Dictionary<string, IAuthenticationProvider>();
            
@@ -100,14 +98,14 @@ namespace SimpleAuthentication.Core
                 typeof (FakeProvider)
             };
 
-            if (Configuration != null &&
-                Configuration.Value.Providers != null &&
-                Configuration.Value.Providers.Any())
+            if (configuration != null &&
+                configuration.Providers != null &&
+                configuration.Providers.Any())
             {
                 // Map the available providers to the config settings provided.
                 SetupConfigurationProviders(authenticationProviders,
                     availableProviders,
-                    Configuration.Value.Providers);
+                    configuration.Providers);
             }
 
             if (authenticationProviders.Any())
