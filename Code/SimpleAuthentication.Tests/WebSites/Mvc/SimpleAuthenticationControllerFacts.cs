@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
@@ -23,6 +24,27 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
 {
     public class SimpleAuthenticationControllerFacts
     {
+        public static Configuration ConfigurationWithGoogleProvider
+        {
+            get
+            {
+                var provider = new Provider
+                {
+                    Name = "Google",
+                    Key = "some ** key",
+                    Secret = "some secret"
+                };
+                
+                return new Configuration
+                {
+                    Providers = new[]
+                    {
+                        provider
+                    }
+                };
+            }
+        }
+
         public class RedirectToProviderFacts
         {
             [Fact]
@@ -58,24 +80,9 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
             public void GivenNoProviderNameRoute_RedirectToProvider_ThrowsAnException()
             {
                 // Arrange.
-                var provider = new Provider
-                {
-                    Name = "Google",
-                    Key = "some ** key",
-                    Secret = "some secret"
-                };
-                var configuration = new Configuration
-                {
-                    Providers = new[]
-                    {
-                        provider
-                    }
-                };
-
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
                 var configService = A.Fake<IConfigService>();
-
-                A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
+                A.CallTo(() => configService.GetConfiguration()).Returns(ConfigurationWithGoogleProvider);
 
                 var controller = new SimpleAuthenticationController(authenticationProviderCallback, configService);
 
@@ -92,19 +99,8 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
             {
                 // Arrange.
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
-
-                var provider = new Provider
-                {
-                    Name = "Google",
-                    Key = "some ** key",
-                    Secret = "some secret"
-                };
-                var configuration = new Configuration()
-                {
-                    Providers = new[] {provider}
-                };
                 var configService = A.Fake<IConfigService>();
-                A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
+                A.CallTo(() => configService.GetConfiguration()).Returns(ConfigurationWithGoogleProvider);
 
                 var request = A.Fake<HttpRequestBase>();
                 A.CallTo(() => request.QueryString).Returns(new NameValueCollection());
@@ -143,18 +139,8 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 // Arrange.
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
 
-                var provider = new Provider
-                {
-                    Name = "Google",
-                    Key = "some ** key",
-                    Secret = "some secret"
-                };
-                var configuration = new Configuration()
-                {
-                    Providers = new[] { provider }
-                };
                 var configService = A.Fake<IConfigService>();
-                A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
+                A.CallTo(() => configService.GetConfiguration()).Returns(ConfigurationWithGoogleProvider);
 
                 var request = A.Fake<HttpRequestBase>();
                 //A.CallTo(() => request.QueryString["returnUrl"]).Returns(null);
@@ -198,7 +184,9 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
             {
                 // Arrange.
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
+
                 var configService = A.Fake<IConfigService>();
+                A.CallTo(() => configService.GetConfiguration()).Returns(ConfigurationWithGoogleProvider);
 
                 var session = A.Fake<HttpSessionStateBase>();
                 A.CallTo(() => session["SimpleAuthentication-StateKey-427B6ED7-A803-4F18-A396-0084417B548D"])
@@ -227,24 +215,15 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 // Arrange.
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
 
-                var provider = new Provider
-                {
-                    Name = "Google",
-                    Key = "some ** key",
-                    Secret = "some secret"
-                };
-                var configuration = new Configuration()
-                {
-                    Providers = new[] { provider }
-                };
                 var configService = A.Fake<IConfigService>();
+                var configuration = ConfigurationWithGoogleProvider;
                 A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
 
                 var request = A.Fake<HttpRequestBase>();
                 A.CallTo(() => request.QueryString).Returns(new NameValueCollection());
                 A.CallTo(() => request.Url).Returns(new Uri("http://www.foo.com"));
 
-                var cacheData = new CacheData(provider.Name, "asdadsds", null);
+                var cacheData = new CacheData(configuration.Providers.First().Name, "asdadsds", null);
                 var session = A.Fake<HttpSessionStateBase>();
                 A.CallTo(() => session["SimpleAuthentication-StateKey-427B6ED7-A803-4F18-A396-0084417B548D"])
                     .Returns(cacheData);
@@ -278,17 +257,8 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                     A<AuthenticateCallbackResult>._)).Returns(redirectResult);
                 const string state = "barbra streisand";
 
-                var provider = new Provider
-                {
-                    Name = "Google",
-                    Key = "some ** key",
-                    Secret = "some secret"
-                };
-                var configuration = new Configuration()
-                {
-                    Providers = new[] {provider}
-                };
                 var configService = A.Fake<IConfigService>();
+                var configuration = ConfigurationWithGoogleProvider;
                 A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
 
                 var queryString = new NameValueCollection
@@ -300,7 +270,7 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 A.CallTo(() => request.QueryString).Returns(queryString);
                 A.CallTo(() => request.Url).Returns(new Uri("http://www.foo.com"));
 
-                var cacheData = new CacheData(provider.Name, state, null);
+                var cacheData = new CacheData(configuration.Providers.First().Name, state, null);
                 var session = A.Fake<HttpSessionStateBase>();
                 A.CallTo(() => session["SimpleAuthentication-StateKey-427B6ED7-A803-4F18-A396-0084417B548D"])
                     .Returns(cacheData);
