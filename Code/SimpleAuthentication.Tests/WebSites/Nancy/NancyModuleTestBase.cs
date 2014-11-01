@@ -37,7 +37,10 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
                 {
                     with.Dependencies(dependencies);
                 }
+
             });
+
+            CookieBasedSessions.Enable(bootstrapper);
 
             if (session != null)
             {

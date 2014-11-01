@@ -9,24 +9,29 @@ namespace SimpleAuthentication.Mvc
 {
     public static class RouteConfig
     {
-        public const string DefaultRedirectRoute = "authenticate/{providerName}";
-        public const string DefaultCallbackRoute = "authenticate/callback";
         public const string RedirectToProviderRouteName = "SimpleAuthentication.Mvc-Redirect";
         public const string CallbackRouteName = "SimpleAuthentication.Mvc-Callback";
 
-        public static void RegisterRoutes(string redirectRoute = DefaultRedirectRoute,
-            string callbackRoute = DefaultCallbackRoute)
+        public static void RegisterRoutes()
+        {
+            RegisterRoutes(SimpleAuthenticationController.DefaultRedirectRoute,
+                SimpleAuthenticationController.DefaultCallbackRoute);
+        }
+
+        public static void RegisterRoutes(string redirectRoute,
+            string callbackRoute)
         {
             // If someone provides a null or empty route parameter, then we assuming
             // they want the default routes.
 
-            RouteTable.Routes.MapOAuthRedirect(string.IsNullOrWhiteSpace(redirectRoute)
-                ? DefaultRedirectRoute
-                : redirectRoute);
-
+            // NOTE: This needs to be registered before the other one, else this will never get caught.
             RouteTable.Routes.MapOAuthCallback(string.IsNullOrWhiteSpace(callbackRoute)
-                ? DefaultCallbackRoute
+                ? SimpleAuthenticationController.DefaultCallbackRoute
                 : callbackRoute);
+
+            RouteTable.Routes.MapOAuthRedirect(string.IsNullOrWhiteSpace(redirectRoute)
+                ? SimpleAuthenticationController.DefaultRedirectRoute
+                : redirectRoute);
         }
 
         /// <summary>
@@ -53,7 +58,7 @@ namespace SimpleAuthentication.Mvc
             routes.MapRoute(
                 name: CallbackRouteName,
                 url: route,
-                defaults: new {controller = "SimpleAuthentication", action = "AuthenticateCallbackResultAsync"}
+                defaults: new { controller = "SimpleAuthentication", action = "AuthenticateCallback" }
                 );
         }
     }

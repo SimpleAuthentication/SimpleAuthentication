@@ -23,7 +23,7 @@ namespace SimpleAuthentication.Sample.Mvc
             builder.RegisterControllers(typeof(MvcApplication).Assembly);
 
             // Register Simple Authentication stuff.
-            builder.RegisterType<SampleMvcAutoAuthenticationCallbackProvider>().As<IAuthenticationProviderCallback>();
+            builder.RegisterType<SampleMvcAuthenticationCallbackProvider>().As<IAuthenticationProviderCallback>();
             builder.RegisterType<ConfigService>().As<IConfigService>();
             builder.RegisterControllers(typeof(SimpleAuthenticationController).Assembly);
 

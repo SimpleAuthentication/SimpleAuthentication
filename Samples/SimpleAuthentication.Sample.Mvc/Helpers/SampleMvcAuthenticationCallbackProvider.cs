@@ -6,7 +6,7 @@ using SimpleAuthentication.Sample.Mvc.Models;
 
 namespace SimpleAuthentication.Sample.Mvc.Helpers
 {
-    public class SampleMvcAutoAuthenticationCallbackProvider : IAuthenticationProviderCallback
+    public class SampleMvcAuthenticationCallbackProvider : IAuthenticationProviderCallback
     {
         public ActionResult Process(Controller controller, AuthenticateCallbackResult result)
         {

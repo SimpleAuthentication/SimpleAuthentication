@@ -1,4 +1,4 @@
-﻿@model SimpleAuthentication.Sample.MvcAuto.Models.AuthenticateCallbackViewModel
+﻿@model SimpleAuthentication.Sample.Mvc.Models.AuthenticateCallbackViewModel
 
 @{
     Layout = "/Views/Shared/_Layout.cshtml";
@@ -16,8 +16,8 @@
     {
         <h2>User Information</h2>
         <p>Provider Type: @Model.AuthenticatedClient.ProviderName</p>
-        <p>Public Access Token: @Model.AuthenticatedClient.AccessToken.PublicToken</p>
-        <p>Secret Access Token: @Model.AuthenticatedClient.AccessToken.SecretToken</p>
+        <p>Public Access Token: @Model.AuthenticatedClient.AccessToken.Token</p>
+        <p>Access Token Expires On: @Model.AuthenticatedClient.AccessToken.ExpiresOn</p>
         <p>Access Token Expires On: @Model.AuthenticatedClient.AccessToken.ExpiresOn</p>
         <p>ID: @Model.AuthenticatedClient.UserInformation.Id</p>
         <p>Name: @Model.AuthenticatedClient.UserInformation.Name</p>
@@ -29,7 +29,7 @@
             <p>Picture:<br/> <img alt="Provider Image" src="@Model.AuthenticatedClient.UserInformation.Picture" /></p>
         }
         <p>Gender: @Model.AuthenticatedClient.UserInformation.Gender.ToString()</p>
-        <p>Referrer/RedirectTo Url: @(Model.ReturnUrl == null ? "-none/null-" : Model.ReturnUrl)</p>
+        <p>Referrer/RedirectTo Url: @(Model.ReturnUrl ?? "-none/null-")</p>
     }
 
 
