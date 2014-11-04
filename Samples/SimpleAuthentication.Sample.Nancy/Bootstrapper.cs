@@ -7,7 +7,7 @@ using Nancy.TinyIoc;
 using SimpleAuthentication.Core.Providers;
 using SimpleAuthentication.ExtraProviders;
 
-namespace SimpleAuthentication.Sample.NancyAuto
+namespace SimpleAuthentication.Sample.Nancy
 {
     public class Bootstrapper : DefaultNancyBootstrapper
     {

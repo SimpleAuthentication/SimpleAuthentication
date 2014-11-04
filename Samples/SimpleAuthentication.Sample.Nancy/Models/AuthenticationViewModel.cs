@@ -1,7 +1,7 @@
 ﻿using System;
 using SimpleAuthentication.Core;
 
-namespace SimpleAuthentication.Sample.NancyAuto.Models
+namespace SimpleAuthentication.Sample.Nancy.Models
 {
     public class AuthenticationViewModel
     {

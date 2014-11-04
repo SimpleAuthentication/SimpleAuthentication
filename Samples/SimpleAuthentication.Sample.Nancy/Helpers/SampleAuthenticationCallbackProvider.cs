@@ -3,9 +3,9 @@ using Nancy;
 using Nancy.Responses.Negotiation;
 using Nancy.SimpleAuthentication;
 using SimpleAuthentication.Core;
-using SimpleAuthentication.Sample.NancyAuto.Models;
+using SimpleAuthentication.Sample.Nancy.Models;
 
-namespace SimpleAuthentication.Sample.NancyAuto.Helpers
+namespace SimpleAuthentication.Sample.Nancy.Helpers
 {
     public class SampleAuthenticationCallbackProvider : IAuthenticationProviderCallback
     {

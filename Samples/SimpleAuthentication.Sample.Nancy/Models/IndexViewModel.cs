@@ -1,4 +1,4 @@
-﻿namespace SimpleAuthentication.Sample.NancyAuto.Models
+﻿namespace SimpleAuthentication.Sample.Nancy.Models
 {
     public class IndexViewModel
     {
