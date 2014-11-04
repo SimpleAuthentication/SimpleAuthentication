@@ -13,6 +13,7 @@ using Shouldly;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Config;
 using SimpleAuthentication.Core.Exceptions;
+using SimpleAuthentication.Core.Providers;
 using SimpleAuthentication.Mvc;
 using WorldDomination.Net.Http;
 using Xunit;
@@ -21,67 +22,16 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
 {
     public class SimpleAuthenticationControllerFacts
     {
-        public static Configuration ConfigurationWithGoogleProvider
-        {
-            get
-            {
-                var provider = new Provider
-                {
-                    Name = "Google",
-                    Key = "some ** key",
-                    Secret = "some secret"
-                };
-                
-                return new Configuration
-                {
-                    Providers = new[]
-                    {
-                        provider
-                    }
-                };
-            }
-        }
-
         public class RedirectToProviderFacts
         {
-            [Fact]
-            public void GivenNoAppSettings_RedirectToProvider_ThrowsAnException()
-            {
-                // Arrange.
-                var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
-                var configService = A.Fake<IConfigService>();
-
-                var request = A.Fake<HttpRequestBase>();
-                //A.CallTo(() => request.QueryString["returnUrl"]).Returns(null);
-                A.CallTo(() => request.QueryString).Returns(new NameValueCollection());
-                A.CallTo(() => request.UrlReferrer).Returns(null);
-                var requestUrl = new Uri("http://localhost:45216/SimpleAuthentication/RedirectToProvider?providerName=google");
-                A.CallTo(() => request.Url).Returns(requestUrl);
-                A.CallTo(() => request.UrlReferrer).Returns(new Uri(requestUrl.Authority));
-                var httpContext = A.Fake<HttpContextBase>();
-                A.CallTo(() => httpContext.Request).Returns(request);
-                var controllerContext = new ControllerContext(httpContext, new RouteData(), A.Fake<ControllerBase>());
-
-                // Act.
-                var exception = Should.Throw<AuthenticationException>(() =>
-                    new SimpleAuthenticationController(authenticationProviderCallback, configService)
-                    {
-                        ControllerContext = controllerContext
-                    });
-
-                // Assert.
-                exception.Message.ShouldBe("No Authentication Provider config settings where found. As such, we'll never be able to authenticate successfully against another service. How to fix this: add at least one Authentication Provider configuration data into your config file's <appSettings> section (recommended and easiest answer) [eg. <add key=\"sa.Google\" value=\"key:587140099194.apps.googleusercontent.com;secret:npk1_gx-gqJmLiJRPFooxCEY\"/> or add a custom config section to your .config file (looks a bit more pro, but is also a bit more complex to setup). For more info (especially the convention rules for the appSettings key/value> please refer to: ");
-            }
-
             [Fact]
             public void GivenNoProviderNameRoute_RedirectToProvider_ThrowsAnException()
             {
                 // Arrange.
+                var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
-                var configService = A.Fake<IConfigService>();
-                A.CallTo(() => configService.GetConfiguration()).Returns(ConfigurationWithGoogleProvider);
-
-                var controller = new SimpleAuthenticationController(authenticationProviderCallback, configService);
+                var controller = new SimpleAuthenticationController(authenticationProviderFactory,
+                    authenticationProviderCallback);
 
                 // Act.
                 var exception = Should.Throw<AuthenticationException>(() => controller.RedirectToProvider(null));
@@ -95,9 +45,11 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
             public void GivenAProviderNameButNoReturnUrl_RedirectToProvider_ReturnsARedirectResult()
             {
                 // Arrange.
+                var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
+                A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
+                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle); 
+                
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
-                var configService = A.Fake<IConfigService>();
-                A.CallTo(() => configService.GetConfiguration()).Returns(ConfigurationWithGoogleProvider);
 
                 var request = A.Fake<HttpRequestBase>();
                 A.CallTo(() => request.QueryString).Returns(new NameValueCollection());
@@ -109,7 +61,8 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 A.CallTo(() => httpContext.Request).Returns(request);
                 var controllerContext = new ControllerContext(httpContext, new RouteData(), A.Fake<ControllerBase>());
 
-                var controller = new SimpleAuthenticationController(authenticationProviderCallback, configService)
+                var controller = new SimpleAuthenticationController(authenticationProviderFactory,
+                    authenticationProviderCallback)
                 {
                     ControllerContext = controllerContext
                 };
@@ -134,10 +87,11 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
             public void GivenAProviderNameWithAReturnUrl_RedirectToProvider_ReturnsARedirectResult()
             {
                 // Arrange.
+                var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
+                A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
+                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
+                
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
-
-                var configService = A.Fake<IConfigService>();
-                A.CallTo(() => configService.GetConfiguration()).Returns(ConfigurationWithGoogleProvider);
 
                 var request = A.Fake<HttpRequestBase>();
                 //A.CallTo(() => request.QueryString["returnUrl"]).Returns(null);
@@ -152,7 +106,8 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 A.CallTo(() => httpContext.Request).Returns(request);
                 var controllerContext = new ControllerContext(httpContext, new RouteData(), A.Fake<ControllerBase>());
 
-                var controller = new SimpleAuthenticationController(authenticationProviderCallback, configService)
+                var controller = new SimpleAuthenticationController(authenticationProviderFactory, 
+                    authenticationProviderCallback)
                 {
                     ControllerContext = controllerContext
                 };
@@ -180,10 +135,8 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
             public void GivenNoSession_AuthenticateCallbackResultAsync_ThrowsAnException()
             {
                 // Arrange.
+                var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
-
-                var configService = A.Fake<IConfigService>();
-                A.CallTo(() => configService.GetConfiguration()).Returns(ConfigurationWithGoogleProvider);
 
                 var session = A.Fake<HttpSessionStateBase>();
                 A.CallTo(() => session["SimpleAuthentication-StateKey-427B6ED7-A803-4F18-A396-0084417B548D"])
@@ -193,7 +146,8 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
 
                 var controllerContext = new ControllerContext(httpContext, new RouteData(), A.Fake<ControllerBase>());
 
-                var controller = new SimpleAuthenticationController(authenticationProviderCallback, configService)
+                var controller = new SimpleAuthenticationController(authenticationProviderFactory,
+                    authenticationProviderCallback)
                 {
                     ControllerContext = controllerContext
                 };
@@ -210,17 +164,18 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
             public void GivenNoStateInTheQueryString_AuthenticateCallbackResultAsync_ThrowsAnException()
             {
                 // Arrange.
+                var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
+                A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
+                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle); 
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
-
-                var configService = A.Fake<IConfigService>();
-                var configuration = ConfigurationWithGoogleProvider;
-                A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
 
                 var request = A.Fake<HttpRequestBase>();
                 A.CallTo(() => request.QueryString).Returns(new NameValueCollection());
                 A.CallTo(() => request.Url).Returns(new Uri("http://www.foo.com"));
 
-                var cacheData = new CacheData(configuration.Providers.First().Name, "asdadsds", null);
+                var cacheData = new CacheData(TestHelpers.AuthenticationProvidersWithGoogle.First().Value.Name, 
+                    "asdadsds", 
+                    null);
                 var session = A.Fake<HttpSessionStateBase>();
                 A.CallTo(() => session["SimpleAuthentication-StateKey-427B6ED7-A803-4F18-A396-0084417B548D"])
                     .Returns(cacheData);
@@ -230,7 +185,7 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 A.CallTo(() => httpContext.Session).Returns(session);
                 var controllerContext = new ControllerContext(httpContext, new RouteData(), A.Fake<ControllerBase>());
 
-                var controller = new SimpleAuthenticationController(authenticationProviderCallback, configService)
+                var controller = new SimpleAuthenticationController(authenticationProviderFactory, authenticationProviderCallback)
                 {
                     ControllerContext = controllerContext
                 };
@@ -249,14 +204,14 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 // Arrange.
                 const string redirectResultUrl ="http://www.dancedancepewpew.com/a/b/c";
                 var redirectResult = new RedirectResult(redirectResultUrl);
+
+                var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
+                A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
+                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
                 A.CallTo(() => authenticationProviderCallback.Process(A<Controller>._,
                     A<AuthenticateCallbackResult>._)).Returns(redirectResult);
                 const string state = "barbra streisand";
-
-                var configService = A.Fake<IConfigService>();
-                var configuration = ConfigurationWithGoogleProvider;
-                A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
 
                 var queryString = new NameValueCollection
                 {
@@ -267,7 +222,7 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 A.CallTo(() => request.QueryString).Returns(queryString);
                 A.CallTo(() => request.Url).Returns(new Uri("http://www.foo.com"));
 
-                var cacheData = new CacheData(configuration.Providers.First().Name, state, null);
+                var cacheData = new CacheData(TestHelpers.AuthenticationProvidersWithGoogle.First().Value.Name, state, null);
                 var session = A.Fake<HttpSessionStateBase>();
                 A.CallTo(() => session["SimpleAuthentication-StateKey-427B6ED7-A803-4F18-A396-0084417B548D"])
                     .Returns(cacheData);
@@ -277,7 +232,7 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 A.CallTo(() => httpContext.Session).Returns(session);
                 var controllerContext = new ControllerContext(httpContext, new RouteData(), A.Fake<ControllerBase>());
 
-                var controller = new SimpleAuthenticationController(authenticationProviderCallback, configService)
+                var controller = new SimpleAuthenticationController(authenticationProviderFactory, authenticationProviderCallback)
                 {
                     ControllerContext = controllerContext
                 };

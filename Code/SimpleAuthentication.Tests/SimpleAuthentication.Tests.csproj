@@ -102,6 +102,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AuthenticationProviderFactoryFacts.cs" />
+    <Compile Include="ConfigServiceFacts.cs" />
     <Compile Include="ExtraProviders\GitHubProviderFacts.cs" />
     <Compile Include="ExtraProviders\InstagramProviderFacts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -112,6 +114,7 @@
     <Compile Include="Providers\WindowsLiveProviderFacts.cs" />
     <Compile Include="SystemExtensionsFacts.cs" />
     <Compile Include="SystemHelpersFacts.cs" />
+    <Compile Include="TestHelpers.cs" />
     <Compile Include="WebApplicationServiceFacts.cs" />
     <Compile Include="WebSites\Mvc\SimpleAuthenticationControllerFacts.cs" />
     <Compile Include="WebSites\Nancy\AuthenticationProviderCallbackFacts.cs" />

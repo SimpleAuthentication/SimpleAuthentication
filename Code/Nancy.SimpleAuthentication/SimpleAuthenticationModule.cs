@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Config;
 using SimpleAuthentication.Core.Exceptions;
+using SimpleAuthentication.Core.Providers;
 using SimpleAuthentication.Core.Tracing;
 
 namespace Nancy.SimpleAuthentication
@@ -23,21 +24,21 @@ namespace Nancy.SimpleAuthentication
         private readonly Lazy<ITraceManager> _traceManager = new Lazy<ITraceManager>(() => new TraceManager());
         private string _returnToUrlParameterKey;
 
-        public SimpleAuthenticationModule(IAuthenticationProviderCallback authenticationProviderCallback,
-            IConfigService configService
+        public SimpleAuthenticationModule(IAuthenticationProviderFactory authenticationProviderFactory,
+            IAuthenticationProviderCallback authenticationProviderCallback
             //,
             //string redirectRoute = DefaultRedirectRoute,
             //string callbackRoute = DefaultCallbackRoute
             )
         {
+            if (authenticationProviderFactory == null)
+            {
+                throw new ArgumentNullException("authenticationProviderFactory");
+            }
+
             if (authenticationProviderCallback == null)
             {
                 throw new ArgumentNullException("authenticationProviderCallback");
-            }
-
-            if (configService == null)
-            {
-                throw new ArgumentNullException("configService");
             }
             
             _authenticationProviderCallback = authenticationProviderCallback;
@@ -45,7 +46,7 @@ namespace Nancy.SimpleAuthentication
             //RedirectRoute = redirectRoute;
             //CallbackRoute = callbackRoute;
 
-            _webApplicationService = new WebApplicationService(configService,
+            _webApplicationService = new WebApplicationService(authenticationProviderFactory,
                 TraceSource,
                 CallbackRoute);
 

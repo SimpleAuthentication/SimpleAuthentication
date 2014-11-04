@@ -9,6 +9,7 @@ using Nancy.Testing;
 using Shouldly;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Config;
+using SimpleAuthentication.Core.Providers;
 using WorldDomination.Net.Http;
 using Xunit;
 
@@ -23,25 +24,20 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
             {
                 // Arrange.
                 var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
-                var configuration = new Configuration
-                {
-                    Providers = new[]
-                    {
-                        new Provider
-                        {
-                            Name = "Google",
-                            Key = "some key",
-                            Secret = "some secret"
-                        }
-                    }
-                };
 
                 var configService = A.Fake<IConfigService>();
-                A.CallTo(() => configService.GetConfiguration()).Returns(configuration);
+                A.CallTo(() => configService.GetConfiguration())
+                    .Returns(TestHelpers.ConfigurationWithGoogleProvider);
 
+                var providerScanner = A.Fake<IProviderScanner>();
+                A.CallTo(() => providerScanner.GetDiscoveredProviders())
+                    .Returns(new[] {typeof (GoogleProvider)});
+
+                var authenticationProviderFactory = new AuthenticationProviderFactory(configService,
+                    providerScanner);
+                AddModuleDependency(typeof (IAuthenticationProviderFactory), authenticationProviderFactory);
                 AddModuleDependency(typeof(IAuthenticationProviderCallback), authenticationCallbackProvider);
-                AddModuleDependency(typeof(IConfigService), configService);
-
+                
                 var browser = Browser();
 
                 // Act.
@@ -57,8 +53,8 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
                 result.Body.AsString().ShouldBeNullOrEmpty();
                 result.Headers.Count.ShouldBe(1);
                 result.Headers["Location"]
-                    .ShouldStartWith("https://accounts.google.com/o/oauth2/auth?client_id=some%20key&redirect_uri=http%3A%2F%2Ffoo.com%2Fauthenticate%2Fcallback&response_type=code&scope=profile%20email&state=");
-                                  // "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Ffoo.com%2Fauthenticate%2Fcallback&response_type=code&scope=profile%20email&state=cdcdc112-53b4-4e4c-8d55-d44829b2d720"
+                    .ShouldStartWith(
+                        "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Ffoo.com%2Fauthenticate%2Fcallback&response_type=code&scope=profile%20email&state=");
                 var cacheData =
                     (CacheData)result.Context.Request.Session["SimpleAuthentication-StateKey-cf92a651-d638-4ce4-a393-f612d3be4c3a"];
                 cacheData.ProviderKey.ShouldBe("google");

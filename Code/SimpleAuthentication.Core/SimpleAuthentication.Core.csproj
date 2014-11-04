@@ -69,8 +69,10 @@
     <Compile Include="AuthenticateCallbackAsyncData.cs" />
     <Compile Include="AuthenticateCallbackResult.cs" />
     <Compile Include="AuthenticationProviderFactory.cs" />
+    <Compile Include="IAuthenticationProviderFactory.cs" />
+    <Compile Include="Providers\ProviderScanner.cs" />
     <Compile Include="CacheData.cs" />
-    <Compile Include="Config\ConfigService.cs" />
+    <Compile Include="Config\AppConfigService.cs" />
     <Compile Include="Config\Configuration.cs" />
     <Compile Include="Config\IConfigService.cs" />
     <Compile Include="Config\Provider.cs" />
@@ -80,6 +82,7 @@
     <Compile Include="Providers\Google\Emails.cs" />
     <Compile Include="Providers\Google\Image.cs" />
     <Compile Include="Providers\Google\Name.cs" />
+    <Compile Include="Providers\IProviderScanner.cs" />
     <Compile Include="Providers\OAuth\V10a\OAuth10Provider.cs" />
     <Compile Include="Providers\OAuth\V20\OAuth20Provider.cs" />
     <Compile Include="Providers\FacebookProvider.cs" />

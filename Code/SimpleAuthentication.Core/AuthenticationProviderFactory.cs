@@ -8,54 +8,110 @@ using SimpleAuthentication.Core.Tracing;
 
 namespace SimpleAuthentication.Core
 {
-    public class AuthenticationProviderFactory
+    public class AuthenticationProviderFactory : IAuthenticationProviderFactory
     {
-        private readonly IDictionary<string, IAuthenticationProvider> _providers;
-
-        public AuthenticationProviderFactory(IConfigService configService)
+        public AuthenticationProviderFactory(IConfigService configService,
+            IProviderScanner providerScanner)
         {
-            configService.ThrowIfNull("configService");
+            if (configService == null)
+            {
+                throw new ArgumentNullException("configService");
+            }
+
+            if (providerScanner == null)
+            {
+                throw new ArgumentNullException("providerScanner");
+            }
 
             TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
 
-            _providers = Initialize(configService.GetConfiguration());
+            SetupAuthenticationProviders(configService, providerScanner);
         }
 
-        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders
-        {
-            get { return _providers; }
-        }
+        public IDictionary<string, IAuthenticationProvider> AuthenticationProviders { get; private set; }
 
         public ITraceManager TraceManager { set; private get; }
 
-        public void AddProvider(IAuthenticationProvider provider, bool replaceExisting = true)
+        private void SetupAuthenticationProviders(IConfigService configService,
+            IProviderScanner providerScanner)
         {
-            AddProviderToDictionary(AuthenticationProviders, provider, replaceExisting);
-        }
-
-        public void RemoveProvider<T>()
-        {
-            var providerName = typeof (T).Name.ToLowerInvariant();
-
-            RemoveProviderFromDictionary(providerName, AuthenticationProviders);
-        }
-
-        public static IAuthenticationProvider AvailableProvider<T>(IList<Type> discoveredProviders,
-            string name,
-            Func<T> providerParamsFunc) where T : ProviderParams
-        {
-            discoveredProviders.ThrowIfNull("discoveredProviders");
-
-            var provider = discoveredProviders.SingleOrDefault(x => x.Name.ToLowerInvariant().StartsWith(name));
-
-            if (provider == null)
+            if (configService == null)
             {
-                var errorMessage =
+                throw new ArgumentNullException("configService");
+            }
+
+            if (providerScanner == null)
+            {
+                throw new ArgumentNullException("providerScanner");
+            }
+
+            var configuration = configService.GetConfiguration();
+            if (configuration == null ||
+                configuration.Providers == null ||
+                !configuration.Providers.Any())
+            {
+                throw new AuthenticationException("There needs to be at least one Authentication Provider's detail's in the configService.Provider's collection. Otherwise, how else are we to set the available Authentication Providers?");
+            }
+
+            var discoveredProviders = providerScanner.GetDiscoveredProviders();
+            if (discoveredProviders == null ||
+                !discoveredProviders.Any())
+            {
+                throw new AuthenticationException("No discovered providers were found by the Provider Scanner. We need at least one IAuthenticationProvider type to exist so we can attempt to map the authentication data (from the configService) to the found Provider.");
+            }
+            // Lets try and map the developer-provided list of providers against the available
+            // list that was discovered.
+            // We don't want to load providers that cannot be mapped -- after all,
+            // we can only goto a provider if we have the api keys, etc.
+            foreach (var configProvider in configuration.Providers)
+            {
+                var provider = LoadProvider(configProvider, discoveredProviders);
+                if (provider == null)
+                {
+                    throw new AuthenticationException("Failed to create a Provider for the name: {0}. Maybe the concrete class doesn't exist or the constructor params are not the required ones?");
+                }
+
+                if (AuthenticationProviders == null)
+                {
+                    AuthenticationProviders = new Dictionary<string, IAuthenticationProvider>();
+                }
+
+                var key = provider.Name.ToLowerInvariant();
+
+                if (!AuthenticationProviders.ContainsKey(key))
+                {
+                    AuthenticationProviders.Add(key, provider);
+                }
+            }
+        }
+
+        private static IAuthenticationProvider LoadProvider(Provider configProvider,
+            IList<Type> discoveredProviders)
+        {
+            if (configProvider == null)
+            {
+                throw new ArgumentNullException("configProvider");
+            }
+
+            if (discoveredProviders == null ||
+                !discoveredProviders.Any())
+            {
+                throw new ArgumentNullException("discoveredProviders");
+            }
+
+            string configProviderName = configProvider.Name.ToLowerInvariant();
+
+            var exisitingProvider = discoveredProviders
+                .SingleOrDefault(x => x.Name.ToLowerInvariant().StartsWith(configProviderName));
+
+            if (exisitingProvider == null)
+            {
+                string errorMessage =
                     string.Format(
                         "Unable to find the provider [{0}]. Is there a provider dll available? Is there a typo in the provider name? Solution suggestions: Check to make sure the correct dll's are in the 'bin' directory and/or check the name to make sure there's no typo's in there. Example: If you're trying include the GitHub provider, make sure the name is 'github' (any case) and that the ExtraProviders dll exists in the 'bin' directory or make sure you've downloaded the package via NuGet -> install-package SimpleAuthentication.ExtraProviders.",
-                        name);
+                        configProviderName);
 
-                throw new ApplicationException(errorMessage);
+                throw new AuthenticationException(errorMessage);
             }
 
             IAuthenticationProvider authenticationProvider = null;
@@ -63,149 +119,47 @@ namespace SimpleAuthentication.Core
             // Make sure we have a provider with the correct constructor parameters.
             // How? If a person creates their own provider and doesn't offer a constructor
             // that has a sigle ProviderParams, then we're stuffed. So we need to help them.
-            if (provider.GetConstructor(new[] {typeof (ProviderParams)}) != null)
+            if (exisitingProvider.GetConstructor(new[] { typeof(ProviderParams) }) != null)
             {
-                var parameters = providerParamsFunc();
+                var parameters = new ProviderParams(configProvider.Key,
+                    configProvider.Secret,
+                    configProvider.Scopes.ScopesToCollection());
 
-                authenticationProvider = Activator.CreateInstance(provider, parameters) as IAuthenticationProvider;
+                authenticationProvider =
+                    Activator.CreateInstance(exisitingProvider, parameters) as IAuthenticationProvider;
             }
 
             if (authenticationProvider == null)
             {
                 // We didn't find a proper constructor for the provider class we wish to instantiate.
-                var errorMessage =
+                string errorMessage =
                     string.Format(
                         "The type {0} doesn't have the proper constructor. It requires a constructor that only accepts 1 argument of type ProviderParams. Eg. public MyProvider(ProviderParams providerParams){{ .. }}.",
-                        provider.FullName);
+                        exisitingProvider.FullName);
 
                 throw new ApplicationException(errorMessage);
             }
 
             return authenticationProvider;
         }
+    }
 
-        IDictionary<string, IAuthenticationProvider> Initialize(Configuration configuration)
+    public static class CollectionExtensions
+    {
+        public static ICollection<string> ScopesToCollection(this string scopes)
         {
-            var authenticationProviders = new Dictionary<string, IAuthenticationProvider>();
-           
-            // TODO: Replace this with Phillip Hayden's code for *smart scanning*.
-            var availableProviders = new List<Type>
-            {
-                typeof (GoogleProvider),
-                typeof (FacebookProvider),
-                typeof (TwitterProvider),
-                typeof (WindowsLiveProvider),
-                typeof (FakeProvider)
-            };
-
-            if (configuration != null &&
-                configuration.Providers != null &&
-                configuration.Providers.Any())
-            {
-                // Map the available providers to the config settings provided.
-                SetupConfigurationProviders(authenticationProviders,
-                    availableProviders,
-                    configuration.Providers);
-            }
-
-            if (authenticationProviders.Any())
-            {
-                return authenticationProviders;
-            }
-
-            // No providers where found. Unable to go anywhere!
-            const string errorMessage =
-                "No Authentication Provider config settings where found. As such, we'll never be able to authenticate successfully against another service. How to fix this: add at least one Authentication Provider configuration data into your config file's <appSettings> section (recommended and easiest answer) [eg. <add key=\"sa.Google\" value=\"key:587140099194.apps.googleusercontent.com;secret:npk1_gx-gqJmLiJRPFooxCEY\"/> or add a custom config section to your .config file (looks a bit more pro, but is also a bit more complex to setup). For more info (especially the convention rules for the appSettings key/value> please refer to: ";
-            throw new AuthenticationException(errorMessage);
-        }
-
-        private static void SetupConfigurationProviders(
-            IDictionary<string, IAuthenticationProvider> authenticationProviders,
-            IList<Type> availableProviders,
-            IEnumerable<Provider> providers)
-        {
-            authenticationProviders.ThrowIfNull("authenticationProviders");
-            availableProviders.ThrowIfNull("discoveredProviders");
-            providers.ThrowIfNull("appSettings");
-
-            foreach (var provider in providers)
-            {
-                var discoveredProvider = AvailableProvider(availableProviders, provider);
-
-                AddProviderToDictionary(authenticationProviders, discoveredProvider, false);
-            }
-        }
-
-        private static IAuthenticationProvider AvailableProvider(IList<Type> discoveredProviders,
-            Provider provider)
-        {
-            provider.ThrowIfNull("providerKey");
-
-            var name = provider.Name.ToLowerInvariant();
-
-            return AvailableProvider(discoveredProviders, name, () =>
-                new ProviderParams(
-                    provider.Key,
-                    provider.Secret,
-                    provider.Scopes.ScopesToCollection()));
-        }
-
-        private static void AddProviderToDictionary(
-            IDictionary<string, IAuthenticationProvider> authenticationProviders,
-            IAuthenticationProvider provider,
-            bool replaceExisting = true)
-        {
-            provider.ThrowIfNull("provider");
-            authenticationProviders.ThrowIfNull("authenticationProviders");
-
-            var key = provider.Name.ToLower();
-
-            if (authenticationProviders.ContainsKey(key) && !replaceExisting)
-            {
-                throw new InvalidOperationException(
-                    string.Format(
-                        "The provider '{0}' already exists and cannot be overridden, either set `replaceExisting` to `true`, or remove the provider first.",
-                        provider.Name));
-            }
-
-            authenticationProviders[key] = provider;
-        }
-
-        private static void RemoveProviderFromDictionary(string providerName,
-            ICollection<KeyValuePair<string, IAuthenticationProvider>> authenticationProviders)
-        {
-            providerName.ThrowIfNull("providerName");
-            authenticationProviders.ThrowIfNull("authenticationProviders");
-
-            var providersToRemove =
-                authenticationProviders.Where(x => providerName.StartsWith(x.Key.ToLowerInvariant()))
-                    .ToList();
-
-            foreach (var providerPair in providersToRemove)
-            {
-                authenticationProviders.Remove(providerPair);
-            }
+            return string.IsNullOrEmpty(scopes) 
+                ? null 
+                : scopes.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
         }
     }
 
-    public static class Extensions
+    public static class ProvidersExtensions
     {
-        public static void ThrowIfNull(this object thing, string parameter)
+        public static bool ContainsAnAuthenticationProvider(this IList<IAuthenticationProvider> providers,
+            IAuthenticationProvider provider)
         {
-            if (thing == null)
-            {
-                throw new ArgumentNullException(parameter);
-            }
-        }
-
-        public static ICollection<string> ScopesToCollection(this string scopes)
-        {
-            if (string.IsNullOrEmpty(scopes))
-            {
-                return null;
-            }
-
-            return scopes.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+            return providers.Any(x => x.Name.Equals(provider.Name, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }

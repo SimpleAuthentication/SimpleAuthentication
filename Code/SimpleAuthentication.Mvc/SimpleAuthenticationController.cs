@@ -9,6 +9,7 @@ using System.Web.WebPages;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Config;
 using SimpleAuthentication.Core.Exceptions;
+using SimpleAuthentication.Core.Providers;
 using SimpleAuthentication.Core.Tracing;
 
 namespace SimpleAuthentication.Mvc
@@ -27,29 +28,29 @@ namespace SimpleAuthentication.Mvc
         private readonly Lazy<ITraceManager> _traceManager = new Lazy<ITraceManager>(() => new TraceManager());
         private string _returnToUrlParameterKey;
 
-        public SimpleAuthenticationController(IAuthenticationProviderCallback authenticationProviderCallback,
-            IConfigService configService
+        public SimpleAuthenticationController(IAuthenticationProviderFactory authenticationProviderFactory,
+            IAuthenticationProviderCallback authenticationProviderCallback
             //,
             //string redirectRoute = DefaultRedirectRoute,
             //string callbackRoute = DefaultCallbackRoute
             )
         {
+            if (authenticationProviderFactory == null)
+            {
+                throw new ArgumentNullException("authenticationProviderFactory");
+            }
+
             if (authenticationProviderCallback == null)
             {
                 throw new ArgumentNullException("authenticationProviderCallback");
             }
 
-            if (configService == null)
-            {
-                throw new ArgumentNullException("configService");
-            }
-            
             _authenticationProviderCallback = authenticationProviderCallback;
 
             //RedirectRoute = redirectRoute;
             //CallbackRoute = callbackRoute;
 
-            _webApplicationService = new WebApplicationService(configService,
+            _webApplicationService = new WebApplicationService(authenticationProviderFactory,
                 TraceSource,
                 CallbackRoute);
         }

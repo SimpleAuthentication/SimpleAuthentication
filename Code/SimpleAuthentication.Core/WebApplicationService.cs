@@ -10,17 +10,17 @@ namespace SimpleAuthentication.Core
 {
     public class WebApplicationService
     {
-        private readonly AuthenticationProviderFactory _authenticationProviderFactory;
+        private readonly IAuthenticationProviderFactory _authenticationProviderFactory;
         private readonly string _callbackRoute;
         private readonly TraceSource _traceSource;
 
-        public WebApplicationService(IConfigService configService,
+        public WebApplicationService(IAuthenticationProviderFactory authenticationProviderFactory,
             TraceSource traceSource,
             string callbackRoute)
         {
-            if (configService == null)
+            if (authenticationProviderFactory == null)
             {
-                throw new ArgumentNullException("configService");
+                throw new ArgumentNullException("authenticationProviderFactory");
             }
 
             if (traceSource == null)
@@ -28,7 +28,7 @@ namespace SimpleAuthentication.Core
                 throw new ArgumentNullException("traceSource");
             }
 
-            _authenticationProviderFactory = new AuthenticationProviderFactory(configService);
+            _authenticationProviderFactory = authenticationProviderFactory;
             _traceSource = traceSource;
 
             _callbackRoute = callbackRoute;
