@@ -31,7 +31,7 @@ namespace SimpleAuthentication.ExtraProviders
 
         protected override Uri AccessTokenUri
         {
-            get { return new Uri("https://api.github.com/login/oauth/access_token"); }
+            get { return new Uri("https://github.com/login/oauth/access_token"); }
         }
 
         public override RedirectToAuthenticateSettings GetRedirectToAuthenticateSettings(

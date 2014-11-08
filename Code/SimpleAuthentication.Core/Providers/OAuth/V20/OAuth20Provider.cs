@@ -200,6 +200,12 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
 
                 var requestUri = AccessTokenUri;
 
+                // Some API's (like GitHub) require a UserAgent header.
+                if (!string.IsNullOrWhiteSpace(UserAgent))
+                {
+                    client.DefaultRequestHeaders.Add("user-agent", UserAgent);
+                }
+
                 //TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
                 //    requestUri.AbsoluteUri);
 

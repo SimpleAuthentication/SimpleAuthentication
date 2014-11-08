@@ -25,24 +25,9 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
                 // Arrange.
                 var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
 
-                var providers = new[]
-                {
-                    new Provider
-                    {
-                        Name = "Google",
-                        Key = "some.*.(.). key",
-                        Secret = "some secret"
-                    }
-                };
-
-                var configuration = new Configuration
-                {
-                    Providers = providers
-                };
-
                 var configService = A.Fake<IConfigService>();
                 A.CallTo(() => configService.GetConfiguration())
-                    .Returns(configuration);
+                    .Returns(TestHelpers.ConfigurationWithGoogleProvider);
 
                 var providerScanner = A.Fake<IProviderScanner>();
                 A.CallTo(() => providerScanner.GetDiscoveredProviders())

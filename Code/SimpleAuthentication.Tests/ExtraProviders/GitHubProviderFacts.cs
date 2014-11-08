@@ -59,7 +59,7 @@ namespace SimpleAuthentication.Tests.ExtraProviders
                 HttpClientFactory.MessageHandler = new FakeHttpMessageHandler(
                     new Dictionary<string, HttpResponseMessage>
                     {
-                        {"https://api.github.com/login/oauth/access_token", accessTokenResponse},
+                        {"https://github.com/login/oauth/access_token", accessTokenResponse},
                         {"https://api.github.com/user?access_token=1a048d8e06ee61de21625d2820", userInformationResponse}
                     });
 
