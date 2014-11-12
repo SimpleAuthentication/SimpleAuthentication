@@ -3,7 +3,9 @@ using System.Web.Mvc;
 using System.Web.Routing;
 using Autofac;
 using Autofac.Integration.Mvc;
+using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Config;
+using SimpleAuthentication.Core.Providers;
 using SimpleAuthentication.Mvc;
 using SimpleAuthentication.Sample.Mvc.Helpers;
 
@@ -22,8 +24,10 @@ namespace SimpleAuthentication.Sample.Mvc
             builder.RegisterControllers(typeof(MvcApplication).Assembly);
 
             // Register Simple Authentication stuff.
+            builder.RegisterType<AuthenticationProviderFactory>().As<IAuthenticationProviderFactory>();
             builder.RegisterType<SampleMvcAuthenticationCallbackProvider>().As<IAuthenticationProviderCallback>();
             builder.RegisterType<AppConfigService>().As<IConfigService>().SingleInstance();
+            builder.RegisterType<ProviderScanner>().As<IProviderScanner>().SingleInstance();
             builder.RegisterControllers(typeof(SimpleAuthenticationController).Assembly);
 
             var container = builder.Build();
