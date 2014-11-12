@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
     <metadata>
         <id>SimpleAuthentication.Core</id>
-        <version>2.0-BETA-1</version>
+        <version>0.0.0</version>
         <title>SimpleAuthentication.Core: making authentication ... simple!</title>
         <authors>Justin Adler, Phillip Haydon and contributors</authors>
         <owners>Justin Adler and Phillip Haydon</owners>
@@ -16,9 +16,9 @@
         <language>en-au</language>
         <tags>authentication twitter google facebook microsoftaccount microsoftlive oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
         <dependencies>
-            <dependency id="Newtonsoft.Json" version="6.0.3" />
-            <dependency id="Microsoft.Net.Http" version="2.2.22" />
-            <dependency id="OAuth" version="1.0.3" />
+            <dependency id="Newtonsoft.Json" version="[6.0.6, 7.0.0)" />
+            <dependency id="WorldDomination.HttpClient.Helpers" version="[2.0.0, 3.0.0)" />
+            <dependency id="OAuth" version="[1.0.3, 2.0.0)" />
         </dependencies>
     </metadata>
     <files>

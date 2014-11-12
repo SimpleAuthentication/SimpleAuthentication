@@ -3,32 +3,8 @@
          ####################################################################
 
 
-   
-
-Starting Options
-^^^^^^^^^^^^^^^^
-   1. Use the web.config custom provider
-                            or
-   2. Manually wire up the providers you will offer.
-
-
-Easy vs Hard
-^^^^^^^^^^^^
-   1. EASY: Choose to use the provided Nancy Module or Mvc Controller to make setup -really- simple.
-            If you do this, you will need to install-package ..
-      a. Nancy Module: Install-Package Nancy.SimpleAuthentication
-      b. Mvc Controller: Install-Package SimpleAuthentication.Mvc 
-                            or
-   2. HARD: Create your own module/controller, your own routes and code all of this. Manually.
-
-
-
-Setup Instructions
-^^^^^^^^^^^^^^^^^^
-
-   1. MVC Automatic Setup - https://github.com/SimpleAuthentication/SimpleAuthentication/tree/master/Samples/SimpleAuthentication.Sample.MvcAuto
-   2. NancyFX Automatic Setup - https://github.com/SimpleAuthentication/SimpleAuthentication/tree/master/Samples/SimpleAuthentication.Sample.NancyAuto
-   
+  
+  TODO: re do this for version 2.0.
 
 
 !! SPECIAL INSTRUCTIONS IF YOU WANT TO OFFER AUTHENTICATION VIA MICROSOFT LIVE !!
