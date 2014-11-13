@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using SimpleAuthentication.Core;
-using SimpleAuthentication.Core.Config;
 using SimpleAuthentication.Core.Exceptions;
-using SimpleAuthentication.Core.Providers;
 using SimpleAuthentication.Core.Tracing;
 
 namespace Nancy.SimpleAuthentication
@@ -16,12 +14,12 @@ namespace Nancy.SimpleAuthentication
         public const string DefaultRedirectRoute = "/authenticate/{providerkey}";
         public const string DefaultCallbackRoute = "/authenticate/callback";
 
-        private string _redirectRoute;
-        private string _callbackRoute;
-        private readonly WebApplicationService _webApplicationService;
         private readonly IAuthenticationProviderCallback _authenticationProviderCallback;
 
         private readonly Lazy<ITraceManager> _traceManager = new Lazy<ITraceManager>(() => new TraceManager());
+        private readonly WebApplicationService _webApplicationService;
+        private string _callbackRoute;
+        private string _redirectRoute;
         private string _returnToUrlParameterKey;
 
         public SimpleAuthenticationModule(IAuthenticationProviderFactory authenticationProviderFactory,
@@ -40,7 +38,7 @@ namespace Nancy.SimpleAuthentication
             {
                 throw new ArgumentNullException("authenticationProviderCallback");
             }
-            
+
             _authenticationProviderCallback = authenticationProviderCallback;
 
             //RedirectRoute = redirectRoute;
@@ -106,7 +104,7 @@ namespace Nancy.SimpleAuthentication
 
         private Response RedirectToProvider(dynamic parameters)
         {
-            var providerKey = (string)parameters.providerkey;
+            var providerKey = (string) parameters.providerkey;
 
             if (string.IsNullOrEmpty(providerKey))
             {
@@ -139,7 +137,7 @@ namespace Nancy.SimpleAuthentication
         private async Task<dynamic> AuthenticateCallbackAsync()
         {
             TraceSource.TraceVerbose("Retrieving Cache values - State and RedirectToUrl.");
-            
+
             var cacheData = Session[SessionKeyState] as CacheData;
             Session[SessionKeyState] = null;
             TraceSource.TraceInformation("Previous CacheData: {0}",
@@ -170,7 +168,7 @@ namespace Nancy.SimpleAuthentication
                 await
                     _webApplicationService
                         .AuthenticateCallbackAsync<IAuthenticationProviderCallback, INancyModule, dynamic>(
-                        _authenticationProviderCallback,
+                            _authenticationProviderCallback,
                             this,
                             authenticateCallbackAsyncData);
         }

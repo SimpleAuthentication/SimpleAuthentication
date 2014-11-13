@@ -6,6 +6,10 @@ shift
 CLS
 @ECHO .
 @ECHO .
+@ECHO Removing any existing nupkg files.
+@ECHO .
+del *.nupkg
+
 @ECHO Packing the SimpleAuthentication NuSpec's into nupkg files.
 @ECHO .
 nuget.exe pack SimpleAuthentication.Core.nuspec -Version %version%

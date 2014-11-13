@@ -19,7 +19,7 @@
         <language>en-au</language>
         <tags>authentication github amazon 37signals thirtysevensignals basecamp highrise linkedin openid oauth oauth1 oauth2 unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
         <dependencies>
-            <dependency id="SimpleAuthentication.Core" version="[2.0.0-alpha1, 3.0.0)" />
+            <dependency id="SimpleAuthentication.Core" version="[2.0.0-alpha, 3.0.0)" />
         </dependencies>
     </metadata>
     <files>

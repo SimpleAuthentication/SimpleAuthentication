@@ -16,7 +16,7 @@
         <language>en-au</language>
         <tags>authentication mvc controller twitter google facebook microsoftaccount oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
         <dependencies>
-            <dependency id="SimpleAuthentication.Core" version="[2.0.0-alpha1, 3.0.0)" />
+            <dependency id="SimpleAuthentication.Core" version="[2.0.0-alpha, 3.0.0)" />
             <dependency id="Microsoft.AspNet.Mvc" version="[5.2.2, 6.0.0)" />
         </dependencies>
     </metadata>
