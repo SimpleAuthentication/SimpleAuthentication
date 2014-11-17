@@ -199,7 +199,7 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
             }
 
             [Fact]
-            public async Task GivenAValidCallback_AuthenticateCallbackResultAsync_ThrowsAnException()
+            public async Task GivenAValidCallback_AuthenticateCallbackResultAsync_ReturnsARedirectResult()
             {
                 // Arrange.
                 const string redirectResultUrl ="http://www.dancedancepewpew.com/a/b/c";
@@ -258,6 +258,53 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 result.Url.ShouldBe(redirectResultUrl);
                 A.CallTo(() => authenticationProviderCallback.Process(A<Controller>._, 
                     A<AuthenticateCallbackResult>._)).MustHaveHappened(Repeated.Exactly.Once);
+            }
+        }
+
+        public class GetAuthenticateMeFacts
+        {
+            [Fact]
+            public void GivenAProviderAndAccessToken_GetAuthenticateMe_ReturnsSomeJson()
+            {
+                // Arrange.
+                var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
+                A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
+                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
+
+
+                var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
+
+                var httpContext = A.Fake<HttpContextBase>();
+
+                var controllerContext = new ControllerContext(httpContext, new RouteData(), A.Fake<ControllerBase>());
+
+
+                var controller = new SimpleAuthenticationController(authenticationProviderFactory, authenticationCallbackProvider)
+                {
+                    ControllerContext = controllerContext
+                };
+
+
+                const string accessToken = "813E2697-C5B8-4F1B-A0C6-579E79B20AD9";
+
+                var userInformationJson = File.ReadAllText("Sample Data\\Google-UserInfoResult-Content.json");
+                var userInformationResponse = FakeHttpMessageHandler.GetStringHttpResponseMessage(userInformationJson);
+                HttpClientFactory.MessageHandler = new FakeHttpMessageHandler(
+                    new Dictionary<string, HttpResponseMessage>
+                    {
+                        {
+                            "https://www.googleapis.com/plus/v1/people/me?access_token=" + accessToken,
+                            userInformationResponse
+                        }
+                    });
+
+                // Act.
+            }
+
+            [Fact (Skip = "TODO")]
+            public void GivenAnExpiredAccessToken_GetAuthenticateMe_ReturnsAnError()
+            {
+                
             }
         }
     }
