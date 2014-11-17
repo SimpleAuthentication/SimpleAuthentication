@@ -9,6 +9,9 @@ namespace Nancy.SimpleAuthentication
     /// <remarks>IMPORTANT: This class is **NOT** intended to be used in production, but as a basis for quick prototyping and testing stuff.</remarks>
     public class SimpleAuthenticationProviderCallback : IAuthenticationProviderCallback
     {
+        private const string Notice =
+            "You are using the SimpleAuthenticationProviderCallback class that comes with the Nancy.SimpleAuthentication library. This class is generally auto setup with Nancy and is here to provide you with a quick example of what this entire library can do. It's probably not very helpful for production, though. The recommendation is to create your own class which inherits from IAuthenticationProviderCallback and impliment your own logic OR inherit from this class and impliment your own logic for the methods you decide to override.";
+
         #region IAuthenticationProviderCallback members
 
         /// <summary>
@@ -19,7 +22,13 @@ namespace Nancy.SimpleAuthentication
         /// <returns>A json representation of the authenticated user's information.</returns>
         public virtual dynamic Process(INancyModule module, AuthenticateCallbackResult result)
         {
-            return module.Response.AsJson(result);
+            var model = new
+            {
+                Notice,
+                AuthenticateCallbackResult = result
+            };
+
+            return module.Response.AsJson(model);
         }
 
         /// <summary>
@@ -33,14 +42,21 @@ namespace Nancy.SimpleAuthentication
         {
             // NOTE: for any inner exceptions, we're not caring about recursing through and grabbing 
             //       that info. this is just for a quick and dirty output.
-            var errorMessage = new
+            var errorModel = new
             {
                 message = exception.Message,
                 source = exception.Source,
                 stackTrace = exception.StackTrace,
                 innerException = exception.InnerException != null
             };
-            return module.Response.AsJson(errorMessage, (HttpStatusCode)exception.HttpStatusCode);
+
+            var model = new
+            {
+                Notice,
+                Error = errorModel
+            };
+
+            return module.Response.AsJson(model, (HttpStatusCode) exception.HttpStatusCode);
         }
 
         #endregion
