@@ -132,6 +132,19 @@ namespace SimpleAuthentication.Core.Providers
                 RawUserInformation));
         }
 
+        public async Task<IAuthenticatedClient> AuthenticateClientAsync(AccessToken accessToken)
+        {
+            if (accessToken == null)
+            {
+                throw new ArgumentNullException("accessToken");
+            }
+
+            return await Task.FromResult(new AuthenticatedClient(Name,
+                accessToken,
+                UserInformation,
+                RawUserInformation));
+        }
+
         public string RedirectToAuthenticateAsyncExceptionMessage { protected get; set; }
         public string AuthenticateClientAsyncExceptionMessage { protected get; set; }
         public UserInformation UserInformation { protected get; set; }

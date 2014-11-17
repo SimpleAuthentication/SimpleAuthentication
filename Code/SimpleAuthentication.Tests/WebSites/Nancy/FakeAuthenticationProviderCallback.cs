@@ -1,14 +1,13 @@
-﻿using System;
-using Nancy;
+﻿using Nancy;
 using Nancy.Responses;
 using Nancy.SimpleAuthentication;
 using SimpleAuthentication.Core;
 
 namespace SimpleAuthentication.Tests.WebSites.Nancy
 {
-    public class FakeAuthenticationProviderCallback : IAuthenticationProviderCallback
+    public class FakeAuthenticationProviderCallback : SimpleAuthenticationProviderCallback
     {
-        public dynamic Process(INancyModule nancyModule, AuthenticateCallbackResult result)
+        public override dynamic Process(INancyModule nancyModule, AuthenticateCallbackResult result)
         {
             var model = new UserViewModel
             {
@@ -29,11 +28,6 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
             }
 
             return nancyModule.Response.AsRedirect(result.ReturnUrl);
-        }
-
-        public dynamic OnRedirectToAuthenticationProviderError(INancyModule nancyModule, Exception exception)
-        {
-            throw new NotImplementedException();
         }
     }
 }

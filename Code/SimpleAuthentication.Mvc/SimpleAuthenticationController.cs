@@ -29,11 +29,13 @@ namespace SimpleAuthentication.Mvc
         private string _returnToUrlParameterKey;
 
         public SimpleAuthenticationController(IAuthenticationProviderFactory authenticationProviderFactory,
-            IAuthenticationProviderCallback authenticationProviderCallback
-            //,
-            //string redirectRoute = DefaultRedirectRoute,
-            //string callbackRoute = DefaultCallbackRoute
-            )
+            IAuthenticationProviderCallback authenticationProviderCallback) : this (authenticationProviderFactory, authenticationProviderCallback, DefaultRedirectRoute, DefaultCallbackRoute)
+        { }
+
+        public SimpleAuthenticationController(IAuthenticationProviderFactory authenticationProviderFactory,
+            IAuthenticationProviderCallback authenticationProviderCallback,
+            string redirectRoute,
+            string callbackRoute)
         {
             if (authenticationProviderFactory == null)
             {

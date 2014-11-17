@@ -1,15 +1,15 @@
-﻿using System;
-using Nancy;
+﻿using Nancy;
 using Nancy.Responses.Negotiation;
 using Nancy.SimpleAuthentication;
 using SimpleAuthentication.Core;
+using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Sample.Nancy.Models;
 
 namespace SimpleAuthentication.Sample.Nancy.Helpers
 {
-    public class SampleAuthenticationCallbackProvider : IAuthenticationProviderCallback
+    public class SampleAuthenticationCallbackProvider : SimpleAuthenticationProviderCallback
     {
-        public dynamic Process(INancyModule module, AuthenticateCallbackResult result)
+        public override dynamic Process(INancyModule module, AuthenticateCallbackResult result)
         {
             var model = new AuthenticationViewModel
             {
@@ -30,8 +30,7 @@ namespace SimpleAuthentication.Sample.Nancy.Helpers
             //    .WithView("AuthenticateCallback");
         }
 
-        public dynamic OnRedirectToAuthenticationProviderError(INancyModule module,
-            Exception exception)
+        public override dynamic OnError(INancyModule module, ErrorType errorType, AuthenticationException exception)
         {
             var model = new AuthenticationViewModel
             {
@@ -40,9 +39,19 @@ namespace SimpleAuthentication.Sample.Nancy.Helpers
 
             //return nancyModule.Response.AsRedirect("/");
 
-            return new Negotiator(module.Context)
-                .WithModel(model)
-                .WithView("AuthenticateCallback");
+            if (errorType != ErrorType.UserInformation)
+            {
+                return new Negotiator(module.Context)
+                    .WithModel(model)
+                    .WithView("AuthenticateCallback");
+            }
+
+            var errorModel = new
+            {
+                errorMessage = exception.Message
+            };
+
+            return module.Response.AsJson(errorModel, (HttpStatusCode) exception.HttpStatusCode);
         }
     }
 }

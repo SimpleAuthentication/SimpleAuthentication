@@ -1,5 +1,5 @@
-﻿using System;
-using SimpleAuthentication.Core;
+﻿using SimpleAuthentication.Core;
+using SimpleAuthentication.Core.Exceptions;
 
 namespace Nancy.SimpleAuthentication
 {
@@ -19,10 +19,13 @@ namespace Nancy.SimpleAuthentication
         /// <summary>
         /// If an error occurs during the authentication process, this is where you can handle it.
         /// </summary>
-        /// <remarks>An example of a valid error would be if the user cancels their permission check.</remarks>
+        /// <remarks>An example of a valid error would be if the user cancels their permission check or the user doesn't have the correct scope permissions or an access token has been revoked.</remarks>
         /// <param name="module">The current module.</param>
+        /// <param name="errorType">Which part of the pipeline did this error occur in.</param>
         /// <param name="exception">The exception error that occured.</param>
         /// <returns></returns>
-        dynamic OnRedirectToAuthenticationProviderError(INancyModule module, Exception exception);
+        dynamic OnError(INancyModule module,
+            ErrorType errorType,
+            AuthenticationException exception);
     }
 }

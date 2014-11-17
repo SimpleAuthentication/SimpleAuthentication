@@ -92,6 +92,16 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
             var accessToken = await GetAccessTokenAsync(authorizationCode, callbackUri);
             //TraceSource.TraceVerbose("Access Token retrieved.");
 
+            return await AuthenticateClientAsync(accessToken);
+        }
+
+        public async Task<IAuthenticatedClient> AuthenticateClientAsync(AccessToken accessToken)
+        {
+            if (accessToken == null)
+            {
+                throw new ArgumentNullException("accessToken");
+            }
+
             //TraceSource.TraceVerbose("Retrieving user information.");
             var userInformationContent = await GetUserInformationAsync(accessToken);
 
@@ -258,7 +268,28 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
 
                     //TraceSource.TraceVerbose("Retrieving user information. Google Endpoint: {0}",
                     //    requestUri.AbsoluteUri);
-                    content = await client.GetStringAsync(requestUri);
+                    var response = await client.GetAsync(requestUri);
+                    if (response == null ||
+                        !response.IsSuccessStatusCode)
+                    {
+                        // An unexpected error (eg. incorrect scopes or access token or
+                        // the access token has expired, etc).
+                        var errorMessage =
+                            string.Format(
+                                "Failed to retrieve UserInfo data from the {0} Api. StatusCode: {1}; Status: {2}",
+                                Name,
+                                response == null
+                                    ? "-unknown-"
+                                    : response.StatusCode.ToString(),
+                                response == null
+                                    ? "-unknown- "
+                                    : response.ReasonPhrase);
+                        throw new AuthenticationException(errorMessage, null, response == null
+                            ? HttpStatusCode.InternalServerError
+                            : response.StatusCode);
+                    }
+
+                    content = await response.Content.ReadAsStringAsync();
                 }
 
                 return content;

@@ -10,9 +10,7 @@ using Nancy;
 using Nancy.SimpleAuthentication;
 using Shouldly;
 using SimpleAuthentication.Core;
-using SimpleAuthentication.Core.Config;
 using SimpleAuthentication.Core.Exceptions;
-using SimpleAuthentication.Core.Providers;
 using WorldDomination.Net.Http;
 using Xunit;
 
@@ -53,7 +51,7 @@ namespace SimpleAuthentication.Tests
                 var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
                 A.CallTo(() => authenticationCallbackProvider.Process(A<INancyModule>._,
                     A<AuthenticateCallbackResult>._)).Returns(callbackResult);
-                
+
                 var nancyModule = A.Fake<INancyModule>();
 
                 var traceSource = new TraceSource("test");
@@ -120,7 +118,7 @@ namespace SimpleAuthentication.Tests
             }
 
             [Fact]
-            public async Task GivenSomeFullData_AuthenticateCallbackAsync_ThrowsAnException()
+            public async Task GivenSomeFullData_AuthenticateCallbackAsync_ACallbackResult()
             {
                 // Arrange.
                 const string callbackResult = "this is someview content!";
@@ -164,6 +162,80 @@ namespace SimpleAuthentication.Tests
             }
         }
 
+        public class AuthenticateMeAsyncFacts
+        {
+            [Fact]
+            public void GivenNoProviderKey_AuthenticateMeAsync_ThrowsAnException()
+            {
+                // Arrange.
+                var traceSource = new TraceSource("test");
+
+                var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
+                var webApplicationService = new WebApplicationService(authenticationProviderFactory,
+                    traceSource,
+                    "asdjhsdkfhds");
+
+                // Act and Assert.
+                var result =
+                    Should.Throw<ArgumentNullException>(
+                        async () => await webApplicationService.AuthenticateMeAsync(null, new AccessToken()));
+            }
+
+            [Fact]
+            public void GivenNoAccessToken_AuthenticateMeAsync_ThrowsAnException()
+            {
+                // Arrange.
+                var traceSource = new TraceSource("test");
+
+                var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
+                var webApplicationService = new WebApplicationService(authenticationProviderFactory,
+                    traceSource,
+                    "asdjhsdkfhds");
+
+                // Act and Assert.
+                var result =
+                    Should.Throw<ArgumentNullException>(
+                        async () => await webApplicationService.AuthenticateMeAsync("aaa", null));
+            }
+
+            [Fact]
+            public async Task GivenSomeValidCredentials_AuthenticateMeAsync_ReturnsAnAuthenticatedClient()
+            {
+                // Arrange.
+                var traceSource = new TraceSource("test");
+
+                var accessToken = new AccessToken
+                {
+                    Token = "12C63F29-67CD-4FDD-97FA-95529EFA9758"
+                };
+
+                var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
+                A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
+                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
+
+                var userInformationJson = File.ReadAllText("Sample Data\\Google-UserInfoResult-Content.json");
+                var userInformationResponse = FakeHttpMessageHandler.GetStringHttpResponseMessage(userInformationJson);
+                HttpClientFactory.MessageHandler = new FakeHttpMessageHandler(
+                    new Dictionary<string, HttpResponseMessage>
+                    {
+                        {
+                            "https://www.googleapis.com/plus/v1/people/me?access_token=" + accessToken.Token,
+                            userInformationResponse
+                        }
+                    });
+
+                var webApplicationService = new WebApplicationService(authenticationProviderFactory,
+                    traceSource,
+                    "asdjhsdkfhds");
+
+                // Act.
+                var result = await webApplicationService.AuthenticateMeAsync("google", accessToken);
+
+                // Assert.
+                result.UserInformation.Email.ShouldBe("foo@pewpew.com");
+            }
+        }
+
         public class RedirectToProviderFacts
         {
             [Fact]
@@ -180,17 +252,18 @@ namespace SimpleAuthentication.Tests
                     traceSource,
                     "asdjhsdkfhds");
 
-                var redirectToProviderData = new RedirectToProviderData(TestHelpers.AuthenticationProvidersWithGoogle.First().Value.Name,
-                    new Uri("http://www.pewpew.com/a/b/c"),
-                    null,
-                    null);
+                var redirectToProviderData =
+                    new RedirectToProviderData(TestHelpers.AuthenticationProvidersWithGoogle.First().Value.Name,
+                        new Uri("http://www.pewpew.com/a/b/c"),
+                        null,
+                        null);
 
                 // Act.
                 var result = webApplicationService.RedirectToProvider(redirectToProviderData);
 
                 // Assert.
                 result.RedirectUrl.AbsoluteUri.ShouldStartWith(
-                     "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fasdjhsdkfhds&response_type=code&scope=profile%20email&state=");
+                    "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fasdjhsdkfhds&response_type=code&scope=profile%20email&state=");
                 result.CacheData.ProviderKey.ShouldBe(redirectToProviderData.ProviderKey);
                 result.CacheData.State.ShouldNotBe(null);
                 result.CacheData.ReturnUrl.ShouldBe(null);
@@ -211,17 +284,18 @@ namespace SimpleAuthentication.Tests
                     traceSource,
                     "asdjhsdkfhds");
 
-                var redirectToProviderData = new RedirectToProviderData(TestHelpers.AuthenticationProvidersWithGoogle.First().Value.Name,
-                    new Uri("http://www.pewpew.com/a/b/c"),
-                    null,
-                    "/foo/bar?a=b");
+                var redirectToProviderData =
+                    new RedirectToProviderData(TestHelpers.AuthenticationProvidersWithGoogle.First().Value.Name,
+                        new Uri("http://www.pewpew.com/a/b/c"),
+                        null,
+                        "/foo/bar?a=b");
 
                 // Act.
                 var result = webApplicationService.RedirectToProvider(redirectToProviderData);
 
                 // Assert.
                 result.RedirectUrl.AbsoluteUri.ShouldStartWith(
-                     "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fasdjhsdkfhds&response_type=code&scope=profile%20email&state=");
+                    "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fasdjhsdkfhds&response_type=code&scope=profile%20email&state=");
                 result.CacheData.ProviderKey.ShouldBe(redirectToProviderData.ProviderKey);
                 result.CacheData.State.ShouldNotBe(null);
                 result.CacheData.ReturnUrl.ShouldBe(redirectToProviderData.ReturnUrl);
@@ -241,17 +315,18 @@ namespace SimpleAuthentication.Tests
                     traceSource,
                     "asdjhsdkfhds");
 
-                var redirectToProviderData = new RedirectToProviderData(TestHelpers.AuthenticationProvidersWithGoogle.First().Value.Name,
-                    new Uri("http://www.pewpew.com/a/b/c"),
-                    "http://www.aa.bb.com",
-                    null);
+                var redirectToProviderData =
+                    new RedirectToProviderData(TestHelpers.AuthenticationProvidersWithGoogle.First().Value.Name,
+                        new Uri("http://www.pewpew.com/a/b/c"),
+                        "http://www.aa.bb.com",
+                        null);
 
                 // Act.
                 var result = webApplicationService.RedirectToProvider(redirectToProviderData);
 
                 // Assert.
                 result.RedirectUrl.AbsoluteUri.ShouldStartWith(
-                      "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fasdjhsdkfhds&response_type=code&scope=profile%20email&state=");
+                    "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fasdjhsdkfhds&response_type=code&scope=profile%20email&state=");
                 result.CacheData.ProviderKey.ShouldBe(redirectToProviderData.ProviderKey);
                 result.CacheData.State.ShouldNotBe(null);
                 result.CacheData.ReturnUrl.ShouldBe(redirectToProviderData.Referer);
@@ -273,17 +348,18 @@ namespace SimpleAuthentication.Tests
                     traceSource,
                     "asdjhsdkfhds");
 
-                var redirectToProviderData = new RedirectToProviderData(TestHelpers.AuthenticationProvidersWithGoogle.First().Value.Name,
-                    new Uri("http://www.pewpew.com/a/b/c"),
-                    "http://www.aa.bb.com",
-                    "http://www.xxx.net/a/b/c?d=e&f=g");
+                var redirectToProviderData =
+                    new RedirectToProviderData(TestHelpers.AuthenticationProvidersWithGoogle.First().Value.Name,
+                        new Uri("http://www.pewpew.com/a/b/c"),
+                        "http://www.aa.bb.com",
+                        "http://www.xxx.net/a/b/c?d=e&f=g");
 
                 // Act.
                 var result = webApplicationService.RedirectToProvider(redirectToProviderData);
 
                 // Assert.
                 result.RedirectUrl.AbsoluteUri.ShouldStartWith(
-                      "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fasdjhsdkfhds&response_type=code&scope=profile%20email&state=");
+                    "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fasdjhsdkfhds&response_type=code&scope=profile%20email&state=");
                 result.CacheData.ProviderKey.ShouldBe(redirectToProviderData.ProviderKey);
                 result.CacheData.State.ShouldNotBe(null);
                 result.CacheData.ReturnUrl.ShouldBe(redirectToProviderData.ReturnUrl);

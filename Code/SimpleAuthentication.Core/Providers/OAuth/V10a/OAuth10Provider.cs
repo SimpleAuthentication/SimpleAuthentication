@@ -81,6 +81,16 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V10a
             
             var accessToken = await GetAccessTokenAsync(oAuthVerifier);
 
+            return await AuthenticateClientAsync(accessToken);
+        }
+
+        public async Task<IAuthenticatedClient> AuthenticateClientAsync(AccessToken accessToken)
+        {
+            if (accessToken == null)
+            {
+                throw new ArgumentNullException("accessToken");
+            }
+
             var userInformationContent = await GetUserInformationAsync(accessToken);
             var userInformation = GetUserInformationFromContent(userInformationContent);
 

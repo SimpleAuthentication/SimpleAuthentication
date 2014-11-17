@@ -40,5 +40,12 @@ namespace SimpleAuthentication.Core
         Task<IAuthenticatedClient> AuthenticateClientAsync(IDictionary<string, string> queryString,
             string state,
             Uri callbackUrl);
+
+        /// <summary>
+        /// Retrieve the user information from the Authentication Provider, now that we have authenticated.
+        /// </summary>
+        /// <param name="accessToken">A previously retrieved access token.</param>
+        /// <returns>An authenticatedClient with either user information or some error message(s).</returns>
+        Task<IAuthenticatedClient> AuthenticateClientAsync(AccessToken accessToken);
     }
 }
