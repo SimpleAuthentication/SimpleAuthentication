@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using Nancy;
 using Nancy.Bootstrapper;
 using Nancy.Session;
+using Nancy.SimpleAuthentication;
 using Nancy.TinyIoc;
 using SimpleAuthentication.Core.Providers;
 using SimpleAuthentication.ExtraProviders;
+using SimpleAuthentication.Sample.Nancy.Helpers;
 
 namespace SimpleAuthentication.Sample.Nancy
 {
@@ -24,6 +26,7 @@ namespace SimpleAuthentication.Sample.Nancy
             };
             var providerScanner = new ProviderScanner(additionalProviderTypes);
             container.Register<IProviderScanner, ProviderScanner>(providerScanner);
+            container.Register<IAuthenticationProviderCallback, SampleAuthenticationCallbackProvider>();
 
             //var authenticationProviderFactory = new AuthenticationProviderFactory(providerScanner);
 
