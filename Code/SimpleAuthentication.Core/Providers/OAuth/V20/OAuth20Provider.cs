@@ -252,57 +252,45 @@ namespace SimpleAuthentication.Core.Providers.OAuth.V20
                 throw new ArgumentException("accessToken.Token");
             }
 
-            try
+            string content;
+
+            using (var client = HttpClientFactory.GetHttpClient())
             {
-                string content;
+                var requestUri = UserInformationUri(accessToken);
 
-                using (var client = HttpClientFactory.GetHttpClient())
+                // Some API's (like GitHub) require a UserAgent header.
+                if (!string.IsNullOrWhiteSpace(UserAgent))
                 {
-                    var requestUri = UserInformationUri(accessToken);
-
-                    // Some API's (like GitHub) require a UserAgent header.
-                    if (!string.IsNullOrWhiteSpace(UserAgent))
-                    {
-                        client.DefaultRequestHeaders.Add("user-agent", UserAgent);
-                    }
-
-                    //TraceSource.TraceVerbose("Retrieving user information. Google Endpoint: {0}",
-                    //    requestUri.AbsoluteUri);
-                    var response = await client.GetAsync(requestUri);
-                    if (response == null ||
-                        !response.IsSuccessStatusCode)
-                    {
-                        // An unexpected error (eg. incorrect scopes or access token or
-                        // the access token has expired, etc).
-                        var errorMessage =
-                            string.Format(
-                                "Failed to retrieve UserInfo data from the {0} Api. StatusCode: {1}; Status: {2}",
-                                Name,
-                                response == null
-                                    ? "-unknown-"
-                                    : response.StatusCode.ToString(),
-                                response == null
-                                    ? "-unknown- "
-                                    : response.ReasonPhrase);
-                        throw new AuthenticationException(errorMessage, null, response == null
-                            ? HttpStatusCode.InternalServerError
-                            : response.StatusCode);
-                    }
-
-                    content = await response.Content.ReadAsStringAsync();
+                    client.DefaultRequestHeaders.Add("user-agent", UserAgent);
                 }
 
-                return content;
+                //TraceSource.TraceVerbose("Retrieving user information. Google Endpoint: {0}",
+                //    requestUri.AbsoluteUri);
+                var response = await client.GetAsync(requestUri);
+                if (response == null ||
+                    !response.IsSuccessStatusCode)
+                {
+                    // An unexpected error (eg. incorrect scopes or access token or
+                    // the access token has expired, etc).
+                    var errorMessage =
+                        string.Format(
+                            "Failed to retrieve UserInfo data from the {0} Api. StatusCode: {1}; Status: {2}",
+                            Name,
+                            response == null
+                                ? "-unknown-"
+                                : response.StatusCode.ToString(),
+                            response == null
+                                ? "-unknown- "
+                                : response.ReasonPhrase);
+                    throw new AuthenticationException(errorMessage, null, response == null
+                        ? HttpStatusCode.InternalServerError
+                        : response.StatusCode);
+                }
+
+                content = await response.Content.ReadAsStringAsync();
             }
-            catch (Exception exception)
-            {
-                var errorMessage =
-                    string.Format("Failed to retrieve UserInfo data from the {0} Api. Error Messages: {1}",
-                        Name,
-                        exception.RecursiveErrorMessages());
-                //TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage, exception);
-            }
+
+            return content;
         }
 
         protected abstract UserInformation GetUserInformationFromContent(string content);
