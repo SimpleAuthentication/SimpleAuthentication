@@ -1,6 +1,6 @@
-﻿using System;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using SimpleAuthentication.Core;
+using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Mvc;
 using SimpleAuthentication.Sample.Mvc.Models;
 
@@ -21,7 +21,7 @@ namespace SimpleAuthentication.Sample.Mvc.Helpers
             };
         }
 
-        public ActionResult OnRedirectToAuthenticationProviderError(Controller controller, Exception exception)
+        public ActionResult OnError(Controller controller, ErrorType errorType, AuthenticationException exception)
         {
             return new ViewResult
             {

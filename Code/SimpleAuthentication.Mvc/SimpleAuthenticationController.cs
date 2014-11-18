@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using System.Web.WebPages;
 using SimpleAuthentication.Core;
-using SimpleAuthentication.Core.Config;
 using SimpleAuthentication.Core.Exceptions;
-using SimpleAuthentication.Core.Providers;
 using SimpleAuthentication.Core.Tracing;
 
 namespace SimpleAuthentication.Mvc
@@ -17,25 +12,33 @@ namespace SimpleAuthentication.Mvc
     public class SimpleAuthenticationController : AsyncController
     {
         private const string SessionKeyState = "SimpleAuthentication-StateKey-427B6ED7-A803-4F18-A396-0084417B548D";
-        public const string DefaultRedirectRoute = "authenticate/{providerName}";
+        public const string DefaultRedirectRoute = "authenticate/{providerkey}";
         public const string DefaultCallbackRoute = "authenticate/callback";
+        public const string DefaultUserInformationRoute = "authenticate/{providerkey}/me/{accesstoken}";
 
-        private string _redirectRoute;
-        private string _callbackRoute;
-        private readonly WebApplicationService _webApplicationService;
         private readonly IAuthenticationProviderCallback _authenticationProviderCallback;
 
         private readonly Lazy<ITraceManager> _traceManager = new Lazy<ITraceManager>(() => new TraceManager());
+        private readonly WebApplicationService _webApplicationService;
+        private string _callbackRoute;
+        private string _redirectRoute;
+        private string _userInformationRoute;
         private string _returnToUrlParameterKey;
 
         public SimpleAuthenticationController(IAuthenticationProviderFactory authenticationProviderFactory,
-            IAuthenticationProviderCallback authenticationProviderCallback) : this (authenticationProviderFactory, authenticationProviderCallback, DefaultRedirectRoute, DefaultCallbackRoute)
-        { }
+            IAuthenticationProviderCallback authenticationProviderCallback) : this(authenticationProviderFactory,
+                authenticationProviderCallback,
+                DefaultRedirectRoute,
+                DefaultCallbackRoute,
+                DefaultUserInformationRoute)
+        {
+        }
 
         public SimpleAuthenticationController(IAuthenticationProviderFactory authenticationProviderFactory,
             IAuthenticationProviderCallback authenticationProviderCallback,
             string redirectRoute,
-            string callbackRoute)
+            string callbackRoute,
+            string userInformationRoute)
         {
             if (authenticationProviderFactory == null)
             {
@@ -49,8 +52,9 @@ namespace SimpleAuthentication.Mvc
 
             _authenticationProviderCallback = authenticationProviderCallback;
 
-            //RedirectRoute = redirectRoute;
-            //CallbackRoute = callbackRoute;
+            RedirectRoute = redirectRoute;
+            CallbackRoute = callbackRoute;
+            UserInformationRoute = userInformationRoute;
 
             _webApplicationService = new WebApplicationService(authenticationProviderFactory,
                 TraceSource,
@@ -90,6 +94,17 @@ namespace SimpleAuthentication.Mvc
             set { _callbackRoute = value; }
         }
 
+        public string UserInformationRoute
+        {
+            get
+            {
+                return (string.IsNullOrWhiteSpace(_userInformationRoute))
+                    ? DefaultUserInformationRoute
+                    : _userInformationRoute;
+            }
+            set { _userInformationRoute = value; }
+        }
+
         public string ReturnToUrlParameterKey
         {
             get { return (string.IsNullOrEmpty(_returnToUrlParameterKey) ? "returnUrl" : _returnToUrlParameterKey); }
@@ -107,13 +122,15 @@ namespace SimpleAuthentication.Mvc
         }
 
         [HttpGet]
-        public RedirectResult RedirectToProvider(string providerName)
+        public ActionResult RedirectToProvider(string providerKey)
         {
-            if (string.IsNullOrEmpty(providerName))
+            RedirectToProviderResult redirectToProviderResult;
+
+            if (string.IsNullOrEmpty(providerKey))
             {
-                var sampleUrl = RedirectRoute.Replace("{providerName}", "google");
+                var sampleUrl = RedirectRoute.Replace("{providerkey}", "google");
                 var errorMessage = string.Format(
-                    "ProviderName value missing. You need to supply a valid provider name so we know where to redirect the user Eg. ....{0}",
+                    "ProviderKey value missing. You need to supply a valid provider name so we know where to redirect the user Eg. ....{0}",
                     sampleUrl);
                 throw new AuthenticationException(errorMessage);
             }
@@ -123,28 +140,34 @@ namespace SimpleAuthentication.Mvc
                 ? Request.UrlReferrer.AbsoluteUri
                 : null;
 
-            var redirectToProviderData = new RedirectToProviderData(providerName,
+            var redirectToProviderData = new RedirectToProviderData(providerKey,
                 Request.Url,
                 referer,
                 returnUrl);
 
-            var result = _webApplicationService.RedirectToProvider(redirectToProviderData);
+            try
+            {
+                redirectToProviderResult = _webApplicationService.RedirectToProvider(redirectToProviderData);
+            }
+            catch (AuthenticationException exception)
+            {
+                return _authenticationProviderCallback.OnError(this, ErrorType.RedirectToProvider, exception);
+            }
+            catch (Exception exception)
+            {
+                var authenticationException = new AuthenticationException(exception.Message);
+                return _authenticationProviderCallback.OnError(this, ErrorType.RedirectToProvider,
+                    authenticationException);
+            }
 
             // Remember any important information for later, after we've returned back here.
-            Session[SessionKeyState] = result.CacheData;
+            Session[SessionKeyState] = redirectToProviderResult.CacheData;
 
-            // Now redirect :)
-            return new RedirectResult(result.RedirectUrl.AbsoluteUri);
+            return new RedirectResult(redirectToProviderResult.RedirectUrl.AbsoluteUri);
         }
 
         [HttpGet]
-        public ActionResult Test()
-        {
-            return Content(DateTime.Now.Ticks.ToString());
-        }
-
-        [HttpGet]
-        public async Task<ActionResult> AuthenticateCallback()
+        public async Task<ActionResult> AuthenticateCallbackAsync()
         {
             TraceSource.TraceVerbose("Retrieving Cache values - State and RedirectToUrl.");
 
@@ -179,9 +202,56 @@ namespace SimpleAuthentication.Mvc
                 await
                     _webApplicationService
                         .AuthenticateCallbackAsync<IAuthenticationProviderCallback, AsyncController, dynamic>(
-                        _authenticationProviderCallback,
+                            _authenticationProviderCallback,
                             this,
                             authenticateCallbackAsyncData);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> AuthenticateMeAsync(string providerKey, string accessToken)
+        {
+            if (string.IsNullOrEmpty(providerKey))
+            {
+                var sampleUrl = RedirectRoute.Replace("{providerkey}", "google");
+                var errorMessage = string.Format(
+                    "ProviderName value missing. You need to supply a valid provider name so we know where to redirect the user Eg. ....{0}",
+                    sampleUrl);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                var sampleUrl = UserInformationRoute.Replace("{providerkey}", "google").Replace("{accesstoken}", "ABCDE-1234");
+                var errorMessage = string.Format(
+                    "AccessToken value missing. You need to supply a valid access token so we attempt to retrieve the user information. Eg. ....{0}",
+                    sampleUrl);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            var superAwesomeAccessToken = new AccessToken
+            {
+                Token = accessToken
+            };
+
+            IAuthenticatedClient authenticatedClient;
+
+            try
+            {
+                authenticatedClient =
+                 await _webApplicationService.AuthenticateMeAsync(providerKey, superAwesomeAccessToken);
+            }
+            catch (AuthenticationException exception)
+            {
+                return _authenticationProviderCallback.OnError(this, ErrorType.UserInformation, exception);
+            }
+            catch (Exception exception)
+            {
+                var authenticationException = new AuthenticationException(exception.Message, exception);
+                return _authenticationProviderCallback.OnError(this, ErrorType.UserInformation,
+                    authenticationException);
+            }
+
+            return Json(authenticatedClient);
         }
     }
 }

@@ -1,6 +1,6 @@
-﻿using System;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using SimpleAuthentication.Core;
+using SimpleAuthentication.Core.Exceptions;
 
 namespace SimpleAuthentication.Mvc
 {
@@ -22,8 +22,11 @@ namespace SimpleAuthentication.Mvc
         /// </summary>
         /// <remarks>An example of a valid error would be if the user cancels their permission check.</remarks>
         /// <param name="controller">The current controller being executed.</param>
+        /// <param name="errorType">Which part of the pipeline did this error occur in.</param>
         /// <param name="exception">The exception error that occured.</param>
         /// <returns></returns>
-        ActionResult OnRedirectToAuthenticationProviderError(Controller controller, Exception exception);
+        ActionResult OnError(Controller controller,
+            ErrorType errorType,
+            AuthenticationException exception);
     }
 }

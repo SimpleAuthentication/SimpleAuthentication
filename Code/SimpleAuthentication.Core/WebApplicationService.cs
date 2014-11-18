@@ -238,19 +238,5 @@ namespace SimpleAuthentication.Core
 
             return model;
         }
-
-        private static TResult HandleError<TInvokeObject, TModuleOrController, TResult>(ErrorType errorType,
-            TInvokeObject objectToInvokeOn,
-            TModuleOrController moduleOrController,
-            AuthenticationException exception)
-        {
-            // TODO: CACHE THE METHOD AND TYPE.
-            var type = typeof (TInvokeObject);
-            var errorMethod = type.GetMethod("OnError");
-            var result = (TResult) errorMethod.Invoke(objectToInvokeOn,
-                new object[] {moduleOrController, errorType, exception});
-
-            return result;
-        }
     }
 }

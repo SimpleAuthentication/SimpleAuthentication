@@ -13,7 +13,7 @@ namespace Nancy.SimpleAuthentication
         private const string SessionKeyState = "SimpleAuthentication-StateKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
         public const string DefaultRedirectRoute = "/authenticate/{providerkey}";
         public const string DefaultCallbackRoute = "/authenticate/callback";
-        public const string UserInformationRoute = "/authenticate/{providerkey}/me/{accesstoken}";
+        public const string DefaultUserInformationRoute = "/authenticate/{providerkey}/me/{accesstoken}";
 
         private readonly IAuthenticationProviderCallback _authenticationProviderCallback;
 
@@ -58,7 +58,7 @@ namespace Nancy.SimpleAuthentication
             // Define the routes and how they are handled.
             Get[RedirectRoute] = parameters => RedirectToProvider(parameters);
             Get[CallbackRoute, true] = async (parameters, ct) => await AuthenticateCallbackAsync();
-            Get[UserInformationRoute, true] = async (parameters, ct) => await AuthenticateMeAsync(parameters);
+            Get[DefaultUserInformationRoute, true] = async (parameters, ct) => await AuthenticateMeAsync(parameters);
         }
 
         public string RedirectRoute
@@ -116,7 +116,6 @@ namespace Nancy.SimpleAuthentication
 
             try
             {
-
                 var providerKey = GetProviderKeyFromRoute(parameters);
 
                 var returnUrl = Request.Query[ReturnToUrlParameterKey];
@@ -178,7 +177,7 @@ namespace Nancy.SimpleAuthentication
             var errorMessage =
                 string.Format(
                     "AccessToken value missing. You need to supply a valud access token in the route so we can attempt to retrieve the details. ie. {0}",
-                    UserInformationRoute);
+                    DefaultUserInformationRoute);
             throw new ArgumentNullException(errorMessage);
         }
 
