@@ -64,25 +64,25 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
                 cacheData.ReturnUrl.ShouldBe(null);
             }
 
-            //[Fact]
-            //public void GivenAMissingProviderKey_GetRedirectToProvider_ReturnsANotFound()
-            //{
-            //    // Arrange.
-            //    var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
-            //    var configService = A.Fake<IConfigService>();
+            [Fact]
+            public void GivenAMissingProviderKey_GetRedirectToProvider_ReturnsANotFound()
+            {
+                // Arrange.
+                var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
+                var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
+                
+                AddModuleDependency(typeof(IAuthenticationProviderFactory), authenticationProviderFactory);
+                AddModuleDependency(typeof(IAuthenticationProviderCallback), authenticationCallbackProvider);
 
-            //    AddModuleDependency(typeof(IAuthenticationProviderCallback), authenticationCallbackProvider);
-            //    AddModuleDependency(typeof(IConfigService), configService);
+                var browser = Browser();
 
-            //    var browser = Browser();
+                // Act.
+                var result = browser.Get("/authenticate/", with => with.HttpRequest());
 
-            //    // Act.
-            //    var result = browser.Get("/authenticate/", with => with.HttpRequest());
-
-            //    // Assert.
-            //    result.ShouldNotBe(null);
-            //    result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
-            //}
+                // Assert.
+                result.ShouldNotBe(null);
+                result.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+            }
 
             //[Fact]
             //public void GivenAValidProviderKeyAndAValidIdentifier_GetRedirectToProvider_ReturnsARedirectResponse()
