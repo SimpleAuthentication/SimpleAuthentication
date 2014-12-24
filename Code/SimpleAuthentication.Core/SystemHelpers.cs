@@ -54,11 +54,11 @@ namespace SimpleAuthentication.Core
 
             // REF: http://msdn.microsoft.com/en-us/library/system.uribuilder.query(v=vs.110).aspx
             // NOTE: first character is the '?'. So we need to skip it.
-            var existingQuery = String.IsNullOrWhiteSpace(result.Query)
+            var existingQuery = string.IsNullOrWhiteSpace(result.Query)
                 ? null
                 : result.Query.Substring(1);
 
-            if (String.IsNullOrWhiteSpace(existingQuery))
+            if (string.IsNullOrWhiteSpace(existingQuery))
             {
                 // No existing query - so just 
                 result.Query = JoinQueryStringParameters(querystringParameters);

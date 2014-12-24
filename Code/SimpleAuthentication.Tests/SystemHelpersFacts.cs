@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mime;
 using Shouldly;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Exceptions;
@@ -18,40 +17,32 @@ namespace SimpleAuthentication.Tests
             {
                 // Arrange.
                 var uri = new Uri("http://www.mysite.com/a/b/c");
-                var querystringParameters = new Dictionary<string, string>
-                {
-                    {"a", "1"},
-                    {"b^*&/234", "&%7as ad7 6* SA "}
-                };
 
                 // Act.
-                var result = SystemHelpers.CreateUri(uri, querystringParameters);
+                var result = SystemHelpers.CreateUri(uri, null);
 
                 // Assert.
-                result.Query.ShouldBe("?a=1&b%5E%2A%26%2F234=%26%257as%20ad7%206%2A%20SA%20");
+                result.Query.ShouldBe(null);
             }
 
             [Fact]
             public void GivenAUriWithSomeQuerystringParameters_AddOrUpdateQuery_AddsTheQuerystringParameters()
             {
-                // NOTE: Since .NET 4.5, Uri.EscapeDataString *correctly* escapes the querystring.
-                // unescaped:  "!", "*", "'", "(", ")"
-                // escaped: ALPHA / DIGIT / "-" / "." / "_" / "~"
-                // REF: 
-                
                 // Arrange.
-                var uri = new Uri("http://www.mysite.com/a/b/c?pewpew=woot&foo=bar&x=y");
-                var querystringParameters = new Dictionary<string, string>
+                var uri = new Uri("http://www.mysite.com/a/b/c");
+
+                var querystringParameters = new List<KeyValuePair<string, string>>
                 {
-                    {"a", "1"},
-                    {"b^*&/234", "&%7as ad7 6* SA "}
+                    new KeyValuePair<string, string>("a", "1"),
+                    new KeyValuePair<string, string>("b^*&/234", "&%7as ad7 6* SA ")
                 };
 
                 // Act.
-                var result = SystemHelpers.CreateUri(uri, querystringParameters);
+                var result = SystemHelpers.CreateUri(uri, 
+                    querystringParameters.ToDictionary(key => key.Key, value => value.Value));
 
                 // Assert.
-                result.Query.ShouldBe("?pewpew=woot&foo=bar&x=y&a=1&b%5E%2A%26%2F234=%26%257as%20ad7%206%2A%20SA%20");
+                result.Query.ShouldBe(querystringParameters.ToEncodedString());
             }
 
             [Fact]
@@ -59,17 +50,22 @@ namespace SimpleAuthentication.Tests
             {
                 // Arrange.
                 var uri = new Uri("http://www.mysite.com/a/b/c?pewpew=woot&foo=bar&x=y&state=hithere");
-                var querystringParameters = new Dictionary<string, string>
+                var querystringParameters = new List<KeyValuePair<string, string>>
                 {
-                    {"a", "1"},
-                    {"b^*&/234", "&%7as ad7 6* SA "},
-                    {"state", "0aa44508-991a-47db-b6b4-d8edd4c0bf40"}
+                    new KeyValuePair<string, string>("a", "1"),
+                    new KeyValuePair<string, string>("b^*&/234", "&%7as ad7 6* SA "),
+                    new KeyValuePair<string, string>("state", "0aa44508-991a-47db-b6b4-d8edd4c0bf40")
                 };
 
                 // Act.
-                var result = SystemHelpers.CreateUri(uri, querystringParameters);
+                var result = SystemHelpers.CreateUri(uri,
+                    querystringParameters.ToDictionary(key => key.Key, value => value.Value));
 
                 // Assert.
+                var queryString = string.Format("?pewpew=woot&foo=bar&x=y&{0}={1}",
+                    Uri.EscapeDataString(querystringParameters[1].Key),
+                    Uri.EscapeDataString(querystringParameters[1].Value));
+                result.Query.ShouldBe(queryString);
                 result.Query.ShouldBe("?pewpew=woot&foo=bar&x=y&state=0aa44508-991a-47db-b6b4-d8edd4c0bf40&a=1&b%5E%2A%26%2F234=%26%257as%20ad7%206%2A%20SA%20");
             }
         }
