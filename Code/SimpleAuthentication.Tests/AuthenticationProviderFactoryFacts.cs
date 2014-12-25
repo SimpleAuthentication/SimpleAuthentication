@@ -37,7 +37,7 @@ namespace SimpleAuthentication.Tests
             {
                 // Arrange.
                 var configService = A.Fake<IConfigService>();
-                A.CallTo(() => configService.GetConfiguration()).Returns(TestHelpers.ConfigurationWithGoogleProvider);
+                A.CallTo(() => configService.GetConfiguration()).Returns(TestHelpers.ConfigurationProviders);
 
                 // NOTE: This provider scanner defaults to returning a null Type list.
                 var providerScanner = A.Fake<IProviderScanner>();
@@ -55,7 +55,7 @@ namespace SimpleAuthentication.Tests
             {
                 // Arrange.
                 var configService = A.Fake<IConfigService>();
-                A.CallTo(() => configService.GetConfiguration()).Returns(TestHelpers.ConfigurationWithGoogleProvider);
+                A.CallTo(() => configService.GetConfiguration()).Returns(TestHelpers.ConfigurationProviders);
 
                 // NOTE: This provider scanner defaults to returning a null Type list.
                 var discoveredProviders = new[] {typeof (FacebookProvider)};

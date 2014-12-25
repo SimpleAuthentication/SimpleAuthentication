@@ -19,9 +19,7 @@ namespace SimpleAuthentication.Tests.ExtraProviders
             public void GivenARedirectUrl_GetRedirectToAuthenticateSettings_ReturnsARedirectToAuthenticateSettings()
             {
                 // Arrange.
-                var providerParams = new ProviderParams("zdskjhf&*^65sdfh/.<>\\sdf",
-                    "szdkjhg&^%178~/.,<>\\[]{}sdsf sd df s");
-                var provider = new GitHubProvider(providerParams);
+                var provider = TestHelpers.AuthenticationProviders["github"];
                 var callbackUri = new Uri("http://www.mysite.com/pew/pew?provider=github");
 
                 // Act.
@@ -29,9 +27,17 @@ namespace SimpleAuthentication.Tests.ExtraProviders
 
                 // Assert.
                 result.State.ShouldNotBe(null);
-                result.RedirectUri.AbsoluteUri.ShouldBe(
-                    string.Format("https://github.com/login/oauth/authorize?client_id=zdskjhf%26%2A%5E65sdfh%2F.%3C%3E%5Csdf&redirect_uri=http%3A%2F%2Fwww.mysite.com%2Fpew%2Fpew%3Fprovider%3Dgithub&response_type=code&scope=user%3Aemail&state={0}",
-                    result.State));
+                var queryStringSegments = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("client_id", TestHelpers.GoogleProvider.Key),
+                    new KeyValuePair<string, string>("redirect_uri", callbackUri.AbsoluteUri),
+                    new KeyValuePair<string, string>("response_type", "code"),
+                    new KeyValuePair<string, string>("scope", "user:email"),
+                    new KeyValuePair<string, string>("state", result.State)
+                }.ToEncodedString();
+                var url = string.Format("https://github.com/login/oauth/authorize?{0}", queryStringSegments);
+                
+                result.RedirectUri.AbsoluteUri.ShouldBe(url);
             }
         }
 

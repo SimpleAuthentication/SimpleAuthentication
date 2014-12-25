@@ -13,15 +13,13 @@ namespace SimpleAuthentication.Tests.ExtraProviders
 {
     public class InstagramProviderFacts
     {
-        public class GetRedirectToAuthenticateSettingsAsyncFacts
+        public class GetRedirectToAuthenticateSettingsFacts
         {
             [Fact]
             public void GivenARedirectUrl_GetRedirectToAuthenticateSettings_ReturnsARedirectToAuthenticateSettings()
             {
                 // Arrange.
-                var providerParams = new ProviderParams("zdskjhf&*^65sdfh/.<>\\sdf",
-                    "szdkjhg&^%178~/.,<>\\[]{}sdsf sd df s");
-                var provider = new InstagramProvider(providerParams);
+                var provider = TestHelpers.AuthenticationProviders[TestHelpers.InstagramProvider.Name];
                 var callbackUri = new Uri("http://www.mysite.com/pew/pew?provider=instagram");
 
                 // Act.
@@ -29,10 +27,18 @@ namespace SimpleAuthentication.Tests.ExtraProviders
 
                 // Assert.
                 result.State.ShouldNotBe(null);
+                var queryStringSegments = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("client_id", TestHelpers.InstagramProvider.Key),
+                    new KeyValuePair<string, string>("redirect_uri", callbackUri.AbsoluteUri),
+                    new KeyValuePair<string, string>("response_type", "code"),
+                    new KeyValuePair<string, string>("scope", "basic"),
+                    new KeyValuePair<string, string>("state", result.State)
+                }.ToEncodedString();
+                var url = string.Format("https://api.instagram.com/oauth/authorize/?{0}", queryStringSegments);
+                
                 result.RedirectUri.AbsoluteUri.ShouldBe(
-                    string.Format(
-                        "https://api.instagram.com/oauth/authorize/?client_id=zdskjhf%26%2A%5E65sdfh%2F.%3C%3E%5Csdf&redirect_uri=http%3A%2F%2Fwww.mysite.com%2Fpew%2Fpew%3Fprovider%3Dinstagram&response_type=code&scope=basic&state={0}",
-                        result.State));
+                    string.Format(url));
             }
         }
 
@@ -42,9 +48,7 @@ namespace SimpleAuthentication.Tests.ExtraProviders
             public async Task GivenAValidResponse_AuthenticateClientAsync_ReturnsAnAuthenticatedClient()
             {
                 // Arrange.
-                var providerParams = new ProviderParams("zdskjhf&*^65sdfh/.<>\\sdf",
-                    "szdkjhg&^%178~/.,<>\\[]{}sdsf sd df s");
-                var provider = new InstagramProvider(providerParams);
+                var provider = TestHelpers.AuthenticationProviders[TestHelpers.InstagramProvider.Name];
                 const string stateKey = "state";
                 const string state = "adyi#&(*,./,.!~`  uhj97&^*&shdgf\\//////\\dsf";
                 var querystring = new Dictionary<string, string>

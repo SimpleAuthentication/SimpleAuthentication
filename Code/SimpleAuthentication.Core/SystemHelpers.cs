@@ -40,17 +40,16 @@ namespace SimpleAuthentication.Core
                 throw new ArgumentNullException("sourceUrl");
             }
 
-            if (querystringParameters == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            if (!querystringParameters.Any())
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
             var result = new UriBuilder(sourceUrl);
+
+            if (querystringParameters == null ||
+                !querystringParameters.Any())
+            {
+                return new Uri(result.ToString());    
+            }
+
+            // HERE: We have some extra query string params so we need to join them
+            //       into the existing query string -or- make them the querystring.
 
             // REF: http://msdn.microsoft.com/en-us/library/system.uribuilder.query(v=vs.110).aspx
             // NOTE: first character is the '?'. So we need to skip it.

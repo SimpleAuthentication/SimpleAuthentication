@@ -22,7 +22,7 @@ namespace SimpleAuthentication.Tests
                 var result = SystemHelpers.CreateUri(uri, null);
 
                 // Assert.
-                result.Query.ShouldBe(null);
+                result.Query.ShouldBeNullOrEmpty();
             }
 
             [Fact]
@@ -42,7 +42,8 @@ namespace SimpleAuthentication.Tests
                     querystringParameters.ToDictionary(key => key.Key, value => value.Value));
 
                 // Assert.
-                result.Query.ShouldBe(querystringParameters.ToEncodedString());
+                var query = string.Format("?{0}", querystringParameters.ToEncodedString());
+                result.Query.ShouldBe(query);
             }
 
             [Fact]
@@ -62,11 +63,18 @@ namespace SimpleAuthentication.Tests
                     querystringParameters.ToDictionary(key => key.Key, value => value.Value));
 
                 // Assert.
-                var queryString = string.Format("?pewpew=woot&foo=bar&x=y&{0}={1}",
-                    Uri.EscapeDataString(querystringParameters[1].Key),
-                    Uri.EscapeDataString(querystringParameters[1].Value));
-                result.Query.ShouldBe(queryString);
-                result.Query.ShouldBe("?pewpew=woot&foo=bar&x=y&state=0aa44508-991a-47db-b6b4-d8edd4c0bf40&a=1&b%5E%2A%26%2F234=%26%257as%20ad7%206%2A%20SA%20");
+                var queryStringSegments = new List<KeyValuePair<string, string>>
+                {
+                    {new KeyValuePair<string, string>("pewpew", "woot")},
+                    {new KeyValuePair<string, string>("foo", "bar")},
+                    {new KeyValuePair<string, string>("x", "y")}
+                };
+                queryStringSegments.Add(querystringParameters[2]);
+                queryStringSegments.Add(querystringParameters[0]);
+                queryStringSegments.Add(querystringParameters[1]);
+                var encodedQueryString = queryStringSegments.ToEncodedString();
+                var url = string.Format("?{0}", encodedQueryString);
+                result.Query.ShouldBe(url);
             }
         }
 

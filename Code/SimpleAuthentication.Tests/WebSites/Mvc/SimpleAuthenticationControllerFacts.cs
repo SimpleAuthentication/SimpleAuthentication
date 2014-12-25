@@ -47,7 +47,7 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 // Arrange.
                 var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
                 A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
-                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle); 
+                    .Returns(TestHelpers.AuthenticationProviders); 
                 
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
 
@@ -66,17 +66,24 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 {
                     ControllerContext = controllerContext
                 };
-
-                const string providerName = "google";
                 
                 // Act.
-                var result = (RedirectResult)controller.RedirectToProvider(providerName);
+                var result = (RedirectResult)controller.RedirectToProvider(TestHelpers.GoogleProvider.Name);
 
                 // Assert.
                 result.Permanent.ShouldBe(false);
-                result.Url.ShouldStartWith("https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Flocalhost%3A45216%2Fauthenticate%2Fcallback&response_type=code&scope=profile%20email&state=");
+                var queryStringSegments = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("client_id", TestHelpers.GoogleProvider.Key),
+                    new KeyValuePair<string, string>("redirect_uri", "http://localhost:45216/authenticate/callback"),
+                    new KeyValuePair<string, string>("response_type", "code"),
+                    new KeyValuePair<string, string>("scope", "profile email"),
+                    new KeyValuePair<string, string>("state", string.Empty)
+                }.ToEncodedString();
+                var url = string.Format("https://accounts.google.com/o/oauth2/auth?{0}", queryStringSegments);
+                result.Url.ShouldStartWith(url);
                 var cacheData = (CacheData)controller.Session["SimpleAuthentication-StateKey-427B6ED7-A803-4F18-A396-0084417B548D"];
-                cacheData.ProviderKey.ShouldBe(providerName);
+                cacheData.ProviderKey.ShouldBe(TestHelpers.GoogleProvider.Name);
                 cacheData.ReturnUrl.ShouldBe(requestUrl.Authority);
                 cacheData.State.ShouldNotBe(null);
             }
@@ -87,39 +94,47 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 // Arrange.
                 var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
                 A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
-                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
-                
+                    .Returns(TestHelpers.AuthenticationProviders);
+
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
 
                 var request = A.Fake<HttpRequestBase>();
-                //A.CallTo(() => request.QueryString["returnUrl"]).Returns(null);
                 const string returnUrl = "/foo/bar?a=1234&b=xxx";
                 var queryString = new NameValueCollection {{"returnUrl", returnUrl}};
                 A.CallTo(() => request.QueryString).Returns(queryString);
                 A.CallTo(() => request.UrlReferrer).Returns(null);
-                var requestUrl = new Uri("http://localhost:45216/SimpleAuthentication/RedirectToProvider?providerName=google");
+                var requestUrl =
+                    new Uri("http://localhost:45216/SimpleAuthentication/RedirectToProvider?providerName=google");
                 A.CallTo(() => request.Url).Returns(requestUrl);
                 A.CallTo(() => request.UrlReferrer).Returns(new Uri(requestUrl.Authority));
                 var httpContext = A.Fake<HttpContextBase>();
                 A.CallTo(() => httpContext.Request).Returns(request);
                 var controllerContext = new ControllerContext(httpContext, new RouteData(), A.Fake<ControllerBase>());
 
-                var controller = new SimpleAuthenticationController(authenticationProviderFactory, 
+                var controller = new SimpleAuthenticationController(authenticationProviderFactory,
                     authenticationProviderCallback)
                 {
                     ControllerContext = controllerContext
                 };
 
-                const string providerName = "google";
-
                 // Act.
-                var result = (RedirectResult)controller.RedirectToProvider(providerName);
+                var result = (RedirectResult) controller.RedirectToProvider(TestHelpers.GoogleProvider.Name);
 
                 // Assert.
                 result.Permanent.ShouldBe(false);
-                result.Url.ShouldStartWith("https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Flocalhost%3A45216%2Fauthenticate%2Fcallback&response_type=code&scope=profile%20email&state=");
-                var cacheData = (CacheData)controller.Session["SimpleAuthentication-StateKey-427B6ED7-A803-4F18-A396-0084417B548D"];
-                cacheData.ProviderKey.ShouldBe(providerName);
+                var queryStringSegments = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("client_id", TestHelpers.GoogleProvider.Key),
+                    new KeyValuePair<string, string>("redirect_uri", "http://localhost:45216/authenticate/callback"),
+                    new KeyValuePair<string, string>("response_type", "code"),
+                    new KeyValuePair<string, string>("scope", "profile email"),
+                    new KeyValuePair<string, string>("state", string.Empty)
+                }.ToEncodedString();
+                var url = string.Format("https://accounts.google.com/o/oauth2/auth?{0}", queryStringSegments);
+                result.Url.ShouldStartWith(url);
+                var cacheData =
+                    (CacheData) controller.Session["SimpleAuthentication-StateKey-427B6ED7-A803-4F18-A396-0084417B548D"];
+                cacheData.ProviderKey.ShouldBe(TestHelpers.GoogleProvider.Name);
                 cacheData.ReturnUrl.ShouldBe(returnUrl);
                 cacheData.State.ShouldNotBe(null);
             }
@@ -136,7 +151,7 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
 
                 var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
                 A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
-                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
+                    .Returns(TestHelpers.AuthenticationProviders);
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
                 A.CallTo(() => authenticationProviderCallback.Process(A<Controller>._,
                     A<AuthenticateCallbackResult>._)).Returns(redirectResult);
@@ -151,7 +166,7 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 A.CallTo(() => request.QueryString).Returns(queryString);
                 A.CallTo(() => request.Url).Returns(new Uri("http://www.foo.com"));
 
-                var cacheData = new CacheData(TestHelpers.AuthenticationProvidersWithGoogle.First().Value.Name, state,
+                var cacheData = new CacheData(TestHelpers.AuthenticationProviders.First().Value.Name, state,
                     null);
                 var session = A.Fake<HttpSessionStateBase>();
                 A.CallTo(() => session["SimpleAuthentication-StateKey-427B6ED7-A803-4F18-A396-0084417B548D"])
@@ -227,14 +242,14 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 // Arrange.
                 var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
                 A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
-                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
+                    .Returns(TestHelpers.AuthenticationProviders);
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
 
                 var request = A.Fake<HttpRequestBase>();
                 A.CallTo(() => request.QueryString).Returns(new NameValueCollection());
                 A.CallTo(() => request.Url).Returns(new Uri("http://www.foo.com"));
 
-                var cacheData = new CacheData(TestHelpers.AuthenticationProvidersWithGoogle.First().Value.Name,
+                var cacheData = new CacheData(TestHelpers.AuthenticationProviders.First().Value.Name,
                     "asdadsds",
                     null);
                 var session = A.Fake<HttpSessionStateBase>();
@@ -270,7 +285,7 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 // Arrange.
                 var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
                 A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
-                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
+                    .Returns(TestHelpers.AuthenticationProviders);
 
                 var authenticationProviderCallback = A.Fake<IAuthenticationProviderCallback>();
                 var httpContext = A.Fake<HttpContextBase>();
@@ -351,7 +366,7 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 // Arrange.
                 var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
                 A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
-                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
+                    .Returns(TestHelpers.AuthenticationProviders);
 
                 var contentResult = new ContentResult
                 {

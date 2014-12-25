@@ -29,7 +29,7 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
 
                 var configService = A.Fake<IConfigService>();
                 A.CallTo(() => configService.GetConfiguration())
-                    .Returns(TestHelpers.ConfigurationWithGoogleProvider);
+                    .Returns(TestHelpers.FilteredConfigurationProviders("google"));
 
                 var providerScanner = A.Fake<IProviderScanner>();
                 A.CallTo(() => providerScanner.GetDiscoveredProviders())
@@ -316,7 +316,7 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
 
                 var configService = A.Fake<IConfigService>();
                 A.CallTo(() => configService.GetConfiguration())
-                    .Returns(TestHelpers.ConfigurationWithGoogleProvider);
+                    .Returns(TestHelpers.FilteredConfigurationProviders("google"));
 
                 var providerScanner = A.Fake<IProviderScanner>();
                 A.CallTo(() => providerScanner.GetDiscoveredProviders())
@@ -372,7 +372,7 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
                 
                 var configService = A.Fake<IConfigService>();
                 A.CallTo(() => configService.GetConfiguration())
-                    .Returns(TestHelpers.ConfigurationWithGoogleProvider);
+                    .Returns(TestHelpers.FilteredConfigurationProviders("google"));
 
                 var providerScanner = A.Fake<IProviderScanner>();
                 A.CallTo(() => providerScanner.GetDiscoveredProviders())

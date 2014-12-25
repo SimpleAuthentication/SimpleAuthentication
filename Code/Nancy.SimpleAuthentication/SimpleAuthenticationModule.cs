@@ -128,13 +128,13 @@ namespace Nancy.SimpleAuthentication
 
             try
             {
-                var redirection = _webApplicationService.RedirectToProvider(redirectToProviderData);
+                var redirectionResult = _webApplicationService.RedirectToProvider(redirectToProviderData);
 
                 // Remember any important information for later, after we've returned back here.
-                Session[SessionKeyState] = redirection.CacheData;
+                Session[SessionKeyState] = redirectionResult.CacheData;
 
                 // Now redirect :)
-                result = Response.AsRedirect(redirection.RedirectUrl.AbsoluteUri);
+                result = Response.AsRedirect(redirectionResult.RedirectUrl.AbsoluteUri);
 
             }
             catch (AuthenticationException exception)

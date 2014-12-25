@@ -45,7 +45,7 @@ namespace SimpleAuthentication.Tests
                 // Arrange.
                 var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
                 A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
-                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
+                    .Returns(TestHelpers.AuthenticationProviders);
 
                 const string callbackResult = "this is someview content!";
                 var authenticationCallbackProvider = A.Fake<IAuthenticationProviderCallback>();
@@ -91,7 +91,7 @@ namespace SimpleAuthentication.Tests
                 var traceSource = new TraceSource("test");
                 var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
                 A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
-                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
+                    .Returns(TestHelpers.AuthenticationProviders);
                 var webApplicationService = new WebApplicationService(authenticationProviderFactory,
                     traceSource,
                     "some callback route");
@@ -144,7 +144,7 @@ namespace SimpleAuthentication.Tests
                 var traceSource = new TraceSource("test");
                 var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
                 A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
-                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
+                    .Returns(TestHelpers.AuthenticationProviders);
 
                 var webApplicationService = new WebApplicationService(authenticationProviderFactory,
                     traceSource,
@@ -211,7 +211,7 @@ namespace SimpleAuthentication.Tests
 
                 var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
                 A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
-                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
+                    .Returns(TestHelpers.AuthenticationProviders);
 
                 var userInformationJson = File.ReadAllText("Sample Data\\Google-UserInfoResult-Content.json");
                 var userInformationResponse = FakeHttpMessageHandler.GetStringHttpResponseMessage(userInformationJson);
@@ -243,18 +243,20 @@ namespace SimpleAuthentication.Tests
             {
                 // Arrange.
                 var traceSource = new TraceSource("test");
-
+                var googleProvider = TestHelpers.AuthenticationProviders.Single(x => x.Key == "google");
                 var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
                 A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
-                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
+                    .Returns(TestHelpers.AuthenticationProviders);
 
+                const string callbackRoute = "asdjhsdkfhds";
                 var webApplicationService = new WebApplicationService(authenticationProviderFactory,
                     traceSource,
-                    "asdjhsdkfhds");
+                    callbackRoute);
 
+                const string redirectUrl = "http://www.pewpew.com/a/b/c";
                 var redirectToProviderData =
-                    new RedirectToProviderData(TestHelpers.AuthenticationProvidersWithGoogle.First().Value.Name,
-                        new Uri("http://www.pewpew.com/a/b/c"),
+                    new RedirectToProviderData(googleProvider.Key,
+                        new Uri(redirectUrl),
                         null,
                         null);
 
@@ -262,8 +264,16 @@ namespace SimpleAuthentication.Tests
                 var result = webApplicationService.RedirectToProvider(redirectToProviderData);
 
                 // Assert.
-                result.RedirectUrl.AbsoluteUri.ShouldStartWith(
-                    "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fasdjhsdkfhds&response_type=code&scope=profile%20email&state=");
+                var queryStringSegments = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("client_id", TestHelpers.GoogleProvider.Key),
+                    new KeyValuePair<string, string>("redirect_uri", "http://www.pewpew.com/" + callbackRoute),
+                    new KeyValuePair<string, string>("response_type", "code"),
+                    new KeyValuePair<string, string>("scope", "profile email"),
+                    new KeyValuePair<string, string>("state", string.Empty)
+                }.ToEncodedString();
+                var url = string.Format("https://accounts.google.com/o/oauth2/auth?{0}", queryStringSegments);
+                result.RedirectUrl.AbsoluteUri.ShouldStartWith(url);
                 result.CacheData.ProviderKey.ShouldBe(redirectToProviderData.ProviderKey);
                 result.CacheData.State.ShouldNotBe(null);
                 result.CacheData.ReturnUrl.ShouldBe(null);
@@ -278,14 +288,14 @@ namespace SimpleAuthentication.Tests
 
                 var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
                 A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
-                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
+                    .Returns(TestHelpers.AuthenticationProviders);
 
                 var webApplicationService = new WebApplicationService(authenticationProviderFactory,
                     traceSource,
                     "asdjhsdkfhds");
 
                 var redirectToProviderData =
-                    new RedirectToProviderData(TestHelpers.AuthenticationProvidersWithGoogle.First().Value.Name,
+                    new RedirectToProviderData(TestHelpers.AuthenticationProviders.First().Value.Name,
                         new Uri("http://www.pewpew.com/a/b/c"),
                         null,
                         "/foo/bar?a=b");
@@ -309,14 +319,14 @@ namespace SimpleAuthentication.Tests
 
                 var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
                 A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
-                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
+                    .Returns(TestHelpers.AuthenticationProviders);
 
                 var webApplicationService = new WebApplicationService(authenticationProviderFactory,
                     traceSource,
                     "asdjhsdkfhds");
 
                 var redirectToProviderData =
-                    new RedirectToProviderData(TestHelpers.AuthenticationProvidersWithGoogle.First().Value.Name,
+                    new RedirectToProviderData(TestHelpers.AuthenticationProviders.First().Value.Name,
                         new Uri("http://www.pewpew.com/a/b/c"),
                         "http://www.aa.bb.com",
                         null);
@@ -342,14 +352,14 @@ namespace SimpleAuthentication.Tests
 
                 var authenticationProviderFactory = A.Fake<IAuthenticationProviderFactory>();
                 A.CallTo(() => authenticationProviderFactory.AuthenticationProviders)
-                    .Returns(TestHelpers.AuthenticationProvidersWithGoogle);
+                    .Returns(TestHelpers.AuthenticationProviders);
 
                 var webApplicationService = new WebApplicationService(authenticationProviderFactory,
                     traceSource,
                     "asdjhsdkfhds");
 
                 var redirectToProviderData =
-                    new RedirectToProviderData(TestHelpers.AuthenticationProvidersWithGoogle.First().Value.Name,
+                    new RedirectToProviderData(TestHelpers.AuthenticationProviders.First().Value.Name,
                         new Uri("http://www.pewpew.com/a/b/c"),
                         "http://www.aa.bb.com",
                         "http://www.xxx.net/a/b/c?d=e&f=g");
