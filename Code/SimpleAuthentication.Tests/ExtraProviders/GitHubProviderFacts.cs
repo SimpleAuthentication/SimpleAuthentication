@@ -29,7 +29,7 @@ namespace SimpleAuthentication.Tests.ExtraProviders
                 result.State.ShouldNotBe(null);
                 var queryStringSegments = new List<KeyValuePair<string, string>>
                 {
-                    new KeyValuePair<string, string>("client_id", TestHelpers.GoogleProvider.Key),
+                    new KeyValuePair<string, string>("client_id", TestHelpers.ConfigProviderKey),
                     new KeyValuePair<string, string>("redirect_uri", callbackUri.AbsoluteUri),
                     new KeyValuePair<string, string>("response_type", "code"),
                     new KeyValuePair<string, string>("scope", "user:email"),

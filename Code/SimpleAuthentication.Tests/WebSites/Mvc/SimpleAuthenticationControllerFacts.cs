@@ -68,13 +68,13 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 };
                 
                 // Act.
-                var result = (RedirectResult)controller.RedirectToProvider(TestHelpers.GoogleProvider.Name);
+                var result = (RedirectResult)controller.RedirectToProvider("google");
 
                 // Assert.
                 result.Permanent.ShouldBe(false);
                 var queryStringSegments = new List<KeyValuePair<string, string>>
                 {
-                    new KeyValuePair<string, string>("client_id", TestHelpers.GoogleProvider.Key),
+                    new KeyValuePair<string, string>("client_id", TestHelpers.ConfigProviderKey),
                     new KeyValuePair<string, string>("redirect_uri", "http://localhost:45216/authenticate/callback"),
                     new KeyValuePair<string, string>("response_type", "code"),
                     new KeyValuePair<string, string>("scope", "profile email"),
@@ -83,7 +83,7 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 var url = string.Format("https://accounts.google.com/o/oauth2/auth?{0}", queryStringSegments);
                 result.Url.ShouldStartWith(url);
                 var cacheData = (CacheData)controller.Session["SimpleAuthentication-StateKey-427B6ED7-A803-4F18-A396-0084417B548D"];
-                cacheData.ProviderKey.ShouldBe(TestHelpers.GoogleProvider.Name);
+                cacheData.ProviderKey.ShouldBe("google");
                 cacheData.ReturnUrl.ShouldBe(requestUrl.Authority);
                 cacheData.State.ShouldNotBe(null);
             }
@@ -118,13 +118,13 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 };
 
                 // Act.
-                var result = (RedirectResult) controller.RedirectToProvider(TestHelpers.GoogleProvider.Name);
+                var result = (RedirectResult) controller.RedirectToProvider("google");
 
                 // Assert.
                 result.Permanent.ShouldBe(false);
                 var queryStringSegments = new List<KeyValuePair<string, string>>
                 {
-                    new KeyValuePair<string, string>("client_id", TestHelpers.GoogleProvider.Key),
+                    new KeyValuePair<string, string>("client_id", TestHelpers.ConfigProviderKey),
                     new KeyValuePair<string, string>("redirect_uri", "http://localhost:45216/authenticate/callback"),
                     new KeyValuePair<string, string>("response_type", "code"),
                     new KeyValuePair<string, string>("scope", "profile email"),
@@ -134,7 +134,7 @@ namespace SimpleAuthentication.Tests.WebSites.Mvc
                 result.Url.ShouldStartWith(url);
                 var cacheData =
                     (CacheData) controller.Session["SimpleAuthentication-StateKey-427B6ED7-A803-4F18-A396-0084417B548D"];
-                cacheData.ProviderKey.ShouldBe(TestHelpers.GoogleProvider.Name);
+                cacheData.ProviderKey.ShouldBe("google");
                 cacheData.ReturnUrl.ShouldBe(returnUrl);
                 cacheData.State.ShouldNotBe(null);
             }

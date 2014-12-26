@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web;
-using System.Web.Mvc;
-using System.Web.Routing;
-using FakeItEasy;
-using Shouldly;
+﻿using Shouldly;
 using SimpleAuthentication.Core.Config;
 using SimpleAuthentication.Core.Exceptions;
 using Xunit;

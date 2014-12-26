@@ -13,6 +13,8 @@ namespace SimpleAuthentication.Tests
     public static class TestHelpers
     {
         private static IList<Provider> _providers;
+        public const string ConfigProviderKey = "some ** key";
+        public const string ConfigProviderSecret = "some secret";
 
         public static string ToEncodedString(this List<KeyValuePair<string, string>> value)
         {
@@ -32,11 +34,6 @@ namespace SimpleAuthentication.Tests
             return result.ToString();
         }
 
-        public static Provider GoogleProvider
-        {
-            get { return Providers.Single(x => x.Name == "google"); }
-        }
-
         public static Provider InstagramProvider
         {
             get { return Providers.Single(x => x.Name == "instagram"); }
@@ -45,19 +42,6 @@ namespace SimpleAuthentication.Tests
         public static Provider GitHubProvider
         {
             get { return Providers.Single(x => x.Name == "github"); }
-        }
-
-        public static IList<Provider> Providers
-        {
-            get
-            {
-                return _providers ?? (_providers = new List<Provider>
-                {
-                    CreateProvider("google"),
-                    CreateProvider("instagram"),
-                    CreateProvider("github")
-                });
-            }
         }
 
         public static Configuration ConfigurationProviders
@@ -85,21 +69,39 @@ namespace SimpleAuthentication.Tests
         {
             get
             {
+                var providerParams = new ProviderParams(ConfigProviderKey, ConfigProviderSecret);
                 return new Dictionary<string, IAuthenticationProvider>
                 {
                     {
-                        GoogleProvider.Name,
-                        new GoogleProvider(new ProviderParams(GoogleProvider.Key, GoogleProvider.Secret))
+                        "google",
+                        new GoogleProvider(providerParams)
+                    },
+                    {
+                        "facebook",
+                        new FacebookProvider(providerParams)
                     },
                     {
                         InstagramProvider.Name,
-                        new InstagramProvider(new ProviderParams(InstagramProvider.Key, InstagramProvider.Secret))
+                        new InstagramProvider(providerParams)
                     },
                     {
                         GitHubProvider.Name,
-                        new GitHubProvider(new ProviderParams(GitHubProvider.Key, GitHubProvider.Secret))
+                        new GitHubProvider(providerParams)
                     }
                 };
+            }
+        }
+
+        private static IList<Provider> Providers
+        {
+            get
+            {
+                return _providers ?? (_providers = new List<Provider>
+                {
+                    CreateProvider("google"),
+                    CreateProvider("instagram"),
+                    CreateProvider("github")
+                });
             }
         }
 
@@ -110,8 +112,8 @@ namespace SimpleAuthentication.Tests
             return new Provider
             {
                 Name = name,
-                Key = "some ** key",
-                Secret = "some secret"
+                Key = ConfigProviderKey,
+                Secret = ConfigProviderSecret
             };
         }
     }

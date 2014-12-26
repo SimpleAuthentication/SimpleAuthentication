@@ -21,9 +21,7 @@ namespace SimpleAuthentication.Tests.Providers
             public async Task GivenSomeValidCallbackData_AuthenticateClientAsync_ReturnsSomeUserInformation()
             {
                 // Arrange.
-                const string publicApiKey = "adskfhsd kds j k&^%*&^%*%/\\/\\/\\/111";
-                const string secretApiKey = "xxxxxxxxx asdsad as das kds j k&^%*&^%*%/\\/\\/\\/111";
-                var provider = new FacebookProvider(new ProviderParams(publicApiKey, secretApiKey));
+                var provider = TestHelpers.AuthenticationProviders["facebook"];
                 const string state = "adyiuhj97&^*&shdgf\\//////\\dsf";
 
                 var querystring = new Dictionary<string, string>
@@ -154,22 +152,25 @@ namespace SimpleAuthentication.Tests.Providers
             public void GivenACallbackUrlAndIsMobile_GetRedirectToAuthenticateSettings_ReturnsSomeRedirectToAuthenticateSettings()
             {
                 // Arrange.
-                const string publicApiKey = "adskfhsd kds j k&^%*&^%*%/\\/\\/\\/111";
-                const string secretApiKey = "xxxxxxxxx asdsad as das kds j k&^%*&^%*%/\\/\\/\\/111";
-                var provider = new FacebookProvider(new ProviderParams(publicApiKey, secretApiKey))
-                {
-                    IsMobile = true
-                };
+                var provider = (FacebookProvider)TestHelpers.AuthenticationProviders["facebook"]; 
+                provider.IsMobile = true;
+                
                 var callbackUrl = new Uri("http://www.mywebsite.com/auth/callback?provider=facebookz0r");
 
                 // Arrange.
                 var result = provider.GetRedirectToAuthenticateSettings(callbackUrl);
 
                 // Assert.
-                result.RedirectUri.AbsoluteUri.ShouldBe(
-                    string.Format(
-                         "https://m.facebook.com/dialog/oauth?client_id=adskfhsd%20kds%20j%20k%26%5E%25%2A%26%5E%25%2A%25%2F%5C%2F%5C%2F%5C%2F111&redirect_uri=http%3A%2F%2Fwww.mywebsite.com%2Fauth%2Fcallback%3Fprovider%3Dfacebookz0r&response_type=code&scope=public_profile%2Cemail&state={0}",
-                        result.State));
+                var queryStringSegments = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("client_id", TestHelpers.ConfigProviderKey),
+                    new KeyValuePair<string, string>("redirect_uri", callbackUrl.AbsoluteUri),
+                    new KeyValuePair<string, string>("response_type", "code"),
+                    new KeyValuePair<string, string>("scope", "public_profile,email"),
+                    new KeyValuePair<string, string>("state", result.State)
+                }.ToEncodedString();
+                var url = string.Format("https://m.facebook.com/dialog/oauth?{0}", queryStringSegments);
+                result.RedirectUri.AbsoluteUri.ShouldBe(url);
                 result.State.ShouldNotBeNullOrEmpty();
             }
 

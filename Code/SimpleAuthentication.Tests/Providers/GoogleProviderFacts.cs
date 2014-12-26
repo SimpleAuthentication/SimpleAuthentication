@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Shouldly;
@@ -20,18 +21,24 @@ namespace SimpleAuthentication.Tests.Providers
             public void GivenACallbackUrl_GetRedirectToAuthenticateSettings_ReturnsSomeRedirectToAuthenticateSettings()
             {
                 // Arrange.
-                const string publicApiKey = "adskfhsd kds j k&^%*&^%*%/\\/\\/\\/111";
-                const string secretApiKey = "xxxxxxxxx asdsad as das kds j k&^%*&^%*%/\\/\\/\\/111";
-                var provider = new GoogleProvider(new ProviderParams(publicApiKey, secretApiKey));
+                var provider = TestHelpers.AuthenticationProviders["google"];
                 var callbackUrl = new Uri("http://www.mywebsite.com/auth/callback?provider=googlez0r");
 
                 // Arrange.
                 var result = provider.GetRedirectToAuthenticateSettings(callbackUrl);
 
                 // Assert.
-                result.RedirectUri.AbsoluteUri.ShouldStartWith(
-                    string.Format("https://accounts.google.com/o/oauth2/auth?client_id=adskfhsd%20kds%20j%20k%26%5E%25%2A%26%5E%25%2A%25%2F%5C%2F%5C%2F%5C%2F111&redirect_uri=http%3A%2F%2Fwww.mywebsite.com%2Fauth%2Fcallback%3Fprovider%3Dgooglez0r&response_type=code&scope=profile%20email&state={0}",
-                    result.State));
+                var queryStringSegments = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("client_id", TestHelpers.ConfigProviderKey),
+                    new KeyValuePair<string, string>("redirect_uri", callbackUrl.AbsoluteUri),
+                    new KeyValuePair<string, string>("response_type", "code"),
+                    new KeyValuePair<string, string>("scope", "profile email"),
+                    new KeyValuePair<string, string>("state", result.State)
+                }.ToEncodedString();
+                var url = string.Format("https://accounts.google.com/o/oauth2/auth?{0}", queryStringSegments);
+
+                result.RedirectUri.AbsoluteUri.ShouldBe(url);
                 result.State.ShouldNotBeNullOrEmpty();
             }
         }

@@ -54,9 +54,16 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
                 result.StatusCode.ShouldBe(HttpStatusCode.SeeOther);
                 result.Body.AsString().ShouldBeNullOrEmpty();
                 result.Headers.Count.ShouldBe(1);
-                result.Headers["Location"]
-                    .ShouldStartWith(
-                        "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Ffoo.com%2Fauthenticate%2Fcallback&response_type=code&scope=profile%20email&state=");
+                var queryStringSegments = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("client_id", TestHelpers.ConfigProviderKey),
+                    new KeyValuePair<string, string>("redirect_uri", "http://foo.com/authenticate/callback"),
+                    new KeyValuePair<string, string>("response_type", "code"),
+                    new KeyValuePair<string, string>("scope", "profile email"),
+                    new KeyValuePair<string, string>("state", string.Empty)
+                }.ToEncodedString();
+                var url = string.Format("https://accounts.google.com/o/oauth2/auth?{0}", queryStringSegments);
+                result.Headers["Location"].ShouldStartWith(url);
                 var cacheData =
                     (CacheData)result.Context.Request.Session["SimpleAuthentication-StateKey-cf92a651-d638-4ce4-a393-f612d3be4c3a"];
                 cacheData.ProviderKey.ShouldBe("google");
