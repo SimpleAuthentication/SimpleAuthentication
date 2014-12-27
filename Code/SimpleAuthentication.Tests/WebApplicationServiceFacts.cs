@@ -304,8 +304,16 @@ namespace SimpleAuthentication.Tests
                 var result = webApplicationService.RedirectToProvider(redirectToProviderData);
 
                 // Assert.
-                result.RedirectUrl.AbsoluteUri.ShouldStartWith(
-                    "https://accounts.google.com/o/oauth2/auth?client_id=some%20%2A%2A%20key&redirect_uri=http%3A%2F%2Fwww.pewpew.com%2Fasdjhsdkfhds&response_type=code&scope=profile%20email&state=");
+                var queryStringSegments = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("client_id", TestHelpers.ConfigProviderKey),
+                    new KeyValuePair<string, string>("redirect_uri", "http://www.pewpew.com/asdjhsdkfhds"),
+                    new KeyValuePair<string, string>("response_type", "code"),
+                    new KeyValuePair<string, string>("scope", "profile email"),
+                    new KeyValuePair<string, string>("state", string.Empty)
+                }.ToEncodedString();
+                var url = string.Format("https://accounts.google.com/o/oauth2/auth?{0}", queryStringSegments);
+                result.RedirectUrl.AbsoluteUri.ShouldStartWith(url);
                 result.CacheData.ProviderKey.ShouldBe(redirectToProviderData.ProviderKey);
                 result.CacheData.State.ShouldNotBe(null);
                 result.CacheData.ReturnUrl.ShouldBe(redirectToProviderData.ReturnUrl);
