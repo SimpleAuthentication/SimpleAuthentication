@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SimpleAuthentication.Core.Exceptions;
@@ -93,11 +94,16 @@ namespace SimpleAuthentication.Core.Providers
             }
 
             var state = Guid.NewGuid().ToString();
-            var redirectUri = string.Format("{0}&state={1}", requestUrl.AbsoluteUri, state);
 
+            var questyString = new Dictionary<string, string>
+            {
+                {"state", state}
+            };
+
+            var redirectUri = SystemHelpers.CreateUri(requestUrl, questyString);
             return new RedirectToAuthenticateSettings
             {
-                RedirectUri = new Uri(redirectUri),
+                RedirectUri = redirectUri,
                 State = state
             };
         }

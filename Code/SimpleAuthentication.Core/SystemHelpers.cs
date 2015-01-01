@@ -141,7 +141,7 @@ namespace SimpleAuthentication.Core
             }
         }
 
-        private static string JoinQueryStringParameters(IDictionary<string, string> querystringParameters)
+        public static string JoinQueryStringParameters(IDictionary<string, string> querystringParameters)
         {
             if (querystringParameters == null)
             {
