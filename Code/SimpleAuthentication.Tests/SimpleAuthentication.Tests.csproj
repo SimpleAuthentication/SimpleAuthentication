@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExtraProviders\GitHubProviderFacts.cs" />
+    <Compile Include="ExtraProviders\LinkedInProviderFacts.cs" />
     <Compile Include="ExtraProviders\InstagramProviderFacts.cs" />
     <Compile Include="FakeHttpMessageHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -80,6 +81,9 @@
     <Compile Include="WebSites\SimpleAuthenticationModuleFacts.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Sample Data\LinkedIn-AccessToken-Content.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Content Include="Sample Data\GitHub-AccessToken-Content.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -87,6 +91,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Sample Data\Instagram-UserInfoResult-Content.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Sample Data\LinkedIn-UserInfoResult-Content.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Sample Data\GitHub-UserInfoResult-Content.json">

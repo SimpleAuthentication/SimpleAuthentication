@@ -17,8 +17,9 @@
                 <hr/>
                 <fieldset title="Extra Providers">
                     <legend>Extra Providers</legend>
-                    <a href="/authenticate/github"><img src="/Content/github_32.png" alt="Login with your GitHub account."</a>
-                    <a href="/authenticate/instagram"><img src="/Content/instagram_32.png" alt="Login with your Instagram account."</a>
+                    <a href="/authenticate/github"><img src="/Content/github_32.png" alt="Login with your GitHub account."/></a>
+                    <a href="/authenticate/instagram"><img src="/Content/instagram_32.png" alt="Login with your Instagram account."/></a>
+                    <a href="/authenticate/linkedin"><img src="/Content/linkedin_32.png" alt="Login with your LinkedIn account."/></a>
                 </fieldset>
 
                 <hr/>
