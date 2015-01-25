@@ -14,7 +14,8 @@ param (
   [string]$source = $PSScriptRoot,
   [string]$destination = $PSScriptRoot,
   [string]$pushSource = "https://nuget.org",
-  [string]$nuget = ""
+  [string]$nuget = "",
+  [bool]$clean = $false
 )
 
 
@@ -26,6 +27,7 @@ function DisplayCommandLineArgs()
     "    => destination: $destination"
     "    => nuget: $nuget"
     "    => api key: $apiKey"
+    "    => clean: $clean"
 
     ""
     "eg. NuGetPackageAndPublish.ps1 -version 0.1-alpha"
@@ -98,6 +100,11 @@ function DisplayCommandLineArgs()
 
 function CleanUp()
 {
+    if ($clean -eq $false)
+    {
+        return;
+    }
+
     $nupkgFiles = @(Get-ChildItem $destination -Filter *.nupkg)
 
     if ($nupkgFiles.Length -gt 0)
