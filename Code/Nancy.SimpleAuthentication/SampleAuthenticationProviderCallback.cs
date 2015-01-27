@@ -7,10 +7,10 @@ namespace Nancy.SimpleAuthentication
     /// A simple implimentation of the handling the custom callback from the Authentication Provider or for hanlding an error.
     /// </summary>
     /// <remarks>IMPORTANT: This class is **NOT** intended to be used in production, but as a basis for quick prototyping and testing stuff.</remarks>
-    public class SimpleAuthenticationProviderCallback : IAuthenticationProviderCallback
+    public class SampleAuthenticationProviderCallback : IAuthenticationProviderCallback
     {
         private const string Notice =
-            "You are using the SimpleAuthenticationProviderCallback class that comes with the Nancy.SimpleAuthentication library. This class is generally auto setup with Nancy and is here to provide you with a quick example of what this entire library can do. It's probably not very helpful for production, though. The recommendation is to create your own class which inherits from IAuthenticationProviderCallback and impliment your own logic OR inherit from this class and impliment your own logic for the methods you decide to override.";
+            "You are using the SampleSimpleAuthenticationProviderCallback class that comes with the Nancy.SimpleAuthentication library. This class is generally auto setup with Nancy and is here to provide you with a quick example of what this entire library can do -> just returns the results as Json. It's probably not very helpful for production, though. The recommendation is to create your own class which inherits from IAuthenticationProviderCallback and impliment your own logic OR inherit from this class and impliment your own logic for the methods you decide to override.";
 
         #region IAuthenticationProviderCallback members
 

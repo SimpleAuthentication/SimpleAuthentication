@@ -7,7 +7,7 @@ using SimpleAuthentication.Sample.Nancy.Models;
 
 namespace SimpleAuthentication.Sample.Nancy.Helpers
 {
-    public class SampleAuthenticationCallbackProvider : SimpleAuthenticationProviderCallback
+    public class SampleAuthenticationCallbackProvider : SampleAuthenticationProviderCallback
     {
         public override dynamic Process(INancyModule module, AuthenticateCallbackResult result)
         {

@@ -211,7 +211,6 @@ namespace Nancy.SimpleAuthentication
 
             try
             {
-
                 var authenticateCallbackAsyncData = new AuthenticateCallbackAsyncData(Request.Url,
                     cacheData,
                     queryString);

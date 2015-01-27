@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Threading;
 using Nancy;
 using Nancy.Session;
+using Nancy.SimpleAuthentication;
 using Nancy.Testing;
 
 namespace SimpleAuthentication.Tests.WebSites.Nancy
@@ -18,7 +20,8 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
         }
 
         protected Browser Browser(IEnumerable<object> dependencies = null,
-            IDictionary<string, object> session = null)
+            IDictionary<string, object> session = null,
+            IAuthenticationProviderCallback authenticationProviderCallback = null)
         {
             var bootstrapper = new ConfigurableBootstrapper(with =>
             {
@@ -35,12 +38,14 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
 
                 if (dependencies != null)
                 {
-                    with.Dependencies(dependencies);
+                    foreach (var dependency in dependencies)
+                    {
+                        with.Dependency(dependency);
+                    }
                 }
-
             });
 
-            CookieBasedSessions.Enable(bootstrapper);
+            //CookieBasedSessions.Enable(bootstrapper);
 
             if (session != null)
             {

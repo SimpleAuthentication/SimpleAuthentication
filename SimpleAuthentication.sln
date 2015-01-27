@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{D128BA57-B2BC-4AAE-9306-F6B428D1AE8F}"
 EndProject
@@ -23,6 +23,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleAuthentication.Mvc", "Code\SimpleAuthentication.Mvc\SimpleAuthentication.Mvc.csproj", "{FF30BDE9-3B3F-467A-B206-11C1BA83E316}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleAuthentication.Sample.Nancy", "Samples\SimpleAuthentication.Sample.Nancy\SimpleAuthentication.Sample.Nancy.csproj", "{C344D22C-5DC0-44E6-8595-D2EF49BF255B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nancy.SimpleAuthentication.Testing", "Code\Nancy.SimpleAuthentication.Testing\Nancy.SimpleAuthentication.Testing.csproj", "{9A525604-B58D-462B-AD9F-35DC2712754C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,6 +60,10 @@ Global
 		{C344D22C-5DC0-44E6-8595-D2EF49BF255B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C344D22C-5DC0-44E6-8595-D2EF49BF255B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C344D22C-5DC0-44E6-8595-D2EF49BF255B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A525604-B58D-462B-AD9F-35DC2712754C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A525604-B58D-462B-AD9F-35DC2712754C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A525604-B58D-462B-AD9F-35DC2712754C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A525604-B58D-462B-AD9F-35DC2712754C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
