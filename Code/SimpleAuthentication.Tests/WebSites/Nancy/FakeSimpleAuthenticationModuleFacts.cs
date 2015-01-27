@@ -72,11 +72,10 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
                     ReturnUrl = "/"
                 };
 
-                var authenticationProviderCallback = new SampleAuthenticationProviderCallback();
                 var browser = new Browser(with =>
                 {
                     with.Module<FakeSimpleAuthenticationModule>();
-                    with.Dependency<IAuthenticationProviderCallback>(authenticationProviderCallback);
+                    with.Dependency<IAuthenticationProviderCallback>(new SampleAuthenticationProviderCallback());
                     with.Dependency(authenticateCallbackResult);
                 });
 
@@ -85,7 +84,25 @@ namespace SimpleAuthentication.Tests.WebSites.Nancy
 
                 // Assert.
                 result.StatusCode.ShouldBe(HttpStatusCode.OK);
-                Console.WriteLine(result.Body.AsString());
+            }
+
+            [Fact]
+            public void GivenAnErrorResponseFromAProvider_AuthenticateCallback_ReturnsAnError()
+            {
+                // Arrange.
+                var authenticationException = new AuthenticationException("Some error occured at the provuder.");
+                var browser = new Browser(with =>
+                {
+                    var module = new FakeSimpleAuthenticationModule(new SampleAuthenticationProviderCallback(),
+                        authenticationException);
+                    with.Module(module);
+                });
+
+                // Act.
+                var result = browser.Get("/authenticate/callback");
+
+                // Assert.
+                result.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
             }
         }
     }

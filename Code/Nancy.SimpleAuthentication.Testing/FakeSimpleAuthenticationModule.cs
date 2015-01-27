@@ -32,13 +32,20 @@ namespace Nancy.SimpleAuthentication.Testing
             InitializeModule();
         }
 
-        public FakeSimpleAuthenticationModule(AuthenticationException authenticationException)
+        public FakeSimpleAuthenticationModule(IAuthenticationProviderCallback authenticationProviderCallback,
+            AuthenticationException authenticationException)
         {
+            if (authenticationProviderCallback == null)
+            {
+                throw new ArgumentNullException("authenticationProviderCallback");
+            }
+
             if (authenticationException == null)
             {
                 throw new ArgumentNullException("authenticationException");
             }
 
+            _authenticationProviderCallback = authenticationProviderCallback;
             _authenticationException = authenticationException;
 
             InitializeModule();
