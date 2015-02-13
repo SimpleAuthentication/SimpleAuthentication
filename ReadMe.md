@@ -35,7 +35,7 @@ The "How simple is this?" example
 #### Simple steps
 1. Find the View you wish to modify.
 2. Add the Button or hyper link that will be used to kick start the authentication process.
-3. Set the button route to be `/authentication/authenticate/fakefacebook`
+3. Set the button route to be `/authentication/redirect/fakefacebook`
 4. Now we grab the library -> `install-package SimpleAuthentication.Mvc`
 5. Create a class which will be called -after- we come back from Facebook (or any provider). We have to do something with that user data, right?
    `public class HandleCallback();`
@@ -47,7 +47,7 @@ Once this works.
 
 8. Goto [developer.facebook.com](http://developer.facebook.com) and create an application. This will give you a `Client Key` and `Secret Key`.
 9. Enter the Client and Secret key to the `web.config`, `<providers>` section.
-10. Change the button route to `/authentication/authenticate/facebook`  <-- notice we've removed the `fake` prepended text? :)
+10. Change the button route to `/authentication/redirect/facebook`  <-- notice we've removed the `fake` prepended text? :)
 
 Done.
 
