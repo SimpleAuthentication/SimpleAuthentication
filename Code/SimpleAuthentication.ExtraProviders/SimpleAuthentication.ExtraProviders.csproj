@@ -47,11 +47,13 @@
     <Compile Include="..\Shared Assembly Info\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="LinkedInProvider.cs" />
     <Compile Include="Instagram\Data.cs" />
     <Compile Include="GitHubProvider.cs" />
     <Compile Include="GitHub\UserInfo.cs" />
     <Compile Include="InstagramProvider.cs" />
     <Compile Include="Instagram\UserInfo.cs" />
+    <Compile Include="LinkedIn\UserInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
