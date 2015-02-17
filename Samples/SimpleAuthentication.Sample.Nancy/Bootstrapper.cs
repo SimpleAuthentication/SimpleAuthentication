@@ -22,7 +22,8 @@ namespace SimpleAuthentication.Sample.Nancy
             var additionalProviderTypes = new List<Type>
             {
                 typeof (GitHubProvider),
-                typeof (InstagramProvider)
+                typeof (InstagramProvider),
+                typeof (LinkedInProvider)
             };
             var providerScanner = new ProviderScanner(additionalProviderTypes);
             container.Register<IProviderScanner, ProviderScanner>(providerScanner);
