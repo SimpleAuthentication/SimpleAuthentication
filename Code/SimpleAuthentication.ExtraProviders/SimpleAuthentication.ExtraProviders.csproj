@@ -54,6 +54,9 @@
     <Compile Include="AmazonProvider.cs" />
     <Compile Include="Amazon\AccessTokenResult.cs" />
     <Compile Include="Amazon\UserInfoResult.cs" />
+    <Compile Include="ArcGISOnlineProvider.cs" />
+    <Compile Include="ArcGISOnline\AccessTokenResult.cs" />
+    <Compile Include="ArcGISOnline\UserInfoResult.cs" />
     <Compile Include="InstagramProvider.cs" />
     <Compile Include="Instagram\AccessTokenResult.cs" />
     <Compile Include="Instagram\UserInfoResult.cs" />
