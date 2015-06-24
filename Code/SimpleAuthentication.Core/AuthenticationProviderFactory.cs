@@ -22,17 +22,14 @@ namespace SimpleAuthentication.Core
                     return authenticationProviders;
                 });
 
-        public AuthenticationProviderFactory()
-        {
-            TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
-        }
+        private readonly Lazy<ITraceManager> _traceManager = new Lazy<ITraceManager>(() => new TraceManager());
 
         public IDictionary<string, IAuthenticationProvider> AuthenticationProviders
         {
             get { return Providers.Value; }
         }
 
-        public ITraceManager TraceManager { set; [UsedImplicitly] private get; }
+        public ITraceManager TraceManager { get { return _traceManager.Value; }}
 
         public void AddProvider(IAuthenticationProvider provider, bool replaceExisting = true)
         {
