@@ -23,10 +23,11 @@ namespace Nancy.SimpleAuthentication
         private readonly IAuthenticationCallbackProvider _callbackProvider;
         private string _returnToUrlParameterKey;
 
-        public SimpleAuthenticationModule(IAuthenticationCallbackProvider callbackProvider)
+        public SimpleAuthenticationModule(IAuthenticationCallbackProvider callbackProvider,
+            IProviderWhiteList providerWhiteList = null)
         {
             _callbackProvider = callbackProvider;
-            _authenticationProviderFactory = new AuthenticationProviderFactory();
+            _authenticationProviderFactory = new AuthenticationProviderFactory(providerWhiteList);
 
             // Define the routes and how they are handled.
             Get[RedirectRoute] = parameters => RedirectToProvider(parameters);

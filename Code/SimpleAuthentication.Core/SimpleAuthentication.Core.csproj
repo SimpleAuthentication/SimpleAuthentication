@@ -65,6 +65,8 @@
     <Compile Include="Config\ProviderKey.cs" />
     <Compile Include="Config\ProviderKeyCollection.cs" />
     <Compile Include="Exceptions\ConfigurationException.cs" />
+    <Compile Include="Providers\IProviderWhiteList.cs" />
+    <Compile Include="Providers\ProviderWhiteList.cs" />
     <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="ProviderParams.cs" />
     <Compile Include="Providers\BaseOAuth20Provider.cs" />

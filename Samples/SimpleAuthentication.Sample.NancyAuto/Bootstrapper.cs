@@ -1,6 +1,9 @@
-﻿using Nancy;
+﻿using System;
+using System.Collections.Generic;
+using Nancy;
 using Nancy.TinyIoc;
-using SimpleAuthentication.Core;
+using SimpleAuthentication.Core.Providers;
+using SimpleAuthentication.ExtraProviders;
 
 namespace SimpleAuthentication.Sample.NancyAuto
 {
@@ -9,6 +12,19 @@ namespace SimpleAuthentication.Sample.NancyAuto
         protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
         {
             base.ConfigureRequestContainer(container, context);
+
+            var providerWhiteList = new ProviderWhiteList
+            {
+                ProvidersToAllow = new List<Type>
+                {
+                    typeof (FacebookProvider),
+                    typeof (GoogleProvider),
+                    typeof (TwitterProvider),
+                    typeof (WindowsLiveProvider),
+                    typeof (GitHubProvider)
+                }
+            };
+            container.Register<IProviderWhiteList>(providerWhiteList);
         }
     }
 }

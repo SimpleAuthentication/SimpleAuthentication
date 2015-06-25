@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Web.Mvc;
 using SimpleAuthentication.Core;
@@ -39,7 +40,8 @@ namespace SimpleAuthentication.Mvc
         }
 
         public SimpleAuthenticationController(IAuthenticationCallbackProvider callbackProvider,
-            ICache cache)
+            ICache cache,
+            IProviderWhiteList providerWhiteList = null)
         {
             if (callbackProvider == null)
             {
@@ -49,7 +51,7 @@ namespace SimpleAuthentication.Mvc
             _callbackProvider = callbackProvider;
             _cache = cache; // Can be null / not provided.
 
-            _authenticationProviderFactory = new AuthenticationProviderFactory();
+            _authenticationProviderFactory = new AuthenticationProviderFactory(providerWhiteList);
         }
 
         protected override void OnActionExecuting(ActionExecutingContext filterContext)

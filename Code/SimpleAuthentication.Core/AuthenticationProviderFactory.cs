@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using SimpleAuthentication.Core.Config;
+using SimpleAuthentication.Core.Providers;
 using SimpleAuthentication.Core.Tracing;
 
 namespace SimpleAuthentication.Core
@@ -18,9 +19,22 @@ namespace SimpleAuthentication.Core
                 () =>
                 {
                     var authenticationProviders = new Dictionary<string, IAuthenticationProvider>();
-                    Initialize(authenticationProviders);
+                    Initialize(authenticationProviders, _providerAssembliesToInclude);
                     return authenticationProviders;
                 });
+
+        private static ICollection<Type> _providerAssembliesToInclude;
+
+        public AuthenticationProviderFactory(IProviderWhiteList providerWhiteList = null)
+        {
+            // Optional list of assemblies to attempt to load providers from.
+            // NOTE: If none are provided, then we auto include the core ones.
+            _providerAssembliesToInclude = providerWhiteList == null ||
+                                           providerWhiteList.ProvidersToAllow == null ||
+                                           !providerWhiteList.ProvidersToAllow.Any()
+                ? new ProviderWhiteList().DefaultProviders
+                : providerWhiteList.ProvidersToAllow;
+        }
 
         private readonly Lazy<ITraceManager> _traceManager = new Lazy<ITraceManager>(() => new TraceManager());
 
@@ -49,11 +63,13 @@ namespace SimpleAuthentication.Core
             RemoveProviderFromDictionary(providerName, AuthenticationProviders);
         }
 
-        private static void Initialize(IDictionary<string, IAuthenticationProvider> authenticationProviders)
+        private static void Initialize(IDictionary<string, IAuthenticationProvider> authenticationProviders,
+            ICollection<Type> providerAssembliesToInclude)
         {
             authenticationProviders.ThrowIfNull("authenticationProviders");
+            providerAssembliesToInclude.ThrowIfNull("providerAssembliesToInclude");
 
-            var discoveredProviders = ReflectionHelpers.FindAllTypesOf<IAuthenticationProvider>();
+            var discoveredProviders = ReflectionHelpers.FindAllTypesOf<IAuthenticationProvider>(_providerAssembliesToInclude);
             if (discoveredProviders == null)
             {
                 return;
@@ -118,7 +134,7 @@ namespace SimpleAuthentication.Core
             {
                 var errorMessage =
                     string.Format(
-                        "Unable to find the provider [{0}]. Is there a provider dll available? Is there a typo in the provider name? Solution suggestions: Check to make sure the correct dll's are in the 'bin' directory and/or check the name to make sure there's no typo's in there. Example: If you're trying include the GitHub provider, make sure the name is 'github' (any case) and that the ExtraProviders dll exists in the 'bin' directory or make sure you've downloaded the package via NuGet -> install-package SimpleAuthentication.ExtraProviders.",
+                        "Unable to find the provider [{0}]. Have you manually registered the custom providers? (We used to use reflection to auto-discover all dll types but this was causing too many reflection loading errors. urg!). Is there a provider dll available? Is there a typo in the provider name? Solution suggestions: Check to make sure the correct dll's are in the 'bin' directory and check the name to make sure there's no typo's in dll assembly filenames. Also make sure there are no typo's in the .config file where you define the providers you wish to use. Example: If you're trying include the GitHub provider, make sure the filename and .config name is 'github' (any case) and that the ExtraProviders dll exists in the 'bin' directory or make sure you've downloaded the package via NuGet -> install-package SimpleAuthentication.ExtraProviders.",
                         name);
 
                 throw new ApplicationException(errorMessage);

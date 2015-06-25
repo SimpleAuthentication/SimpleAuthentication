@@ -48,5 +48,22 @@ namespace SimpleAuthentication.Core
                     stringBuilder);
             }
         }
+
+        public static IList<Type> FindAllTypesOf<T>(ICollection<Type> types)
+        {
+            if (types == null ||
+                !types.Any())
+            {
+                return null;
+            }
+
+            var type = typeof(T);
+
+            return types.Where(p => type.IsAssignableFrom(p) &&
+                                    p.IsClass &&
+                                    !p.IsAbstract &&
+                                    !p.IsInterface)
+                .ToList();
+        }
     }
 }
