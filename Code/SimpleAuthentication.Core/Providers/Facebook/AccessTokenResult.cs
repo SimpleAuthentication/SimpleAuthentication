@@ -4,10 +4,11 @@
     {
         // ReSharper disable InconsistentNaming
 
-        // REFERENCE: access_token=CAABmZBTPQJVoBAEZBZBrDcoKBC2fH72VdiKZBKjw9rf4AFqtw8feKd2gzWaZBP0xUs58xPgyJ6mlWMpgJc2Y9Pb1vxiWPKKMZCQu4LSK1sMoPdhPxON8goK7oID2OcEspwdXJo8sQwq1yTqQlOQWm0&expires=5152280
+        // REFERENCE: {"access_token":"CAALJTz2108cBADVTdzl6YUhORAKqJAOIogaa48AUM0yzkcqqKy9VRLbOQUelCYUOZCVT5eoONZBv9zCLyDfAhtMRwcLA6SP5Jd7RQDWj9NX4YsPQ8uMqT9Luq4qqQc8Sov9B1S9BklOYiz9NT1cGDrPzGfG0iZBckusYPYvGFetNgZAnYOjonZCYY8snixLIuM3Rl7HiTNgZDZD","token_type":"bearer","expires_in":5122056}
 
         public string access_token { get; set; }
-        public int expires { get; set; }
+        public string token_type { get; set; }
+        public int expires_in { get; set; }
 
         // ReSharper restore InconsistentNaming
     }
