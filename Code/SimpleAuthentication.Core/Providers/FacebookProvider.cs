@@ -171,7 +171,7 @@ namespace SimpleAuthentication.Core.Providers
 
             try
             {
-                var restRequest = new RestRequest("v2.4/me");
+                var restRequest = new RestRequest("v2.5/me");
                 restRequest.AddParameter("access_token", accessToken.PublicToken);
                 restRequest.AddParameter("fields", "name,email,first_name,last_name,locale,gender,link");
 
