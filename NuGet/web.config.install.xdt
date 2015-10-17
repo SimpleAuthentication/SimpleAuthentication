@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+    <configSections xdt:Transform="InsertIfMissing">
+        <section name="authenticationProviders"
+                 type="SimpleAuthentication.Core.Config.ProviderConfiguration, SimpleAuthentication.Core"
+                 xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />
+    </configSections>
+
+    <authenticationProviders xdt:Transform="InsertIfMissing">
+        <providers>
+            <add name="Facebook" key="please-enter-your-real-value" secret="please-enter-your-real-value" />
+            <add name="Google" key="please-enter-your-real-value" secret="please-enter-your-real-value"  />
+            <add name="Twitter" key="please-enter-your-real-value" secret="please-enter-your-real-value"  />
+            <add name="WindowsLive" key="please-enter-your-real-value" secret="please-enter-your-real-value" />
+        </providers>
+    </authenticationProviders>
+
+</configuration>

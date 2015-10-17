@@ -41,13 +41,14 @@ function DisplayHelp()
 
 function DisplayCommandLineArgs()
 {
+    $truncatedApiKey = @{ $true="---"; $false="......" + $apiKey.substring($apiKey.length-6) }[$apiKey -eq ""]  
     "Options provided:"
     "    =>     version: $version"
     "    =>      source: $source"
     "    => destination: $destination"
     "    =>       nuget: $nuget"
     "    =>  feedSource: $feedSource"
-    "    =>     api key: $apiKey"
+    "    =>     api key: $truncatedApiKey"
     "    =>       clean: $clean"
     ""
 
@@ -154,7 +155,7 @@ function PackageTheSpecifications()
 
     foreach($file in $files)
     {
-        &$nugetExe pack $file -Version $version -OutputDirectory $destination
+        &$nugetExe pack ($file.FullName) -Version $version -OutputDirectory $destination
 
         ""
     }
@@ -199,13 +200,13 @@ function PushThePackagesToNuGet()
 $ErrorActionPreference = "Stop"
 $global:nugetExe = ""
 
-cls
+#cls
 
 ""
 " ---------------------- start script ----------------------"
 ""
 ""
-"  Starting NuGet packing/publishing script -  (╯°□°）╯︵ ┻━┻"
+"  Starting NuGet packing/publishing script"
 ""
 "  This script will look for -all- *.nuspec files in a source directory,"
 "  then paackage them up to *.nupack files. Finally, it can publish"
