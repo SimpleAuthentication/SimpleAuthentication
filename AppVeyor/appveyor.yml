@@ -11,7 +11,7 @@ pull_requests:
 
 environment:
   nugetFeedSource: https://www.myget.org/F/simpleauthentication/api/v2
-  my_variable:
+  apiKey:
     secure: F92kP6Fl41Uv4yoGN/PBsGKVPAkFIkvcBfQwFV2TCGyg1zihi7PD+BOSOUDfHkLg
 
 init:
