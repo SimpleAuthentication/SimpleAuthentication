@@ -173,7 +173,7 @@ namespace SimpleAuthentication.Core.Providers
             {
                 var restRequest = new RestRequest("v2.4/me");
                 restRequest.AddParameter("access_token", accessToken.PublicToken);
-                restRequest.AddParameter("fields", "name,email,first_name,last_name,locale,gender");
+                restRequest.AddParameter("fields", "name,email,first_name,last_name,locale,gender,link");
 
                 var restClient = RestClientFactory.CreateRestClient(BaseUrl);
 
@@ -217,18 +217,22 @@ namespace SimpleAuthentication.Core.Providers
                             ? string.Empty
                             : response.Data.LastName).Trim();
 
-            return new UserInformation
+            var userInformation = new UserInformation
                    {
                        Id = id.ToString(),
                        Name = name,
                        Email = response.Data.Email,
                        Locale = response.Data.Locale,
                        UserName = response.Data.Username,
+                       Gender = GenderTypeHelpers.ToGenderType(response.Data.Gender),
                        Picture = string.Format("https://graph.facebook.com/{0}/picture", id)
                    };
+
+            return userInformation;
         }
 
         #endregion
+
 
         /// <summary>
         /// Are we on a mobile device?
