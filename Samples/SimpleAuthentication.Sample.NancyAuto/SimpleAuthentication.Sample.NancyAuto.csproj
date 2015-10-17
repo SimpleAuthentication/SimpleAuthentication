@@ -149,7 +149,6 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <PropertyGroup>
     <PostBuildEvent>
 if $(ConfigurationName) == Debug (
