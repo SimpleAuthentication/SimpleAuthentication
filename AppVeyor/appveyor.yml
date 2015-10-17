@@ -10,6 +10,7 @@ pull_requests:
   do_not_increment_build_number: true
 
 environment:
+  nugetFeedSource: https://www.myget.org/F/simpleauthentication/api/v2
   my_variable:
     secure: F92kP6Fl41Uv4yoGN/PBsGKVPAkFIkvcBfQwFV2TCGyg1zihi7PD+BOSOUDfHkLg
 
@@ -32,7 +33,7 @@ build:
 
 on_success:
   - ps: Write-Host $env:appveyor_build_version
-  - ps: '& ".\NuGet\NuGet Package and Publish.ps1" -Version $env:appveyor_build_version -NuGet "C:\Tools\NuGet\nuget.exe" -feedSource https://www.myget.org/F/simpleauthentication/api/v2 -apiKey $env:apiKey'
+  - ps: '& ".\NuGet\NuGet Package and Publish.ps1" -Version $env:appveyor_build_version -NuGet "C:\Tools\NuGet\nuget.exe" -feedSource $env:nugetFeedSource -apiKey $env:apiKey'
 
 cache:
   - packages -> **\packages.config
