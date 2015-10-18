@@ -17,11 +17,10 @@
         <tags>authentication twitter google facebook oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination nancy nancyfx</tags>
         <dependencies>
             <dependency id="Nancy" version="0.21.1" />
-            <dependency id="SimpleAuthentication.Core" version="0.4"/>
+            <dependency id="SimpleAuthentication.Core" version="[0.3.12,1)"/>
         </dependencies>
     </metadata>
     <files>
-        <file src="web.config.install.xdt" target="content\web.config.install.xdt" />
         <file src="..\Code\Nancy.SimpleAuthentication\bin\Release\Nancy.SimpleAuthentication.dll" target="lib\net40\Nancy.SimpleAuthentication.dll" />
         <file src="ReadMe.txt" target="ReadMe.txt" />
     </files>

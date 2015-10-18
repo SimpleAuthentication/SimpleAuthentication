@@ -17,11 +17,10 @@
         <tags>authentication mvc controller twitter google facebook microsoftaccount oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
         <dependencies>
             <dependency id="WebActivatorEx" version="2.0.3" />
-            <dependency id="SimpleAuthentication.Core" version="0.4"/>
+            <dependency id="SimpleAuthentication.Core" version="[0.3.12,1)"/>
         </dependencies>
     </metadata>
     <files>
-        <file src="web.config.install.xdt" target="content\web.config.install.xdt" />
         <file src="..\Code\SimpleAuthentication.Mvc-3\bin\Release\SimpleAuthentication.Mvc-3.dll" target="lib\net40\SimpleAuthentication.Mvc-3.dll" />
         <file src="ReadMe.txt" target="ReadMe.txt" />
     </files>

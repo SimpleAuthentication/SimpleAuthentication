@@ -17,7 +17,7 @@
         <tags>glimpse authentication twitter google facebook microsoftaccount oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
         <dependencies>
             <dependency id="Glimpse" version="1.8.6" />
-            <dependency id="SimpleAuthentication" version="0.4"/>
+            <dependency id="SimpleAuthentication" version="[0.3.12,1)"/>
         </dependencies>
     </metadata>
     <files>
