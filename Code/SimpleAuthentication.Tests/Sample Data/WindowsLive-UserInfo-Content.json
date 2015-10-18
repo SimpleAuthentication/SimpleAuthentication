@@ -1,0 +1,16 @@
+﻿{
+  "id": "1234",
+  "name": "Tanis Half-Elven",
+  "first_name": "Tanis",
+  "last_name": "Half-Elven",
+  "link": "https://profile.live.com/",
+  "gender": "male",
+  "emails": {
+      "preferred": "tanis.half-elven@InnOfLastHope.krynn", 
+      "account": "tanis.half-elven@InnOfLastHope.krynn", 
+      "personal": null, 
+      "business": null
+   }, 
+  "locale": "en-au",
+  "updated_time": "2014-08-16T01:22:47+0000"
+}

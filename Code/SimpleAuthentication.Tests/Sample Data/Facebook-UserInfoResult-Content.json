@@ -1,0 +1,52 @@
+﻿{
+  "id": "123456789",
+  "education": [
+    {
+      "school": {
+        "id": "112059628806717",
+        "name": "Geelong Grammar School"
+      },
+      "type": "High School",
+      "year": {
+        "id": "142673469093081",
+        "name": "1993"
+      }
+    },
+    {
+      "concentration": [
+        {
+          "id": "104076956295773",
+          "name": "Computer Science"
+        }
+      ],
+      "school": {
+        "id": "8959695308",
+        "name": "RMIT University"
+      },
+      "type": "College",
+      "year": {
+        "id": "144560162276732",
+        "name": "1998"
+      }
+    }
+  ],
+  "email": "foo@pewpew.com",
+  "first_name": "Sturm",
+  "gender": "male",
+  "last_name": "Brightblade",
+  "link": "https://www.facebook.com/sturmbrightblade",
+  "locale": "en_GB",
+  "name": "Sturm Brightblade",
+  "timezone": 10,
+  "updated_time": "2014-05-17T07:39:47+0000",
+  "username": "sturmbrightblade",
+  "verified": true,
+  "work": [
+    {
+      "employer": {
+        "id": "69696969",
+        "name": "KnightsOfTheRose.com.au"
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 ﻿namespace SimpleAuthentication.Core.Providers.Google
 {
-    public class UserInfoResult
+    internal class UserInfoResult
     {
         public string Id { get; set; }
         public string Email { get; set; }

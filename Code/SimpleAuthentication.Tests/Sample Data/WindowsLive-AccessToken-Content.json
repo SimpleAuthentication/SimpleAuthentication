@@ -1,0 +1,8 @@
+﻿{
+  "token_type": "bearer",
+  "expires_in": 3600,
+  "scope": "wl.signin wl.basic wl.emails",
+  "access_token": "EwCIAq1DBAAUGCCXc8wU/zFu9QnLdZXy+YnElFkAAaQn28y+8VQWmn7VMOVO9u",
+  "authentication_token": "eyJhbGciOiJIUzI1NiIsImtpZCI6IjAiLCJ0eXAiOiJKV1QifQ.eyJ2ZXIiOjEsImlzcyI6InVybjp3aW5kb3dzOmxpdmVpZCIsImV4cCI6MTQwODExMjEwOSwidWlkIjoiYzQ2MDZmYmI3MjFkZjI5ZjZmMTAyNjYzY2MwMWQ1ZjEiLCJhdWQiOiJzaW1wbGVhdXRoZW50aWNhdGlvbi5sb2NhbHRlc3QubWUiLCJ1cm46bWljcm9zb2Z0OmFwcHVyaSI6ImFwcGlkOi8vMDAwMDAwMDA0MDBFRDQ4OCIsInVybjptaWNyb3NvZnQ6YXBwaWQiOiIwMDAwMDAwMDQwMEVENDg4In0.iXVIRR75ay6Gby7Zakqq_XkK5prVUvWNk2xU-l_XZyQ",
+  "user_id": "c4606fbb721df29f6f102663cc01d5f1"
+}

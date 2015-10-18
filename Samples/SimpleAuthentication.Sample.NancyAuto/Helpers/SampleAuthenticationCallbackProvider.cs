@@ -1,24 +1,30 @@
-﻿namespace SimpleAuthentication.Sample.NancyAuto.Helpers
-{
-    using Models;
-    using Nancy;
-    using Nancy.SimpleAuthentication;
+﻿using System;
+using Nancy;
+using Nancy.SimpleAuthentication;
+using SimpleAuthentication.Sample.NancyAuto.Models;
 
+namespace SimpleAuthentication.Sample.NancyAuto.Helpers
+{
     public class SampleAuthenticationCallbackProvider : IAuthenticationCallbackProvider
     {
-        public dynamic Process(NancyModule nancyModule, AuthenticateCallbackData model)
+        public dynamic Process(NancyModule nancyModule, AuthenticateCallbackResult result)
         {
+            var model = new AuthenticationViewModel
+            {
+                AuthenticatedClient = result.AuthenticatedClient,
+                ReturnUrl = result.ReturnUrl
+            };
             return nancyModule.View["AuthenticateCallback", model];
         }
 
-        public dynamic OnRedirectToAuthenticationProviderError(NancyModule nancyModule, string errorMessage)
+        public dynamic OnRedirectToAuthenticationProviderError(NancyModule nancyModule, Exception exception)
         {
-            var model = new IndexViewModel
+            var model = new AuthenticationViewModel
             {
-                ErrorMessage = errorMessage
+                ErrorMessage = exception.Message
             };
 
-            return nancyModule.View["index", model];
+            return nancyModule.View["AuthenticateCallback", model];
         }
     }
 }
