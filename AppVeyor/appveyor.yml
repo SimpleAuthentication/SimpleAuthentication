@@ -32,6 +32,9 @@ build:
   verbosity: minimal
 
 on_success:
+  - ps: Write-Host "$env:appveyor_build_version - " + $env:appveyor_build_version
+  - ps: Write-Host "       $env:nugetFeedSource - " + $env:nugetFeedSource
+  - ps: Write-Host "                $env:apiKey - " + $env:apiKey
   - ps: '& ".\NuGet\NuGet Package and Publish.ps1" -Version $env:appveyor_build_version -NuGet "C:\Tools\NuGet\nuget.exe" -feedSource $env:nugetFeedSource -apiKey $env:apiKey'
 
 cache:
