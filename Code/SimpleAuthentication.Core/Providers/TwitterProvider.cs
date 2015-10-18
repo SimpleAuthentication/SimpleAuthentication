@@ -3,7 +3,7 @@ using System.Collections.Specialized;
 using System.Net;
 using RestSharp;
 using RestSharp.Authenticators;
-using RestSharp.Contrib;
+using RestSharp.Extensions.MonoHttp;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Providers.Twitter;
 using SimpleAuthentication.Core.Tracing;

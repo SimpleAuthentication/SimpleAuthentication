@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
-using System.Text;
 using RestSharp;
-using RestSharp.Contrib;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Providers.Facebook;
 using SimpleAuthentication.Core.Tracing;
