@@ -2,25 +2,29 @@
 using System.Collections.Generic;
 using System.Linq;
 using SimpleAuthentication.Core.Config;
-using SimpleAuthentication.Core.Exceptions;
-using SimpleAuthentication.Core.Providers;
 using SimpleAuthentication.Core.Tracing;
 
 namespace SimpleAuthentication.Core
 {
+    using Annotations;
+
     public class AuthenticationProviderFactory
     {
-        public static Lazy<Configuration> Configuration;
+        public static Lazy<Configuration> Configuration =
+            new Lazy<Configuration>(() => ProviderConfigHelper.UseConfig() ?? ProviderConfigHelper.UseAppSettings());
 
         private static readonly Lazy<IDictionary<string, IAuthenticationProvider>> Providers =
-            new Lazy<IDictionary<string, IAuthenticationProvider>>(Initialize);
+            new Lazy<IDictionary<string, IAuthenticationProvider>>(
+                () =>
+                {
+                    var authenticationProviders = new Dictionary<string, IAuthenticationProvider>();
+                    Initialize(authenticationProviders);
+                    return authenticationProviders;
+                });
 
-        public AuthenticationProviderFactory(IConfigService configService)
+        public AuthenticationProviderFactory()
         {
-            configService.ThrowIfNull("configService");
-
             TraceManager = new Lazy<ITraceManager>(() => new TraceManager()).Value;
-            Configuration = new Lazy<Configuration>(configService.GetConfiguration);
         }
 
         public IDictionary<string, IAuthenticationProvider> AuthenticationProviders
@@ -28,23 +32,86 @@ namespace SimpleAuthentication.Core
             get { return Providers.Value; }
         }
 
-        public ITraceManager TraceManager { set; private get; }
+        public ITraceManager TraceManager { set; [UsedImplicitly] private get; }
 
         public void AddProvider(IAuthenticationProvider provider, bool replaceExisting = true)
         {
             AddProviderToDictionary(AuthenticationProviders, provider, replaceExisting);
         }
 
+        [Obsolete("Use RemoveProvider<T>(), this will be removed in a future version.")]
+        public void RemoveProvider(string providerName)
+        {
+            RemoveProviderFromDictionary(providerName, AuthenticationProviders);
+        }
+
         public void RemoveProvider<T>()
         {
-            var providerName = typeof (T).Name.ToLowerInvariant();
+            var providerName = typeof(T).Name.ToLowerInvariant();
 
             RemoveProviderFromDictionary(providerName, AuthenticationProviders);
         }
 
-        public static IAuthenticationProvider AvailableProvider<T>(IList<Type> discoveredProviders,
-            string name,
-            Func<T> providerParamsFunc) where T : ProviderParams
+        private static void Initialize(IDictionary<string, IAuthenticationProvider> authenticationProviders)
+        {
+            authenticationProviders.ThrowIfNull("authenticationProviders");
+
+            var discoveredProviders = ReflectionHelpers.FindAllTypesOf<IAuthenticationProvider>();
+            if (discoveredProviders == null)
+            {
+                return;
+            }
+
+            if (Configuration == null)
+            {
+                return;
+            }
+
+            if (Configuration.Value.Providers != null &&
+                Configuration.Value.Providers.Any())
+            {
+                SetupConfigurationProviders(authenticationProviders, discoveredProviders, Configuration.Value.Providers);
+            }
+        }
+
+        private static void SetupConfigurationProviders(
+            IDictionary<string, IAuthenticationProvider> authenticationProviders,
+            IList<Type> discoveredProviders,
+            IEnumerable<Provider> providers)
+        {
+            authenticationProviders.ThrowIfNull("authenticationProviders");
+            discoveredProviders.ThrowIfNull("discoveredProviders");
+            providers.ThrowIfNull("appSettings");
+
+            foreach (var provider in providers)
+            {
+                var discoveredProvider = DiscoverProvider(discoveredProviders, provider);
+
+                AddProviderToDictionary(authenticationProviders, discoveredProvider, false);
+            }
+        }
+
+        //private static void SetupCustomConfigProviders(
+        //    IDictionary<string, IAuthenticationProvider> authenticationProviders,
+        //    IList<Type> discoveredProviders,
+        //    ProviderConfiguration providerConfig)
+        //{
+        //    authenticationProviders.ThrowIfNull("authenticationProviders");
+        //    discoveredProviders.ThrowIfNull("discoveredProviders");
+        //    providerConfig.ThrowIfNull("providerConfig");
+        //    providerConfig.Providers.ThrowIfNull("providerConfig.Providers");
+
+        //    foreach (ProviderKey provider in providerConfig.Providers)
+        //    {
+        //        var discoveredProvider = DiscoverProvider(discoveredProviders, provider);
+
+        //        AddProviderToDictionary(authenticationProviders, discoveredProvider, false);
+        //    }
+        //}
+
+        public static IAuthenticationProvider DiscoverProvider<T>(IList<Type> discoveredProviders,
+                                                                  string name,
+                                                                  Func<T> providerParamsFunc) where T : ProviderParams
         {
             discoveredProviders.ThrowIfNull("discoveredProviders");
 
@@ -65,7 +132,7 @@ namespace SimpleAuthentication.Core
             // Make sure we have a provider with the correct constructor parameters.
             // How? If a person creates their own provider and doesn't offer a constructor
             // that has a sigle ProviderParams, then we're stuffed. So we need to help them.
-            if (provider.GetConstructor(new[] {typeof (ProviderParams)}) != null)
+            if (provider.GetConstructor(new[] { typeof(ProviderParams) }) != null)
             {
                 var parameters = providerParamsFunc();
 
@@ -86,76 +153,24 @@ namespace SimpleAuthentication.Core
             return authenticationProvider;
         }
 
-        private static IDictionary<string, IAuthenticationProvider> Initialize()
-        {
-            var authenticationProviders = new Dictionary<string, IAuthenticationProvider>();
-           
-            // TODO: Replace this with Phillip Hayden's code for *smart scanning*.
-            var availableProviders = new List<Type>
-            {
-                typeof (GoogleProvider),
-                typeof (FacebookProvider),
-                typeof (TwitterProvider),
-                typeof (WindowsLiveProvider),
-                typeof (FakeProvider)
-            };
-
-            if (Configuration != null &&
-                Configuration.Value.Providers != null &&
-                Configuration.Value.Providers.Any())
-            {
-                // Map the available providers to the config settings provided.
-                SetupConfigurationProviders(authenticationProviders,
-                    availableProviders,
-                    Configuration.Value.Providers);
-            }
-
-            if (authenticationProviders.Any())
-            {
-                return authenticationProviders;
-            }
-
-            // No providers where found. Unable to go anywhere!
-            const string errorMessage =
-                "No Authentication Provider config settings where found. As such, we'll never be able to authenticate successfully against another service. How to fix this: add at least one Authentication Provider configuration data into your config file's <appSettings> section (recommended and easiest answer) [eg. <add key=\"sa.Google\" value=\"key:587140099194.apps.googleusercontent.com;secret:npk1_gx-gqJmLiJRPFooxCEY\"/> or add a custom config section to your .config file (looks a bit more pro, but is also a bit more complex to setup). For more info (especially the convention rules for the appSettings key/value> please refer to: ";
-            throw new AuthenticationException(errorMessage);
-        }
-
-        private static void SetupConfigurationProviders(
-            IDictionary<string, IAuthenticationProvider> authenticationProviders,
-            IList<Type> availableProviders,
-            IEnumerable<Provider> providers)
-        {
-            authenticationProviders.ThrowIfNull("authenticationProviders");
-            availableProviders.ThrowIfNull("discoveredProviders");
-            providers.ThrowIfNull("appSettings");
-
-            foreach (var provider in providers)
-            {
-                var discoveredProvider = AvailableProvider(availableProviders, provider);
-
-                AddProviderToDictionary(authenticationProviders, discoveredProvider, false);
-            }
-        }
-
-        private static IAuthenticationProvider AvailableProvider(IList<Type> discoveredProviders,
-            Provider provider)
+        private static IAuthenticationProvider DiscoverProvider(IList<Type> discoveredProviders, Provider provider)
         {
             provider.ThrowIfNull("providerKey");
 
             var name = provider.Name.ToLowerInvariant();
 
-            return AvailableProvider(discoveredProviders, name, () =>
-                new ProviderParams(
-                    provider.Key,
-                    provider.Secret,
-                    provider.Scopes.ScopesToCollection()));
+            return DiscoverProvider(discoveredProviders, name, () => new ProviderParams
+            {
+                PublicApiKey = provider.Key,
+                SecretApiKey = provider.Secret,
+                Scopes = provider.Scopes.ScopesToCollection()
+            });
         }
 
         private static void AddProviderToDictionary(
             IDictionary<string, IAuthenticationProvider> authenticationProviders,
             IAuthenticationProvider provider,
-            bool replaceExisting = true)
+            [UsedImplicitly] bool replaceExisting = true)
         {
             provider.ThrowIfNull("provider");
             authenticationProviders.ThrowIfNull("authenticationProviders");
@@ -173,15 +188,14 @@ namespace SimpleAuthentication.Core
             authenticationProviders[key] = provider;
         }
 
-        private static void RemoveProviderFromDictionary(string providerName,
-            ICollection<KeyValuePair<string, IAuthenticationProvider>> authenticationProviders)
+        private static void RemoveProviderFromDictionary(string providerName, ICollection<KeyValuePair<string, IAuthenticationProvider>> authenticationProviders)
         {
             providerName.ThrowIfNull("providerName");
             authenticationProviders.ThrowIfNull("authenticationProviders");
 
             var providersToRemove =
                 authenticationProviders.Where(x => providerName.StartsWith(x.Key.ToLowerInvariant()))
-                    .ToList();
+                                       .ToList();
 
             foreach (var providerPair in providersToRemove)
             {
@@ -207,7 +221,7 @@ namespace SimpleAuthentication.Core
                 return null;
             }
 
-            return scopes.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+            return scopes.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
         }
     }
 }

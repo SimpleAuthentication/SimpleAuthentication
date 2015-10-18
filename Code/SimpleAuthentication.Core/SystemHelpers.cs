@@ -1,164 +1,95 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using SimpleAuthentication.Core.Exceptions;
 
 namespace SimpleAuthentication.Core
 {
     public static class SystemHelpers
     {
-        public static IDictionary<string, string> ConvertKeyValueContentToDictionary(string content,
-            bool unescapeKeysAndValues = false,
-            char delimeter = '&')
+        public static string RecursiveErrorMessages(this Exception exception)
         {
-            if (string.IsNullOrWhiteSpace(content))
+            if (exception == null)
             {
-                throw new ArgumentNullException("content");
+                throw new ArgumentNullException("exception");
             }
 
-            var parameters = content.Split(new[] {delimeter});
+            var errorMessages = new StringBuilder();
 
-            return (from p in parameters
-                let kv = p.Split(new[] {'='})
-                where kv.Length == 2
-                select kv)
-                .ToDictionary(keyValue => unescapeKeysAndValues
-                    ? Uri.UnescapeDataString(keyValue[0])
-                    : keyValue[0],
-                    keyValue => unescapeKeysAndValues
-                        ? Uri.UnescapeDataString(keyValue[1])
-                        : keyValue[1]);
-        }
-
-        public static Uri CreateUri(Uri sourceUrl,
-            IDictionary<string, string> querystringParameters)
-        {
-            if (sourceUrl == null)
+            // Keep grabbing any error messages while we have some inner exception.
+            Exception nextException = exception;
+            while (nextException != null)
             {
-                throw new ArgumentNullException("sourceUrl");
-            }
-
-            if (querystringParameters == null)
-            {
-                throw new ArgumentNullException();
-            }
-
-            if (!querystringParameters.Any())
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-
-            var result = new UriBuilder(sourceUrl);
-
-            // REF: http://msdn.microsoft.com/en-us/library/system.uribuilder.query(v=vs.110).aspx
-            // NOTE: first character is the '?'. So we need to skip it.
-            var existingQuery = String.IsNullOrWhiteSpace(result.Query)
-                ? null
-                : result.Query.Substring(1);
-
-            if (String.IsNullOrWhiteSpace(existingQuery))
-            {
-                // No existing query - so just 
-                result.Query = JoinQueryStringParameters(querystringParameters);
-            }
-            else
-            {
-                // We have some existing query, so we need to figure out if there's any 
-                var keyValues = ConvertKeyValueContentToDictionary(existingQuery, true);
-                if (keyValues == null ||
-                    !keyValues.Any())
+                if (errorMessages.Length > 0)
                 {
-                    var errorMessage =
-                        String.Format(
-                            "Tried to convert the Query string '{0}' to a KeyValue collection, but it's either null or contains no items. We expected at least one key/value item.",
-                            String.IsNullOrWhiteSpace(existingQuery));
-                    throw new Exception(errorMessage);
+                    errorMessages.Append(" ");
                 }
+                // Append this error message.
+                errorMessages.AppendFormat(nextException.Message);
 
-                // NOTE: If we have an existing key, we need to ovewrite the value.
-                foreach (var parameter in querystringParameters)
-                {
-                    var key = Uri.EscapeDataString(parameter.Key);
-                    if (keyValues.ContainsKey(key))
-                    {
-                        keyValues[key] = parameter.Value;
-                    }
-                    else
-                    {
-                        // Key doesn't exist, so we need to add it in.
-                        keyValues.Add(parameter);
-                    }
-                }
-
-                result.Query = JoinQueryStringParameters(keyValues);
+                // Grab the next error message.
+                nextException = nextException.InnerException;
             }
 
-            return new Uri(result.ToString());
+            return errorMessages.Length > 0 ? errorMessages.ToString() : null;
         }
 
-        public static void CrossSiteRequestForgeryCheck(IDictionary<string, string> querystring,
-            string state,
-            string stateKey)
+        public static Uri CreateCallBackUri(string providerKey, Uri requestUrl,
+                                            string path = "/authentication/authenticatecallback")
         {
-            if (querystring == null)
+            if (string.IsNullOrEmpty(providerKey))
             {
-                throw new ArgumentNullException("querystring");
+                throw new ArgumentNullException("providerKey");
             }
 
-            if (string.IsNullOrWhiteSpace(state))
+            if (requestUrl == null)
             {
-                throw new ArgumentNullException("state");
+                throw new ArgumentNullException("requestUrl");
             }
 
-            if (string.IsNullOrWhiteSpace(stateKey))
+            if (string.IsNullOrEmpty(path))
             {
-                throw new ArgumentNullException("stateKey");
+                throw new ArgumentNullException("path");
             }
 
-            // Start with the Cross Site Request Forgery check.
-            if (!querystring.ContainsKey(stateKey))
+            var builder = new UriBuilder(requestUrl)
             {
-                var errorMessage = string.Format(
-                    "The callback querystring doesn't include a state key/value parameter. We need one of these so we can do a CSRF check. Please check why the request url from the provider is missing the parameter: '{0}'. eg. &{0}=something...",
-                    stateKey);
-                //TraceSource.TraceError(errorMessage);
-                throw new AuthenticationException(errorMessage);
+                Path = path,
+                Query = "providerkey=" + providerKey.ToLowerInvariant()
+            };
+
+            // Don't include port 80/443 in the Uri.
+            if (builder.Uri.IsDefaultPort)
+            {
+                builder.Port = -1;
             }
 
-            var callbackState = querystring[stateKey];
-            if (!callbackState.Equals(state, StringComparison.InvariantCultureIgnoreCase))
-            {
-                var errorMessage =
-                    string.Format(
-                        "CSRF check fails: The callback '{0}' value '{1}' doesn't match the server's *remembered* state value '{2}.",
-                        stateKey,
-                        callbackState,
-                        state);
-                throw new AuthenticationException(errorMessage);
-            }
+            return builder.Uri;
         }
 
-        private static string JoinQueryStringParameters(IDictionary<string, string> querystringParameters)
+        public static Uri CreateRoute(Uri requestUrl, string path, string query = null)
         {
-            if (querystringParameters == null)
+            if (requestUrl == null)
             {
-                throw new ArgumentNullException();
+                throw new ArgumentNullException("requestUrl");
             }
 
-            if (!querystringParameters.Any())
+            if (string.IsNullOrEmpty(path))
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentNullException("path");
             }
 
-            var parametersToAppend = querystringParameters
-                .Select(x => String.Format("{0}={1}",
-                    Uri.EscapeDataString(x.Key),
-                    Uri.EscapeDataString(x.Value)))
-                .ToArray();
+            var builder = new UriBuilder(requestUrl)
+            {
+                Path = path,
+                Query = query
+            };
 
-            return String.Join("&", parametersToAppend);
+            // Don't include port 80/443 in the Uri.
+            if (builder.Uri.IsDefaultPort)
+            {
+                builder.Port = -1;
+            }
+
+            return builder.Uri;
         }
     }
 }

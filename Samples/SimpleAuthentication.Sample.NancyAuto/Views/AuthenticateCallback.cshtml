@@ -18,24 +18,16 @@
             {
                 <h2>Error Information</h2>
                 <p>
-                    Message: @Model.Exception.Message<br />
+                    >Message: @Model.Exception.Message<br />
                 </p>
-                <p>
-                    StackTrace: @Model.Exception.StackTrace
-                </p>
-            }
-            else if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-            {
-                <h2>Authentication Error</h2>
-                <p>
-                    Message: @Model.ErrorMessage    
-                </p>
+                <p>StackTrace: @Model.Exception.StackTrace</p>
             }
             else
             {
                 <h2>User Information</h2>
                 <p>Provider Type: @Model.AuthenticatedClient.ProviderName</p>
-                <p>Public Access Token: @Model.AuthenticatedClient.AccessToken.Token</p>
+                <p>Public Access Token: @Model.AuthenticatedClient.AccessToken.PublicToken</p>
+                <p>Secret Access Token: @Model.AuthenticatedClient.AccessToken.SecretToken</p>
                 <p>Access Token Expires On: @Model.AuthenticatedClient.AccessToken.ExpiresOn</p>
                 <p>ID: @Model.AuthenticatedClient.UserInformation.Id</p>
                 <p>Name: @Model.AuthenticatedClient.UserInformation.Name</p>

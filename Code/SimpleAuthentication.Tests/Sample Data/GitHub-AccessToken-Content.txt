@@ -1,1 +1,0 @@
-﻿access_token=1a048d8e06ee61de21625d2820&scope=user%3Aemail&token_type=bearer
