@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Threading.Tasks;
 using SimpleAuthentication.Core.Tracing;
 
 namespace SimpleAuthentication.Core
@@ -12,33 +10,46 @@ namespace SimpleAuthentication.Core
     public interface IAuthenticationProvider
     {
         /// <summary>
-        /// Name of this provider.
+        /// Provider name.
         /// </summary>
-        /// <example>Eg. Google or Fake or Custom Forms Auth, etc.</example>
         string Name { get; }
 
         /// <summary>
-        /// What type of authentication is this?
+        /// What type of authentication is this? OAuth? Custom? 
         /// </summary>
-        /// <example>OAuth 2.0 or Custom Forms Authentication.</example>
-        string Description { get; }
+        string AuthenticationType { get; }
 
         /// <summary>
-        /// Determine the url (and all querystring params) we require to kick off our authentication process with the external Authentication Provider.
+        /// (Optional) Authentication resource/endpoint we should redirect to.
         /// </summary>
-        /// <param name="callbackUrl">The current request url. This is used to generate the return url.</param>
+        Uri AuthenticateRedirectionUrl { get; set; }
+
+        /// <summary>
+        /// Access token.
+        /// </summary>
+        AccessToken AccessToken { get; set; }
+
+        /// <summary>
+        /// (Optional) TraceManager for displaying trace information.
+        /// </summary>
+        ITraceManager TraceManager { set; }
+
+        /// <summary>
+        /// Uri to redirect to the Authentication Provider with all querystring parameters defined.
+        /// </summary>
+        /// <param name="requestUrl">The current request url. This is used to generate the return uri.</param>
         /// <returns>The redirection details, like the Uri and any Access Token or State data we might need to persist between roundtrips.</returns>
-        Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(Uri callbackUrl);
+        RedirectToAuthenticateSettings RedirectToAuthenticate(Uri requestUrl);
 
         /// <summary>
         /// Retrieve the user information from the Authentication Provider, now that we have authenticated.
         /// </summary>
-        /// <param name="queryString">QueryString parameters from the callback.</param>
+        /// <param name="queryStringParameters">QueryString parameters from the callback.</param>
         /// <param name="state">The (deserialized) state from before we did the redirect to the provider.</param>
-        /// <param name="callbackUrl">OAuth 2.0 Only: The callback endpoint used for for authenticating.</param>
+        /// <param name="callbackUri">The callback endpoint used for for quthenticating.</param>
         /// <returns>An authenticatedClient with either user information or some error message(s).</returns>
-        Task<IAuthenticatedClient> AuthenticateClientAsync(IDictionary<string, string> queryString,
-            string state,
-            Uri callbackUrl);
+        IAuthenticatedClient AuthenticateClient(NameValueCollection queryStringParameters,
+                                                string state,
+                                                Uri callbackUri);
     }
 }

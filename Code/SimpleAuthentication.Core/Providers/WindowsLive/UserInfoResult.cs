@@ -1,20 +1,15 @@
-﻿using Newtonsoft.Json;
-
-namespace SimpleAuthentication.Core.Providers.WindowsLive
+﻿namespace SimpleAuthentication.Core.Providers.WindowsLive
 {
-    internal class UserInfoResult
+    public class UserInfoResult
     {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        [JsonProperty("first_name")]
-        public string FirstName { get; set; }
-        [JsonProperty("last_name")]
-        public string LastName{ get; set; }
-        public string Link { get; set; }
-        public string Gender { get; set; }
-        public string Locale { get; set; }
-        [JsonProperty("updated_time ")]
-        public string UpdatedTime { get; set; }
-        public Emails Emails { get; set; }
+        public string id { get; set; }
+        public string name { get; set; }
+        public string first_name { get; set; }
+        public string last_name { get; set; }
+        public string link { get; set; }
+        public string gender { get; set; }
+        public string locale { get; set; }
+        public string updated_time { get; set; }
+        public Emails emails { get; set; }
     }
 }
