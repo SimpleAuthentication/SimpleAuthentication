@@ -23,9 +23,9 @@ namespace SimpleAuthentication.Core
             _restClientDictionary = new Dictionary<string, IRestClient>
             {
                 {
-                    string.IsNullOrEmpty(restClient.BaseUrl)
+                    restClient.BaseUrl == null
                         ? Guid.NewGuid().ToString()
-                        : restClient.BaseUrl.ToLowerInvariant(),
+                        : restClient.BaseUrl.AbsoluteUri.ToLowerInvariant(),
                     restClient
                 }
             };
@@ -42,7 +42,7 @@ namespace SimpleAuthentication.Core
             _restClientDictionary = new Dictionary<string, IRestClient>();
             foreach (var restClient in restClients)
             {
-                _restClientDictionary.Add(restClient.BaseUrl.ToLowerInvariant(), restClient);
+                _restClientDictionary.Add(restClient.BaseUrl.AbsoluteUri.ToLowerInvariant(), restClient);
             }
         }
 

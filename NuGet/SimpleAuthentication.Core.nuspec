@@ -16,7 +16,7 @@
         <language>en-au</language>
         <tags>authentication twitter google facebook microsoftaccount oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
         <dependencies>
-            <dependency id="RestSharp" version="104.1" />
+            <dependency id="RestSharp" version="[105.2.3,106)" />
         </dependencies>
     </metadata>
     <files>
