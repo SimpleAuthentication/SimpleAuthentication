@@ -1,31 +1,106 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
-using RestSharp;
+using System.Globalization;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 using SimpleAuthentication.Core;
 using SimpleAuthentication.Core.Exceptions;
-using SimpleAuthentication.Core.Providers;
+using SimpleAuthentication.Core.Providers.OAuth.V20;
 using SimpleAuthentication.ExtraProviders.Instagram;
 
 namespace SimpleAuthentication.ExtraProviders
 {
-    public class InstagramProvider : BaseOAuth20Provider<AccessTokenResult>
+    public class InstagramProvider : OAuth20Provider
     {
-        private const string AccessTokenKey = "access_token";
-
-        public InstagramProvider(ProviderParams providerParams) : this("Instagram", providerParams)
+        public InstagramProvider(ProviderParams providerParams)
+            : base(providerParams)
         {
         }
 
-        protected InstagramProvider(string name, ProviderParams providerParams) : base(name, providerParams)
+        #region OAuth20Provider Implementation
+
+        public override string Name
         {
-            AuthenticateRedirectionUrl = new Uri("https://api.instagram.com/oauth/authorize/");
+            get { return "Instagram"; }
         }
 
-        public override IEnumerable<string> DefaultScopes
+        protected override IEnumerable<string> DefaultScopes
         {
-            get { return new[] { "basic" }; }
+            get { return new[] {"basic"}; }
         }
+
+        protected override Uri AccessTokenUri
+        {
+            get { return new Uri("https://api.instagram.com/oauth/access_token"); }
+        }
+
+        protected override AccessToken MapAccessTokenContentToAccessToken(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                throw new ArgumentNullException("content");
+            }
+
+            var accessToken = JsonConvert.DeserializeObject<dynamic>(content);
+
+            string token = accessToken.access_token;
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                var errorMessage =
+                    string.Format(
+                        "No 'access_token' key/value found in the {0} access token response. Content retrieved: {1}.",
+                        Name,
+                        content);
+                throw new AuthenticationException(errorMessage);
+            }
+
+            // NOTE: Instagram doesn't include an EXPIRES ON value.
+            return new AccessToken
+            {
+                Token = accessToken.access_token,
+                ExpiresOn = DateTime.MaxValue
+            };
+        }
+
+        protected override Uri UserInformationUri(AccessToken accessToken)
+        {
+            var requestUri = string.Format("https://api.instagram.com/v1/users/self?access_token={0}",
+                accessToken.Token);
+            return new Uri(requestUri);
+        }
+
+        protected override UserInformation GetUserInformationFromContent(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                throw new ArgumentNullException("content");
+            }
+
+            var userInfo = JsonConvert.DeserializeObject<UserInfo>(content);
+            
+            return new UserInformation
+            {
+                Id = userInfo.Data.Id,
+                Name = userInfo.Data.FullName,
+                UserName = userInfo.Data.UserName,
+                Picture = userInfo.Data.ProfilePicture
+            };
+        }
+
+        public override async Task<RedirectToAuthenticateSettings> GetRedirectToAuthenticateSettingsAsync(Uri callbackUrl)
+        {
+            if (callbackUrl == null)
+            {
+                throw new ArgumentNullException("callbackUrl");
+            }
+
+            var providerAuthenticationUrl = new Uri("https://api.instagram.com/oauth/authorize/");
+            return GetRedirectToAuthenticateSettings(callbackUrl, providerAuthenticationUrl);
+        }
+
+        #endregion
+
+        /*
 
         public override string ScopeSeparator
         {
@@ -45,7 +120,7 @@ namespace SimpleAuthentication.ExtraProviders
                 throw new ArgumentNullException("redirectUri");
             }
 
-            var restRequest = new RestRequest("/oauth/access_token", Method.POST);
+            var restRequest = new RestRequest("https://api.instagram.com/oauth/access_token", Method.POST);
             restRequest.AddParameter("client_id", PublicApiKey);
             restRequest.AddParameter("client_secret", SecretApiKey);
             restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
@@ -94,7 +169,7 @@ namespace SimpleAuthentication.ExtraProviders
 
             try
             {
-                var restRequest = new RestRequest("/users/self", Method.GET);
+                var restRequest = new RestRequest("https://api.instagram.com/v1//users/self", Method.GET);
                 restRequest.AddParameter(AccessTokenKey, accessToken.PublicToken);
                 var restClient = RestClientFactory.CreateRestClient("https://api.instagram.com/v1/");
                 restClient.UserAgent = PublicApiKey;
@@ -134,5 +209,8 @@ namespace SimpleAuthentication.ExtraProviders
                 UserName = response.Data.Data.Username
             };
         }
+    }
+         * 
+         **/
     }
 }

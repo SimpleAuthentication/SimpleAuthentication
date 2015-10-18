@@ -1,21 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D75207D5-FA68-4DC6-939A-2AC3CAD4BEAD}</ProjectGuid>
+    <ProjectGuid>{B402F572-08B1-42AE-A8AA-6DC68452F28B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SimpleAuthentication.ExtraProviders</RootNamespace>
     <AssemblyName>SimpleAuthentication.ExtraProviders</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -25,6 +23,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -32,59 +31,28 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="RestSharp, Version=104.3.3.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\RestSharp.104.3.3\lib\net4\RestSharp.dll</HintPath>
+      <HintPath>..\..\packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Caching" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\Shared Assembly Info\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="AmazonProvider.cs" />
-    <Compile Include="Amazon\AccessTokenResult.cs" />
-    <Compile Include="Amazon\UserInfoResult.cs" />
+    <Compile Include="Instagram\Data.cs" />
+    <Compile Include="GitHubProvider.cs" />
+    <Compile Include="GitHub\UserInfo.cs" />
     <Compile Include="InstagramProvider.cs" />
-    <Compile Include="Instagram\AccessTokenResult.cs" />
-    <Compile Include="Instagram\UserInfoResult.cs" />
-    <Compile Include="ThirtySevenSignalsProvider.cs" />
-    <Compile Include="GitHubProvider.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="GitHub\AccessTokenResult.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="GitHub\UserInfoResult.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="LinkedInProvider.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="LinkedIn\AccessTokenResult.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="LinkedIn\UserInfoResult.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="OpenIdProvider.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="Instagram\UserInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ThirtySevenSignals\AccessTokenResult.cs" />
-    <Compile Include="ThirtySevenSignals\Account.cs" />
-    <Compile Include="ThirtySevenSignals\Identity.cs" />
-    <Compile Include="ThirtySevenSignals\PersonResult.cs" />
-    <Compile Include="ThirtySevenSignals\UserInfoResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SimpleAuthentication.Core\SimpleAuthentication.Core.csproj">
@@ -95,9 +63,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
