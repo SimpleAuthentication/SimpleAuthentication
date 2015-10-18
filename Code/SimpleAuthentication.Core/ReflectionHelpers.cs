@@ -13,12 +13,12 @@ namespace SimpleAuthentication.Core
         {
             try
             {
-                var type = typeof (T);
+                var type = typeof(T);
 
                 return AppDomain.CurrentDomain
                     .GetAssemblies()
                     .ToList()
-                    .SelectMany(s => s.GetTypes())
+                    .SelectMany(s => s.GetLoadableTypes())
                     .Where(p => type.IsAssignableFrom(p) &&
                                 p.IsClass &&
                                 !p.IsAbstract &&
@@ -46,6 +46,23 @@ namespace SimpleAuthentication.Core
                 throw new Exception(
                     "Failed to reflect on the current domain's Assemblies while searching for plugins. Error Message: " +
                     stringBuilder);
+            }
+        }
+
+        public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
+        {
+            if (assembly == null)
+            {
+                throw new ArgumentNullException("assembly");
+            }
+            
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                return e.Types.Where(t => t != null);
             }
         }
     }
