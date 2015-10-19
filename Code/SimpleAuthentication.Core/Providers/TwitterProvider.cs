@@ -366,7 +366,8 @@ namespace SimpleAuthentication.Core.Providers
                 },
                 AccessToken = new AccessToken
                 {
-                    PublicToken = oAuthAccessToken.AccessToken
+                    PublicToken = oAuthAccessToken.AccessToken,
+                    SecretToken = oAuthAccessToken.AccessTokenSecret
                 }
             };
         }
