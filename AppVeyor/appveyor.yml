@@ -32,10 +32,7 @@ build:
   verbosity: minimal
 
 on_success:
-  - ps: Write-Host "$env:appveyor_build_version - " + $env:appveyor_build_version
-  - ps: Write-Host "       $env:nugetFeedSource - " + $env:nugetFeedSource
-  - ps: Write-Host "                $env:apiKey - " + $env:apiKey
-  - ps: '& ".\NuGet\NuGet Package and Publish.ps1" -Version $env:appveyor_build_version -NuGet "C:\Tools\NuGet\nuget.exe" -feedSource $env:nugetFeedSource -apiKey $env:apiKey'
+  - ps: $destinationPath = $env:appveyor_build_folder + ".\file1.ps1"; (new-object net.webclient).DownloadFile('https://raw.githubusercontent.com/PureKrome/PushIt/master/NuGet%20Package%20and%20Publish.ps1', $destinationPath); & $destinationPath  -Version $env:appveyor_build_version -NuGet "C:\Tools\NuGet\nuget.exe" -feedSource $env:nugetFeedSource -apiKey $env:apiKey -source '.\NuGet\' -destination '.\NuGet\'
 
 cache:
   - packages -> **\packages.config
