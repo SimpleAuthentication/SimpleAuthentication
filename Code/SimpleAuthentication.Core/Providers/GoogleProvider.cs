@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using RestSharp;
 using SimpleAuthentication.Core.Exceptions;
@@ -97,7 +98,7 @@ namespace SimpleAuthentication.Core.Providers
 
             try
             {
-                var restRequest = new RestRequest("/oauth2/v2/userinfo", Method.GET);
+                var restRequest = new RestRequest("/plus/v1/people/me", Method.GET);
                 restRequest.AddParameter(AccessTokenKey, accessToken.PublicToken);
 
                 var restClient = RestClientFactory.CreateRestClient("https://www.googleapis.com");
@@ -143,17 +144,22 @@ namespace SimpleAuthentication.Core.Providers
             }
 
             return new UserInformation
-                   {
-                       Id = response.Data.Id,
-                       Gender = string.IsNullOrEmpty(response.Data.Gender)
-                                    ? GenderType.Unknown
-                                    : GenderTypeHelpers.ToGenderType(response.Data.Gender),
-                       Name = response.Data.Name,
-                       Email = response.Data.Email,
-                       Locale = response.Data.Locale,
-                       Picture = response.Data.Picture,
-                       UserName = response.Data.GivenName
-                   };
+            {
+                Id = response.Data.Id,
+                Gender = string.IsNullOrEmpty(response.Data.Gender)
+                    ? GenderType.Unknown
+                    : GenderTypeHelpers.ToGenderType(response.Data.Gender),
+                Name = response.Data.Name.ToString(),
+                Email = response.Data.Emails != null &&
+                        response.Data.Emails.Any()
+                    ? response.Data.Emails.First().Value
+                    : null,
+                Locale = response.Data.Language,
+                Picture = response.Data.Image != null
+                    ? response.Data.Image.Url
+                    : null,
+                UserName = response.Data.DisplayName
+            };
         }
 
         #endregion
@@ -164,7 +170,7 @@ namespace SimpleAuthentication.Core.Providers
             {
                 return new[]
                        {
-                           "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
+                           "profile email"
                        };
             }
         }

@@ -65,6 +65,9 @@
     <Compile Include="Config\ProviderKey.cs" />
     <Compile Include="Config\ProviderKeyCollection.cs" />
     <Compile Include="Exceptions\ConfigurationException.cs" />
+    <Compile Include="Providers\Google\Email.cs" />
+    <Compile Include="Providers\Google\Image.cs" />
+    <Compile Include="Providers\Google\Name.cs" />
     <Compile Include="ReflectionHelpers.cs" />
     <Compile Include="ProviderParams.cs" />
     <Compile Include="Providers\BaseOAuth20Provider.cs" />
