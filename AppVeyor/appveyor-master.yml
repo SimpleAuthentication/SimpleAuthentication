@@ -1,5 +1,5 @@
 
-version: '0.4'
+version: '0.{build}'
 configuration: Release
 
 branches:
@@ -31,12 +31,7 @@ build:
   verbosity: minimal
 
 on_success:
-  - ps: Write-Host $env:appveyor_build_version
-  - ps: '& ".\NuGet\NuGet Package and Publish.ps1" -Version $env:appveyor_build_version -NuGet "C:\Tools\NuGet\nuget.exe" -apiKey $env:apiKey'
-
-# NOTE: there are no artifacts, right now.
-#artifacts:
-#  - path: '**\*.nupkg'
+  - ps: if (-not $env:APPVEYOR_PULL_REQUEST_NUMBER) { $destinationPath = $env:appveyor_build_folder + ".\file1.ps1"; (new-object net.webclient).DownloadFile('https://raw.githubusercontent.com/PureKrome/PushIt/master/NuGet%20Package%20and%20Publish.ps1', $destinationPath); & $destinationPath  -Version $env:appveyor_build_version -NuGet "C:\Tools\NuGet\nuget.exe" -apiKey $env:apiKey -source '.\NuGet\' -destination '.\NuGet\' }
 
 cache:
   - packages -> **\packages.config
