@@ -13,5 +13,6 @@
         public string Locale { get; set; }
         public bool Verified { get; set; }
         public string UpdatedTime { get; set; }
+        public string Gender { get; set; }
     }
 }

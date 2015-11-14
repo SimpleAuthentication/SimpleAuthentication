@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>SimpleAuthentication.Core</id>
+        <version>0.0.0</version>
+        <title>SimpleAuthentication.Core: making authentication ... simple!</title>
+        <authors>Justin Adler, Phillip Haydon and contributors</authors>
+        <owners>Justin Adler and Phillip Haydon</owners>
+        <projectUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</projectUrl>
+        <iconUrl>http://i.imgur.com/bR4Yf.jpg</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>SimpleAuthentication is a ASP.NET library that makes it really simple to for developers to add Social Authentication code to an ASP.NET application.</description>
+        <summary>A really simple way to Authenticate against Facebook, Twitter, Google or a Microsoft Account.</summary>
+        <releaseNotes />
+        <copyright>2012</copyright>
+        <language>en-au</language>
+        <tags>authentication twitter google facebook microsoftaccount oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
+        <dependencies>
+            <dependency id="RestSharp" version="[105.2.3,106)" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="..\Code\SimpleAuthentication.Core\bin\Release\SimpleAuthentication.Core.dll" target="lib\net40\SimpleAuthentication.Core.dll" />
+        <file src="ReadMe.txt" target="ReadMe.txt" />
+    </files>
+</package>

@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>Glimpse.SimpleAuthentication</id>
+        <version>0.0.0</version>
+        <title>Glimpse.SimpleAuthentication: Glimpse plugin for SimpleAuthentication</title>
+        <authors>Justin Adler, Phillip Haydon and contributors</authors>
+        <owners>Justin Adler and Phillip Haydon</owners>
+        <projectUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</projectUrl>
+        <iconUrl>http://i.imgur.com/bR4Yf.jpg</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>This is a Glimpse plugin which helps developers see what magic happens 'under the hood' for SimpleAuthentication.</description>
+        <summary>A Glimpse plugin for SimpleAuthentication.</summary>
+        <releaseNotes />
+        <copyright>2013</copyright>
+        <language>en-au</language>
+        <tags>glimpse authentication twitter google facebook microsoftaccount oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
+        <dependencies>
+            <dependency id="Glimpse" version="1.8.6" />
+            <dependency id="SimpleAuthentication" version="[0.3.12,1)"/>
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="..\Code\Glimpse.SimpleAuthentication\bin\Release\Glimpse.SimpleAuthentication.dll" target="lib\net40\Glimpse.SimpleAuthentication.dll" />
+        <file src="ReadMe.txt" target="ReadMe.txt" />
+    </files>
+</package>

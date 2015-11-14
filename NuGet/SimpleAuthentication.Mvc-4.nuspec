@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>SimpleAuthentication.Mvc4</id>
+        <version>0.0.0</version>
+        <title>SimpleAuthentication.Mvc: ASP.NET MVC 4 library for SimpleAuthentication</title>
+        <authors>Justin Adler,Phillip Haydon and contributors</authors>
+        <owners>Justin Adler and Phillip Haydon</owners>
+        <projectUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</projectUrl>
+        <iconUrl>http://i.imgur.com/bR4Yf.jpg</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Used with SimpleAuthentication, provides automated configuration for ASP.NET Mvc projects.</description>
+        <summary>An ASP.NET Mvc plugin for SimpleAuthentiction. It provides a default controller, routes and uses WebActivator to auto-wire up those routes.</summary>
+        <releaseNotes />
+        <copyright>2012</copyright>
+        <language>en-au</language>
+        <tags>authentication mvc controller twitter google facebook microsoftaccount oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
+        <dependencies>
+            <dependency id="WebActivatorEx" version="2.0.3" />
+            <dependency id="Microsoft.AspNet.Mvc" version="[4.0.30506.0,6)" />
+            <dependency id="SimpleAuthentication.Core" version="[0.3.12,1)"/>
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="..\Code\SimpleAuthentication.Mvc\bin\Release\SimpleAuthentication.Mvc.dll" target="lib\net40\SimpleAuthentication.Mvc.dll" />
+        <file src="ReadMe.txt" target="ReadMe.txt" />
+    </files>
+</package>

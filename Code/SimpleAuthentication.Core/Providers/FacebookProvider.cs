@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
-using System.Text;
 using RestSharp;
-using RestSharp.Contrib;
 using SimpleAuthentication.Core.Exceptions;
 using SimpleAuthentication.Core.Providers.Facebook;
 using SimpleAuthentication.Core.Tracing;
@@ -111,7 +109,7 @@ namespace SimpleAuthentication.Core.Providers
                 throw new ArgumentNullException("redirectUri");
             }
 
-            var restRequest = new RestRequest("oauth/access_token");
+            var restRequest = new RestRequest("v2.4/oauth/access_token");
             restRequest.AddParameter("client_id", PublicApiKey);
             restRequest.AddParameter("client_secret", SecretApiKey);
             restRequest.AddParameter("code", authorizationCode);
@@ -122,34 +120,6 @@ namespace SimpleAuthentication.Core.Providers
             var restClient = RestClientFactory.CreateRestClient(BaseUrl);
             TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
                                      restClient.BuildUri(restRequest).AbsoluteUri);
-
-            // Really really sad hack. Facebook send back all their data as Json except
-            // this f'ing endpoint. As such, we'll fuck with things here.
-            // We'll manually create the data - if possible.
-            // How - we will try and recreate the content result.
-            restRequest.OnBeforeDeserialization = response =>
-            {
-                // Grab the content and convert it into json.
-                if (response.StatusCode != HttpStatusCode.OK)
-                {
-                    // Something is wrong - so just leave. This is handled elsewhere.
-                    return;
-                }
-
-                // Lets do this!
-                var querystringData = HttpUtility.ParseQueryString(response.Content);
-                var json = new StringBuilder("{"); // Start.
-                
-                foreach (var key in querystringData.AllKeys)
-                {
-                    json.AppendFormat("\"{0}\":\"{1}\"", key, querystringData[key]);
-                }
-
-                json.Append("}"); // End.
-
-                response.Content = json.ToString();
-                response.ContentType = "text/json";
-            };
 
             return restClient.Execute<AccessTokenResult>(restRequest);
         }
@@ -162,7 +132,7 @@ namespace SimpleAuthentication.Core.Providers
             }
 
             if (string.IsNullOrEmpty(accessTokenResult.access_token) ||
-                accessTokenResult.expires <= 0)
+                accessTokenResult.expires_in <= 0)
             {
                 var errorMessage =
                     string.Format(
@@ -170,7 +140,7 @@ namespace SimpleAuthentication.Core.Providers
                         string.IsNullOrEmpty(accessTokenResult.access_token)
                             ? "-no access token-"
                             : accessTokenResult.access_token,
-                        accessTokenResult.expires.ToString());
+                        accessTokenResult.expires_in.ToString());
 
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
@@ -179,7 +149,7 @@ namespace SimpleAuthentication.Core.Providers
             return new AccessToken
                    {
                        PublicToken = accessTokenResult.access_token,
-                       ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.expires)
+                       ExpiresOn = DateTime.UtcNow.AddSeconds(accessTokenResult.expires_in)
                    };
         }
 
@@ -199,8 +169,9 @@ namespace SimpleAuthentication.Core.Providers
 
             try
             {
-                var restRequest = new RestRequest("me");
+                var restRequest = new RestRequest("v2.5/me");
                 restRequest.AddParameter("access_token", accessToken.PublicToken);
+                restRequest.AddParameter("fields", "name,email,first_name,last_name,locale,gender,link");
 
                 var restClient = RestClientFactory.CreateRestClient(BaseUrl);
 
@@ -244,18 +215,22 @@ namespace SimpleAuthentication.Core.Providers
                             ? string.Empty
                             : response.Data.LastName).Trim();
 
-            return new UserInformation
+            var userInformation = new UserInformation
                    {
                        Id = id.ToString(),
                        Name = name,
                        Email = response.Data.Email,
                        Locale = response.Data.Locale,
                        UserName = response.Data.Username,
+                       Gender = GenderTypeHelpers.ToGenderType(response.Data.Gender),
                        Picture = string.Format("https://graph.facebook.com/{0}/picture", id)
                    };
+
+            return userInformation;
         }
 
         #endregion
+
 
         /// <summary>
         /// Are we on a mobile device?
@@ -269,9 +244,11 @@ namespace SimpleAuthentication.Core.Providers
                 _isMobile = value;
 
                 // Now auto set the redirection url. 
-                AuthenticateRedirectionUrl = IsMobile
-                                                 ? new Uri("https://m.facebook.com/dialog/oauth")
-                                                 : new Uri("https://www.facebook.com/dialog/oauth");
+                var url = string.Format("https://{0}.facebook.com/v2.4/dialog/oauth",
+                    IsMobile
+                        ? "m"
+                        : "www");
+                AuthenticateRedirectionUrl = new Uri(url);
             }
         }
 
@@ -279,7 +256,7 @@ namespace SimpleAuthentication.Core.Providers
 
         public override IEnumerable<string> DefaultScopes
         {
-            get { return new[] {"email"}; }
+            get { return new[] { "public_profile", "email" }; }
         }
 
         public override string ScopeSeparator

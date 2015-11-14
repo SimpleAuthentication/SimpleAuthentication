@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>SimpleAuthentication.ExtraProviders</id>
+        <version>0.0.0</version>
+        <title>SimpleAuthentication.ExtraProviders: Extra Providers for SimpleAuthentication.</title>
+        <authors>Justin Adler, Phillip Haydon and contributors</authors>
+        <owners>Justin Adler and Phillip Haydon</owners>
+        <projectUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</projectUrl>
+        <iconUrl>http://i.imgur.com/bR4Yf.jpg</iconUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Used with SimpleAuthentication, this adds additional provider support:
+
+1. GitHub
+2. Amazon
+3. 37 Signals
+4. LinkedIn
+5. OpenId.</description>
+        <summary>A really simple way to Authenticate against a number of popular providers like GitHub, Amazon, 37 Signals, etc...</summary>
+        <releaseNotes />
+        <copyright>2012</copyright>
+        <language>en-au</language>
+        <tags>authentication github amazon 37signals thirtysevensignals basecamp highrise linkedin openid oauth oauth1 oauth2 unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
+        <dependencies>
+            <dependency id="SimpleAuthentication.Core" version="[0.3.12,1)" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="..\Code\SimpleAuthentication.ExtraProviders\bin\Release\SimpleAuthentication.ExtraProviders.dll" target="lib\net40\SimpleAuthentication.ExtraProviders.dll" />
+        <file src="ReadMe.txt" target="ReadMe.txt" />
+    </files>
+</package>
