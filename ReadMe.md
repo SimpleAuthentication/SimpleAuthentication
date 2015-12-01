@@ -39,17 +39,17 @@ Out of the box, it offers **Facebook**, **Google**, **Twitter** and **Microsoft 
 
 ## How does this compare to ASP.NET Identity / ASP.NET Membership?
 
- - **Simple Authentication**: An extreamly *lightweight* library that only deals with the *authentication*. No database code. No rules forcing you to impliment contracts. *No passwords*
+ - **Simple Authentication**: An extremely *lightweight* library that only deals with the *authentication*. No database code. No rules forcing you to implement contracts. *No passwords*
  - **ASP.NET Identity / Membership**: a heavy, enterprisy, one-huge-hammer-fits-all approach that is strongly tied to sql server and entity framework.
 
-Simple Authentication doesn't want to tie you into any particular database, data access layer or forcing / maintaining passwords. In essense, we've tried to pass this security concern onto other systems. Once you've received some *authenticated* user information, *you* decide what you want to do with.
-On the other hand, ASP.NET Identity/Membership is a full end-to-end stack for user credentials. It's tied to Sql Server and you're tied to impliementing all the interface contracts. But most importantly, passwords are still stored in your database if forms authentiction was used. It's a one-big-hammer approach.
+Simple Authentication doesn't want to tie you into any particular database, data access layer or forcing / maintaining passwords. In essence, we've tried to pass this security concern onto other systems. Once you've received some *authenticated* user information, *you* decide what you want to do with.
+On the other hand, ASP.NET Identity/Membership is a full end-to-end stack for user credentials. It's tied to Sql Server and you're tied to implementing all the interface contracts. But most importantly, passwords are still stored in your database if forms authentication was used. It's a one-big-hammer approach.
 
 [Read this wiki page](http://asd) for an elaborate discussion on the differences (pro's/con's) of Simple Authentication vs ASP.NET.
 
 ## Extensible
 
-Have an OAuth 1.0a or OAuth 2.0 Athentication Provider? It's really easy to create your own providers, extending what's already out of the box.
+Have an OAuth 1.0a or OAuth 2.0 Authentication Provider? It's really easy to create your own providers, extending what's already out of the box.
 These AP's are also available:
 
 - GitHub
