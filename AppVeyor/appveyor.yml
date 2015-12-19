@@ -1,5 +1,10 @@
 
-version: '0.{build}-dev'
+# NOTE: There is no 'version' key/value because this can be different for 
+#       forks and dev-releases. As such, use the AppVeyor UI to define it.
+#       for upstream/dev this should be in the format <upstream/release milestone>.{build}-dev
+#       e.g. 0.6.{build}-dev
+#       The '-dev' postfix makes sure the version is a 'pre-release' package.
+
 configuration: Release
 
 branches:
