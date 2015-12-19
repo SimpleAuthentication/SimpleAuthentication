@@ -144,20 +144,22 @@ namespace SimpleAuthentication.Core.Providers
             }
 
             return new UserInformation
-                   {
-                       Name = string.Format("{0} {1}",
-                                            string.IsNullOrEmpty(response.Data.first_name)
-                                                ? string.Empty
-                                                : response.Data.first_name,
-                                            string.IsNullOrEmpty(response.Data.last_name)
-                                                ? string.Empty
-                                                : response.Data.last_name).Trim(),
-                       Locale = response.Data.locale,
-                       UserName = response.Data.name,
-                       Id = response.Data.id,
-                       Email = response.Data.emails.Preferred,
-                       Gender = (GenderType) Enum.Parse(typeof (GenderType), response.Data.gender ?? "Unknown", true)
-                   };
+            {
+                Name = string.Format("{0} {1}",
+                    string.IsNullOrEmpty(response.Data.first_name)
+                        ? string.Empty
+                        : response.Data.first_name,
+                    string.IsNullOrEmpty(response.Data.last_name)
+                        ? string.Empty
+                        : response.Data.last_name).Trim(),
+                Locale = response.Data.locale,
+                UserName = response.Data.name,
+                Id = response.Data.id,
+                Email = response.Data.emails.Preferred,
+                Gender = string.IsNullOrEmpty(response.Data.gender)
+                    ? GenderType.Unknown
+                    : GenderTypeHelpers.ToGenderType(response.Data.gender),
+            };
         }
 
         #endregion
