@@ -183,6 +183,7 @@ namespace SimpleAuthentication.Mvc
             {
                 // Which provider did we just authenticate with?
                 var provider = GetAuthenticationProvider(inputModel.ProviderKey);
+                model.ProviderName = provider.Name;
 
                 // Where do we return to, after we've authenticated?
                 var callbackUri = GenerateCallbackUri(provider.Name);

@@ -5,6 +5,16 @@ namespace SimpleAuthentication.Mvc
 {
     public class AuthenticateCallbackData
     {
+        public AuthenticateCallbackData()
+        {
+            ProviderName = "Unknown";
+        }
+
+        /// <summary>
+        /// An Authentication Provider.
+        /// </summary>
+        public string ProviderName { get; set; }
+
         /// <summary>
         /// The authenticated client information, if we have successfully authenticated.
         /// </summary>
