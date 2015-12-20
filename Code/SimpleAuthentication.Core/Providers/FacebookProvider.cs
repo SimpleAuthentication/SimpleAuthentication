@@ -216,15 +216,17 @@ namespace SimpleAuthentication.Core.Providers
                             : response.Data.LastName).Trim();
 
             var userInformation = new UserInformation
-                   {
-                       Id = id.ToString(),
-                       Name = name,
-                       Email = response.Data.Email,
-                       Locale = response.Data.Locale,
-                       UserName = response.Data.Username,
-                       Gender = GenderTypeHelpers.ToGenderType(response.Data.Gender),
-                       Picture = string.Format("https://graph.facebook.com/{0}/picture", id)
-                   };
+            {
+                Id = id.ToString(),
+                Name = name,
+                Email = response.Data.Email,
+                Locale = response.Data.Locale,
+                UserName = response.Data.Username,
+                Gender = string.IsNullOrWhiteSpace(response.Data.Gender)
+                    ? GenderType.Unknown
+                    : GenderTypeHelpers.ToGenderType(response.Data.Gender),
+                Picture = string.Format("https://graph.facebook.com/{0}/picture", id)
+            };
 
             return userInformation;
         }
