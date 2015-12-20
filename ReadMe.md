@@ -5,7 +5,7 @@
 branch | status
 ----- | -----
 master | [![Build status](https://ci.appveyor.com/api/projects/status/ekgco74ae4cyu31g)](https://ci.appveyor.com/project/PureKrome/simpleauthentication-294)
-dev | [![Build status](https://ci.appveyor.com/api/projects/status/vhba8xt4alg4jg6a)](https://ci.appveyor.com/project/PureKrome/simpleauthentication-g3cxx)
+dev | [![Build status](https://ci.appveyor.com/api/projects/status/okhor81tbvxucdoo)](https://ci.appveyor.com/project/PureKrome/simpleauthentication-xud0a)
 
 Package | `master` @ NuGet | `dev` @ MyGet
 ----- | ------ | ---
