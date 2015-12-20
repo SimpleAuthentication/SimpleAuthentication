@@ -169,7 +169,7 @@ namespace SimpleAuthentication.Core.Providers
                 throw new ArgumentException("verifierResult.OAuthToken");
             }
 
-            if (string.IsNullOrEmpty(verifierResult.OAuthToken))
+            if (string.IsNullOrEmpty(verifierResult.OAuthVerifier))
             {
                 throw new ArgumentException("verifierResult.OAuthVerifier");
             }
@@ -184,7 +184,8 @@ namespace SimpleAuthentication.Core.Providers
 
                 restClient.Authenticator = OAuth1Authenticator.ForAccessToken(PublicApiKey, SecretApiKey,
                                                                               verifierResult.OAuthToken,
-                                                                              null, verifierResult.OAuthVerifier);
+                                                                              null, 
+                                                                              verifierResult.OAuthVerifier);
                 response = restClient.Execute(restRequest);
             }
             catch (Exception exception)
