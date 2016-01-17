@@ -106,7 +106,7 @@ namespace Nancy.SimpleAuthentication
             {
                 // We failed to determine where to go. A classic example of this is with OpenId and a bad OpenId endpoint.
                 const string errorMessage =
-                    "No redirect to authencate settings retrieved. This means we don't know where to go. A classic example of this is with OpenId and a bad OpenId endpoint. Please check the data you are providing to the Controller. Otherwise, you will need to debug the individual provider class you are trying use to connect with.";
+                    "No redirect to authenticate settings retrieved. This means we don't know where to go. A classic example of this is with OpenId and a bad OpenId endpoint. Please check the data you are providing to the Controller. Otherwise, you will need to debug the individual provider class you are trying use to connect with.";
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
             }
