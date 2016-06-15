@@ -27,6 +27,13 @@ namespace SimpleAuthentication.Sample.MvcAuto
             builder.RegisterControllers(typeof(SimpleAuthenticationController).Assembly);
             builder.RegisterType<CookieCache>().As<ICache>();
 
+            // OPTIONAL - hardcode the return callback url from the provider, instead of using the auto-determined one.
+            //var options = new ConfigurationOptions
+            //{
+            //    BasePath = new Uri("http://asdasdasd.a.das.asd.asd")
+            //};
+            //builder.RegisterInstance(options).As<IConfigurationOptions>();
+
             var container = builder.Build();
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));
         }

@@ -20,12 +20,13 @@ namespace SimpleAuthentication.Mvc
         private readonly IAuthenticationCallbackProvider _callbackProvider;
         private string _returnToUrlParameterKey;
         private ICache _cache;
+        private IConfigurationOptions _configurationOptions;
 
         public SimpleAuthenticationController()
         {
             // We don't have the bare minimum requirements - so lets help the developer.
             const string errorMessage =
-                "Please use the SimpleAuthenticationController(IAuthenticationCallbackProvider)" +
+                "Please use the SimpleAuthenticationController(IAuthenticationCallbackProvider) [or another with optional arguments]" +
                 " constructor. This is because we need to know what to do AFTER we've retrieved the" +
                 " User Information from the Authentication Provider. This is normally done by" +
                 " leveraging the ASP.NET MVC Dependency Resolver. So please pick a form of Dependency" +
@@ -39,7 +40,18 @@ namespace SimpleAuthentication.Mvc
         }
 
         public SimpleAuthenticationController(IAuthenticationCallbackProvider callbackProvider,
-            ICache cache)
+            IConfigurationOptions configurationOptions) : this(callbackProvider, null, configurationOptions)
+        {
+        }
+
+        public SimpleAuthenticationController(IAuthenticationCallbackProvider callbackProvider,
+            ICache cache) : this(callbackProvider, cache, null)
+        {
+        }
+
+        public SimpleAuthenticationController(IAuthenticationCallbackProvider callbackProvider,
+            ICache cache,
+            IConfigurationOptions configurationOptions)
         {
             if (callbackProvider == null)
             {
@@ -48,6 +60,7 @@ namespace SimpleAuthentication.Mvc
 
             _callbackProvider = callbackProvider;
             _cache = cache; // Can be null / not provided.
+            _configurationOptions = configurationOptions; // Can be null / not provided.
 
             _authenticationProviderFactory = new AuthenticationProviderFactory();
         }
@@ -118,7 +131,7 @@ namespace SimpleAuthentication.Mvc
             }
 
             // Where do we return to, after we've authenticated?
-            var callbackUri = GenerateCallbackUri(provider.Name);
+            var callbackUri = GenerateCallbackUri(provider.Name, _configurationOptions?.BasePath);
 
             // Determine where we need to redirect to.
             var redirectToAuthenticateSettings = provider.RedirectToAuthenticate(callbackUri);
@@ -186,7 +199,7 @@ namespace SimpleAuthentication.Mvc
                 model.ProviderName = provider.Name;
 
                 // Where do we return to, after we've authenticated?
-                var callbackUri = GenerateCallbackUri(provider.Name);
+                var callbackUri = GenerateCallbackUri(provider.Name, _configurationOptions?.BasePath);
 
                 // Grab the user information.
                 model.AuthenticatedClient = provider.AuthenticateClient(Request.QueryString, state, callbackUri);
@@ -253,10 +266,12 @@ namespace SimpleAuthentication.Mvc
             return provider;
         }
 
-        private Uri GenerateCallbackUri(string providerName)
+        private Uri GenerateCallbackUri(string providerName, Uri basePath)
         {
-            return SystemHelpers.CreateCallBackUri(providerName, Request.Url,
-                                                   Url.RouteUrl(SimpleAuthenticationRouteConfig.CallbackRouteName));
+            return SystemHelpers.CreateCallBackUri(providerName,
+                Request.Url,
+                Url.RouteUrl(SimpleAuthenticationRouteConfig.CallbackRouteName),
+                basePath);
         }
 
         private string DetermineReturnUrl(string returnUrl)
