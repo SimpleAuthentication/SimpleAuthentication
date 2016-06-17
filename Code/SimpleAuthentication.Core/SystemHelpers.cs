@@ -32,8 +32,10 @@ namespace SimpleAuthentication.Core
             return errorMessages.Length > 0 ? errorMessages.ToString() : null;
         }
 
-        public static Uri CreateCallBackUri(string providerKey, Uri requestUrl,
-                                            string path = "/authentication/authenticatecallback")
+        public static Uri CreateCallBackUri(string providerKey,
+            Uri requestUrl,
+            string path = "/authentication/authenticatecallback",
+            Uri basePathOverride = null)
         {
             if (string.IsNullOrEmpty(providerKey))
             {
@@ -50,38 +52,14 @@ namespace SimpleAuthentication.Core
                 throw new ArgumentNullException("path");
             }
 
-            var builder = new UriBuilder(requestUrl)
-            {
-                Path = path,
-                Query = "providerkey=" + providerKey.ToLowerInvariant()
-            };
-
-            // Don't include port 80/443 in the Uri.
-            if (builder.Uri.IsDefaultPort)
-            {
-                builder.Port = -1;
-            }
-
-            return builder.Uri;
-        }
-
-        public static Uri CreateRoute(Uri requestUrl, string path, string query = null)
-        {
-            if (requestUrl == null)
-            {
-                throw new ArgumentNullException("requestUrl");
-            }
-
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentNullException("path");
-            }
-
-            var builder = new UriBuilder(requestUrl)
-            {
-                Path = path,
-                Query = query
-            };
+            // If the developer wishes to use their own hardcoded Uri as the return basepath, then use that.
+            // Otherwise, use the same basepath from the original request .. determined by the 
+            // framework.
+            var builder = new UriBuilder(basePathOverride ?? requestUrl)
+                {
+                    Path = path,
+                    Query = "providerkey=" + providerKey.ToLowerInvariant()
+                };
 
             // Don't include port 80/443 in the Uri.
             if (builder.Uri.IsDefaultPort)
