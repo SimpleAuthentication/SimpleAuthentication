@@ -1,6 +1,6 @@
 
 # Version: each build number represents a milestone.
-version: '0.{build}'
+version: '0.{build}.0'
 configuration: Release
 
 branches:
