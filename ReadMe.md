@@ -1,20 +1,21 @@
 ![SimpleAuthentication - making authentication ... simple](http://i.imgur.com/eEJBOiY.png)
 
-**SimpleAuthentication** is a ASP.NET library that makes it really easy and simple for developers to add *Social Authentication* to an ASP.NET application.
+**SimpleAuthentication** is a ASP.NET library that makes it really easy and simple for developers to add *Social Authentication* to an ASP.NET application. It currently targets .NET 4.x framework, not the new .NET Core framework.
 
-branch | status
+branch @ GitHub | status
 ----- | -----
 master | [![Build status](https://ci.appveyor.com/api/projects/status/ekgco74ae4cyu31g)](https://ci.appveyor.com/project/PureKrome/simpleauthentication-294)
 dev | [![Build status](https://ci.appveyor.com/api/projects/status/okhor81tbvxucdoo)](https://ci.appveyor.com/project/PureKrome/simpleauthentication-xud0a)
 
 Package | `master` @ NuGet | `dev` @ MyGet
 ----- | ------ | ---
-SimpleAuthentication.Core | [![](http://img.shields.io/nuget/v/SimpleAuthentication.Core.svg?style=flat-square)](https://www.nuget.org/packages/SimpleAuthentication.Core) ![](http://img.shields.io/nuget/dt/SimpleAuthentication.Core.svg?style=flat-square) | ![](http://img.shields.io/myget/SimpleAuthentication/vpre/SimpleAuthentication.Core.svg?style=flat-square)![](http://img.shields.io/myget/SimpleAuthentication/dt/SimpleAuthentication.Core.svg?style=flat-square)
-SimpleAuthentication.ExtraProviders |  [![](http://img.shields.io/nuget/v/SimpleAuthentication.ExtraProviders.svg?style=flat-square)](https://www.nuget.org/packages/SimpleAuthentication.ExtraProviders) ![](http://img.shields.io/nuget/dt/SimpleAuthentication.ExtraProviders.svg?style=flat-square) | ![](http://img.shields.io/myget/SimpleAuthentication/vpre/SimpleAuthentication.ExtraProviders.svg?style=flat-square)![](http://img.shields.io/myget/SimpleAuthentication/dt/SimpleAuthentication.ExtraProviders.svg?style=flat-square)
-SimpleAuthentication.Mvc4 | [![](http://img.shields.io/nuget/v/SimpleAuthentication.Mvc4.svg?style=flat-square)](https://www.nuget.org/packages/SimpleAuthentication.Mvc4) ![](http://img.shields.io/nuget/dt/SimpleAuthentication.Mvc4.svg?style=flat-square) | ![](http://img.shields.io/myget/SimpleAuthentication/vpre/SimpleAuthentication.Mvc4.svg?style=flat-square)![](http://img.shields.io/myget/SimpleAuthentication/dt/SimpleAuthentication.Mvc4.svg?style=flat-square)
-SimpleAuthentication.Mvc3 | [![](http://img.shields.io/nuget/v/SimpleAuthentication.Mvc3.svg?style=flat-square)](https://www.nuget.org/packages/SimpleAuthentication.Mvc3) ![](http://img.shields.io/nuget/dt/SimpleAuthentication.Mvc3.svg?style=flat-square) | ![](http://img.shields.io/myget/SimpleAuthentication/vpre/SimpleAuthentication.Mvc3.svg?style=flat-square)![](http://img.shields.io/myget/SimpleAuthentication/dt/SimpleAuthentication.Mvc3.svg?style=flat-square)
-Nancy.SimpleAuthentication | [![](http://img.shields.io/nuget/v/Nancy.SimpleAuthentication.svg?style=flat-square)](https://www.nuget.org/packages/Nancy.SimpleAuthentication) ![](http://img.shields.io/nuget/dt/Nancy.SimpleAuthentication.svg?style=flat-square) | ![](http://img.shields.io/myget/SimpleAuthentication/vpre/Nancy.SimpleAuthentication.svg?style=flat-square)![](http://img.shields.io/myget/SimpleAuthentication/dt/Nancy.SimpleAuthentication.svg?style=flat-square)
-Glimpse.SimpleAuthentication | [![](http://img.shields.io/nuget/v/Glimpse.SimpleAuthentication.svg?style=flat-square)](https://www.nuget.org/packages/Glimpse.SimpleAuthentication) ![](http://img.shields.io/nuget/dt/Glimpse.SimpleAuthentication.svg?style=flat-square) | ![](http://img.shields.io/myget/SimpleAuthentication/vpre/Glimpse.SimpleAuthentication.svg?style=flat-square)![](http://img.shields.io/myget/SimpleAuthentication/dt/Glimpse.SimpleAuthentication.svg?style=flat-square)
+SimpleAuthentication.Core | [![NuGet Badge](https://buildstats.info/nuget/SimpleAuthentication.Core)](https://www.nuget.org/packages/SimpleAuthentication.Core/) | [![MyGet Badge](https://buildstats.info/myget/simpleauthentication/SimpleAuthentication.Core)](https://www.myget.org/feed/SimpleAuthentication/package/nuget/SimpleAuthentication.Core)
+SimpleAuthentication.ExtraProviders | [![NuGet Badge](https://buildstats.info/nuget/SimpleAuthentication.ExtraProviders)](https://www.nuget.org/packages/SimpleAuthentication.ExtraProviders/) | [![MyGet Badge](https://buildstats.info/myget/simpleauthentication/SimpleAuthentication.ExtraProviders)](https://www.myget.org/feed/SimpleAuthentication/package/nuget/SimpleAuthentication.ExtraProviders)
+SimpleAuthentication.Mvc4 | [![NuGet Badge](https://buildstats.info/nuget/SimpleAuthentication.Mvc4)](https://www.nuget.org/packages/SimpleAuthentication.Mvc4/) | [![MyGet Badge](https://buildstats.info/myget/simpleauthentication/SimpleAuthentication.Mvc4)](https://www.myget.org/feed/SimpleAuthentication/package/nuget/SimpleAuthentication.Mvc4)
+SimpleAuthentication.Mvc3 | [![NuGet Badge](https://buildstats.info/nuget/SimpleAuthentication.Mvc3)](https://www.nuget.org/packages/SimpleAuthentication.Mvc3/) | [![MyGet Badge](https://buildstats.info/myget/simpleauthentication/SimpleAuthentication.Mvc3)](https://www.myget.org/feed/SimpleAuthentication/package/nuget/SimpleAuthentication.Mvc3)
+Nancy.SimpleAuthentication | [![NuGet Badge](https://buildstats.info/nuget/Nancy.SimpleAuthentication)](https://www.nuget.org/packages/Nancy.SimpleAuthentication/) | [![MyGet Badge](https://buildstats.info/myget/simpleauthentication/Nancy.SimpleAuthentication)](https://www.myget.org/feed/SimpleAuthentication/package/nuget/Nancy.SimpleAuthentication)
+SimpleAuthentication.Mvc3 | [![NuGet Badge](https://buildstats.info/nuget/Glimpse.SimpleAuthentication)](https://www.nuget.org/packages/Glimpse.SimpleAuthentication/) | [![MyGet Badge](https://buildstats.info/myget/simpleauthentication/Glimpse.SimpleAuthentication)](https://www.myget.org/feed/SimpleAuthentication/package/nuget/Glimpse.SimpleAuthentication)
+
 
 
 ## What does the term "Social Authentication" mean"?
@@ -67,8 +68,7 @@ Take advantage of the [Glimpse plugin](http://getglimpse.com) so you can see wha
 
 And Finally ...
 --
-* Still having problems? We hang out in [JabbR](https://jabbr.net/#/rooms/SimpleAuthentication) so you can ask questions in there :)
+* Still having problems? Create an issue with your question/problem.
 * We accept Pull Requests.
-* Please use the GitHub issues for any other problems.
 * License : [MIT](http://www.tldrlegal.com/license/mit-license)
 * No Unicorns were harmed in the coding of this library.

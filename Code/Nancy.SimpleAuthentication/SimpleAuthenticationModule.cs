@@ -22,11 +22,18 @@ namespace Nancy.SimpleAuthentication
         private readonly AuthenticationProviderFactory _authenticationProviderFactory;
         private readonly IAuthenticationCallbackProvider _callbackProvider;
         private string _returnToUrlParameterKey;
+        private readonly IConfigurationOptions _configurationOptions;
 
-        public SimpleAuthenticationModule(IAuthenticationCallbackProvider callbackProvider)
+        public SimpleAuthenticationModule(IAuthenticationCallbackProvider callbackProvider) : this(callbackProvider, null)
+        {
+        }
+
+
+        public SimpleAuthenticationModule(IAuthenticationCallbackProvider callbackProvider, IConfigurationOptions configurationOptions)
         {
             _callbackProvider = callbackProvider;
             _authenticationProviderFactory = new AuthenticationProviderFactory();
+            _configurationOptions = configurationOptions;
 
             // Define the routes and how they are handled.
             Get[RedirectRoute] = parameters => RedirectToProvider(parameters);
@@ -97,7 +104,7 @@ namespace Nancy.SimpleAuthentication
             }
 
             // Where do we return to, after we've authenticated?
-            var callbackUri = GenerateCallbackUri(provider.Name);
+            var callbackUri = GenerateCallbackUri(provider.Name, _configurationOptions?.BasePath);
 
             // Determine where we need to redirect to.
             var redirectToAuthenticateSettings = provider.RedirectToAuthenticate(callbackUri);
@@ -106,7 +113,7 @@ namespace Nancy.SimpleAuthentication
             {
                 // We failed to determine where to go. A classic example of this is with OpenId and a bad OpenId endpoint.
                 const string errorMessage =
-                    "No redirect to authencate settings retrieved. This means we don't know where to go. A classic example of this is with OpenId and a bad OpenId endpoint. Please check the data you are providing to the Controller. Otherwise, you will need to debug the individual provider class you are trying use to connect with.";
+                    "No redirect to authenticate settings retrieved. This means we don't know where to go. A classic example of this is with OpenId and a bad OpenId endpoint. Please check the data you are providing to the Controller. Otherwise, you will need to debug the individual provider class you are trying use to connect with.";
                 TraceSource.TraceError(errorMessage);
                 throw new AuthenticationException(errorMessage);
             }
@@ -156,7 +163,7 @@ namespace Nancy.SimpleAuthentication
                 model.ProviderName = provider.Name;
 
                 // Where do we return to, after we've authenticated?
-                var callbackUri = GenerateCallbackUri(provider.Name);
+                var callbackUri = GenerateCallbackUri(provider.Name, _configurationOptions?.BasePath);
 
                 var queryString = new NameValueCollection();
                 foreach (var key in Request.Query.Keys)
@@ -229,9 +236,12 @@ namespace Nancy.SimpleAuthentication
             return provider;
         }
 
-        private Uri GenerateCallbackUri(string providerName)
+        private Uri GenerateCallbackUri(string providerName, Uri basePathOverride)
         {
-            return SystemHelpers.CreateCallBackUri(providerName, Request.Url, Request.Url.BasePath + CallbackRoute);
+            return SystemHelpers.CreateCallBackUri(providerName,
+                Request.Url,
+                Request.Url.BasePath + CallbackRoute,
+                basePathOverride);
         }
 
         private string DetermineReturnUrl()
