@@ -41,7 +41,7 @@ namespace SimpleAuthentication.Core.Providers
                 throw new ArgumentNullException("redirectUri");
             }
 
-            var restRequest = new RestRequest("/oauth20_token.srf");
+            var restRequest = new RestRequest("/oauth20_token.srf", Method.POST);
             restRequest.AddParameter("client_id", PublicApiKey);
             restRequest.AddParameter("redirect_uri", redirectUri);
             restRequest.AddParameter("client_secret", SecretApiKey);
