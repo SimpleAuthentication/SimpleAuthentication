@@ -21,7 +21,7 @@ namespace SimpleAuthentication.Core
         public DateTime ExpiresOn { get; set; }
 
         public override string ToString()
-        {
+        {//what is this mean
             return string.Format("Public Token: {0}. Private Token: {1}. Expires On: {2}.",
                                  string.IsNullOrEmpty(PublicToken) ? "--no public token--" : PublicToken,
                                  string.IsNullOrEmpty(SecretToken) ? "--no secret token--" : SecretToken,
