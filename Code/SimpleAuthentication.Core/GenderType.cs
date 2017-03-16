@@ -26,7 +26,7 @@ namespace SimpleAuthentication.Core
         {
             if (string.IsNullOrEmpty(value))
             {
-                throw new ArgumentNullException("value");
+                return GenderType.Unknown;
             }
 
             switch (value.ToLowerInvariant())
