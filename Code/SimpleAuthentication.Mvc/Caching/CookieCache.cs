@@ -26,7 +26,7 @@ namespace SimpleAuthentication.Mvc.Caching
 
             set
             {
-                var cookie = httpContext.Request.Cookies[Name] ?? new HttpCookie(Name);
+                var cookie = httpContext.Request.Cookies[Name] ?? new HttpCookie(Name) {HttpOnly = true};
 
                 cookie.Values[key] = value;
 
