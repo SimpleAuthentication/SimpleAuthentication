@@ -1,3 +1,12 @@
+# :no_entry: DEPRECATED
+
+This repo is now **Deprecated** and only under maintenance mode. No further work will be done unless it's pretty serious (bad flaw, etc).
+
+ASP.NET Core has superceeded this repo with their (much better) [Core-Identity solution](https://docs.microsoft.com/en-us/aspnet/core/security/authentication/identity?tabs=visual-studio%2Caspnetcore2x).
+
+
+---
+
 ![SimpleAuthentication - making authentication ... simple](http://i.imgur.com/eEJBOiY.png)
 
 **SimpleAuthentication** is a ASP.NET library that makes it really easy and simple for developers to add *Social Authentication* to an ASP.NET application. It currently targets .NET 4.x framework, not the new .NET Core framework.
