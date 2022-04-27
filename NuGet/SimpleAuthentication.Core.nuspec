@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>SimpleAuthentication.Core</id>
-        <version>0.0.0</version>
+        <version>0.10.0</version>
         <title>SimpleAuthentication.Core: making authentication ... simple!</title>
         <authors>Justin Adler, Phillip Haydon and contributors</authors>
         <owners>Justin Adler and Phillip Haydon</owners>
@@ -15,12 +15,12 @@
         <copyright>2012</copyright>
         <language>en-au</language>
         <tags>authentication twitter google facebook microsoftaccount oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
-        <dependencies>
-            <dependency id="RestSharp" version="[105.2.3,106)" />
+		<dependencies>
+			<dependency id="RestSharp" version="106.15.0" />
         </dependencies>
     </metadata>
     <files>
-        <file src="..\Code\SimpleAuthentication.Core\bin\Release\SimpleAuthentication.Core.dll" target="lib\net40\SimpleAuthentication.Core.dll" />
+        <file src="..\Code\SimpleAuthentication.Core\bin\Release\SimpleAuthentication.Core.dll" target="lib\net48\SimpleAuthentication.Core.dll" />
         <file src="ReadMe.txt" target="ReadMe.txt" />
     </files>
 </package>
