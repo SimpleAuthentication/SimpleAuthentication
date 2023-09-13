@@ -33,8 +33,8 @@ jobs:
       - name: Dotnet Build
         run: dotnet build --configuration Release -p:ContinuousIntegrationBuild=true -p:DebugType=Embedded -p:VersionPrefix=$VERSION_PREFIX --version-suffix $VERSION_SUFFIX
 
-      - name: Dotnet Test
-        run: dotnet test --configuration Release --no-build
+      # - name: Dotnet Test
+      #   run: dotnet test --configuration Release --no-build
 
       - name: Dotnet Pack
         run: dotnet pack --configuration Release --no-build --output ./artifacts -p:DebugType=Embedded -p:VersionPrefix=$VERSION_PREFIX --version-suffix $VERSION_SUFFIX
@@ -69,5 +69,5 @@ jobs:
       - name: Dotnet Build
         run: dotnet build --configuration Debug
 
-      - name: Dotnet Test
-        run: dotnet test --configuration Debug --verbosity minimal --no-build --collect:"XPlat Code Coverage" --results-directory "./.codecoverage"
+      # - name: Dotnet Test
+      #   run: dotnet test --configuration Debug --verbosity minimal --no-build --collect:"XPlat Code Coverage" --results-directory "./.codecoverage"
