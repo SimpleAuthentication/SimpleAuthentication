@@ -3,8 +3,34 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <OutputType>Library</OutputType>
+        <Title>SimpleAuthentication.ExtraProviders: Extra Providers for SimpleAuthentication</Title>
+        <Authors>Justin Adler, Phillip Haydon</Authors>
+        <Company>Simple Authentication</Company>
+        <Description>
+            Used with SimpleAuthentication, this adds additional provider support:
+
+            1. GitHub
+            2. Amazon
+            3. 37 Signals
+            4. LinkedIn
+            5. OpenId.
+        </Description>
+        <Summary>A really simple way to Authenticate against a number of popular providers like GitHub, Amazon, 37 Signals, etc...</Summary>
+        <Copyright>2012</Copyright>
+        <PackageProjectUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</PackageProjectUrl>
+        <PackageIcon>Icon.jpg</PackageIcon>
+        <RepositoryUrl>https://github.com/SimpleAuthentication/SimpleAuthentication</RepositoryUrl>
+        <PackageTags>authentication;github;amazon;37signals;thirtysevensignals;basecamp;highrise;linkedin;openid;oauth;oauth1;oauth2;unicorn;magicalunicorn;magical-unicorn;worlddomination;worldomination</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
+    <ItemGroup>
+        <None Include="..\..\Icon.jpg">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
+    </ItemGroup>
+    
     <ItemGroup>
         <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
         <PackageReference Include="RestSharp" Version="106.15.0" />
