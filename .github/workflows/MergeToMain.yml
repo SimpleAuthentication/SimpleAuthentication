@@ -1,0 +1,73 @@
+name: Merge Pull Requests into 'main'
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  packages: write
+
+env:
+  DOTNET_NOLOGO: true
+
+jobs:
+  build_and_create_a_nuget:
+    name: Package a NuGet to GPR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build version prefix/suffix
+        run: |
+          echo "VERSION_PREFIX=$(( 100 + ${{ github.run_number }} )).0.0" >> $GITHUB_ENV
+          echo "VERSION_SUFFIX=beta" >> $GITHUB_ENV
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+
+      - name: Dotnet Restore
+        run: dotnet restore --verbosity minimal
+
+      - name: Dotnet Build
+        run: dotnet build --configuration Release -p:ContinuousIntegrationBuild=true -p:DebugType=Embedded -p:VersionPrefix=$VERSION_PREFIX --version-suffix $VERSION_SUFFIX
+
+      - name: Dotnet Test
+        run: dotnet test --configuration Release --no-build
+
+      - name: Dotnet Pack
+        run: dotnet pack --configuration Release --no-build --output ./artifacts -p:DebugType=Embedded -p:VersionPrefix=$VERSION_PREFIX --version-suffix $VERSION_SUFFIX
+
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: NuGetPackage.${{ env.VERSION_PREFIX }}-${{ env.VERSION_SUFFIX }}
+          path: ./artifacts/
+
+      - name: Publish to GPR
+        run: |
+          dotnet nuget push "./artifacts/*.nupkg" \
+            --no-symbols \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --source https://nuget.pkg.github.com/${{ github.repository_owner }}
+            
+  test:
+    name: Buid and Test (DEBUG)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+
+      - name: Dotnet Restore
+        run: dotnet restore --verbosity minimal
+
+      - name: Dotnet Build
+        run: dotnet build --configuration Debug
+
+      - name: Dotnet Test
+        run: dotnet test --configuration Debug --verbosity minimal --no-build --collect:"XPlat Code Coverage" --results-directory "./.codecoverage"
