@@ -1,0 +1,65 @@
+name: Publish to Nuget.org and GPR
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+      - "*.*.*"
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  DOTNET_NOLOGO: true
+
+jobs:
+  build_and_create_a_nuget:
+    name: Package a NuGet to NuGet.org
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Calculate version from the Commit Tag
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+
+      - name: Dotnet Restore
+        run: dotnet restore --verbosity minimal
+
+      - name: Dotnet Build
+        run: dotnet build --configuration Release -p:ContinuousIntegrationBuild=true -p:DebugType=Embedded -p:version=${{ env.RELEASE_VERSION }}
+
+      - name: Dotnet Pack
+        run: dotnet pack --configuration Release --no-build --output ./artifacts -p:DebugType=Embedded -p:version=${{ env.RELEASE_VERSION }}
+
+      - name: Publish artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: NuGetPackage.${{ env.RELEASE_VERSION }}
+          path: ./artifacts/
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: NuGetPackage.${{ env.RELEASE_VERSION }}
+          files: ./artifacts/*
+
+      - name: Publish to GPR
+        run: |
+          dotnet nuget push "./artifacts/*.nupkg" \
+            --no-symbols \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --source https://nuget.pkg.github.com/${{ github.repository_owner }}
+
+      - name: Publish to nuget.org
+        run: |
+          dotnet nuget push "./artifacts/*.nupkg" \
+            --api-key ${{ secrets.NUGET_TOKEN }} \
+            --source https://api.nuget.org/v3/index.json
