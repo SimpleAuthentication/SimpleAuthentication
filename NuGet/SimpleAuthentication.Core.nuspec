@@ -15,12 +15,12 @@
         <copyright>2012</copyright>
         <language>en-au</language>
         <tags>authentication twitter google facebook microsoftaccount oauth oauth1 oauth2 openid unicorn magicalunicorn magical-unicorn worlddomination worldomination</tags>
-		<dependencies>
-			<dependency id="RestSharp" version="106.15.0" />
+	<dependencies>
+		<dependency id="RestSharp" version="106.15.0" />
         </dependencies>
     </metadata>
     <files>
-        <file src="..\Code\SimpleAuthentication.Core\bin\Release\SimpleAuthentication.Core.dll" target="lib\net48\SimpleAuthentication.Core.dll" />
+        <file src="..\Code\SimpleAuthentication.Core\bin\Release\netstandard2.0\SimpleAuthentication.Core.dll" target="lib\netstandard2.0\SimpleAuthentication.Core.dll" />
         <file src="ReadMe.txt" target="ReadMe.txt" />
     </files>
 </package>

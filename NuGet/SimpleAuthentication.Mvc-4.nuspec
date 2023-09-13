@@ -22,7 +22,7 @@
         </dependencies>
     </metadata>
     <files>
-        <file src="..\Code\SimpleAuthentication.Mvc\bin\Release\SimpleAuthentication.Mvc.dll" target="lib\net48\SimpleAuthentication.Mvc.dll" />
+        <file src="..\Code\SimpleAuthentication.Mvc\bin\Release\SimpleAuthentication.Mvc.dll" target="lib\net472\SimpleAuthentication.Mvc.dll" />
         <file src="ReadMe.txt" target="ReadMe.txt" />
     </files>
 </package>
