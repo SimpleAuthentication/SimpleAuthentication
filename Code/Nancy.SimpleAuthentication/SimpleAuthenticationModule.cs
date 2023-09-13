@@ -10,7 +10,7 @@ using SimpleAuthentication.Core.Tracing;
 
 namespace Nancy.SimpleAuthentication
 {
-    public class SimpleAuthenticationModule : NancyModule
+    public sealed class SimpleAuthenticationModule : NancyModule
     {
         private const string SessionKeyState = "SimpleAuthentication-StateKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
         private const string SessionKeyRedirectToUrl = "SimpleAuthentication-RedirectUrlKey-cf92a651-d638-4ce4-a393-f612d3be4c3a";
@@ -36,9 +36,9 @@ namespace Nancy.SimpleAuthentication
             _configurationOptions = configurationOptions;
 
             // Define the routes and how they are handled.
-            Get[RedirectRoute] = parameters => RedirectToProvider(parameters);
-            Post[RedirectRoute] = parameters => RedirectToProvider(parameters);
-            Get[CallbackRoute] = parameters => AuthenticateCallback();
+            Get(RedirectRoute, parameters => RedirectToProvider(parameters));
+            Post(RedirectRoute, parameters => RedirectToProvider(parameters));
+            Get(CallbackRoute, parameters => AuthenticateCallback());
 
             // If no Cache type is provided, we'll use a Session as the default.
             Before += context =>
