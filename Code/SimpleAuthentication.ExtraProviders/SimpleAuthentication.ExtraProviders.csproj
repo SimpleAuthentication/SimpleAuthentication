@@ -39,7 +39,7 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="RestSharp" Version="106.15.0" />
-        <PackageReference Include="System.Runtime.Caching" Version="7.0.0" />
+        <PackageReference Include="System.Runtime.Caching" Version="4.7.0" />
     </ItemGroup>
 
     <ItemGroup>
