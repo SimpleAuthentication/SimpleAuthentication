@@ -16,7 +16,7 @@ namespace SimpleAuthentication.Core.Providers
         private const string AccessTokenKey = "access_token";
         private const string ExpiresInKey = "expires_in";
         private const string TokenTypeKey = "token_type";
-        private string _promptType;
+        private readonly string _promptType;
 
         public GoogleProvider(ProviderParams providerParams) : this("Google", providerParams)
         {
@@ -24,8 +24,8 @@ namespace SimpleAuthentication.Core.Providers
 
         public GoogleProvider(GoogleProviderParams providerParams) : this("Google", providerParams)
         {
+            if (!string.IsNullOrWhiteSpace(providerParams?.PromptType))
 
-            if (!string.IsNullOrEmpty(providerParams?.PromptType))
             {
                 _promptType = providerParams.PromptType;
             }
