@@ -16,9 +16,19 @@ namespace SimpleAuthentication.Core.Providers
         private const string AccessTokenKey = "access_token";
         private const string ExpiresInKey = "expires_in";
         private const string TokenTypeKey = "token_type";
+        private readonly string _promptType;
 
         public GoogleProvider(ProviderParams providerParams) : this("Google", providerParams)
         {
+        }
+
+        public GoogleProvider(GoogleProviderParams providerParams) : this("Google", providerParams)
+        {
+            if (!string.IsNullOrWhiteSpace(providerParams?.PromptType))
+
+            {
+                _promptType = providerParams.PromptType;
+            }
         }
 
         protected GoogleProvider(string name, ProviderParams providerParams) : base(name, providerParams)
@@ -48,6 +58,11 @@ namespace SimpleAuthentication.Core.Providers
             restRequest.AddParameter("redirect_uri", redirectUri.AbsoluteUri);
             restRequest.AddParameter("code", authorizationCode);
             restRequest.AddParameter("grant_type", "authorization_code");
+
+            if (!string.IsNullOrWhiteSpace(_promptType))
+            {
+                restRequest.AddParameter("prompt", _promptType);
+            }
 
             var restClient = RestClientFactory.CreateRestClient("https://accounts.google.com");
             TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
