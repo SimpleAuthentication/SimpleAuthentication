@@ -59,11 +59,6 @@ namespace SimpleAuthentication.Core.Providers
             restRequest.AddParameter("code", authorizationCode);
             restRequest.AddParameter("grant_type", "authorization_code");
 
-            if (!string.IsNullOrWhiteSpace(_promptType))
-            {
-                restRequest.AddParameter("prompt", _promptType);
-            }
-
             var restClient = RestClientFactory.CreateRestClient("https://accounts.google.com");
             TraceSource.TraceVerbose("Retrieving Access Token endpoint: {0}",
                                      restClient.BuildUri(restRequest).AbsoluteUri);
@@ -170,6 +165,17 @@ namespace SimpleAuthentication.Core.Providers
                 Picture = response.Data.Picture,
                 UserName = response.Data.Name
             };
+        }
+
+        protected override string CreateRedirectionQuerystringParameters(Uri callbackUri, string state)
+        {
+            var url = base.CreateRedirectionQuerystringParameters(callbackUri, state);
+
+            var promptType = string.IsNullOrWhiteSpace(_promptType)
+                             ? string.Empty
+                             : string.Format("&prompt={0}", _promptType);
+
+            return string.Format("{0}{1}", url, promptType);
         }
 
         #endregion
